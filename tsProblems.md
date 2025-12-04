@@ -15,7 +15,7 @@ This document contains the results of a comprehensive TypeScript project audit c
 - Обработки long press с таймером
 - Отслеживания начальной позиции касания
 - Обнаружения движения для отмены long press
-- Дублированные константы `DEFAULT_LONG_PRESS_DELAY = 500` и `DEFAULT_MOVE_THRESHOLD = 10`
+- ~~Дублированные константы `DEFAULT_LONG_PRESS_DELAY = 500` и `DEFAULT_MOVE_THRESHOLD = 10`~~
 
 **Предложение:** Извлечь общую логику в базовый хук или объединить функциональность.
 
@@ -23,7 +23,7 @@ This document contains the results of a comprehensive TypeScript project audit c
 □ Создать базовый хук useTouchTracking с общей логикой
 □ Рефакторить use-gestures.ts для использования базового хука
 □ Рефакторить use-long-press.ts для использования базового хука
-□ Перенести общие константы в constants.ts
+✅ Перенести общие константы в constants.ts (LONG_PRESS.DEFAULT_DELAY_MS, LONG_PRESS.DEFAULT_MOVE_THRESHOLD_PX)
 ```
 
 ### 1.2 Паттерн UI компонентов Radix
@@ -65,34 +65,50 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 ### 2.1 Слишком большие компоненты страниц
 **Местоположение:** 
-- `client/src/pages/gallery/index.tsx` (636 строк)
-- `client/src/pages/camera/index.tsx` (401 строка)
+- `client/src/pages/gallery/index.tsx` (~~636 строк~~ → 643 строки после рефакторинга)
+- `client/src/pages/camera/index.tsx` (~~401 строка~~ → 407 строк)
 
-**Проблема:** Компоненты страниц содержат слишком много логики и состояний:
-- GalleryPage: upload логика, selection, filters, dialogs, mutations
-- CameraPage: capture логика, color sampling, orientation, stabilization
+**Проблема:** ~~Компоненты страниц содержат слишком много логики и состояний~~
 
-**Предложение:** Декомпозиция на более мелкие компоненты и хуки.
+**Статус:** ✅ Значительно улучшено
+
+GalleryPage теперь использует хуки:
+- `useGallerySelection` - управление выделением
+- `useGalleryView` - переключение видов и папок
+- `useGalleryFilters` - фильтрация и сортировка
+- `useGalleryPhotos` - загрузка и пагинация фото
+- `useUploadHandler` - логика загрузки в облако
+- `useLinksDialog` - управление диалогом ссылок
 
 ```
-□ Извлечь useUploadHandler из GalleryPage
-□ Извлечь useGalleryDialogs для управления состоянием диалогов
-□ Извлечь ColorSamplingProvider или хук из CameraPage
-□ Создать CaptureController component для логики съёмки
+✅ Извлечь useUploadHandler из GalleryPage
+✅ Извлечь useGalleryDialogs для управления состоянием диалогов (реализовано как useLinksDialog + useGallerySelection)
+□ Извлечь ColorSamplingProvider или хук из CameraPage (ОПЦИОНАЛЬНО)
+□ Создать CaptureController component для логики съёмки (ОПЦИОНАЛЬНО)
 ```
 
 ### 2.2 Отсутствие слоя сервисов
-**Местоположение:** `client/src/lib/db.ts` (705 строк)
+**Местоположение:** ~~`client/src/lib/db.ts` (705 строк)~~ → `client/src/lib/db/`
 
-**Проблема:** Файл db.ts содержит и доступ к данным, и бизнес-логику (кеширование, подсчёт статистики). Это нарушает Single Responsibility Principle.
+**Статус:** ✅ ВЫПОЛНЕНО
 
-**Предложение:** Разделить на слои.
+Структура теперь:
+```
+client/src/lib/db/
+├── db-core.ts        # Базовые операции IndexedDB, openDB, generateId
+├── photo-service.ts  # Операции с фотографиями
+├── folder-service.ts # Операции с папками и статистикой
+├── settings-service.ts # Операции с настройками
+├── storage-service.ts  # Утилиты хранения
+└── index.ts          # Реэкспорт всех функций
+```
 
 ```
-□ Создать client/src/services/photo-service.ts для бизнес-логики фото
-□ Создать client/src/services/settings-service.ts для бизнес-логики настроек
-□ Оставить в db.ts только низкоуровневые операции с IndexedDB
-□ Перенести кеширование в отдельный модуль cache.ts
+✅ Создать client/src/lib/db/photo-service.ts для бизнес-логики фото
+✅ Создать client/src/lib/db/settings-service.ts для бизнес-логики настроек
+✅ Оставить в db-core.ts только низкоуровневые операции с IndexedDB
+✅ Создать folder-service.ts для работы с папками
+✅ Создать storage-service.ts для утилит хранения
 ```
 
 ---
@@ -100,24 +116,12 @@ This document contains the results of a comprehensive TypeScript project audit c
 ## 3. Производительность
 
 ### 3.1 Последовательные await вместо параллельных
-**Местоположение:** `client/src/pages/camera/index.tsx` строки 78-94
+**Местоположение:** `client/src/pages/camera/index.tsx` строки 78-98
 
-**Проблема:** `getPhotoCounts()` и `getLatestPhoto()` выполняются последовательно, хотя не зависят друг от друга.
+**Статус:** ✅ ВЫПОЛНЕНО
 
+Текущий код использует `Promise.all`:
 ```typescript
-// Текущий код
-const counts = await getPhotoCounts();
-setPhotoCount(counts.total);
-setCloudCount(counts.cloud);
-if (counts.total > 0) {
-  const latest = await getLatestPhoto();
-  // ...
-}
-```
-
-**Предложение:**
-```typescript
-// Оптимизированный код
 const [counts, latest] = await Promise.all([
   getPhotoCounts(),
   getLatestPhoto(),
@@ -125,29 +129,29 @@ const [counts, latest] = await Promise.all([
 ```
 
 ```
-□ Рефакторить loadPhotos в camera/index.tsx для параллельного выполнения
+✅ Рефакторить loadPhotos в camera/index.tsx для параллельного выполнения
 ```
 
 ### 3.2 Неоптимальная загрузка файлов для скачивания
-**Местоположение:** `client/src/pages/gallery/index.tsx` строки 226-257
+**Местоположение:** `client/src/pages/gallery/index.tsx` строки 226-263
 
-**Проблема:** `handleDownloadSelected` обрабатывает фотографии последовательно с искусственной задержкой 100ms.
+**Статус:** ✅ ВЫПОЛНЕНО
 
+Текущий код использует `Promise.all` для параллельной предзагрузки:
 ```typescript
-for (const photo of selectedPhotos) {
-  const imageData = await getPhotoImageData(photo.id);
-  const blob = await createCleanImageBlob(imageData);
-  // download logic
-  await new Promise(resolve => setTimeout(resolve, 100)); // искусственная задержка
-}
+const imageDataResults = await Promise.all(
+  selectedPhotos.map(async (photo) => {
+    const imageData = await getPhotoImageData(photo.id);
+    const blob = await createCleanImageBlob(imageData);
+    return { photo, blob };
+  })
+);
 ```
 
-**Предложение:** Параллельная загрузка данных, последовательное скачивание.
-
 ```
-□ Предзагрузить imageData для всех фото параллельно через Promise.all
-□ Оставить последовательное скачивание для предотвращения блокировки браузера
-□ Удалить искусственную задержку или заменить на requestIdleCallback
+✅ Предзагрузить imageData для всех фото параллельно через Promise.all
+✅ Оставить последовательное скачивание для предотвращения блокировки браузера
+✅ Удалена искусственная задержка
 ```
 
 ### 3.3 Отсутствие мемоизации в PhotoListItem и PhotoGridCell
@@ -161,15 +165,24 @@ for (const photo of selectedPhotos) {
 ```
 
 ### 3.4 Отсутствие debounce для color sampling
-**Местоположение:** `client/src/pages/camera/index.tsx` строки 128-203
+**Местоположение:** `client/src/pages/camera/index.tsx` строки 130-208
 
-**Проблема:** Color sampling использует requestAnimationFrame с интервалом 100ms, но setReticleColor вызывается на каждом цикле, что может вызывать лишние ререндеры.
+**Статус:** ✅ ВЫПОЛНЕНО
 
-**Предложение:** Добавить проверку на изменение цвета перед setState.
+Используется `previousColorRef` для предотвращения лишних ререндеров:
+```typescript
+const previousColorRef = useRef<string>(CAMERA.DEFAULT_RETICLE_COLOR);
+// ...
+const newColor = getContrastingColor(r, g, b, colorScheme);
+if (newColor !== previousColorRef.current) {
+  previousColorRef.current = newColor;
+  setReticleColor(newColor);
+}
+```
 
 ```
-□ Добавить сравнение нового цвета с предыдущим перед setReticleColor
-□ Использовать useRef для хранения предыдущего цвета
+✅ Добавить сравнение нового цвета с предыдущим перед setReticleColor
+✅ Использовать useRef для хранения предыдущего цвета
 ```
 
 ---
@@ -184,7 +197,7 @@ for (const photo of selectedPhotos) {
 - Типы хорошо определены в `shared/schema.ts`
 
 ```
-□ Нет задач - типизация в хорошем состоянии
+✅ Нет задач - типизация в хорошем состоянии
 ```
 
 ---
@@ -192,7 +205,7 @@ for (const photo of selectedPhotos) {
 ## 5. Обработка данных
 
 ### 5.1 Потенциальная оптимизация фильтрации
-**Местоположение:** `client/src/lib/db.ts` функция `getFolderStats`
+**Местоположение:** `client/src/lib/db/folder-service.ts` функция `getFolderStats`
 
 **Проблема:** Проход по всем записям для подсчёта статистики при каждом запросе (с TTL кешем 5 секунд).
 
@@ -226,7 +239,7 @@ for (const photo of selectedPhotos) {
 **Статус:** ✅ Реализовано - throttle уже используется (строки 91-99)
 
 ```
-□ Нет критичных задач по асинхронности
+✅ Нет критичных задач по асинхронности
 ```
 
 ---
@@ -245,7 +258,7 @@ Lazy loading правильно реализован в `client/src/App.tsx`:
 Виртуализация реализована в `client/src/components/virtualized-gallery.tsx` с использованием react-window.
 
 ```
-□ Нет задач - code splitting и virtualization в хорошем состоянии
+✅ Нет задач - code splitting и virtualization в хорошем состоянии
 ```
 
 ---
@@ -253,15 +266,16 @@ Lazy loading правильно реализован в `client/src/App.tsx`:
 ## 8. Код-смеллы
 
 ### 8.1 Длинные файлы
-**Местоположение:**
-- `client/src/lib/db.ts` - 705 строк
-- `client/src/pages/gallery/index.tsx` - 636 строк
+**Статус:** ✅ Значительно улучшено
+
+- ~~`client/src/lib/db.ts` - 705 строк~~ → Разбит на модули в `client/src/lib/db/`
+- `client/src/pages/gallery/index.tsx` - 643 строки (логика вынесена в хуки)
 - `client/src/components/virtualized-gallery.tsx` - 467 строк
-- `client/src/pages/camera/index.tsx` - 401 строка
+- `client/src/pages/camera/index.tsx` - 407 строк
 
 ```
-□ Разбить db.ts на модули (см. раздел 2.2)
-□ Разбить gallery/index.tsx (см. раздел 2.1)
+✅ Разбить db.ts на модули (см. раздел 2.2)
+✅ Разбить gallery/index.tsx - логика вынесена в хуки
 □ [ОПЦИОНАЛЬНО] Разбить virtualized-gallery.tsx на VirtualizedList и VirtualizedGrid файлы
 ```
 
@@ -269,28 +283,22 @@ Lazy loading правильно реализован в `client/src/App.tsx`:
 **Результат проверки:** ✅ Хорошо
 
 Магические числа вынесены в `client/src/lib/constants.ts`:
-- TIMING, GESTURE, GAME, UPLOAD, STORAGE_KEYS, PATTERN_LOCK, IMAGE, SENSORS, CAMERA, GALLERY, UI
+- TIMING, GESTURE, GAME, UPLOAD, STORAGE_KEYS, PATTERN_LOCK, IMAGE, SENSORS, CAMERA, GALLERY, UI, LONG_PRESS
 
-Исключения найдены в:
-- `client/src/pages/camera/index.tsx` строка 155: `20` (sizePercent default) - используется `settings.reticle.size || 20`
+**Статус:** ✅ ВЫПОЛНЕНО - `CAMERA.DEFAULT_RETICLE_SIZE` добавлен и используется:
+```typescript
+const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
+```
 
 ```
-□ Добавить DEFAULT_RETICLE_SIZE в constants.ts
-□ Заменить hardcoded значение на константу
+✅ Добавить DEFAULT_RETICLE_SIZE в constants.ts
+✅ Заменить hardcoded значение на константу
 ```
 
 ### 8.3 Большое количество зависимостей в useCallback
-**Местоположение:** `client/src/pages/camera/index.tsx` строка 323
+**Местоположение:** `client/src/pages/camera/index.tsx` строка 328
 
-**Проблема:** handleCapture имеет 14 зависимостей в массиве зависимостей.
-
-```typescript
-}, [isReady, isCapturing, accuracyBlocked, capturePhoto, geoData, orientationData, 
-    currentNote, reticleColor, settings.reticle, settings.imgbb, settings.soundEnabled, 
-    settings.watermarkScale, settings.stabilization, settings.enhancement, playCapture, 
-    waitForStability, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, 
-    handleProcessingComplete]);
-```
+**Проблема:** handleCapture имеет много зависимостей в массиве зависимостей.
 
 **Предложение:** Группировать связанные данные в объекты или использовать useReducer.
 
@@ -316,18 +324,18 @@ Lazy loading правильно реализован в `client/src/App.tsx`:
 ### Высокий приоритет (производительность и архитектура)
 
 ```
-□ [PERF-1] Параллелизовать getPhotoCounts() и getLatestPhoto() в camera/index.tsx
-□ [PERF-2] Оптимизировать handleDownloadSelected для параллельной загрузки данных
-□ [PERF-3] Добавить проверку изменения цвета перед setReticleColor
-□ [ARCH-1] Разбить db.ts на photo-service.ts, settings-service.ts и db-core.ts
-□ [ARCH-2] Извлечь хуки из GalleryPage (useUploadHandler, useGalleryDialogs)
+✅ [PERF-1] Параллелизовать getPhotoCounts() и getLatestPhoto() в camera/index.tsx
+✅ [PERF-2] Оптимизировать handleDownloadSelected для параллельной загрузки данных
+✅ [PERF-3] Добавить проверку изменения цвета перед setReticleColor
+✅ [ARCH-1] Разбить db.ts на photo-service.ts, settings-service.ts, folder-service.ts, storage-service.ts и db-core.ts
+✅ [ARCH-2] Извлечь хуки из GalleryPage (useUploadHandler, useGallerySelection, useGalleryFilters, useGalleryPhotos, useGalleryView, useLinksDialog)
 ```
 
 ### Средний приоритет (дублирование и рефакторинг)
 
 ```
-□ [DUP-1] Объединить логику use-gestures.ts и use-long-press.ts
-□ [DUP-2] Перенести общие константы DEFAULT_LONG_PRESS_DELAY, DEFAULT_MOVE_THRESHOLD в constants.ts
+□ [DUP-1] Объединить логику use-gestures.ts и use-long-press.ts (создать useTouchTracking)
+✅ [DUP-2] Перенести общие константы DEFAULT_LONG_PRESS_DELAY, DEFAULT_MOVE_THRESHOLD в constants.ts
 □ [REF-1] Создать общие компоненты SettingRow и SettingSlider
 □ [REF-2] Группировать зависимости handleCapture в captureConfig объект
 ```
@@ -335,7 +343,7 @@ Lazy loading правильно реализован в `client/src/App.tsx`:
 ### Низкий приоритет (опциональные улучшения)
 
 ```
-□ [OPT-1] Добавить DEFAULT_RETICLE_SIZE в constants.ts
+✅ [OPT-1] Добавить DEFAULT_RETICLE_SIZE в constants.ts
 □ [OPT-2] Рассмотреть инкрементальное обновление статистики папок
 □ [OPT-3] Разбить virtualized-gallery.tsx на отдельные файлы
 □ [OPT-4] Создать overlayStyles constant для UI компонентов
@@ -355,3 +363,5 @@ Lazy loading правильно реализован в `client/src/App.tsx`:
 8. ✅ **Cleanup** - useEffect hooks имеют корректные cleanup функции
 9. ✅ **i18n** - Правильная структура локализации
 10. ✅ **Memo** - Использование React.memo для оптимизации компонентов
+11. ✅ **Service Layer** - Разделение db.ts на специализированные сервисы
+12. ✅ **Custom Hooks** - Хорошая декомпозиция логики GalleryPage в переиспользуемые хуки
