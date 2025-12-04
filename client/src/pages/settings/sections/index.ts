@@ -1,0 +1,12 @@
+export { GeneralSettingsSection } from "./GeneralSettingsSection";
+export { WatermarkSection } from "./WatermarkSection";
+export { ReticleSection } from "./ReticleSection";
+export { ThemeSection } from "./ThemeSection";
+export { CaptureLocationSection } from "./CaptureLocationSection";
+export { CameraSettingsSection } from "./CameraSettingsSection";
+export { ImageQualitySection } from "./ImageQualitySection";
+export { CloudUploadSection } from "./CloudUploadSection";
+export { StorageSection } from "./StorageSection";
+export { PrivacySection } from "./PrivacySection";
+export { PWASection } from "./PWASection";
+export { ResetSection } from "./ResetSection";

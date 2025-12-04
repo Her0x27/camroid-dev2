@@ -1,0 +1,86 @@
+# Camera ZeroDay - Tactical Camera PWA
+
+## Overview
+
+Camera ZeroDay is a Progressive Web App (PWA) designed as a tactical camera for capturing geotagged photos with precision metadata. It features military-grade HUD overlays, customizable reticles, GPS coordinates, device orientation data, and offline-first functionality. The application operates as a single-page app, storing all data locally in IndexedDB, requiring no backend beyond static file serving. It is ideal for fieldwork, surveying, and tactical operations where precise location and orientation data are crucial.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+
+**Technology Stack:**
+- **React 18** with TypeScript
+- **Vite** for build and development
+- **Wouter** for client-side routing
+- **TanStack Query** for state management
+- **Tailwind CSS** with a custom tactical dark theme
+- **shadcn/ui** component library (Radix UI primitives)
+
+**Design Philosophy:**
+The application employs a utility-first, tactical UI inspired by military HUDs, emphasizing high information density, readability in varied lighting, touch optimization for single-handed use, and a minimalist, purpose-driven interface.
+
+**Component Structure:**
+- Custom hooks for camera, geolocation, and device orientation.
+- Reusable UI components from shadcn/ui.
+- Context API for settings management.
+- Four main views: Camera, Gallery, Photo Detail, Settings.
+
+### Data Storage
+
+All application data is stored client-side in **IndexedDB** using a custom abstraction layer. No server-side database is required.
+
+**Data Models:**
+- **Photos Store**: Stores captured photos (base64, thumbnails, metadata).
+- **Settings Store**: Persists user preferences.
+
+**Photo Metadata Schema:**
+Each photo includes GPS coordinates, device orientation, timestamp, optional user notes, and active reticle type. Images are stored as base64 without EXIF data for privacy; separate thumbnails are generated for gallery performance.
+
+### PWA Features
+
+- **Service Worker**: Caches static assets for offline access (production only), uses a network-first strategy with fallback to cached resources.
+- **Mobile Optimization**: Viewport meta tags, Apple-specific meta tags for iOS web app mode, and touch-friendly UI.
+
+### Device APIs Integration
+
+- **Camera API**: Manages MediaStream API, camera switching, canvas-based capture, and stream cleanup.
+- **Geolocation API**: Provides continuous GPS position watching, high-accuracy requests, and error handling.
+- **Device Orientation API**: Handles compass heading, tilt, roll, with cross-browser compatibility and permission requests for iOS 13+.
+
+### Reticle System
+
+Six customizable reticle types (None, Crosshair, Grid, Rangefinder, Tactical, Mil-Dot) with adjustable opacity, color, and metadata overlay visibility. Settings are persisted in IndexedDB.
+
+### State Management
+
+- **Settings Context**: Manages global settings, reticle configuration, GPS/orientation preferences, camera facing, and audio feedback.
+- **Local-First Approach**: All state changes immediately persist to IndexedDB.
+
+## External Dependencies
+
+### UI Component Library
+- **Radix UI**: Unstyled, accessible component primitives.
+- **shadcn/ui**: Pre-styled components built on Radix UI with Tailwind CSS.
+- **lucide-react**: Icon library.
+
+### Build Tools & Development
+- **Vite**: Fast build tool.
+- **TypeScript**: Type safety.
+- **PostCSS & Autoprefixer**: CSS processing.
+
+### Utilities
+- **clsx & tailwind-merge**: Conditional className utilities.
+- **class-variance-authority**: Component variant management.
+- **date-fns**: Date formatting and manipulation.
+- **zod**: Runtime type validation.
+- **nanoid**: Unique ID generation.
+
+### Fonts
+- **Google Fonts**: Roboto Mono (monospaced) and Inter (UI).
+
+### Server (Minimal)
+- **Express**: Serves static files.
