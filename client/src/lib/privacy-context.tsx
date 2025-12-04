@@ -14,6 +14,7 @@ interface PrivacySettings {
 interface PrivacyContextType {
   settings: PrivacySettings;
   isLocked: boolean;
+  isBackgrounded: boolean;
   showCamera: () => void;
   hideCamera: () => void;
   toggleLock: () => void;
@@ -112,6 +113,8 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     }
     return false;
   });
+  
+  const [isBackgrounded, setIsBackgrounded] = useState(false);
   
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activityThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -233,28 +236,45 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     
     const handleVisibilityChange = () => {
       if (document.hidden || document.visibilityState === 'hidden') {
+        setIsBackgrounded(true);
         hideCamera();
+      } else {
+        setIsBackgrounded(false);
       }
     };
     
     const handlePageHide = () => {
+      setIsBackgrounded(true);
       hideCamera();
+    };
+    
+    const handlePageShow = () => {
+      setIsBackgrounded(false);
     };
     
     const handleBlur = () => {
       if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        setIsBackgrounded(true);
         hideCamera();
       }
     };
     
+    const handleFocus = () => {
+      setIsBackgrounded(false);
+    };
+    
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('pageshow', handlePageShow);
     window.addEventListener('blur', handleBlur);
+    window.addEventListener('focus', handleFocus);
     
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('pageshow', handlePageShow);
       window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('focus', handleFocus);
     };
   }, [settings.enabled, hideCamera]);
   
@@ -263,6 +283,7 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
       value={{
         settings,
         isLocked,
+        isBackgrounded,
         showCamera,
         hideCamera,
         toggleLock,

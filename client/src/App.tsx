@@ -10,6 +10,7 @@ import { PrivacyProvider, usePrivacy, loadPrivacySettings } from "@/lib/privacy-
 import { ThemeProvider } from "@/lib/theme-context";
 import { SplashScreen } from "@/components/splash-screen";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { PrivacyOverlay } from "@/components/privacy-overlay";
 import { Loader2 } from "lucide-react";
 
 const CameraPage = lazy(() => import("@/pages/camera"));
@@ -79,6 +80,7 @@ function App() {
                   {showSplash && <SplashScreen onComplete={handleSplashComplete} duration={2800} />}
                   <Router />
                   <Toaster />
+                  <PrivacyOverlay />
                 </ErrorBoundary>
               </PrivacyProvider>
             </SettingsProvider>
