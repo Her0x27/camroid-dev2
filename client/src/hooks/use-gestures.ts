@@ -1,4 +1,5 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useCallback } from "react";
+import { useTouchTracking } from "./use-touch-tracking";
 import { LONG_PRESS, GESTURE } from "@/lib/constants";
 
 export interface UseGesturesOptions {
@@ -34,83 +35,38 @@ export function useGestures(options: UseGesturesOptions): GestureHandlers {
     disabled = false,
   } = options;
 
-  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startPosRef = useRef<{ x: number; y: number; time: number } | null>(null);
-  const longPressFiredRef = useRef(false);
-  const gestureActiveRef = useRef(false);
-
-  const clearLongPressTimer = useCallback(() => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-  }, []);
-
-  const resetGestureState = useCallback(() => {
-    clearLongPressTimer();
-    startPosRef.current = null;
-    longPressFiredRef.current = false;
-    gestureActiveRef.current = false;
-  }, [clearLongPressTimer]);
-
-  useEffect(() => {
-    return () => {
-      clearLongPressTimer();
-    };
-  }, [clearLongPressTimer]);
-
-  const handleStart = useCallback(
-    (clientX: number, clientY: number) => {
-      if (disabled) return;
-
-      startPosRef.current = { x: clientX, y: clientY, time: Date.now() };
-      longPressFiredRef.current = false;
-      gestureActiveRef.current = true;
-
-      if (onLongPress) {
-        longPressTimerRef.current = setTimeout(() => {
-          longPressFiredRef.current = true;
-          onLongPress();
-        }, longPressDelay);
-      }
-    },
-    [disabled, onLongPress, longPressDelay]
-  );
-
-  const handleMove = useCallback(
-    (clientX: number, clientY: number) => {
-      if (disabled || !startPosRef.current || !gestureActiveRef.current) return;
-
-      const deltaX = clientX - startPosRef.current.x;
-      const deltaY = clientY - startPosRef.current.y;
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-      if (distance > moveThreshold) {
-        clearLongPressTimer();
-      }
-    },
-    [disabled, moveThreshold, clearLongPressTimer]
-  );
+  const {
+    handleStart,
+    handleMove,
+    handleEnd: baseHandleEnd,
+    handleCancel,
+    getState,
+  } = useTouchTracking({
+    onLongPress,
+    longPressDelay,
+    moveThreshold,
+    disabled,
+  });
 
   const handleEnd = useCallback(
     (clientX: number, clientY: number) => {
-      if (disabled || !startPosRef.current || !gestureActiveRef.current) {
-        resetGestureState();
+      const { startPos, longPressFired } = baseHandleEnd();
+
+      if (!startPos) {
+        handleCancel();
         return;
       }
 
-      const deltaX = clientX - startPosRef.current.x;
-      const deltaY = clientY - startPosRef.current.y;
+      if (longPressFired) {
+        handleCancel();
+        return;
+      }
+
+      const deltaX = clientX - startPos.x;
+      const deltaY = clientY - startPos.y;
       const absDeltaX = Math.abs(deltaX);
       const absDeltaY = Math.abs(deltaY);
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-      clearLongPressTimer();
-
-      if (longPressFiredRef.current) {
-        resetGestureState();
-        return;
-      }
 
       if (absDeltaX > swipeThreshold && absDeltaX > absDeltaY) {
         if (deltaX < 0 && onSwipeLeft) {
@@ -118,7 +74,7 @@ export function useGestures(options: UseGesturesOptions): GestureHandlers {
         } else if (deltaX > 0 && onSwipeRight) {
           onSwipeRight();
         }
-        resetGestureState();
+        handleCancel();
         return;
       }
 
@@ -126,23 +82,10 @@ export function useGestures(options: UseGesturesOptions): GestureHandlers {
         onTap();
       }
 
-      resetGestureState();
+      handleCancel();
     },
-    [
-      disabled,
-      swipeThreshold,
-      moveThreshold,
-      onTap,
-      onSwipeLeft,
-      onSwipeRight,
-      clearLongPressTimer,
-      resetGestureState,
-    ]
+    [baseHandleEnd, handleCancel, swipeThreshold, moveThreshold, onTap, onSwipeLeft, onSwipeRight]
   );
-
-  const handleCancel = useCallback(() => {
-    resetGestureState();
-  }, [resetGestureState]);
 
   const onTouchStart = useCallback(
     (e: React.TouchEvent) => {
@@ -166,14 +109,15 @@ export function useGestures(options: UseGesturesOptions): GestureHandlers {
 
   const onTouchEnd = useCallback(
     (e: React.TouchEvent) => {
-      if (startPosRef.current && e.changedTouches.length === 1) {
+      const state = getState();
+      if (state.startPos && e.changedTouches.length === 1) {
         const touch = e.changedTouches[0];
         handleEnd(touch.clientX, touch.clientY);
       } else {
         handleCancel();
       }
     },
-    [handleEnd, handleCancel]
+    [getState, handleEnd, handleCancel]
   );
 
   const onMouseDown = useCallback(

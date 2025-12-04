@@ -5,8 +5,6 @@ import {
   Volume2, 
   VolumeX 
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
@@ -16,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
+import { SettingRow } from "@/components/ui/setting-row";
 import type { Settings } from "@shared/schema";
 import type { Translations } from "@/lib/i18n";
 
@@ -48,56 +47,41 @@ export const GeneralSettingsSection = memo(function GeneralSettingsSection({
       description={t.settings.general.description}
       testId="section-general-settings"
     >
-      <div className="flex items-center justify-between gap-4">
-        <Label className="flex items-center gap-2">
-          <Languages className="w-4 h-4" />
-          <div>
-            <span>{t.settings.general.language}</span>
-            <p className="text-xs text-muted-foreground font-normal">
-              {t.settings.general.languageDesc}
-            </p>
-          </div>
-        </Label>
-        <Select
-          value={language}
-          onValueChange={(val) => setLanguage(val as "en" | "ru")}
-        >
-          <SelectTrigger className="w-32" data-testid="select-language">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {availableLanguages.map((lang) => (
-              <SelectItem key={lang.code} value={lang.code}>
-                {lang.nativeName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <SettingRow
+        id="language"
+        icon={<Languages className="w-4 h-4" />}
+        label={t.settings.general.language}
+        description={t.settings.general.languageDesc}
+        control={
+          <Select
+            value={language}
+            onValueChange={(val) => setLanguage(val as "en" | "ru")}
+          >
+            <SelectTrigger className="w-32" data-testid="select-language">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {availableLanguages.map((lang) => (
+                <SelectItem key={lang.code} value={lang.code}>
+                  {lang.nativeName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        }
+      />
 
       <Separator />
 
-      <div className="flex items-center justify-between">
-        <Label htmlFor="sound-enabled" className="flex items-center gap-2 cursor-pointer">
-          {settings.soundEnabled ? (
-            <Volume2 className="w-4 h-4" />
-          ) : (
-            <VolumeX className="w-4 h-4" />
-          )}
-          <div>
-            <span>{t.settings.general.captureSound}</span>
-            <p className="text-xs text-muted-foreground font-normal">
-              {t.settings.general.captureSoundDesc}
-            </p>
-          </div>
-        </Label>
-        <Switch
-          id="sound-enabled"
-          checked={settings.soundEnabled}
-          onCheckedChange={(checked) => updateSettings({ soundEnabled: checked })}
-          data-testid="switch-sound"
-        />
-      </div>
+      <SettingRow
+        id="sound-enabled"
+        icon={settings.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+        label={t.settings.general.captureSound}
+        description={t.settings.general.captureSoundDesc}
+        checked={settings.soundEnabled}
+        onCheckedChange={(checked) => updateSettings({ soundEnabled: checked })}
+        testId="switch-sound"
+      />
     </CollapsibleCard>
   );
 });

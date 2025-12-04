@@ -213,6 +213,35 @@ export default function CameraPage() {
     return geoData.accuracy > (settings.accuracyLimit || 20);
   }, [settings.gpsEnabled, settings.accuracyLimit, geoData.accuracy]);
 
+  const captureConfig = useMemo(() => ({
+    reticle: settings.reticle,
+    watermarkScale: settings.watermarkScale || 100,
+    soundEnabled: settings.soundEnabled,
+    stabilization: {
+      enabled: settings.stabilization?.enabled ?? false,
+      threshold: settings.stabilization?.threshold ?? 60,
+    },
+    enhancement: {
+      enabled: settings.enhancement?.enabled ?? false,
+      sharpness: settings.enhancement?.sharpness ?? 0,
+      denoise: settings.enhancement?.denoise ?? 0,
+      contrast: settings.enhancement?.contrast ?? 0,
+    },
+    imgbb: {
+      autoUpload: settings.imgbb?.autoUpload ?? false,
+      isValidated: settings.imgbb?.isValidated ?? false,
+      apiKey: settings.imgbb?.apiKey ?? "",
+      expiration: settings.imgbb?.expiration ?? 0,
+    },
+  }), [
+    settings.reticle,
+    settings.watermarkScale,
+    settings.soundEnabled,
+    settings.stabilization,
+    settings.enhancement,
+    settings.imgbb,
+  ]);
+
   const handlePhotoSaved = useCallback((result: SavedPhotoResult) => {
     setPhotoCount((prev) => prev + 1);
     setLastPhotoThumb(result.thumbnailData);
@@ -254,11 +283,11 @@ export default function CameraPage() {
     const noteText = currentNote.trim();
 
     try {
-      if (settings.stabilization?.enabled) {
+      if (captureConfig.stabilization.enabled) {
         await waitForStability();
       }
 
-      if (settings.soundEnabled) {
+      if (captureConfig.soundEnabled) {
         playCapture();
       }
 
@@ -271,9 +300,9 @@ export default function CameraPage() {
         tilt: orientationData.tilt,
         note: noteText || undefined,
         timestamp,
-        reticleConfig: settings.reticle,
+        reticleConfig: captureConfig.reticle,
         reticleColor: reticleColor,
-        watermarkScale: settings.watermarkScale || 100,
+        watermarkScale: captureConfig.watermarkScale,
       });
 
       if (!result) {
@@ -302,18 +331,8 @@ export default function CameraPage() {
       processCaptureDeferred({
         result,
         photoData,
-        enhancementSettings: {
-          enabled: settings.enhancement?.enabled ?? false,
-          sharpness: settings.enhancement?.sharpness ?? 0,
-          denoise: settings.enhancement?.denoise ?? 0,
-          contrast: settings.enhancement?.contrast ?? 0,
-        },
-        imgbbSettings: {
-          autoUpload: settings.imgbb?.autoUpload ?? false,
-          isValidated: settings.imgbb?.isValidated ?? false,
-          apiKey: settings.imgbb?.apiKey ?? "",
-          expiration: settings.imgbb?.expiration ?? 0,
-        },
+        enhancementSettings: captureConfig.enhancement,
+        imgbbSettings: captureConfig.imgbb,
         isOnline: navigator.onLine,
         onPhotoSaved: handlePhotoSaved,
         onCloudUpload: handleCloudUpload,
@@ -325,7 +344,7 @@ export default function CameraPage() {
       logger.error("Photo capture failed", error);
       setIsCapturing(false);
     }
-  }, [isReady, isCapturing, accuracyBlocked, capturePhoto, geoData, orientationData, currentNote, reticleColor, settings.reticle, settings.imgbb, settings.soundEnabled, settings.watermarkScale, settings.stabilization, settings.enhancement, playCapture, waitForStability, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingComplete]);
+  }, [isReady, isCapturing, accuracyBlocked, capturePhoto, geoData, orientationData, currentNote, reticleColor, captureConfig, playCapture, waitForStability, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingComplete]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

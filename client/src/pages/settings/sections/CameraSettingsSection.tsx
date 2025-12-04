@@ -1,8 +1,6 @@
 import { memo, useMemo } from "react";
 import { Camera, MonitorPlay } from "lucide-react";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { LockedSlider } from "@/components/ui/locked-slider";
 import {
   Select,
   SelectContent,
@@ -11,6 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
+import { SettingRow } from "@/components/ui/setting-row";
+import { SettingSlider } from "@/components/ui/setting-slider";
 import { useI18n } from "@/lib/i18n";
 import type { Settings, CameraResolution } from "@shared/schema";
 
@@ -40,17 +40,12 @@ export const CameraSettingsSection = memo(function CameraSettingsSection({
       description={t.settings.camera.description}
       testId="section-camera-settings"
     >
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="flex items-center gap-2">
-            <Camera className="w-4 h-4" />
-            <div>
-              <span>{t.settings.camera.resolution}</span>
-              <p className="text-xs text-muted-foreground font-normal">
-                {t.settings.camera.resolutionDesc}
-              </p>
-            </div>
-          </Label>
+      <SettingRow
+        id="camera-resolution"
+        icon={<Camera className="w-4 h-4" />}
+        label={t.settings.camera.resolution}
+        description={t.settings.camera.resolutionDesc}
+        control={
           <Select
             value={settings.cameraResolution}
             onValueChange={(value) =>
@@ -68,35 +63,22 @@ export const CameraSettingsSection = memo(function CameraSettingsSection({
               ))}
             </SelectContent>
           </Select>
-        </div>
-      </div>
+        }
+      />
 
       <Separator />
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="flex items-center gap-2">
-            <div>
-              <span>{t.settings.camera.quality}</span>
-              <p className="text-xs text-muted-foreground font-normal">
-                {t.settings.camera.qualityDesc}
-              </p>
-            </div>
-          </Label>
-          <span className="text-sm text-muted-foreground font-mono">
-            {settings.photoQuality}
-            {t.settings.camera.percent}
-          </span>
-        </div>
-        <LockedSlider
-          value={[settings.photoQuality]}
-          onValueChange={([value]) => updateSettings({ photoQuality: value })}
-          min={50}
-          max={100}
-          step={1}
-          data-testid="slider-photo-quality"
-        />
-      </div>
+      <SettingSlider
+        label={t.settings.camera.quality}
+        description={t.settings.camera.qualityDesc}
+        value={settings.photoQuality}
+        onValueChange={(value) => updateSettings({ photoQuality: value })}
+        min={50}
+        max={100}
+        step={1}
+        unit={t.settings.camera.percent}
+        testId="slider-photo-quality"
+      />
     </CollapsibleCard>
   );
 });

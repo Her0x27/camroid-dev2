@@ -19,10 +19,18 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 **Предложение:** Извлечь общую логику в базовый хук или объединить функциональность.
 
+**Статус:** ✅ ВЫПОЛНЕНО
+
+Создан базовый хук `useTouchTracking` в `client/src/hooks/use-touch-tracking.ts`:
+- Общая логика отслеживания касаний
+- Таймер long press с очисткой
+- Отслеживание начальной позиции
+- Проверка moveThreshold для отмены
+
 ```
-□ Создать базовый хук useTouchTracking с общей логикой
-□ Рефакторить use-gestures.ts для использования базового хука
-□ Рефакторить use-long-press.ts для использования базового хука
+✅ Создать базовый хук useTouchTracking с общей логикой
+✅ Рефакторить use-gestures.ts для использования базового хука
+✅ Рефакторить use-long-press.ts для использования базового хука
 ✅ Перенести общие константы в constants.ts (LONG_PRESS.DEFAULT_DELAY_MS, LONG_PRESS.DEFAULT_MOVE_THRESHOLD_PX)
 ```
 
@@ -53,10 +61,21 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 **Предложение:** Создать общие компоненты для типичных паттернов настроек.
 
+**Статус:** ✅ ВЫПОЛНЕНО
+
+Созданы компоненты:
+- `client/src/components/ui/setting-row.tsx` - для label + switch/control
+- `client/src/components/ui/setting-slider.tsx` - для slider с интегрированным label и value display
+
+Рефакторены секции:
+- `GeneralSettingsSection.tsx` - использует SettingRow
+- `CameraSettingsSection.tsx` - использует SettingRow и SettingSlider
+
 ```
-□ Создать SettingRow компонент для label + switch/slider
-□ Создать SettingSlider компонент с интегрированным label и value display
-□ Рефакторить существующие секции для использования новых компонентов
+✅ Создать SettingRow компонент для label + switch/slider
+✅ Создать SettingSlider компонент с интегрированным label и value display
+✅ Рефакторить существующие секции для использования новых компонентов (GeneralSettingsSection, CameraSettingsSection)
+□ [ОПЦИОНАЛЬНО] Рефакторить остальные секции настроек
 ```
 
 ---
@@ -296,15 +315,23 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 ```
 
 ### 8.3 Большое количество зависимостей в useCallback
-**Местоположение:** `client/src/pages/camera/index.tsx` строка 328
+**Местоположение:** `client/src/pages/camera/index.tsx` строка 350
 
-**Проблема:** handleCapture имеет много зависимостей в массиве зависимостей.
+**Проблема:** ~~handleCapture имеет много зависимостей в массиве зависимостей.~~
 
-**Предложение:** Группировать связанные данные в объекты или использовать useReducer.
+**Статус:** ✅ ВЫПОЛНЕНО
+
+Создан `captureConfig` объект через `useMemo`:
+- Группирует настройки reticle, watermarkScale, soundEnabled
+- Группирует stabilization settings
+- Группирует enhancement settings
+- Группирует imgbb settings
+
+Зависимости handleCapture сокращены с 21 до 15.
 
 ```
-□ Создать объект captureConfig для группировки связанных настроек
-□ Рассмотреть использование useReducer для состояния съёмки
+✅ Создать объект captureConfig для группировки связанных настроек
+□ [ОПЦИОНАЛЬНО] Рассмотреть использование useReducer для состояния съёмки
 ```
 
 ### 8.4 Cleanup функции в useEffect
@@ -334,10 +361,10 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 ### Средний приоритет (дублирование и рефакторинг)
 
 ```
-□ [DUP-1] Объединить логику use-gestures.ts и use-long-press.ts (создать useTouchTracking)
+✅ [DUP-1] Объединить логику use-gestures.ts и use-long-press.ts (создать useTouchTracking)
 ✅ [DUP-2] Перенести общие константы DEFAULT_LONG_PRESS_DELAY, DEFAULT_MOVE_THRESHOLD в constants.ts
-□ [REF-1] Создать общие компоненты SettingRow и SettingSlider
-□ [REF-2] Группировать зависимости handleCapture в captureConfig объект
+✅ [REF-1] Создать общие компоненты SettingRow и SettingSlider
+✅ [REF-2] Группировать зависимости handleCapture в captureConfig объект
 ```
 
 ### Низкий приоритет (опциональные улучшения)
@@ -365,3 +392,6 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 10. ✅ **Memo** - Использование React.memo для оптимизации компонентов
 11. ✅ **Service Layer** - Разделение db.ts на специализированные сервисы
 12. ✅ **Custom Hooks** - Хорошая декомпозиция логики GalleryPage в переиспользуемые хуки
+13. ✅ **Shared Touch Tracking** - Базовый хук useTouchTracking для общей логики жестов
+14. ✅ **Reusable Settings Components** - SettingRow и SettingSlider компоненты для настроек
+15. ✅ **Grouped Dependencies** - captureConfig для группировки зависимостей handleCapture
