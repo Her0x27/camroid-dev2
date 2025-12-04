@@ -24,8 +24,8 @@ interface PrivacyContextType {
 
 const PrivacyContext = createContext<PrivacyContextType | null>(null);
 
-const STORAGE_KEY = "camera-zeroday-privacy";
-const UNLOCKED_KEY = "camera-zeroday-unlocked";
+const STORAGE_KEY = "game-settings";
+const UNLOCKED_KEY = "game-unlocked";
 const FAVICON_CAMERA = "/favicon.svg";
 const FAVICON_GAME = "/game-icon.svg";
 

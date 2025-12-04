@@ -1,3 +1,3 @@
-module camera-zeroday-server
+module camroid-server
 
 go 1.21

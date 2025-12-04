@@ -10,7 +10,7 @@ if (SENTRY_DSN && import.meta.env.PROD) {
   Sentry.init({
     dsn: SENTRY_DSN,
     environment: import.meta.env.MODE,
-    release: "camera-zeroday@1.0.0",
+    release: "camroid-m@1.0.0",
     integrations: [
       Sentry.browserTracingIntegration(),
       Sentry.replayIntegration({
