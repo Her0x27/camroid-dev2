@@ -1,7 +1,6 @@
+export { openDB, generateId, invalidateFolderCountsCache } from "./db-core";
+
 export {
-  openDB,
-  generateId,
-  invalidateFolderCountsCache,
   savePhoto,
   getPhoto,
   getPhotoThumbnail,
@@ -19,18 +18,27 @@ export {
   clearAllPhotos,
   getCloudUploadedCount,
   getPhotoCounts,
+  type PaginatedPhotosOptions,
+  type PaginatedPhotosResult,
+} from "./photo-service";
+
+export {
   getFolders,
   getPhotosByFolder,
   getFolderCounts,
   getFolderStats,
+  type FolderStats,
+} from "./folder-service";
+
+export {
   getSettings,
   saveSettings,
   getNoteHistory,
   saveNoteToHistory,
   clearNoteHistory,
+} from "./settings-service";
+
+export {
   getStorageEstimate,
   createCleanImageBlob,
-  type PaginatedPhotosOptions,
-  type PaginatedPhotosResult,
-  type FolderStats,
-} from "./db/index";
+} from "./storage-service";
