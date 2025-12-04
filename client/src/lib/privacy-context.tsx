@@ -228,6 +228,36 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     };
   }, [isLocked, resetInactivityTimer]);
   
+  useEffect(() => {
+    if (!settings.enabled) return;
+    
+    const handleVisibilityChange = () => {
+      if (document.hidden || document.visibilityState === 'hidden') {
+        hideCamera();
+      }
+    };
+    
+    const handlePageHide = () => {
+      hideCamera();
+    };
+    
+    const handleBlur = () => {
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        hideCamera();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('blur', handleBlur);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, [settings.enabled, hideCamera]);
+  
   return (
     <PrivacyContext.Provider
       value={{

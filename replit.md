@@ -60,6 +60,14 @@ Six customizable reticle types (None, Crosshair, Grid, Rangefinder, Tactical, Mi
 - **Settings Context**: Manages global settings, reticle configuration, GPS/orientation preferences, camera facing, and audio feedback.
 - **Local-First Approach**: All state changes immediately persist to IndexedDB.
 
+### Privacy Mode
+
+The application includes a privacy/masking feature that displays a 2048 game instead of the camera interface:
+- **Auto-lock on minimize**: When PRIVACY_MODE is enabled, the app automatically locks and shows the 2048 mask when minimized, backgrounded, or when the tab loses visibility.
+- **Event handling**: Uses `visibilitychange`, `pagehide` (for Safari iOS), and `blur` (for mobile devices) events for comprehensive cross-platform support.
+- **Unlock gestures**: Configurable unlock methods including quick taps, pattern unlock, and multi-finger gestures.
+- **Auto-lock timer**: Configurable inactivity timeout for automatic locking.
+
 ## External Dependencies
 
 ### UI Component Library
