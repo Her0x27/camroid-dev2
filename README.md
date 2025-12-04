@@ -1,4 +1,4 @@
-# Camera ZeroDay
+# Camroid M
 
 > A tactical camera Progressive Web App with privacy mode
 
@@ -9,7 +9,7 @@
 
 ## Overview
 
-Camera ZeroDay is a Progressive Web App designed for precision photography with comprehensive metadata capture. It combines tactical HUD overlays, GPS geolocation, device orientation tracking, cloud upload capabilities, and offline-first functionality into a single-page application that operates entirely within your browser.
+Camroid M is a Progressive Web App designed for precision photography with comprehensive metadata capture. It combines tactical HUD overlays, GPS geolocation, device orientation tracking, cloud upload capabilities, and offline-first functionality into a single-page application that operates entirely within your browser.
 
 ### Key Highlights
 - **Zero Server Required** — All data stored locally in IndexedDB
@@ -112,7 +112,7 @@ Camera ZeroDay is a Progressive Web App designed for precision photography with 
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd camerazeroday
+cd camroid-m
 
 # Install dependencies
 npm install
@@ -195,7 +195,7 @@ Depending on configured gesture type:
 
 ### Project Structure
 ```
-camerazeroday/
+camroid-m/
 ├── client/src/
 │   ├── components/
 │   │   ├── ui/                      # shadcn/ui components
@@ -298,7 +298,7 @@ All data persists in **IndexedDB** with the following stores:
 
 ## Localization
 
-Camera ZeroDay supports full bilingual interface:
+Camroid M supports full bilingual interface:
 - **English** — Default language
 - **Русский** — Complete Russian translation
 - **Auto-Detection** — Respects browser language preference
@@ -416,6 +416,6 @@ This project is licensed under the MIT License — see LICENSE file for details.
 
 ---
 
-**Camera ZeroDay** — *Precision photography meets tactical intelligence*
+**Camroid M** — *Precision photography meets tactical intelligence*
 
 *Built with care for photographers, surveyors, and tactical professionals*

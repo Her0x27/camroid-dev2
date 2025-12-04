@@ -126,7 +126,7 @@ export const ru: Translations = {
     openInMaps: "Открыть на карте",
     photoNotFound: "Фото не найдено",
     mayHaveBeenDeleted: "Это фото могло быть удалено",
-    shareTitle: "Фото Camera ZeroDay",
+    shareTitle: "Фото Camroid M",
     deleteConfirmTitle: "Удалить фото?",
     deleteConfirmDescription: "Это действие нельзя отменить. Фото будет навсегда удалено с вашего устройства.",
     info: "Инфо",
@@ -318,7 +318,7 @@ export const ru: Translations = {
     },
     
     appInfo: {
-      title: "Camera ZeroDay",
+      title: "Camroid M",
       subtitle: "Тактическая камера PWA",
       storageNote: "Фото хранятся локально на вашем устройстве",
     },

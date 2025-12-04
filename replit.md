@@ -1,8 +1,8 @@
-# Camera ZeroDay - Tactical Camera PWA
+# Camroid M - Tactical Camera PWA
 
 ## Overview
 
-Camera ZeroDay is a Progressive Web App (PWA) designed as a tactical camera for capturing geotagged photos with precision metadata. It features military-grade HUD overlays, customizable reticles, GPS coordinates, device orientation data, and offline-first functionality. The application operates as a single-page app, storing all data locally in IndexedDB, requiring no backend beyond static file serving. It is ideal for fieldwork, surveying, and tactical operations where precise location and orientation data are crucial.
+Camroid M is a Progressive Web App (PWA) designed as a tactical camera for capturing geotagged photos with precision metadata. It features tactical HUD overlays, customizable reticles, GPS coordinates, device orientation data, and offline-first functionality. The application operates as a single-page app, storing all data locally in IndexedDB, requiring no backend beyond static file serving. It is ideal for fieldwork, surveying, and tactical operations where precise location and orientation data are crucial.
 
 ## User Preferences
 

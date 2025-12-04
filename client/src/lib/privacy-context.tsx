@@ -100,7 +100,7 @@ function updateFavicon(isLocked: boolean): void {
 }
 
 function updateTitle(isLocked: boolean): void {
-  document.title = isLocked ? "2048" : "Camera ZeroDay";
+  document.title = isLocked ? "2048" : "Camroid M";
 }
 
 export function PrivacyProvider({ children }: { children: ReactNode }) {

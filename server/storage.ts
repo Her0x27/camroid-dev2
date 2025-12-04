@@ -1,4 +1,4 @@
-// Camera ZeroDay is a client-only application
+// Camroid M is a client-only application
 // All data is stored in IndexedDB on the client side
 // This file is kept minimal as the server only serves static files
 

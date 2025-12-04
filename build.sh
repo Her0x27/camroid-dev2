@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Camera ZeroDay - Build Script
+# Camroid M - Build Script
 # Usage: ./build.sh [options]
 # Options:
 #   --go           Build Go server instead of Node.js
@@ -43,7 +43,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help)
-            echo "Camera ZeroDay - Build Script"
+            echo "Camroid M - Build Script"
             echo ""
             echo "Usage: ./build.sh [options]"
             echo ""
@@ -68,7 +68,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  ${CYAN}Camera ZeroDay - Production Build${BLUE}     ║${NC}"
+echo -e "${BLUE}║  ${CYAN}Camroid M - Production Build${BLUE}          ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
 echo ""
 

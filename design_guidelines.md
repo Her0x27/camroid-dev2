@@ -1,4 +1,4 @@
-# Camera ZeroDay - Tactical Camera PWA Design Guidelines
+# Camroid M - Tactical Camera PWA Design Guidelines
 
 ## Design Approach
 

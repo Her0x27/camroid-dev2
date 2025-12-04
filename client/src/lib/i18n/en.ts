@@ -124,7 +124,7 @@ export const en = {
     openInMaps: "Open in Maps",
     photoNotFound: "Photo Not Found",
     mayHaveBeenDeleted: "This photo may have been deleted",
-    shareTitle: "Camera ZeroDay Photo",
+    shareTitle: "Camroid M Photo",
     deleteConfirmTitle: "Delete Photo?",
     deleteConfirmDescription: "This action cannot be undone. The photo will be permanently removed from your device.",
     info: "Info",
@@ -316,7 +316,7 @@ export const en = {
     },
     
     appInfo: {
-      title: "Camera ZeroDay",
+      title: "Camroid M",
       subtitle: "Tactical Camera PWA",
       storageNote: "Photos are stored locally on your device",
     },

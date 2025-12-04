@@ -242,7 +242,7 @@ func main() {
         flag.Parse()
 
         if *showVersion {
-                fmt.Printf("Camera ZeroDay Server v%s (built: %s)\n", Version, BuildTime)
+                fmt.Printf("Camroid M Server v%s (built: %s)\n", Version, BuildTime)
                 os.Exit(0)
         }
 
@@ -284,7 +284,7 @@ func main() {
                 IdleTimeout:  60 * time.Second,
         }
 
-        log.Printf("Camera ZeroDay Server v%s", Version)
+        log.Printf("Camroid M Server v%s", Version)
         log.Printf("Serving files from: %s", staticDir)
         log.Printf("Listening on %s:%s", config.Host, config.Port)
         log.Printf("Gzip: %v | Cache: %v | Logging: %v", config.EnableGzip, config.EnableCache, config.EnableLogging)

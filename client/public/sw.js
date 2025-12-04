@@ -1,4 +1,4 @@
-// Camera ZeroDay Service Worker
+// Camroid M Service Worker
 // This service worker is only active in production mode
 
 const CACHE_VERSION = '1.0.0';
