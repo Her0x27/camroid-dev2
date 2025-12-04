@@ -42,7 +42,7 @@ export function generateId(): string {
 
 let folderCountsCache: { counts: Map<string | null, number>; timestamp: number } | null = null;
 let folderStatsCache: { stats: unknown[]; timestamp: number } | null = null;
-const FOLDER_COUNTS_TTL_MS = 5000;
+const FOLDER_COUNTS_TTL_MS = 30000;
 
 export function invalidateFolderCountsCache(): void {
   folderCountsCache = null;

@@ -5,9 +5,9 @@ import { useGeolocation } from "@/hooks/use-geolocation";
 import { useOrientation } from "@/hooks/use-orientation";
 import { useCaptureSound } from "@/hooks/use-capture-sound";
 import { useStabilization } from "@/hooks/use-stabilization";
+import { useColorSampling } from "@/hooks/use-color-sampling";
 import { useSettings } from "@/lib/settings-context";
 import { usePrivacy } from "@/lib/privacy-context";
-import { getContrastingColor } from "@/components/reticles";
 import { getPhotoCounts, getLatestPhoto } from "@/lib/db";
 import {
   processCaptureDeferred,
@@ -18,7 +18,6 @@ import {
 import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
-import { CAMERA } from "@/lib/constants";
 import { CameraControls, PhotoNoteDialog, CameraViewfinder } from "./components";
 
 export default function CameraPage() {
@@ -36,9 +35,6 @@ export default function CameraPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
-  const [reticleColor, setReticleColor] = useState<string>(CAMERA.DEFAULT_RETICLE_COLOR);
-  const colorSamplingCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const previousColorRef = useRef<string>(CAMERA.DEFAULT_RETICLE_COLOR);
   const processingAbortRef = useRef<AbortController | null>(null);
 
   const {
@@ -73,6 +69,14 @@ export default function CameraPage() {
     enabled: settings.stabilization?.enabled ?? false,
     threshold: settings.stabilization?.threshold ?? 60,
     videoRef,
+  });
+
+  const reticleColor = useColorSampling({
+    videoRef,
+    enabled: isReady && settings.reticle.enabled,
+    autoColor: settings.reticle.autoColor,
+    reticleSize: settings.reticle.size,
+    colorScheme: settings.reticle.colorScheme || "tactical",
   });
 
   useEffect(() => {
@@ -126,86 +130,6 @@ export default function CameraPage() {
       resetInactivityTimer();
     }
   }, [privacySettings.enabled, resetInactivityTimer]);
-
-  useEffect(() => {
-    if (!isReady || !settings.reticle.autoColor || !settings.reticle.enabled) return;
-    
-    const video = videoRef.current;
-    if (!video) return;
-    
-    const canvas = colorSamplingCanvasRef.current || document.createElement("canvas");
-    colorSamplingCanvasRef.current = canvas;
-    
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return;
-    
-    let animationId: number;
-    let lastUpdate = 0;
-    
-    const sampleColor = (timestamp: number) => {
-      if (timestamp - lastUpdate < CAMERA.COLOR_SAMPLE_INTERVAL_MS) {
-        animationId = requestAnimationFrame(sampleColor);
-        return;
-      }
-      lastUpdate = timestamp;
-      
-      if (video.readyState >= 2) {
-        const videoWidth = video.videoWidth;
-        const videoHeight = video.videoHeight;
-        const minDimension = Math.min(videoWidth, videoHeight);
-        
-        const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
-        const reticleSize = Math.ceil(minDimension * (sizePercent / 100));
-        
-        const sampleSize = Math.min(reticleSize, CAMERA.COLOR_SAMPLE_MAX_SIZE);
-        canvas.width = sampleSize;
-        canvas.height = sampleSize;
-        
-        const sourceX = (videoWidth - reticleSize) / 2;
-        const sourceY = (videoHeight - reticleSize) / 2;
-        
-        try {
-          ctx.drawImage(
-            video,
-            sourceX, sourceY, reticleSize, reticleSize,
-            0, 0, sampleSize, sampleSize
-          );
-          const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize);
-          const data = imageData.data;
-          
-          let r = 0, g = 0, b = 0;
-          const pixelCount = data.length / 4;
-          
-          for (let i = 0; i < data.length; i += 4) {
-            r += data[i];
-            g += data[i + 1];
-            b += data[i + 2];
-          }
-          
-          r = Math.round(r / pixelCount);
-          g = Math.round(g / pixelCount);
-          b = Math.round(b / pixelCount);
-          
-          const colorScheme = settings.reticle.colorScheme || "tactical";
-          const newColor = getContrastingColor(r, g, b, colorScheme);
-          if (newColor !== previousColorRef.current) {
-            previousColorRef.current = newColor;
-            setReticleColor(newColor);
-          }
-        } catch {
-          // Ignore canvas security errors
-        }
-      }
-      
-      animationId = requestAnimationFrame(sampleColor);
-    };
-    
-    animationId = requestAnimationFrame(sampleColor);
-    
-    return () => {
-      cancelAnimationFrame(animationId);
-    };
-  }, [isReady, settings.reticle.autoColor, settings.reticle.enabled, settings.reticle.size, settings.reticle.colorScheme, videoRef]);
 
   const accuracyBlocked = useMemo(() => {
     if (!settings.gpsEnabled) return false;

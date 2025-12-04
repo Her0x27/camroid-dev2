@@ -45,8 +45,22 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 **Предложение:** Это стандартный паттерн shadcn/ui, изменения не рекомендуются, так как это упрощает обновление компонентов. Но можно создать helper для повторяющихся стилей overlay.
 
+**Статус:** ✅ ВЫПОЛНЕНО
+
+Создан `client/src/components/ui/styles.ts`:
+- `overlayStyles` - общие стили overlay анимаций
+- `dialogContentStyles` - стили содержимого диалогов
+- `dialogCloseButtonStyles` - стили кнопки закрытия
+- `dialogHeaderStyles` - стили заголовка диалогов
+- `dialogFooterStyles` - стили футера диалогов
+
+Обновлены компоненты:
+- `alert-dialog.tsx` - использует overlayStyles и dialogContentStyles
+- `dialog.tsx` - использует overlayStyles, dialogContentStyles, dialogCloseButtonStyles
+- `sheet.tsx` - использует overlayStyles и dialogCloseButtonStyles
+
 ```
-□ [ОПЦИОНАЛЬНО] Создать общий overlayStyles constant для повторяющихся классов анимаций
+✅ [ОПЦИОНАЛЬНО] Создать общий overlayStyles constant для повторяющихся классов анимаций
 □ [ОПЦИОНАЛЬНО] Документировать паттерн в README для onboarding новых разработчиков
 ```
 
@@ -105,9 +119,15 @@ GalleryPage теперь использует хуки:
 ```
 ✅ Извлечь useUploadHandler из GalleryPage
 ✅ Извлечь useGalleryDialogs для управления состоянием диалогов (реализовано как useLinksDialog + useGallerySelection)
-□ Извлечь ColorSamplingProvider или хук из CameraPage (ОПЦИОНАЛЬНО)
+✅ Извлечь ColorSamplingProvider или хук из CameraPage (реализовано как useColorSampling)
 □ Создать CaptureController component для логики съёмки (ОПЦИОНАЛЬНО)
 ```
+
+**Дополнительно:** Создан `client/src/hooks/use-color-sampling.ts`:
+- Хук для автоматического определения контрастного цвета прицела
+- Принимает videoRef, enabled, autoColor, reticleSize, colorScheme
+- Использует canvas для семплирования цвета из центра кадра
+- Возвращает контрастный цвет для прицела
 
 ### 2.2 Отсутствие слоя сервисов
 **Местоположение:** ~~`client/src/lib/db.ts` (705 строк)~~ → `client/src/lib/db/`
@@ -239,9 +259,11 @@ if (newColor !== previousColorRef.current) {
 
 **Предложение:** Рассмотреть инкрементальное обновление статистики при мутациях.
 
+**Статус:** ✅ ЧАСТИЧНО ВЫПОЛНЕНО - TTL увеличен до 30 секунд
+
 ```
 □ [ОПЦИОНАЛЬНО] Реализовать инкрементальное обновление статистики папок
-□ [ОПЦИОНАЛЬНО] Увеличить TTL кеша если статистика редко меняется
+✅ [ОПЦИОНАЛЬНО] Увеличить TTL кеша если статистика редко меняется (5с → 30с)
 ```
 
 ---
@@ -390,9 +412,10 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 
 ```
 ✅ [OPT-1] Добавить DEFAULT_RETICLE_SIZE в constants.ts
-□ [OPT-2] Рассмотреть инкрементальное обновление статистики папок
+✅ [OPT-2] Увеличить TTL кеша статистики папок (5с → 30с)
 ✅ [OPT-3] Разбить virtualized-gallery.tsx на отдельные файлы
-□ [OPT-4] Создать overlayStyles constant для UI компонентов
+✅ [OPT-4] Создать overlayStyles constant для UI компонентов
+✅ [OPT-5] Извлечь useColorSampling хук из CameraPage
 ```
 
 ---
