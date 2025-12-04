@@ -70,12 +70,15 @@ This document contains the results of a comprehensive TypeScript project audit c
 Рефакторены секции:
 - `GeneralSettingsSection.tsx` - использует SettingRow
 - `CameraSettingsSection.tsx` - использует SettingRow и SettingSlider
+- `ReticleSection.tsx` - использует SettingRow и SettingSlider
+- `ImageQualitySection.tsx` - использует SettingRow и SettingSlider
+- `WatermarkSection.tsx` - использует SettingRow и SettingSlider
 
 ```
 ✅ Создать SettingRow компонент для label + switch/slider
 ✅ Создать SettingSlider компонент с интегрированным label и value display
 ✅ Рефакторить существующие секции для использования новых компонентов (GeneralSettingsSection, CameraSettingsSection)
-□ [ОПЦИОНАЛЬНО] Рефакторить остальные секции настроек
+✅ Рефакторить остальные секции настроек (ReticleSection, ImageQualitySection, WatermarkSection)
 ```
 
 ---
@@ -174,13 +177,19 @@ const imageDataResults = await Promise.all(
 ```
 
 ### 3.3 Отсутствие мемоизации в PhotoListItem и PhotoGridCell
-**Местоположение:** `client/src/components/virtualized-gallery.tsx`
+**Местоположение:** ~~`client/src/components/virtualized-gallery.tsx`~~ → `client/src/components/virtualized-gallery/`
 
-**Проблема:** Внутренние callback функции `handleLongPress` и `handleClick` создаются заново при каждом рендере, несмотря на memo wrapper.
+**Проблема:** ~~Внутренние callback функции `handleLongPress` и `handleClick` создаются заново при каждом рендере, несмотря на memo wrapper.~~
+
+**Статус:** ✅ ВЫПОЛНЕНО
+
+- `handleClick` теперь обёрнут в `useCallback` в обоих компонентах
+- `handleLongPress` уже использовал `useCallback`
+- `data` для longPressHandlers - примитив (string), мемоизация не требуется
 
 ```
-□ Использовать useMemo для стабилизации объекта data в longPressHandlers
-□ Проверить, что все зависимости useCallback корректны
+✅ Использовать useCallback для handleClick в PhotoListItemBase и PhotoGridCellBase
+✅ Проверить, что все зависимости useCallback корректны
 ```
 
 ### 3.4 Отсутствие debounce для color sampling
@@ -289,13 +298,23 @@ Lazy loading правильно реализован в `client/src/App.tsx`:
 
 - ~~`client/src/lib/db.ts` - 705 строк~~ → Разбит на модули в `client/src/lib/db/`
 - `client/src/pages/gallery/index.tsx` - 643 строки (логика вынесена в хуки)
-- `client/src/components/virtualized-gallery.tsx` - 467 строк
+- ~~`client/src/components/virtualized-gallery.tsx` - 467 строк~~ → Разбит на модули в `client/src/components/virtualized-gallery/`
 - `client/src/pages/camera/index.tsx` - 407 строк
+
+Структура virtualized-gallery:
+```
+client/src/components/virtualized-gallery/
+├── types.ts              # Общие интерфейсы
+├── VirtualizedList.tsx   # PhotoListItem + VirtualizedPhotoList
+├── VirtualizedGrid.tsx   # PhotoGridCell + VirtualizedPhotoGrid
+├── AutoSizerContainer.tsx # AutoSizerContainer
+└── index.ts              # Реэкспорт
+```
 
 ```
 ✅ Разбить db.ts на модули (см. раздел 2.2)
 ✅ Разбить gallery/index.tsx - логика вынесена в хуки
-□ [ОПЦИОНАЛЬНО] Разбить virtualized-gallery.tsx на VirtualizedList и VirtualizedGrid файлы
+✅ Разбить virtualized-gallery.tsx на VirtualizedList и VirtualizedGrid файлы
 ```
 
 ### 8.2 Магические числа
@@ -372,7 +391,7 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 ```
 ✅ [OPT-1] Добавить DEFAULT_RETICLE_SIZE в constants.ts
 □ [OPT-2] Рассмотреть инкрементальное обновление статистики папок
-□ [OPT-3] Разбить virtualized-gallery.tsx на отдельные файлы
+✅ [OPT-3] Разбить virtualized-gallery.tsx на отдельные файлы
 □ [OPT-4] Создать overlayStyles constant для UI компонентов
 ```
 
@@ -395,3 +414,5 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 13. ✅ **Shared Touch Tracking** - Базовый хук useTouchTracking для общей логики жестов
 14. ✅ **Reusable Settings Components** - SettingRow и SettingSlider компоненты для настроек
 15. ✅ **Grouped Dependencies** - captureConfig для группировки зависимостей handleCapture
+16. ✅ **Memoized Callbacks** - handleClick обёрнут в useCallback в virtualized-gallery
+17. ✅ **Modular Gallery Components** - virtualized-gallery разбит на отдельные модули

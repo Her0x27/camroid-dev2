@@ -1,10 +1,9 @@
 import { memo } from "react";
 import { Sparkles, Focus, Waves, SunMedium, Target } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { LockedSlider } from "@/components/ui/locked-slider";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
+import { SettingRow } from "@/components/ui/setting-row";
+import { SettingSlider } from "@/components/ui/setting-slider";
 import { useI18n } from "@/lib/i18n";
 import type { Settings, StabilizationSettings, EnhancementSettings } from "@shared/schema";
 
@@ -28,133 +27,79 @@ export const ImageQualitySection = memo(function ImageQualitySection({
       description={t.settings.imageQuality.description}
       testId="section-image-quality"
     >
-      <div className="flex items-center justify-between">
-        <Label htmlFor="stabilization-enabled" className="flex items-center gap-2 cursor-pointer">
-          <Target className="w-4 h-4" />
-          <div>
-            <span>{t.settings.imageQuality.stabilization}</span>
-            <p className="text-xs text-muted-foreground font-normal">
-              {t.settings.imageQuality.stabilizationDesc}
-            </p>
-          </div>
-        </Label>
-        <Switch
-          id="stabilization-enabled"
-          checked={settings.stabilization.enabled}
-          onCheckedChange={(checked) => updateStabilization({ enabled: checked })}
-          data-testid="switch-stabilization"
-        />
-      </div>
+      <SettingRow
+        id="stabilization-enabled"
+        icon={<Target className="w-4 h-4" />}
+        label={t.settings.imageQuality.stabilization}
+        description={t.settings.imageQuality.stabilizationDesc}
+        checked={settings.stabilization.enabled}
+        onCheckedChange={(checked) => updateStabilization({ enabled: checked })}
+        testId="switch-stabilization"
+      />
 
       {settings.stabilization.enabled && (
         <>
           <Separator />
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="flex items-center gap-2">
-                {t.settings.imageQuality.stabilityThreshold}
-              </Label>
-              <span className="text-sm text-muted-foreground font-mono">
-                {settings.stabilization.threshold}%
-              </span>
-            </div>
-            <LockedSlider
-              value={[settings.stabilization.threshold]}
-              onValueChange={([value]) => updateStabilization({ threshold: value })}
-              min={30}
-              max={90}
-              step={5}
-              data-testid="slider-stability-threshold"
-            />
-            <p className="text-xs text-muted-foreground">
-              {t.settings.imageQuality.stabilityThresholdDesc}
-            </p>
-          </div>
+          <SettingSlider
+            label={t.settings.imageQuality.stabilityThreshold}
+            description={t.settings.imageQuality.stabilityThresholdDesc}
+            value={settings.stabilization.threshold}
+            onValueChange={(value) => updateStabilization({ threshold: value })}
+            min={30}
+            max={90}
+            step={5}
+            testId="slider-stability-threshold"
+          />
         </>
       )}
 
       <Separator />
 
-      <div className="flex items-center justify-between">
-        <Label htmlFor="enhancement-enabled" className="flex items-center gap-2 cursor-pointer">
-          <Focus className="w-4 h-4" />
-          <div>
-            <span>{t.settings.imageQuality.enhancement}</span>
-            <p className="text-xs text-muted-foreground font-normal">
-              {t.settings.imageQuality.enhancementDesc}
-            </p>
-          </div>
-        </Label>
-        <Switch
-          id="enhancement-enabled"
-          checked={settings.enhancement.enabled}
-          onCheckedChange={(checked) => updateEnhancement({ enabled: checked })}
-          data-testid="switch-enhancement"
-        />
-      </div>
+      <SettingRow
+        id="enhancement-enabled"
+        icon={<Focus className="w-4 h-4" />}
+        label={t.settings.imageQuality.enhancement}
+        description={t.settings.imageQuality.enhancementDesc}
+        checked={settings.enhancement.enabled}
+        onCheckedChange={(checked) => updateEnhancement({ enabled: checked })}
+        testId="switch-enhancement"
+      />
 
       {settings.enhancement.enabled && (
         <>
           <Separator />
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="flex items-center gap-2">
-                <Focus className="w-4 h-4" />
-                {t.settings.imageQuality.sharpness}
-              </Label>
-              <span className="text-sm text-muted-foreground font-mono">
-                {settings.enhancement.sharpness}%
-              </span>
-            </div>
-            <LockedSlider
-              value={[settings.enhancement.sharpness]}
-              onValueChange={([value]) => updateEnhancement({ sharpness: value })}
-              min={0}
-              max={100}
-              step={5}
-              data-testid="slider-sharpness"
-            />
-          </div>
+          <SettingSlider
+            icon={<Focus className="w-4 h-4" />}
+            label={t.settings.imageQuality.sharpness}
+            value={settings.enhancement.sharpness}
+            onValueChange={(value) => updateEnhancement({ sharpness: value })}
+            min={0}
+            max={100}
+            step={5}
+            testId="slider-sharpness"
+          />
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="flex items-center gap-2">
-                <Waves className="w-4 h-4" />
-                {t.settings.imageQuality.denoise}
-              </Label>
-              <span className="text-sm text-muted-foreground font-mono">
-                {settings.enhancement.denoise}%
-              </span>
-            </div>
-            <LockedSlider
-              value={[settings.enhancement.denoise]}
-              onValueChange={([value]) => updateEnhancement({ denoise: value })}
-              min={0}
-              max={100}
-              step={5}
-              data-testid="slider-denoise"
-            />
-          </div>
+          <SettingSlider
+            icon={<Waves className="w-4 h-4" />}
+            label={t.settings.imageQuality.denoise}
+            value={settings.enhancement.denoise}
+            onValueChange={(value) => updateEnhancement({ denoise: value })}
+            min={0}
+            max={100}
+            step={5}
+            testId="slider-denoise"
+          />
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="flex items-center gap-2">
-                <SunMedium className="w-4 h-4" />
-                {t.settings.imageQuality.contrast}
-              </Label>
-              <span className="text-sm text-muted-foreground font-mono">
-                {settings.enhancement.contrast}%
-              </span>
-            </div>
-            <LockedSlider
-              value={[settings.enhancement.contrast]}
-              onValueChange={([value]) => updateEnhancement({ contrast: value })}
-              min={0}
-              max={100}
-              step={5}
-              data-testid="slider-contrast"
-            />
-          </div>
+          <SettingSlider
+            icon={<SunMedium className="w-4 h-4" />}
+            label={t.settings.imageQuality.contrast}
+            value={settings.enhancement.contrast}
+            onValueChange={(value) => updateEnhancement({ contrast: value })}
+            min={0}
+            max={100}
+            step={5}
+            testId="slider-contrast"
+          />
         </>
       )}
     </CollapsibleCard>
