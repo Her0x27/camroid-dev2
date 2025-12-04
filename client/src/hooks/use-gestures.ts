@@ -1,4 +1,5 @@
 import { useRef, useCallback, useEffect } from "react";
+import { LONG_PRESS, GESTURE } from "@/lib/constants";
 
 export interface UseGesturesOptions {
   onTap?: () => void;
@@ -21,19 +22,15 @@ export interface GestureHandlers {
   onMouseLeave: () => void;
 }
 
-const DEFAULT_LONG_PRESS_DELAY = 500;
-const DEFAULT_SWIPE_THRESHOLD = 50;
-const DEFAULT_MOVE_THRESHOLD = 10;
-
 export function useGestures(options: UseGesturesOptions): GestureHandlers {
   const {
     onTap,
     onLongPress,
     onSwipeLeft,
     onSwipeRight,
-    longPressDelay = DEFAULT_LONG_PRESS_DELAY,
-    swipeThreshold = DEFAULT_SWIPE_THRESHOLD,
-    moveThreshold = DEFAULT_MOVE_THRESHOLD,
+    longPressDelay = LONG_PRESS.DEFAULT_DELAY_MS,
+    swipeThreshold = GESTURE.DEFAULT_SWIPE_THRESHOLD_PX,
+    moveThreshold = LONG_PRESS.DEFAULT_MOVE_THRESHOLD_PX,
     disabled = false,
   } = options;
 

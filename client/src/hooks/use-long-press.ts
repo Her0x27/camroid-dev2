@@ -1,7 +1,5 @@
 import { useRef, useCallback, useEffect } from "react";
-
-const DEFAULT_LONG_PRESS_DELAY = 500;
-const DEFAULT_MOVE_THRESHOLD = 10;
+import { LONG_PRESS } from "@/lib/constants";
 
 export interface UseLongPressOptions<T = void> {
   onLongPress?: (data: T) => void;
@@ -26,8 +24,8 @@ export function useLongPress<T = void>(options: UseLongPressOptions<T>): LongPre
   const {
     onLongPress,
     data,
-    delay = DEFAULT_LONG_PRESS_DELAY,
-    moveThreshold = DEFAULT_MOVE_THRESHOLD,
+    delay = LONG_PRESS.DEFAULT_DELAY_MS,
+    moveThreshold = LONG_PRESS.DEFAULT_MOVE_THRESHOLD_PX,
     disabled = false,
   } = options;
 

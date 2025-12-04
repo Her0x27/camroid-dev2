@@ -225,34 +225,40 @@ export default function GalleryPage() {
 
   const handleDownloadSelected = useCallback(async () => {
     const selectedPhotos = filteredPhotos.filter(p => selectedIds.has(p.id));
-    let downloadedCount = 0;
     
-    for (const photo of selectedPhotos) {
-      try {
-        const imageData = await getPhotoImageData(photo.id);
-        if (!imageData) {
-          logger.warn(`Could not load imageData for photo ${photo.id}`);
-          continue;
+    const imageDataResults = await Promise.all(
+      selectedPhotos.map(async (photo) => {
+        try {
+          const imageData = await getPhotoImageData(photo.id);
+          if (!imageData) {
+            logger.warn(`Could not load imageData for photo ${photo.id}`);
+            return null;
+          }
+          const blob = await createCleanImageBlob(imageData);
+          return { photo, blob };
+        } catch (error) {
+          logger.error(`Failed to prepare photo ${photo.id}`, error);
+          return null;
         }
-        const blob = await createCleanImageBlob(imageData);
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `zeroday-${new Date(photo.metadata.timestamp).toISOString().slice(0, 10)}-${photo.id.slice(0, 8)}.jpg`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        downloadedCount++;
-        await new Promise(resolve => setTimeout(resolve, 100));
-      } catch (error) {
-        logger.error("Failed to download photo", error);
-      }
+      })
+    );
+    
+    const validResults = imageDataResults.filter((r): r is { photo: typeof selectedPhotos[0]; blob: Blob } => r !== null);
+    
+    for (const { photo, blob } of validResults) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `zeroday-${new Date(photo.metadata.timestamp).toISOString().slice(0, 10)}-${photo.id.slice(0, 8)}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
     
     toast({
       title: t.common.success,
-      description: `${downloadedCount} ${t.gallery.photos}`,
+      description: `${validResults.length} ${t.gallery.photos}`,
     });
   }, [filteredPhotos, selectedIds, toast, t]);
 

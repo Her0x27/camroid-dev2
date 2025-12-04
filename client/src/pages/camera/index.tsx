@@ -36,8 +36,9 @@ export default function CameraPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
-  const [reticleColor, setReticleColor] = useState<string>("#22c55e");
+  const [reticleColor, setReticleColor] = useState<string>(CAMERA.DEFAULT_RETICLE_COLOR);
   const colorSamplingCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const previousColorRef = useRef<string>(CAMERA.DEFAULT_RETICLE_COLOR);
   const processingAbortRef = useRef<AbortController | null>(null);
 
   const {
@@ -77,16 +78,17 @@ export default function CameraPage() {
   useEffect(() => {
     const loadPhotos = async () => {
       try {
-        const counts = await getPhotoCounts();
+        const [counts, latest] = await Promise.all([
+          getPhotoCounts(),
+          getLatestPhoto(),
+        ]);
+        
         setPhotoCount(counts.total);
         setCloudCount(counts.cloud);
         
-        if (counts.total > 0) {
-          const latest = await getLatestPhoto();
-          if (latest) {
-            setLastPhotoThumb(latest.thumbnailData);
-            setLastPhotoId(latest.id);
-          }
+        if (latest) {
+          setLastPhotoThumb(latest.thumbnailData);
+          setLastPhotoId(latest.id);
         }
       } catch (error) {
         logger.error("Failed to load photos", error);
@@ -152,7 +154,7 @@ export default function CameraPage() {
         const videoHeight = video.videoHeight;
         const minDimension = Math.min(videoWidth, videoHeight);
         
-        const sizePercent = settings.reticle.size || 20;
+        const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
         const reticleSize = Math.ceil(minDimension * (sizePercent / 100));
         
         const sampleSize = Math.min(reticleSize, CAMERA.COLOR_SAMPLE_MAX_SIZE);
@@ -186,7 +188,10 @@ export default function CameraPage() {
           
           const colorScheme = settings.reticle.colorScheme || "tactical";
           const newColor = getContrastingColor(r, g, b, colorScheme);
-          setReticleColor(newColor);
+          if (newColor !== previousColorRef.current) {
+            previousColorRef.current = newColor;
+            setReticleColor(newColor);
+          }
         } catch {
           // Ignore canvas security errors
         }
