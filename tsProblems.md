@@ -2,9 +2,11 @@
 
 ## Summary
 
-This document contains the results of a comprehensive TypeScript project audit covering code duplication, architecture, performance, typing, data handling, async patterns, imports, and code smells.
+This document contains the results of a comprehensive TypeScript project audit covering code duplication, architecture, performance, typing, data handling, async patterns, imports, code smells, and **clean code analysis**.
 
 **Финальный статус:** ✅ Основные задачи выполнены. Некоторые опциональные рефакторинги (useCaptureController, incremental cache) были созданы, но откачены из-за проблем с lifecycle/consistency.
+
+**Clean Code Audit (Раздел 9):** ✅ Код чист. Не обнаружено: неиспользуемых импортов, мёртвого кода, избыточных типов, console.log вне логгера, @ts-ignore, as any.
 
 ---
 
@@ -448,6 +450,126 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 16. ✅ **Memoized Callbacks** - handleClick обёрнут в useCallback в virtualized-gallery
 17. ✅ **Modular Gallery Components** - virtualized-gallery разбит на отдельные модули
 18. ✅ **Architecture Documentation** - Документация паттернов в ARCHITECTURE.md
+
+---
+
+## 9. Анализ чистоты кода (Clean Code Audit)
+
+### 9.1 Неиспользуемые импорты
+**Статус:** ✅ НЕ ОБНАРУЖЕНО
+
+ESLint с плагином `unused-imports` не выявил неиспользуемых импортов в проекте.
+
+```
+✅ Нет задач - все импорты используются
+```
+
+### 9.2 Неиспользуемые переменные и константы
+**Статус:** ✅ НЕ ОБНАРУЖЕНО
+
+TypeScript и ESLint проверки не выявили неиспользуемых переменных.
+
+**Паттерн с underscore для игнорирования:**
+Обнаружено использование паттерна деструктуризации с underscore для намеренного игнорирования значений:
+- `client/src/lib/db/photo-service.ts:132` - `const { imageData: _, thumbnailData: __, ...summary } = photo;`
+- `client/src/lib/db/photo-service.ts:159` - `const { imageData: _, ...withThumbnail } = photo;`
+- `client/src/lib/db/photo-service.ts:225` - `const { imageData: _, ...withThumbnail } = photo;`
+
+Это корректный паттерн TypeScript для исключения полей при деструктуризации.
+
+```
+✅ Нет задач - паттерн с underscore используется корректно
+```
+
+### 9.3 Мёртвый код
+**Статус:** ✅ НЕ ОБНАРУЖЕНО
+
+- Недостижимый код после return/throw/break - не найден
+- Неиспользуемые функции и методы - не найдены
+- Закомментированный код - не найден (только документационные комментарии)
+
+```
+✅ Нет задач - мёртвый код отсутствует
+```
+
+### 9.4 Избыточный код
+**Статус:** ✅ НЕ ОБНАРУЖЕНО
+
+- Пустые интерфейсы и типы - не найдены
+- Дублирующиеся определения типов - не найдены
+- Избыточные условия (if true/false) - не найдены
+- Ненужные else после return - не найдены
+
+```
+✅ Нет задач - избыточный код отсутствует
+```
+
+### 9.5 Неиспользуемые типы и интерфейсы
+**Статус:** ✅ НЕ ОБНАРУЖЕНО
+
+Все экспортируемые и неэкспортируемые типы используются в коде.
+
+```
+✅ Нет задач - все типы используются
+```
+
+### 9.6 Консольные логи и отладочный код
+**Статус:** ✅ КОРРЕКТНО
+
+**Обнаружено:**
+- `client/src/lib/logger.ts:36-77` - console.debug/info/warn/error - **НАМЕРЕННО** (централизованный логгер)
+- `server/index.ts:54` - console.log - **НАМЕРЕННО** (серверное логирование запросов)
+- `client/src/docs/ARCHITECTURE.md:84` - console.log - **ДОКУМЕНТАЦИЯ** (пример кода)
+
+Все console.* вызовы либо являются частью централизованной системы логирования, либо используются для серверного логирования. Debugger statements не обнаружены.
+
+```
+✅ Нет задач - логирование централизовано и корректно
+```
+
+### 9.7 Избыточные type assertions
+**Статус:** ✅ НЕ ОБНАРУЖЕНО
+
+- `as any` - не найден ни в одном файле
+- `@ts-ignore` / `@ts-nocheck` / `@ts-expect-error` - не найдены
+- Ненужные type assertions - не обнаружены
+
+```
+✅ Нет задач - type assertions используются минимально и корректно
+```
+
+---
+
+## Чек-лист задач для Clean Code Audit
+
+### Проверенные критерии
+
+| Критерий | Статус | Проблемы |
+|----------|--------|----------|
+| Неиспользуемые импорты | ✅ Чисто | 0 |
+| Неиспользуемые переменные | ✅ Чисто | 0 |
+| Мёртвый код | ✅ Чисто | 0 |
+| Пустые интерфейсы/типы | ✅ Чисто | 0 |
+| Дублирующиеся типы | ✅ Чисто | 0 |
+| Неиспользуемые типы | ✅ Чисто | 0 |
+| Console.log (кроме логгера) | ✅ Чисто | 0 |
+| Debugger statements | ✅ Чисто | 0 |
+| @ts-ignore/@ts-nocheck | ✅ Чисто | 0 |
+| as any | ✅ Чисто | 0 |
+
+### Рекомендации (опционально)
+
+```
+☐ [REC-1] Рассмотреть миграцию server/index.ts console.log на общий logger
+    Файл: server/index.ts:54
+    Причина: Унификация логирования между клиентом и сервером
+    Приоритет: Низкий
+
+☐ [REC-2] Добавить ESLint правило no-console для автоматического контроля
+    Файл: eslint.config.js
+    Причина: Предотвращение случайного добавления console.log
+    Приоритет: Низкий
+```
 
 ---
 
