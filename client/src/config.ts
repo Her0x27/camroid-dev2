@@ -8,7 +8,7 @@ export const CONFIG = {
   // === PRIVACY MODE ===
   // Set to true to hide the camera and show only the 2048 game for all users
   // Set to false to allow users to access the camera (privacy mode becomes optional)
-  PRIVACY_MODE: true,
+  PRIVACY_MODE: false,
 
   // === UNLOCK CONFIGURATION ===
   // Type of gesture required to unlock the camera when privacy mode is active
