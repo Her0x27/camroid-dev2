@@ -4,6 +4,8 @@
 
 This document contains the results of a comprehensive TypeScript project audit covering code duplication, architecture, performance, typing, data handling, async patterns, imports, and code smells.
 
+**Финальный статус:** ✅ Основные задачи выполнены. Некоторые опциональные рефакторинги (useCaptureController, incremental cache) были созданы, но откачены из-за проблем с lifecycle/consistency.
+
 ---
 
 ## 1. Дублирование и повторы
@@ -61,7 +63,7 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 ```
 ✅ [ОПЦИОНАЛЬНО] Создать общий overlayStyles constant для повторяющихся классов анимаций
-□ [ОПЦИОНАЛЬНО] Документировать паттерн в README для onboarding новых разработчиков
+✅ [ОПЦИОНАЛЬНО] Документировать паттерн в ARCHITECTURE.md для onboarding новых разработчиков
 ```
 
 ### 1.3 Структура Settings Sections
@@ -102,11 +104,11 @@ This document contains the results of a comprehensive TypeScript project audit c
 ### 2.1 Слишком большие компоненты страниц
 **Местоположение:** 
 - `client/src/pages/gallery/index.tsx` (~~636 строк~~ → 643 строки после рефакторинга)
-- `client/src/pages/camera/index.tsx` (~~401 строка~~ → 407 строк)
+- `client/src/pages/camera/index.tsx` (~~401 строка~~ → ~350 строк после рефакторинга)
 
 **Проблема:** ~~Компоненты страниц содержат слишком много логики и состояний~~
 
-**Статус:** ✅ Значительно улучшено
+**Статус:** ✅ ЧАСТИЧНО ВЫПОЛНЕНО
 
 GalleryPage теперь использует хуки:
 - `useGallerySelection` - управление выделением
@@ -116,18 +118,18 @@ GalleryPage теперь использует хуки:
 - `useUploadHandler` - логика загрузки в облако
 - `useLinksDialog` - управление диалогом ссылок
 
+CameraPage теперь использует:
+- `useColorSampling` - автоматическое определение контрастного цвета прицела
+- Inline state management with useState + useMemo (captureConfig)
+
 ```
 ✅ Извлечь useUploadHandler из GalleryPage
 ✅ Извлечь useGalleryDialogs для управления состоянием диалогов (реализовано как useLinksDialog + useGallerySelection)
 ✅ Извлечь ColorSamplingProvider или хук из CameraPage (реализовано как useColorSampling)
-□ Создать CaptureController component для логики съёмки (ОПЦИОНАЛЬНО)
+⚠️ [EXPERIMENTAL] useCaptureController с useReducer - создан но откачен из-за lifecycle issues
 ```
 
-**Дополнительно:** Создан `client/src/hooks/use-color-sampling.ts`:
-- Хук для автоматического определения контрастного цвета прицела
-- Принимает videoRef, enabled, autoColor, reticleSize, colorScheme
-- Использует canvas для семплирования цвета из центра кадра
-- Возвращает контрастный цвет для прицела
+**Примечание:** useCaptureController был создан и протестирован, но откатлен из-за проблем с lifecycle management (CAPTURE_FAILED не очищал isProcessing, abort handling не очищал состояние). Текущая inline реализация в camera/index.tsx работает стабильно.
 
 ### 2.2 Отсутствие слоя сервисов
 **Местоположение:** ~~`client/src/lib/db.ts` (705 строк)~~ → `client/src/lib/db/`
@@ -137,7 +139,7 @@ GalleryPage теперь использует хуки:
 Структура теперь:
 ```
 client/src/lib/db/
-├── db-core.ts        # Базовые операции IndexedDB, openDB, generateId
+├── db-core.ts        # Базовые операции IndexedDB, openDB, generateId, кеш с инвалидацией
 ├── photo-service.ts  # Операции с фотографиями
 ├── folder-service.ts # Операции с папками и статистикой
 ├── settings-service.ts # Операции с настройками
@@ -255,16 +257,22 @@ if (newColor !== previousColorRef.current) {
 ### 5.1 Потенциальная оптимизация фильтрации
 **Местоположение:** `client/src/lib/db/folder-service.ts` функция `getFolderStats`
 
-**Проблема:** Проход по всем записям для подсчёта статистики при каждом запросе (с TTL кешем 5 секунд).
+**Проблема:** Проход по всем записям для подсчёта статистики при каждом запросе (с TTL кешем).
 
 **Предложение:** Рассмотреть инкрементальное обновление статистики при мутациях.
 
-**Статус:** ✅ ЧАСТИЧНО ВЫПОЛНЕНО - TTL увеличен до 30 секунд
+**Статус:** ✅ ЧАСТИЧНО ВЫПОЛНЕНО
+
+Текущая реализация использует простую инвалидацию кеша:
+- `invalidateFolderCountsCache()` - сбрасывает кеш при savePhoto/deletePhoto
+- TTL кеша увеличен до 30 секунд
 
 ```
-□ [ОПЦИОНАЛЬНО] Реализовать инкрементальное обновление статистики папок
 ✅ [ОПЦИОНАЛЬНО] Увеличить TTL кеша если статистика редко меняется (5с → 30с)
+⚠️ [EXPERIMENTAL] Инкрементальное обновление - реализовано но откачено из-за конфликтов с invalidateFolderCountsCache
 ```
+
+**Примечание:** Инкрементальное обновление кеша было создано (incrementFolderCount, decrementFolderCount, updateFolderStatsOnAdd/Delete/Upload), но откачено из-за конфликтов: folder-service продолжал вызывать invalidateFolderCountsCache, что конфликтовало с инкрементальными обновлениями. Текущая простая инвалидация работает надёжно.
 
 ---
 
@@ -321,7 +329,7 @@ Lazy loading правильно реализован в `client/src/App.tsx`:
 - ~~`client/src/lib/db.ts` - 705 строк~~ → Разбит на модули в `client/src/lib/db/`
 - `client/src/pages/gallery/index.tsx` - 643 строки (логика вынесена в хуки)
 - ~~`client/src/components/virtualized-gallery.tsx` - 467 строк~~ → Разбит на модули в `client/src/components/virtualized-gallery/`
-- `client/src/pages/camera/index.tsx` - 407 строк
+- `client/src/pages/camera/index.tsx` - ~350 строк (логика color sampling вынесена в useColorSampling)
 
 Структура virtualized-gallery:
 ```
@@ -356,23 +364,19 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 ```
 
 ### 8.3 Большое количество зависимостей в useCallback
-**Местоположение:** `client/src/pages/camera/index.tsx` строка 350
+**Местоположение:** `client/src/pages/camera/index.tsx` строка 271
 
 **Проблема:** ~~handleCapture имеет много зависимостей в массиве зависимостей.~~
 
-**Статус:** ✅ ВЫПОЛНЕНО
+**Статус:** ✅ ЧАСТИЧНО ВЫПОЛНЕНО
 
-Создан `captureConfig` объект через `useMemo`:
-- Группирует настройки reticle, watermarkScale, soundEnabled
-- Группирует stabilization settings
-- Группирует enhancement settings
-- Группирует imgbb settings
-
-Зависимости handleCapture сокращены с 21 до 15.
+Текущая реализация:
+- `captureConfig` объект через `useMemo` группирует настройки
+- Inline state management работает стабильно
 
 ```
 ✅ Создать объект captureConfig для группировки связанных настроек
-□ [ОПЦИОНАЛЬНО] Рассмотреть использование useReducer для состояния съёмки
+⚠️ [EXPERIMENTAL] useReducer для состояния съёмки - создан но откачен (lifecycle issues)
 ```
 
 ### 8.4 Cleanup функции в useEffect
@@ -384,6 +388,7 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 - `use-stabilization.ts` - cancelAnimationFrame
 - `use-photo-navigator.ts` - AbortController abort
 - `use-gestures.ts` - clearLongPressTimer
+- `camera/index.tsx` - processingAbortRef.current?.abort()
 
 ---
 
@@ -416,6 +421,9 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 ✅ [OPT-3] Разбить virtualized-gallery.tsx на отдельные файлы
 ✅ [OPT-4] Создать overlayStyles constant для UI компонентов
 ✅ [OPT-5] Извлечь useColorSampling хук из CameraPage
+✅ [OPT-6] Документировать паттерны в ARCHITECTURE.md
+⚠️ [OPT-7] useCaptureController с useReducer - создан но откачен (lifecycle issues)
+⚠️ [OPT-8] Инкрементальное обновление статистики - создано но откачено (cache conflicts)
 ```
 
 ---
@@ -439,3 +447,17 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 15. ✅ **Grouped Dependencies** - captureConfig для группировки зависимостей handleCapture
 16. ✅ **Memoized Callbacks** - handleClick обёрнут в useCallback в virtualized-gallery
 17. ✅ **Modular Gallery Components** - virtualized-gallery разбит на отдельные модули
+18. ✅ **Architecture Documentation** - Документация паттернов в ARCHITECTURE.md
+
+---
+
+## Документация
+
+Архитектурные паттерны и конвенции документированы в `client/src/docs/ARCHITECTURE.md`:
+- UI Component Patterns (Radix/shadcn, overlayStyles, SettingRow/SettingSlider)
+- Custom Hooks Architecture (useTouchTracking, useColorSampling, Gallery hooks)
+- Database Layer (Service architecture, cache invalidation)
+- Constants (LONG_PRESS, CAMERA, GESTURE, TIMING)
+- Performance Patterns (Memoization, Parallel operations, Virtualization)
+- State Management (Settings Context, captureConfig memoization)
+- Code Organization (File size guidelines, Component structure)
