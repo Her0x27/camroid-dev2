@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useCamera } from "@/hooks/use-camera";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -6,6 +6,7 @@ import { useOrientation } from "@/hooks/use-orientation";
 import { useCaptureSound } from "@/hooks/use-capture-sound";
 import { useStabilization } from "@/hooks/use-stabilization";
 import { useColorSampling } from "@/hooks/use-color-sampling";
+import { useCaptureController } from "@/hooks/use-capture-controller";
 import { useSettings } from "@/lib/settings-context";
 import { usePrivacy } from "@/lib/privacy-context";
 import { getPhotoCounts, getLatestPhoto } from "@/lib/db";
@@ -31,11 +32,18 @@ export default function CameraPage() {
   const [cloudCount, setCloudCount] = useState(0);
   const [lastPhotoThumb, setLastPhotoThumb] = useState<string | null>(null);
   const [lastPhotoId, setLastPhotoId] = useState<string | null>(null);
-  const [isCapturing, setIsCapturing] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
-  const processingAbortRef = useRef<AbortController | null>(null);
+  
+  const {
+    isCapturing,
+    isProcessing,
+    startCapture,
+    captureSuccess,
+    captureFailed,
+    processingComplete,
+    getAbortSignal,
+  } = useCaptureController();
 
   const {
     videoRef,
@@ -104,12 +112,6 @@ export default function CameraPage() {
   useEffect(() => {
     startCamera();
   }, [startCamera]);
-
-  useEffect(() => {
-    return () => {
-      processingAbortRef.current?.abort();
-    };
-  }, []);
 
   const handleRequestPermissions = useCallback(async () => {
     if (settings.orientationEnabled && orientationSupported) {
@@ -189,20 +191,18 @@ export default function CameraPage() {
 
   const handleProcessingError = useCallback((error: Error) => {
     logger.error("Photo processing failed", error);
-  }, []);
+    captureFailed();
+  }, [captureFailed]);
 
-  const handleProcessingComplete = useCallback(() => {
-    setIsProcessing(false);
-  }, []);
+  const handleProcessingCompleteCallback = useCallback(() => {
+    processingComplete();
+  }, [processingComplete]);
 
   const handleCapture = useCallback(async () => {
     if (!isReady || isCapturing || accuracyBlocked) return;
 
-    processingAbortRef.current?.abort();
-    processingAbortRef.current = new AbortController();
-    const signal = processingAbortRef.current.signal;
-
-    setIsCapturing(true);
+    const signal = getAbortSignal();
+    startCapture();
     const timestamp = Date.now();
     const noteText = currentNote.trim();
 
@@ -234,8 +234,7 @@ export default function CameraPage() {
       }
 
       setLastPhotoThumb(result.thumbnailData);
-      setIsCapturing(false);
-      setIsProcessing(true);
+      captureSuccess();
 
       const photoData: PhotoData = {
         geoData: {
@@ -261,14 +260,14 @@ export default function CameraPage() {
         onPhotoSaved: handlePhotoSaved,
         onCloudUpload: handleCloudUpload,
         onError: handleProcessingError,
-        onComplete: handleProcessingComplete,
+        onComplete: handleProcessingCompleteCallback,
         signal,
       });
     } catch (error) {
       logger.error("Photo capture failed", error);
-      setIsCapturing(false);
+      captureFailed();
     }
-  }, [isReady, isCapturing, accuracyBlocked, capturePhoto, geoData, orientationData, currentNote, reticleColor, captureConfig, playCapture, waitForStability, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingComplete]);
+  }, [isReady, isCapturing, accuracyBlocked, capturePhoto, geoData, orientationData, currentNote, reticleColor, captureConfig, playCapture, waitForStability, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingCompleteCallback, getAbortSignal, startCapture, captureSuccess, captureFailed]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

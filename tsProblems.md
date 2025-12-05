@@ -122,16 +122,22 @@ GalleryPage теперь использует хуки:
 
 CameraPage теперь использует:
 - `useColorSampling` - автоматическое определение контрастного цвета прицела
-- Inline state management with useState + useMemo (captureConfig)
+- `useCaptureController` - управление состоянием съёмки через useReducer
 
 ```
 ✅ Извлечь useUploadHandler из GalleryPage
 ✅ Извлечь useGalleryDialogs для управления состоянием диалогов (реализовано как useLinksDialog + useGallerySelection)
 ✅ Извлечь ColorSamplingProvider или хук из CameraPage (реализовано как useColorSampling)
-⚠️ [EXPERIMENTAL] useCaptureController с useReducer - создан но откачен из-за lifecycle issues
+✅ useCaptureController с useReducer - реализован с корректной обработкой lifecycle
 ```
 
-**Примечание:** useCaptureController был создан и протестирован, но откатлен из-за проблем с lifecycle management (CAPTURE_FAILED не очищал isProcessing, abort handling не очищал состояние). Текущая inline реализация в camera/index.tsx работает стабильно.
+**Реализация useCaptureController:**
+- `CAPTURE_START` → `{isCapturing: true, isProcessing: false}`
+- `CAPTURE_SUCCESS` → `{isCapturing: false, isProcessing: true}`
+- `CAPTURE_FAILED` → `{isCapturing: false, isProcessing: false}` - корректно очищает оба состояния
+- `PROCESSING_COMPLETE` → `{isCapturing: false, isProcessing: false}`
+- `ABORT` → `{isCapturing: false, isProcessing: false}` - корректно очищает состояние при отмене
+- Автоматический cleanup AbortController в useEffect
 
 ### 2.2 Отсутствие слоя сервисов
 **Местоположение:** ~~`client/src/lib/db.ts` (705 строк)~~ → `client/src/lib/db/`
@@ -263,18 +269,31 @@ if (newColor !== previousColorRef.current) {
 
 **Предложение:** Рассмотреть инкрементальное обновление статистики при мутациях.
 
-**Статус:** ✅ ЧАСТИЧНО ВЫПОЛНЕНО
+**Статус:** ✅ ВЫПОЛНЕНО
 
-Текущая реализация использует простую инвалидацию кеша:
-- `invalidateFolderCountsCache()` - сбрасывает кеш при savePhoto/deletePhoto
-- TTL кеша увеличен до 30 секунд
+Текущая реализация использует инкрементальное обновление кеша:
+- `updateCacheOnPhotoAdd()` - обновляет кеш при добавлении фото
+- `updateCacheOnPhotoDelete()` - обновляет кеш при удалении фото
+- `updateCacheOnPhotoUpload()` - обновляет uploadedCount при загрузке в облако
+- `invalidateFolderCountsCache()` - используется только в clearAllPhotos для полного сброса
+- TTL кеша 30 секунд
 
 ```
 ✅ [ОПЦИОНАЛЬНО] Увеличить TTL кеша если статистика редко меняется (5с → 30с)
-⚠️ [EXPERIMENTAL] Инкрементальное обновление - реализовано но откачено из-за конфликтов с invalidateFolderCountsCache
+✅ Инкрементальное обновление кеша - реализовано корректно
 ```
 
-**Примечание:** Инкрементальное обновление кеша было создано (incrementFolderCount, decrementFolderCount, updateFolderStatsOnAdd/Delete/Upload), но откачено из-за конфликтов: folder-service продолжал вызывать invalidateFolderCountsCache, что конфликтовало с инкрементальными обновлениями. Текущая простая инвалидация работает надёжно.
+**Реализация инкрементального кеша:**
+- `savePhoto()` → вызывает `updateCacheOnPhotoAdd(folder, thumbnailData, timestamp, isUploaded)`
+- `deletePhoto()` → вызывает `updateCacheOnPhotoDelete(folder, wasUploaded, wasLatestInFolder)` с проверкой latestTimestamp
+- `updatePhoto()` → вызывает `updateCacheOnFolderChange()` при смене папки, или `updateCacheOnPhotoUpload(folder)` при новой загрузке
+- `clearAllPhotos()` → вызывает `invalidateFolderCountsCache()` для полного сброса
+
+**Гарантии корректности:**
+- Иммутабельность: все функции создают новые Map/массивы перед мутацией
+- Смена папки: полная инвалидация кеша для корректного пересчёта
+- Удаление последнего фото папки: инвалидация folderStatsCache для пересчёта latestThumb
+- Защита от двойного increment: updatePhoto проверяет `!wasUploaded && isNowUploaded`
 
 ---
 
@@ -378,7 +397,7 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 
 ```
 ✅ Создать объект captureConfig для группировки связанных настроек
-⚠️ [EXPERIMENTAL] useReducer для состояния съёмки - создан но откачен (lifecycle issues)
+✅ useCaptureController с useReducer - реализован с корректной обработкой lifecycle
 ```
 
 ### 8.4 Cleanup функции в useEffect
@@ -390,7 +409,7 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 - `use-stabilization.ts` - cancelAnimationFrame
 - `use-photo-navigator.ts` - AbortController abort
 - `use-gestures.ts` - clearLongPressTimer
-- `camera/index.tsx` - processingAbortRef.current?.abort()
+- `use-capture-controller.ts` - AbortController abort (автоматический cleanup)
 
 ---
 
@@ -424,8 +443,8 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 ✅ [OPT-4] Создать overlayStyles constant для UI компонентов
 ✅ [OPT-5] Извлечь useColorSampling хук из CameraPage
 ✅ [OPT-6] Документировать паттерны в ARCHITECTURE.md
-⚠️ [OPT-7] useCaptureController с useReducer - создан но откачен (lifecycle issues)
-⚠️ [OPT-8] Инкрементальное обновление статистики - создано но откачено (cache conflicts)
+✅ [OPT-7] useCaptureController с useReducer - реализован с корректной обработкой lifecycle
+✅ [OPT-8] Инкрементальное обновление статистики - реализовано корректно
 ```
 
 ---
@@ -450,6 +469,8 @@ const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
 16. ✅ **Memoized Callbacks** - handleClick обёрнут в useCallback в virtualized-gallery
 17. ✅ **Modular Gallery Components** - virtualized-gallery разбит на отдельные модули
 18. ✅ **Architecture Documentation** - Документация паттернов в ARCHITECTURE.md
+19. ✅ **Capture State Machine** - useCaptureController с useReducer для предсказуемого управления состоянием съёмки
+20. ✅ **Incremental Cache** - Инкрементальное обновление кеша статистики папок без полной инвалидации
 
 ---
 

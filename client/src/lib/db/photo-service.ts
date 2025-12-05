@@ -1,5 +1,15 @@
 import type { Photo, InsertPhoto, PhotoSummary, PhotoWithThumbnail } from "@shared/schema";
-import { openDB, generateId, PHOTOS_STORE, invalidateFolderCountsCache } from "./db-core";
+import { 
+  openDB, 
+  generateId, 
+  PHOTOS_STORE, 
+  invalidateFolderCountsCache,
+  updateCacheOnPhotoAdd,
+  updateCacheOnPhotoDelete,
+  updateCacheOnPhotoUpload,
+  updateCacheOnFolderChange,
+  getFolderStatsCache,
+} from "./db-core";
 
 export interface PaginatedPhotosOptions {
   sortOrder: "newest" | "oldest";
@@ -28,7 +38,12 @@ export async function savePhoto(photo: InsertPhoto): Promise<Photo> {
     const request = store.add(fullPhoto);
 
     request.onsuccess = () => {
-      invalidateFolderCountsCache();
+      updateCacheOnPhotoAdd(
+        fullPhoto.folder || null,
+        fullPhoto.thumbnailData,
+        fullPhoto.metadata.timestamp,
+        !!fullPhoto.cloud?.url
+      );
       resolve(fullPhoto);
     };
     request.onerror = () => reject(request.error);
@@ -320,20 +335,48 @@ export async function updatePhoto(id: string, updates: Partial<Photo>): Promise<
     throw new Error(`Photo not found: ${id}`);
   }
 
+  const oldFolder = existing.folder || null;
+  const wasUploaded = !!existing.cloud?.url;
   const updated = { ...existing, ...updates };
+  const newFolder = updated.folder || null;
+  const isNowUploaded = !!updated.cloud?.url;
+  const folderChanged = oldFolder !== newFolder;
 
   return new Promise((resolve, reject) => {
     const tx = db.transaction(PHOTOS_STORE, "readwrite");
     const store = tx.objectStore(PHOTOS_STORE);
     const request = store.put(updated);
 
-    request.onsuccess = () => resolve(updated);
+    request.onsuccess = () => {
+      if (folderChanged) {
+        updateCacheOnFolderChange();
+      } else if (!wasUploaded && isNowUploaded) {
+        updateCacheOnPhotoUpload(newFolder);
+      }
+      resolve(updated);
+    };
     request.onerror = () => reject(request.error);
   });
 }
 
 export async function deletePhoto(id: string): Promise<boolean> {
   const db = await openDB();
+  const photo = await getPhoto(id);
+  
+  if (!photo) {
+    return false;
+  }
+
+  const folder = photo.folder || null;
+  const statsCache = getFolderStatsCache();
+  let wasLatestInFolder = false;
+  
+  if (statsCache) {
+    const folderStats = statsCache.stats.find(s => s.folder === folder);
+    if (folderStats && folderStats.latestTimestamp === photo.metadata.timestamp) {
+      wasLatestInFolder = true;
+    }
+  }
 
   return new Promise((resolve, reject) => {
     const tx = db.transaction(PHOTOS_STORE, "readwrite");
@@ -341,7 +384,11 @@ export async function deletePhoto(id: string): Promise<boolean> {
     const request = store.delete(id);
 
     request.onsuccess = () => {
-      invalidateFolderCountsCache();
+      updateCacheOnPhotoDelete(
+        folder,
+        !!photo.cloud?.url,
+        wasLatestInFolder
+      );
       resolve(true);
     };
     request.onerror = () => reject(request.error);
