@@ -235,10 +235,11 @@ export default function PhotoDetailPage() {
         variant="ghost"
         size="icon"
         onClick={handleBack}
-        className="absolute top-4 right-4 w-10 h-10 bg-black/40 text-white hover:bg-black/60 z-50 safe-top"
+        className="absolute top-4 right-4 w-12 h-12 bg-black/60 text-white hover:bg-black/80 z-50 rounded-full border border-white/30"
+        style={{ marginTop: 'env(safe-area-inset-top, 0px)' }}
         data-testid="button-close-viewer"
       >
-        <X className="w-6 h-6" />
+        <X className="w-7 h-7" />
       </Button>
 
       <img
