@@ -55,6 +55,12 @@ Each photo includes GPS coordinates, device orientation, timestamp, optional use
 
 Six customizable reticle types (None, Crosshair, Grid, Rangefinder, Tactical, Mil-Dot) with adjustable opacity, color, and metadata overlay visibility. Settings are persisted in IndexedDB.
 
+**Tap-to-Position Feature:**
+- When enabled, long-press (500ms) on the camera viewfinder positions the reticle at that location AND simultaneously captures a photo
+- The reticle position is tracked as percentage coordinates (0-100) for consistent positioning across different screen sizes
+- The captured photo includes the reticle drawn at the selected position
+- Can be toggled on/off in Settings → Crosshair → "Long press to position"
+
 ### State Management
 
 - **Settings Context**: Manages global settings, reticle configuration, GPS/orientation preferences, camera facing, and audio feedback.
