@@ -108,7 +108,7 @@ export const settingsSchema = z.object({
   orientationEnabled: z.boolean().default(true),
   autoSaveLocation: z.boolean().default(true),
   cameraFacing: z.enum(["user", "environment"]).default("environment"),
-  soundEnabled: z.boolean().default(true),
+  soundEnabled: z.boolean().default(false),
   accuracyLimit: z.number().min(5).max(100).default(20), // GPS accuracy limit in meters
   watermarkScale: z.number().min(50).max(150).default(100), // Watermark size as percentage
   showLevelIndicator: z.boolean().default(false), // Show geometric level indicator
@@ -148,7 +148,7 @@ export const defaultSettings: Settings = {
   orientationEnabled: true,
   autoSaveLocation: true,
   cameraFacing: "environment",
-  soundEnabled: true,
+  soundEnabled: false,
   accuracyLimit: 20,
   watermarkScale: 100,
   showLevelIndicator: false,
