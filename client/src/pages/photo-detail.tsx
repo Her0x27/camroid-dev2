@@ -63,6 +63,10 @@ export default function PhotoDetailPage() {
     navigate("/gallery");
   }, [navigate]);
 
+  const handleCloseGallery = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
@@ -329,9 +333,9 @@ export default function PhotoDetailPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleBack}
+              onClick={handleCloseGallery}
               className="text-white hover:bg-white/20"
-              data-testid="button-close-viewer"
+              data-testid="button-close-gallery"
             >
               <X className="w-5 h-5" />
             </Button>
