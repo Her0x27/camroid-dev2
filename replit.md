@@ -118,3 +118,16 @@ The application includes a privacy/masking feature that displays a 2048 game ins
 - `useColorSampling` returns a synchronously computed color: `autoColor ? sampledColor : defaultColor`
 - This eliminates flash when toggling autoColor setting
 - Color is derived from colorScheme palette when autoColor is disabled
+
+### Object-Cover Coordinate Transformation (December 2025)
+The camera preview uses CSS `object-cover` which crops the video to fill the container. This created a mismatch where reticle positions on screen didn't match positions in saved photos.
+
+**Solution:**
+- **convertScreenToVideoCoordinates** (`client/src/lib/canvas-utils.ts`): Converts screen percentage coordinates (relative to visible container area) to video percentage coordinates (relative to full video frame). Used when capturing reticle position from long-press or adjustment drag.
+- **convertVideoToScreenCoordinates** (`client/src/lib/canvas-utils.ts`): Inverse transformation for displaying stored video-space positions correctly on screen.
+
+**Implementation:**
+- Long-press capture converts screen position → video position before saving
+- Adjustment drag converts screen position → video position for storage
+- Display position converts video position → screen position for rendering
+- `tempPosition` (during long-press indicator) stays in screen-space since it's purely visual
