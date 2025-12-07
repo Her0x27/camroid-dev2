@@ -281,3 +281,97 @@ export function sampleContrastingColor(
   });
   return result?.color ?? CAMERA.DEFAULT_RETICLE_COLOR;
 }
+
+export interface ObjectCoverTransformParams {
+  containerWidth: number;
+  containerHeight: number;
+  videoWidth: number;
+  videoHeight: number;
+}
+
+export function convertScreenToVideoCoordinates(
+  screenPosition: ReticlePosition,
+  params: ObjectCoverTransformParams
+): ReticlePosition {
+  const { containerWidth, containerHeight, videoWidth, videoHeight } = params;
+  
+  if (containerWidth === 0 || containerHeight === 0 || videoWidth === 0 || videoHeight === 0) {
+    return screenPosition;
+  }
+  
+  const containerAspect = containerWidth / containerHeight;
+  const videoAspect = videoWidth / videoHeight;
+  
+  let visibleVideoWidth: number;
+  let visibleVideoHeight: number;
+  let offsetX: number;
+  let offsetY: number;
+  
+  if (videoAspect > containerAspect) {
+    visibleVideoHeight = videoHeight;
+    visibleVideoWidth = videoHeight * containerAspect;
+    offsetX = (videoWidth - visibleVideoWidth) / 2;
+    offsetY = 0;
+  } else {
+    visibleVideoWidth = videoWidth;
+    visibleVideoHeight = videoWidth / containerAspect;
+    offsetX = 0;
+    offsetY = (videoHeight - visibleVideoHeight) / 2;
+  }
+  
+  const videoX = offsetX + (screenPosition.x / 100) * visibleVideoWidth;
+  const videoY = offsetY + (screenPosition.y / 100) * visibleVideoHeight;
+  
+  const videoPercentX = (videoX / videoWidth) * 100;
+  const videoPercentY = (videoY / videoHeight) * 100;
+  
+  return {
+    x: Math.max(0, Math.min(100, videoPercentX)),
+    y: Math.max(0, Math.min(100, videoPercentY)),
+  };
+}
+
+export function convertVideoToScreenCoordinates(
+  videoPosition: ReticlePosition,
+  params: ObjectCoverTransformParams
+): ReticlePosition {
+  const { containerWidth, containerHeight, videoWidth, videoHeight } = params;
+  
+  if (containerWidth === 0 || containerHeight === 0 || videoWidth === 0 || videoHeight === 0) {
+    return videoPosition;
+  }
+  
+  const containerAspect = containerWidth / containerHeight;
+  const videoAspect = videoWidth / videoHeight;
+  
+  let visibleVideoWidth: number;
+  let visibleVideoHeight: number;
+  let offsetX: number;
+  let offsetY: number;
+  
+  if (videoAspect > containerAspect) {
+    visibleVideoHeight = videoHeight;
+    visibleVideoWidth = videoHeight * containerAspect;
+    offsetX = (videoWidth - visibleVideoWidth) / 2;
+    offsetY = 0;
+  } else {
+    visibleVideoWidth = videoWidth;
+    visibleVideoHeight = videoWidth / containerAspect;
+    offsetX = 0;
+    offsetY = (videoHeight - visibleVideoHeight) / 2;
+  }
+  
+  const videoX = (videoPosition.x / 100) * videoWidth;
+  const videoY = (videoPosition.y / 100) * videoHeight;
+  
+  const screenX = videoX - offsetX;
+  const screenY = videoY - offsetY;
+  
+  const screenPercentX = (screenX / visibleVideoWidth) * 100;
+  const screenPercentY = (screenY / visibleVideoHeight) * 100;
+  
+  return {
+    x: Math.max(0, Math.min(100, screenPercentX)),
+    y: Math.max(0, Math.min(100, screenPercentY)),
+  };
+}

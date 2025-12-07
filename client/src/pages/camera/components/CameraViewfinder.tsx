@@ -5,6 +5,7 @@ import { Reticle } from "@/components/reticles";
 import { LevelIndicator } from "@/components/level-indicator";
 import { useI18n } from "@/lib/i18n";
 import { useLongPress, type LongPressPositionPercent } from "@/hooks/use-long-press";
+import { convertScreenToVideoCoordinates, convertVideoToScreenCoordinates } from "@/lib/canvas-utils";
 import type { ReticleConfig, ReticlePosition } from "@shared/schema";
 
 interface LongPressIndicatorProps {
@@ -153,12 +154,28 @@ export const CameraViewfinder = memo(function CameraViewfinder({
 
   const handleLongPressWithPosition = useCallback(
     (pos: LongPressPositionPercent) => {
-      const position: ReticlePosition = { x: pos.percentX, y: pos.percentY };
+      const screenPosition: ReticlePosition = { x: pos.percentX, y: pos.percentY };
       setIsLongPressing(false);
-      onLongPressCapture?.(position);
+      
+      const container = containerRef.current;
+      const video = videoRef.current;
+      
+      if (container && video && video.videoWidth > 0 && video.videoHeight > 0) {
+        const rect = container.getBoundingClientRect();
+        const videoPosition = convertScreenToVideoCoordinates(screenPosition, {
+          containerWidth: rect.width,
+          containerHeight: rect.height,
+          videoWidth: video.videoWidth,
+          videoHeight: video.videoHeight,
+        });
+        onLongPressCapture?.(videoPosition);
+      } else {
+        onLongPressCapture?.(screenPosition);
+      }
+      
       setTempPosition(null);
     },
-    [onLongPressCapture]
+    [onLongPressCapture, videoRef]
   );
 
   const longPressHandlers = useLongPress({
@@ -177,7 +194,9 @@ export const CameraViewfinder = memo(function CameraViewfinder({
   const handleAdjustmentDrag = useCallback((e: React.TouchEvent | React.MouseEvent) => {
     if (!adjustmentMode || !isDragging) return;
     
-    const rect = containerRef.current?.getBoundingClientRect();
+    const container = containerRef.current;
+    const video = videoRef.current;
+    const rect = container?.getBoundingClientRect();
     if (!rect) return;
     
     let clientX: number, clientY: number;
@@ -195,8 +214,20 @@ export const CameraViewfinder = memo(function CameraViewfinder({
     const percentX = Math.max(0, Math.min(100, (x / rect.width) * 100));
     const percentY = Math.max(0, Math.min(100, (y / rect.height) * 100));
     
-    onAdjustmentPositionChange?.({ x: percentX, y: percentY });
-  }, [adjustmentMode, isDragging, onAdjustmentPositionChange]);
+    const screenPosition: ReticlePosition = { x: percentX, y: percentY };
+    
+    if (video && video.videoWidth > 0 && video.videoHeight > 0) {
+      const videoPosition = convertScreenToVideoCoordinates(screenPosition, {
+        containerWidth: rect.width,
+        containerHeight: rect.height,
+        videoWidth: video.videoWidth,
+        videoHeight: video.videoHeight,
+      });
+      onAdjustmentPositionChange?.(videoPosition);
+    } else {
+      onAdjustmentPositionChange?.(screenPosition);
+    }
+  }, [adjustmentMode, isDragging, onAdjustmentPositionChange, videoRef]);
 
   const handleAdjustmentDragEnd = useCallback(() => {
     setIsDragging(false);
@@ -255,7 +286,42 @@ export const CameraViewfinder = memo(function CameraViewfinder({
     [reticleConfig.tapToPosition, isReady, longPressHandlers, isLongPressing]
   );
 
-  const displayPosition = adjustmentMode ? adjustmentPosition : (tempPosition || reticlePosition || null);
+  const displayPosition = (() => {
+    const container = containerRef.current;
+    const video = videoRef.current;
+    
+    if (adjustmentMode && adjustmentPosition) {
+      if (container && video && video.videoWidth > 0 && video.videoHeight > 0) {
+        const rect = container.getBoundingClientRect();
+        return convertVideoToScreenCoordinates(adjustmentPosition, {
+          containerWidth: rect.width,
+          containerHeight: rect.height,
+          videoWidth: video.videoWidth,
+          videoHeight: video.videoHeight,
+        });
+      }
+      return adjustmentPosition;
+    }
+    
+    if (tempPosition) {
+      return tempPosition;
+    }
+    
+    if (reticlePosition) {
+      if (container && video && video.videoWidth > 0 && video.videoHeight > 0) {
+        const rect = container.getBoundingClientRect();
+        return convertVideoToScreenCoordinates(reticlePosition, {
+          containerWidth: rect.width,
+          containerHeight: rect.height,
+          videoWidth: video.videoWidth,
+          videoHeight: video.videoHeight,
+        });
+      }
+      return reticlePosition;
+    }
+    
+    return null;
+  })();
 
   return (
     <div 
