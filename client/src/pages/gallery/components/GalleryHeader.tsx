@@ -356,6 +356,16 @@ export const GalleryHeader = memo(function GalleryHeader({
               <Trash2 className="w-5 h-5" />
             </Button>
           )}
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBackToCamera}
+            className="ml-1"
+            data-testid="button-close-gallery"
+          >
+            <X className="w-5 h-5" />
+          </Button>
         </div>
       </div>
     </header>
