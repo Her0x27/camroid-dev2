@@ -41,6 +41,13 @@ export default [
         },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+    },
+  },
+  {
+    files: ["**/logger.ts", "**/logger.tsx"],
+    rules: {
+      "no-console": "off",
     },
   },
 ];
