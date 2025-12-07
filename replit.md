@@ -56,9 +56,15 @@ Each photo includes GPS coordinates, device orientation, timestamp, optional use
 Six customizable reticle types (None, Crosshair, Grid, Rangefinder, Tactical, Mil-Dot) with adjustable opacity, color, and metadata overlay visibility. Settings are persisted in IndexedDB.
 
 **Tap-to-Position Feature:**
-- When enabled, long-press (500ms) on the camera viewfinder positions the reticle at that location AND simultaneously captures a photo
+- When enabled, long-press on the camera viewfinder positions the reticle at that location AND simultaneously captures a photo
+- Long press delay is configurable (300-1500ms) in Settings → Crosshair → "Long press delay"
+- Visual progress indicator (animated ring) shows hold duration at touch position
+- Movement threshold of 10px cancels the long press and hides the indicator
 - The reticle position is tracked as percentage coordinates (0-100) for consistent positioning across different screen sizes
 - The captured photo includes the reticle drawn at the selected position
+- When autoColor is enabled, reticle color is sampled from pixels at the touch position
+- When autoColor is disabled, the user-selected reticle color is used
+- Optional manual adjustment mode allows repositioning the reticle on a frozen frame before capture
 - Can be toggled on/off in Settings → Crosshair → "Long press to position"
 
 ### State Management
