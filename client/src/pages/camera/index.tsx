@@ -20,6 +20,8 @@ import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { CameraControls, PhotoNoteDialog, CameraViewfinder } from "./components";
+import { getContrastingColor } from "@/components/reticles";
+import { CAMERA } from "@/lib/constants";
 import type { ReticlePosition } from "@shared/schema";
 
 interface AdjustmentMode {
@@ -46,7 +48,12 @@ export default function CameraPage() {
     frozenFrame: null,
     position: { x: 50, y: 50 },
   });
+  const [adjustmentReticleColor, setAdjustmentReticleColor] = useState<string>(CAMERA.DEFAULT_RETICLE_COLOR);
   const frozenCanvasRef = useRef<HTMLCanvasElement>(null);
+  const frozenImageRef = useRef<HTMLImageElement | null>(null);
+  const latestAdjustmentPositionRef = useRef<ReticlePosition>({ x: 50, y: 50 });
+  const latestReticleSizeRef = useRef<number>(CAMERA.DEFAULT_RETICLE_SIZE);
+  const pendingSampleRef = useRef<boolean>(false);
   
   const {
     isCapturing,
@@ -212,7 +219,7 @@ export default function CameraPage() {
     processingComplete();
   }, [processingComplete]);
 
-  const handleCaptureWithPosition = useCallback(async (position?: ReticlePosition) => {
+  const handleCaptureWithPosition = useCallback(async (position?: ReticlePosition, customReticleColor?: string) => {
     if (!isReady || isCapturing || accuracyBlocked) return;
 
     const signal = getAbortSignal();
@@ -239,7 +246,7 @@ export default function CameraPage() {
         note: noteText || undefined,
         timestamp,
         reticleConfig: captureConfig.reticle,
-        reticleColor: reticleColor,
+        reticleColor: customReticleColor || reticleColor,
         watermarkScale: captureConfig.watermarkScale,
         reticlePosition: position,
       });
@@ -302,6 +309,91 @@ export default function CameraPage() {
     return canvas.toDataURL('image/jpeg', 0.9);
   }, [videoRef]);
 
+  const sampleColorFromImage = useCallback((img: HTMLImageElement) => {
+    const position = latestAdjustmentPositionRef.current;
+    const reticleSize = latestReticleSizeRef.current;
+    
+    const canvas = document.createElement('canvas');
+    const minDimension = Math.min(img.width, img.height);
+    const sizePercent = reticleSize || CAMERA.DEFAULT_RETICLE_SIZE;
+    const reticleSizePx = Math.ceil(minDimension * (sizePercent / 100));
+    const sampleSize = Math.min(reticleSizePx, CAMERA.COLOR_SAMPLE_MAX_SIZE);
+    
+    canvas.width = sampleSize;
+    canvas.height = sampleSize;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+    
+    const sourceX = (img.width * position.x / 100) - (reticleSizePx / 2);
+    const sourceY = (img.height * position.y / 100) - (reticleSizePx / 2);
+    
+    try {
+      ctx.drawImage(
+        img,
+        sourceX, sourceY, reticleSizePx, reticleSizePx,
+        0, 0, sampleSize, sampleSize
+      );
+      const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize);
+      const data = imageData.data;
+      
+      let r = 0, g = 0, b = 0;
+      const pixelCount = data.length / 4;
+      
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+      }
+      
+      r = Math.round(r / pixelCount);
+      g = Math.round(g / pixelCount);
+      b = Math.round(b / pixelCount);
+      
+      const scheme = settings.reticle.colorScheme || "tactical";
+      const newColor = getContrastingColor(r, g, b, scheme);
+      setAdjustmentReticleColor(newColor);
+    } catch {
+      // Ignore canvas security errors
+    }
+  }, [settings.reticle.colorScheme]);
+
+  const sampleColorFromFrozenFrame = useCallback((
+    imageSrc: string,
+    position: ReticlePosition,
+    reticleSize: number
+  ) => {
+    latestAdjustmentPositionRef.current = position;
+    latestReticleSizeRef.current = reticleSize;
+    
+    const img = frozenImageRef.current || new Image();
+    frozenImageRef.current = img;
+    
+    if (img.src !== imageSrc) {
+      pendingSampleRef.current = true;
+      img.onload = () => {
+        if (pendingSampleRef.current) {
+          pendingSampleRef.current = false;
+          sampleColorFromImage(img);
+        }
+      };
+      img.src = imageSrc;
+    } else if (img.complete) {
+      sampleColorFromImage(img);
+    } else {
+      pendingSampleRef.current = true;
+    }
+  }, [sampleColorFromImage]);
+
+  useEffect(() => {
+    if (adjustmentMode.active && adjustmentMode.frozenFrame && settings.reticle.autoColor) {
+      sampleColorFromFrozenFrame(
+        adjustmentMode.frozenFrame,
+        adjustmentMode.position,
+        settings.reticle.size
+      );
+    }
+  }, [adjustmentMode.active, adjustmentMode.frozenFrame, adjustmentMode.position, settings.reticle.autoColor, settings.reticle.size, sampleColorFromFrozenFrame]);
+
   const handleLongPressCapture = useCallback((position: ReticlePosition) => {
     if (settings.reticle.manualAdjustment) {
       const frozenFrame = captureFrameForAdjustment();
@@ -322,9 +414,9 @@ export default function CameraPage() {
   }, []);
 
   const handleAdjustmentConfirm = useCallback(() => {
-    handleCaptureWithPosition(adjustmentMode.position);
+    handleCaptureWithPosition(adjustmentMode.position, adjustmentReticleColor);
     setAdjustmentMode({ active: false, frozenFrame: null, position: { x: 50, y: 50 } });
-  }, [handleCaptureWithPosition, adjustmentMode.position]);
+  }, [handleCaptureWithPosition, adjustmentMode.position, adjustmentReticleColor]);
 
   const handleAdjustmentCancel = useCallback(() => {
     setAdjustmentMode({ active: false, frozenFrame: null, position: { x: 50, y: 50 } });
@@ -371,7 +463,7 @@ export default function CameraPage() {
         error={cameraError}
         onRetry={startCamera}
         reticleConfig={settings.reticle}
-        reticleColor={reticleColor}
+        reticleColor={adjustmentMode.active ? adjustmentReticleColor : reticleColor}
         orientationData={orientationData}
         showMaskButton={privacySettings.enabled && !adjustmentMode.active}
         onMask={handleMask}
