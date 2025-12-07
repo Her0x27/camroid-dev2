@@ -49,7 +49,6 @@ export default function CameraPage() {
     position: { x: 50, y: 50 },
   });
   const [adjustmentReticleColor, setAdjustmentReticleColor] = useState<string>(CAMERA.DEFAULT_RETICLE_COLOR);
-  const frozenCanvasRef = useRef<HTMLCanvasElement>(null);
   const frozenImageRef = useRef<HTMLImageElement | null>(null);
   const latestAdjustmentPositionRef = useRef<ReticlePosition>({ x: 50, y: 50 });
   const latestReticleSizeRef = useRef<number>(CAMERA.DEFAULT_RETICLE_SIZE);
@@ -309,6 +308,55 @@ export default function CameraPage() {
     return canvas.toDataURL('image/jpeg', 0.9);
   }, [videoRef]);
 
+  const sampleColorFromVideo = useCallback((position: ReticlePosition): string => {
+    const video = videoRef.current;
+    if (!video || video.readyState < 2) return CAMERA.DEFAULT_RETICLE_COLOR;
+    
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
+    const minDimension = Math.min(videoWidth, videoHeight);
+    const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
+    const reticleSizePx = Math.ceil(minDimension * (sizePercent / 100));
+    const sampleSize = Math.min(reticleSizePx, CAMERA.COLOR_SAMPLE_MAX_SIZE);
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = sampleSize;
+    canvas.height = sampleSize;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return CAMERA.DEFAULT_RETICLE_COLOR;
+    
+    const sourceX = (videoWidth * position.x / 100) - (reticleSizePx / 2);
+    const sourceY = (videoHeight * position.y / 100) - (reticleSizePx / 2);
+    
+    try {
+      ctx.drawImage(
+        video,
+        sourceX, sourceY, reticleSizePx, reticleSizePx,
+        0, 0, sampleSize, sampleSize
+      );
+      const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize);
+      const data = imageData.data;
+      
+      let r = 0, g = 0, b = 0;
+      const pixelCount = data.length / 4;
+      
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+      }
+      
+      r = Math.round(r / pixelCount);
+      g = Math.round(g / pixelCount);
+      b = Math.round(b / pixelCount);
+      
+      const scheme = settings.reticle.colorScheme || "tactical";
+      return getContrastingColor(r, g, b, scheme);
+    } catch {
+      return CAMERA.DEFAULT_RETICLE_COLOR;
+    }
+  }, [videoRef, settings.reticle.size, settings.reticle.colorScheme]);
+
   const sampleColorFromImage = useCallback((img: HTMLImageElement) => {
     const position = latestAdjustmentPositionRef.current;
     const reticleSize = latestReticleSizeRef.current;
@@ -405,9 +453,12 @@ export default function CameraPage() {
         });
       }
     } else {
-      handleCaptureWithPosition(position);
+      const colorAtPosition = settings.reticle.autoColor 
+        ? sampleColorFromVideo(position) 
+        : reticleColor;
+      handleCaptureWithPosition(position, colorAtPosition);
     }
-  }, [handleCaptureWithPosition, settings.reticle.manualAdjustment, captureFrameForAdjustment]);
+  }, [handleCaptureWithPosition, settings.reticle.manualAdjustment, settings.reticle.autoColor, captureFrameForAdjustment, sampleColorFromVideo, reticleColor]);
 
   const handleAdjustmentPositionChange = useCallback((position: ReticlePosition) => {
     setAdjustmentMode(prev => ({ ...prev, position }));

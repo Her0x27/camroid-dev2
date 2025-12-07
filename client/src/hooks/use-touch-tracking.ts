@@ -10,6 +10,7 @@ export interface TouchTrackingState {
   startPos: Position | null;
   longPressFired: boolean;
   isActive: boolean;
+  startTime: number | null;
 }
 
 export interface UseTouchTrackingOptions {
@@ -42,6 +43,7 @@ export function useTouchTracking(options: UseTouchTrackingOptions): TouchTrackin
   const startPosRef = useRef<Position | null>(null);
   const longPressFiredRef = useRef(false);
   const isActiveRef = useRef(false);
+  const startTimeRef = useRef<number | null>(null);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -55,6 +57,7 @@ export function useTouchTracking(options: UseTouchTrackingOptions): TouchTrackin
     startPosRef.current = null;
     longPressFiredRef.current = false;
     isActiveRef.current = false;
+    startTimeRef.current = null;
   }, [clearTimer]);
 
   useEffect(() => {
@@ -70,6 +73,7 @@ export function useTouchTracking(options: UseTouchTrackingOptions): TouchTrackin
       startPosRef.current = { x: clientX, y: clientY };
       longPressFiredRef.current = false;
       isActiveRef.current = true;
+      startTimeRef.current = Date.now();
 
       if (onLongPress || onLongPressWithPosition) {
         timerRef.current = setTimeout(() => {
@@ -108,6 +112,7 @@ export function useTouchTracking(options: UseTouchTrackingOptions): TouchTrackin
     };
     startPosRef.current = null;
     isActiveRef.current = false;
+    startTimeRef.current = null;
     return result;
   }, [clearTimer]);
 
@@ -120,6 +125,7 @@ export function useTouchTracking(options: UseTouchTrackingOptions): TouchTrackin
       startPos: startPosRef.current,
       longPressFired: longPressFiredRef.current,
       isActive: isActiveRef.current,
+      startTime: startTimeRef.current,
     };
   }, []);
 

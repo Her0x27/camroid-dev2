@@ -1,4 +1,4 @@
-import { memo, RefObject, useRef, useCallback, useState } from "react";
+import { memo, RefObject, useRef, useCallback, useState, useEffect } from "react";
 import { Camera, EyeOff, FileText, Crosshair, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reticle } from "@/components/reticles";
@@ -6,6 +6,86 @@ import { LevelIndicator } from "@/components/level-indicator";
 import { useI18n } from "@/lib/i18n";
 import { useLongPress, type LongPressPositionPercent } from "@/hooks/use-long-press";
 import type { ReticleConfig, ReticlePosition } from "@shared/schema";
+
+interface LongPressIndicatorProps {
+  position: ReticlePosition;
+  duration: number;
+  containerRef: RefObject<HTMLDivElement>;
+}
+
+const LongPressIndicator = memo(function LongPressIndicator({ 
+  position, 
+  duration, 
+  containerRef 
+}: LongPressIndicatorProps) {
+  const [progress, setProgress] = useState(0);
+  const startTimeRef = useRef<number>(Date.now());
+
+  useEffect(() => {
+    startTimeRef.current = Date.now();
+    setProgress(0);
+    
+    const updateProgress = () => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const newProgress = Math.min(100, (elapsed / duration) * 100);
+      setProgress(newProgress);
+      
+      if (newProgress < 100) {
+        requestAnimationFrame(updateProgress);
+      }
+    };
+    
+    const animationId = requestAnimationFrame(updateProgress);
+    return () => cancelAnimationFrame(animationId);
+  }, [duration]);
+
+  const rect = containerRef.current?.getBoundingClientRect();
+  if (!rect) return null;
+
+  const size = 60;
+  const strokeWidth = 4;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+  return (
+    <div
+      className="absolute z-30 pointer-events-none"
+      style={{
+        left: `${position.x}%`,
+        top: `${position.y}%`,
+        transform: "translate(-50%, -50%)",
+      }}
+    >
+      <svg width={size} height={size} className="drop-shadow-lg">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="rgba(255, 255, 255, 0.3)"
+          strokeWidth={strokeWidth}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="#22c55e"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          style={{
+            transform: "rotate(-90deg)",
+            transformOrigin: "50% 50%",
+            transition: "stroke-dashoffset 16ms linear",
+          }}
+        />
+      </svg>
+    </div>
+  );
+});
 
 interface CameraViewfinderProps {
   videoRef: RefObject<HTMLVideoElement>;
@@ -67,10 +147,14 @@ export const CameraViewfinder = memo(function CameraViewfinder({
   const containerRef = useRef<HTMLDivElement>(null);
   const [tempPosition, setTempPosition] = useState<ReticlePosition | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isLongPressing, setIsLongPressing] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const MOVE_THRESHOLD = 10;
 
   const handleLongPressWithPosition = useCallback(
     (pos: LongPressPositionPercent) => {
       const position: ReticlePosition = { x: pos.percentX, y: pos.percentY };
+      setIsLongPressing(false);
       onLongPressCapture?.(position);
       setTempPosition(null);
     },
@@ -129,6 +213,8 @@ export const CameraViewfinder = memo(function CameraViewfinder({
           const percentX = Math.max(0, Math.min(100, (x / rect.width) * 100));
           const percentY = Math.max(0, Math.min(100, (y / rect.height) * 100));
           setTempPosition({ x: percentX, y: percentY });
+          setIsLongPressing(true);
+          touchStartRef.current = { x: touch.clientX, y: touch.clientY };
         }
       }
       longPressHandlers.onTouchStart(e);
@@ -138,6 +224,8 @@ export const CameraViewfinder = memo(function CameraViewfinder({
 
   const handleTouchEndWrapper = useCallback(() => {
     setTempPosition(null);
+    setIsLongPressing(false);
+    touchStartRef.current = null;
     longPressHandlers.onTouchEnd();
   }, [longPressHandlers]);
 
@@ -152,11 +240,19 @@ export const CameraViewfinder = memo(function CameraViewfinder({
           const percentX = Math.max(0, Math.min(100, (x / rect.width) * 100));
           const percentY = Math.max(0, Math.min(100, (y / rect.height) * 100));
           setTempPosition({ x: percentX, y: percentY });
+          
+          if (touchStartRef.current && isLongPressing) {
+            const deltaX = Math.abs(touch.clientX - touchStartRef.current.x);
+            const deltaY = Math.abs(touch.clientY - touchStartRef.current.y);
+            if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
+              setIsLongPressing(false);
+            }
+          }
         }
       }
       longPressHandlers.onTouchMove(e);
     },
-    [reticleConfig.tapToPosition, isReady, longPressHandlers]
+    [reticleConfig.tapToPosition, isReady, longPressHandlers, isLongPressing]
   );
 
   const displayPosition = adjustmentMode ? adjustmentPosition : (tempPosition || reticlePosition || null);
@@ -198,6 +294,14 @@ export const CameraViewfinder = memo(function CameraViewfinder({
       <div className="absolute inset-0 viewfinder-overlay pointer-events-none" />
 
       {(isReady || adjustmentMode) && <Reticle config={reticleConfig} dynamicColor={reticleColor} position={displayPosition} />}
+
+      {isReady && isLongPressing && tempPosition && reticleConfig.tapToPosition && !adjustmentMode && (
+        <LongPressIndicator
+          position={tempPosition}
+          duration={longPressHandlers.delay}
+          containerRef={containerRef}
+        />
+      )}
 
       {isReady && note && !adjustmentMode && (
         <NoteOverlay note={note} />

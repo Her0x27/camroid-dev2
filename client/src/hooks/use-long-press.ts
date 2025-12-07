@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useTouchTracking, type Position } from "./use-touch-tracking";
+import { useTouchTracking, type Position, type TouchTrackingState } from "./use-touch-tracking";
 import { LONG_PRESS } from "@/lib/constants";
 
 export interface LongPressPositionPercent {
@@ -28,6 +28,8 @@ export interface LongPressHandlers {
   onMouseUp: () => void;
   onMouseLeave: () => void;
   wasLongPress: () => boolean;
+  getState: () => TouchTrackingState;
+  delay: number;
 }
 
 export function useLongPress<T = void>(options: UseLongPressOptions<T>): LongPressHandlers {
@@ -69,6 +71,7 @@ export function useLongPress<T = void>(options: UseLongPressOptions<T>): LongPre
     handleEnd,
     handleCancel,
     wasLongPress,
+    getState,
   } = useTouchTracking({
     onLongPress: handleLongPressCallback,
     onLongPressWithPosition: handleLongPressWithPositionCallback,
@@ -134,5 +137,7 @@ export function useLongPress<T = void>(options: UseLongPressOptions<T>): LongPre
     onMouseUp,
     onMouseLeave,
     wasLongPress,
+    getState,
+    delay,
   };
 }
