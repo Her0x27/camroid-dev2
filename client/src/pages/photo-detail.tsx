@@ -231,18 +231,6 @@ export default function PhotoDetailPage() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <div className="absolute top-0 left-0 right-0 z-50 p-4 safe-top">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleBack}
-          className="w-11 h-11 bg-black/50 text-white hover:bg-black/70 rounded-full border border-white/20"
-          data-testid="button-close-viewer"
-        >
-          <X className="w-6 h-6" />
-        </Button>
-      </div>
-
       <img
         src={photo.imageData}
         alt={t.gallery.photo}
@@ -337,6 +325,15 @@ export default function PhotoDetailPage() {
               data-testid="button-delete"
             >
               <Trash2 className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBack}
+              className="text-white hover:bg-white/20"
+              data-testid="button-close-viewer"
+            >
+              <X className="w-5 h-5" />
             </Button>
           </div>
         </div>
