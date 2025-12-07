@@ -7,7 +7,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Share2,
-  Info
+  Info,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -148,6 +149,8 @@ export default function PhotoDetailPage() {
   const handleDelete = useCallback(async () => {
     if (!photoId) return;
     
+    setShowDeleteDialog(false);
+    
     const result = await deletePhotoById(photoId);
     
     if (result.success) {
@@ -158,13 +161,11 @@ export default function PhotoDetailPage() {
       } else if (hasPrevious) {
         goToPrevious();
       } else {
-        handleBack();
+        setTimeout(() => handleBack(), 100);
       }
     } else {
       logger.error("Failed to delete photo", result.error);
     }
-    
-    setShowDeleteDialog(false);
   }, [photoId, deletePhotoById, hasNext, hasPrevious, total, goToNext, goToPrevious, handleBack, refreshIds]);
 
   const handleExport = useCallback(async () => {
@@ -230,6 +231,16 @@ export default function PhotoDetailPage() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={handleBack}
+        className="absolute top-4 right-4 w-10 h-10 bg-black/40 text-white hover:bg-black/60 z-50 safe-top"
+        data-testid="button-close-viewer"
+      >
+        <X className="w-6 h-6" />
+      </Button>
+
       <img
         src={photo.imageData}
         alt={t.gallery.photo}
