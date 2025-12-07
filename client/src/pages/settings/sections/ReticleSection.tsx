@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Crosshair, Eye, Palette } from "lucide-react";
+import { Crosshair, Eye, Palette, Hand } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { Label } from "@/components/ui/label";
@@ -112,6 +112,18 @@ export const ReticleSection = memo(function ReticleSection({
               </Select>
             </div>
           )}
+
+          <Separator />
+
+          <SettingRow
+            id="tap-to-position"
+            icon={<Hand className="w-4 h-4" />}
+            label={t.settings.crosshair.tapToPosition}
+            description={t.settings.crosshair.tapToPositionDesc}
+            checked={settings.reticle.tapToPosition || false}
+            onCheckedChange={(checked) => updateReticle({ tapToPosition: checked })}
+            testId="switch-tap-to-position"
+          />
         </>
       )}
     </CollapsibleCard>
