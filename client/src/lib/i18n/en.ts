@@ -182,6 +182,11 @@ export const en = {
       },
       tapToPosition: "Tap to Position",
       tapToPositionDesc: "Long press on screen to position crosshair and capture photo",
+      longPressDelay: "Hold Duration",
+      longPressDelayDesc: "Time to hold finger before positioning crosshair",
+      manualAdjustment: "Manual Adjustment",
+      manualAdjustmentDesc: "Adjust crosshair position on frozen frame before capture",
+      ms: "ms",
     },
     
     capture: {

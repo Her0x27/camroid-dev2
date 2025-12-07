@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Crosshair, Eye, Palette, Hand } from "lucide-react";
+import { Crosshair, Eye, Palette, Hand, Timer, Move } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { Label } from "@/components/ui/label";
@@ -124,6 +124,33 @@ export const ReticleSection = memo(function ReticleSection({
             onCheckedChange={(checked) => updateReticle({ tapToPosition: checked })}
             testId="switch-tap-to-position"
           />
+
+          {settings.reticle.tapToPosition && (
+            <>
+              <SettingSlider
+                icon={<Timer className="w-4 h-4" />}
+                label={t.settings.crosshair.longPressDelay}
+                description={t.settings.crosshair.longPressDelayDesc}
+                value={settings.reticle.longPressDelay || 500}
+                onValueChange={(value) => updateReticle({ longPressDelay: value })}
+                min={300}
+                max={1500}
+                step={100}
+                unit={t.settings.crosshair.ms}
+                testId="slider-long-press-delay"
+              />
+
+              <SettingRow
+                id="manual-adjustment"
+                icon={<Move className="w-4 h-4" />}
+                label={t.settings.crosshair.manualAdjustment}
+                description={t.settings.crosshair.manualAdjustmentDesc}
+                checked={settings.reticle.manualAdjustment || false}
+                onCheckedChange={(checked) => updateReticle({ manualAdjustment: checked })}
+                testId="switch-manual-adjustment"
+              />
+            </>
+          )}
         </>
       )}
     </CollapsibleCard>

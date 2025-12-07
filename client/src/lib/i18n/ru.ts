@@ -184,6 +184,11 @@ export const ru: Translations = {
       },
       tapToPosition: "Съёмка удержанием",
       tapToPositionDesc: "Удержание пальца на экране для позиционирования прицела и съёмки",
+      longPressDelay: "Время удержания",
+      longPressDelayDesc: "Время удержания пальца для позиционирования прицела",
+      manualAdjustment: "Ручная корректировка",
+      manualAdjustmentDesc: "Корректировать позицию прицела на замороженном кадре перед съёмкой",
+      ms: "мс",
     },
     
     capture: {

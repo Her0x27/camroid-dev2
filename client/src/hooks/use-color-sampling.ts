@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, RefObject } from "react";
 import { getContrastingColor } from "@/components/reticles";
 import { CAMERA } from "@/lib/constants";
-import type { ColorScheme } from "@shared/schema";
+import type { ColorScheme, ReticlePosition } from "@shared/schema";
 
 interface UseColorSamplingOptions {
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -9,6 +9,7 @@ interface UseColorSamplingOptions {
   autoColor: boolean;
   reticleSize: number;
   colorScheme: ColorScheme;
+  reticlePosition?: ReticlePosition;
 }
 
 export function useColorSampling({
@@ -17,6 +18,7 @@ export function useColorSampling({
   autoColor,
   reticleSize,
   colorScheme,
+  reticlePosition,
 }: UseColorSamplingOptions): string {
   const [reticleColor, setReticleColor] = useState<string>(CAMERA.DEFAULT_RETICLE_COLOR);
   const colorSamplingCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -62,8 +64,10 @@ export function useColorSampling({
         canvas.width = sampleSize;
         canvas.height = sampleSize;
         
-        const sourceX = (videoWidth - reticleSizePx) / 2;
-        const sourceY = (videoHeight - reticleSizePx) / 2;
+        const posX = reticlePosition?.x ?? 50;
+        const posY = reticlePosition?.y ?? 50;
+        const sourceX = (videoWidth * posX / 100) - (reticleSizePx / 2);
+        const sourceY = (videoHeight * posY / 100) - (reticleSizePx / 2);
         
         try {
           ctx.drawImage(
@@ -106,7 +110,7 @@ export function useColorSampling({
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, [videoRef, enabled, autoColor, reticleSize, colorScheme]);
+  }, [videoRef, enabled, autoColor, reticleSize, colorScheme, reticlePosition]);
 
   return reticleColor;
 }

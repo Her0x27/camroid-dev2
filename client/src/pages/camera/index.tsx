@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useLocation } from "wouter";
 import { useCamera } from "@/hooks/use-camera";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -22,6 +22,12 @@ import { useI18n } from "@/lib/i18n";
 import { CameraControls, PhotoNoteDialog, CameraViewfinder } from "./components";
 import type { ReticlePosition } from "@shared/schema";
 
+interface AdjustmentMode {
+  active: boolean;
+  frozenFrame: string | null;
+  position: ReticlePosition;
+}
+
 export default function CameraPage() {
   const [, navigate] = useLocation();
   const { t } = useI18n();
@@ -35,6 +41,12 @@ export default function CameraPage() {
   const [lastPhotoId, setLastPhotoId] = useState<string | null>(null);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
+  const [adjustmentMode, setAdjustmentMode] = useState<AdjustmentMode>({
+    active: false,
+    frozenFrame: null,
+    position: { x: 50, y: 50 },
+  });
+  const frozenCanvasRef = useRef<HTMLCanvasElement>(null);
   
   const {
     isCapturing,
@@ -82,10 +94,11 @@ export default function CameraPage() {
 
   const reticleColor = useColorSampling({
     videoRef,
-    enabled: isReady && settings.reticle.enabled,
+    enabled: isReady && settings.reticle.enabled && !adjustmentMode.active,
     autoColor: settings.reticle.autoColor,
     reticleSize: settings.reticle.size,
     colorScheme: settings.reticle.colorScheme || "tactical",
+    reticlePosition: adjustmentMode.active ? adjustmentMode.position : undefined,
   });
 
   useEffect(() => {
@@ -275,9 +288,47 @@ export default function CameraPage() {
     await handleCaptureWithPosition();
   }, [handleCaptureWithPosition]);
 
+  const captureFrameForAdjustment = useCallback((): string | null => {
+    const video = videoRef.current;
+    if (!video || video.readyState < 2) return null;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    
+    ctx.drawImage(video, 0, 0);
+    return canvas.toDataURL('image/jpeg', 0.9);
+  }, [videoRef]);
+
   const handleLongPressCapture = useCallback((position: ReticlePosition) => {
-    handleCaptureWithPosition(position);
-  }, [handleCaptureWithPosition]);
+    if (settings.reticle.manualAdjustment) {
+      const frozenFrame = captureFrameForAdjustment();
+      if (frozenFrame) {
+        setAdjustmentMode({
+          active: true,
+          frozenFrame,
+          position,
+        });
+      }
+    } else {
+      handleCaptureWithPosition(position);
+    }
+  }, [handleCaptureWithPosition, settings.reticle.manualAdjustment, captureFrameForAdjustment]);
+
+  const handleAdjustmentPositionChange = useCallback((position: ReticlePosition) => {
+    setAdjustmentMode(prev => ({ ...prev, position }));
+  }, []);
+
+  const handleAdjustmentConfirm = useCallback(() => {
+    handleCaptureWithPosition(adjustmentMode.position);
+    setAdjustmentMode({ active: false, frozenFrame: null, position: { x: 50, y: 50 } });
+  }, [handleCaptureWithPosition, adjustmentMode.position]);
+
+  const handleAdjustmentCancel = useCallback(() => {
+    setAdjustmentMode({ active: false, frozenFrame: null, position: { x: 50, y: 50 } });
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -322,14 +373,20 @@ export default function CameraPage() {
         reticleConfig={settings.reticle}
         reticleColor={reticleColor}
         orientationData={orientationData}
-        showMaskButton={privacySettings.enabled}
+        showMaskButton={privacySettings.enabled && !adjustmentMode.active}
         onMask={handleMask}
         note={currentNote || undefined}
-        showLevelIndicator={settings.showLevelIndicator}
-        stabilizationEnabled={settings.stabilization?.enabled}
+        showLevelIndicator={settings.showLevelIndicator && !adjustmentMode.active}
+        stabilizationEnabled={settings.stabilization?.enabled && !adjustmentMode.active}
         stability={stability}
         isStable={isStable}
         onLongPressCapture={handleLongPressCapture}
+        adjustmentMode={adjustmentMode.active}
+        frozenFrame={adjustmentMode.frozenFrame}
+        adjustmentPosition={adjustmentMode.position}
+        onAdjustmentPositionChange={handleAdjustmentPositionChange}
+        onAdjustmentConfirm={handleAdjustmentConfirm}
+        onAdjustmentCancel={handleAdjustmentCancel}
       />
 
       <CameraControls

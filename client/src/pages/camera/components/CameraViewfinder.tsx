@@ -1,5 +1,5 @@
 import { memo, RefObject, useRef, useCallback, useState } from "react";
-import { Camera, EyeOff, FileText, Crosshair } from "lucide-react";
+import { Camera, EyeOff, FileText, Crosshair, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reticle } from "@/components/reticles";
 import { LevelIndicator } from "@/components/level-indicator";
@@ -30,6 +30,12 @@ interface CameraViewfinderProps {
   isStable?: boolean;
   onLongPressCapture?: (position: ReticlePosition) => void;
   reticlePosition?: ReticlePosition | null;
+  adjustmentMode?: boolean;
+  frozenFrame?: string | null;
+  adjustmentPosition?: ReticlePosition;
+  onAdjustmentPositionChange?: (position: ReticlePosition) => void;
+  onAdjustmentConfirm?: () => void;
+  onAdjustmentCancel?: () => void;
 }
 
 export const CameraViewfinder = memo(function CameraViewfinder({
@@ -51,9 +57,16 @@ export const CameraViewfinder = memo(function CameraViewfinder({
   isStable,
   onLongPressCapture,
   reticlePosition,
+  adjustmentMode,
+  frozenFrame,
+  adjustmentPosition,
+  onAdjustmentPositionChange,
+  onAdjustmentConfirm,
+  onAdjustmentCancel,
 }: CameraViewfinderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tempPosition, setTempPosition] = useState<ReticlePosition | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleLongPressWithPosition = useCallback(
     (pos: LongPressPositionPercent) => {
@@ -67,9 +80,43 @@ export const CameraViewfinder = memo(function CameraViewfinder({
   const longPressHandlers = useLongPress({
     onLongPressWithPosition: reticleConfig.tapToPosition ? handleLongPressWithPosition : undefined,
     containerRef: containerRef as React.RefObject<HTMLElement>,
-    disabled: !isReady || !reticleConfig.tapToPosition,
-    delay: 500,
+    disabled: !isReady || !reticleConfig.tapToPosition || adjustmentMode,
+    delay: reticleConfig.longPressDelay || 500,
   });
+
+  const handleAdjustmentDragStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!adjustmentMode) return;
+    e.preventDefault();
+    setIsDragging(true);
+  }, [adjustmentMode]);
+
+  const handleAdjustmentDrag = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!adjustmentMode || !isDragging) return;
+    
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    let clientX: number, clientY: number;
+    if ('touches' in e) {
+      if (e.touches.length !== 1) return;
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    const percentX = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    const percentY = Math.max(0, Math.min(100, (y / rect.height) * 100));
+    
+    onAdjustmentPositionChange?.({ x: percentX, y: percentY });
+  }, [adjustmentMode, isDragging, onAdjustmentPositionChange]);
+
+  const handleAdjustmentDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
   const handleTouchStartWrapper = useCallback(
     (e: React.TouchEvent) => {
@@ -112,53 +159,62 @@ export const CameraViewfinder = memo(function CameraViewfinder({
     [reticleConfig.tapToPosition, isReady, longPressHandlers]
   );
 
-  const displayPosition = tempPosition || reticlePosition || null;
+  const displayPosition = adjustmentMode ? adjustmentPosition : (tempPosition || reticlePosition || null);
 
   return (
     <div 
       ref={containerRef}
       className="relative flex-1 overflow-hidden"
-      onTouchStart={handleTouchStartWrapper}
-      onTouchEnd={handleTouchEndWrapper}
-      onTouchMove={handleTouchMoveWrapper}
-      onMouseDown={longPressHandlers.onMouseDown}
-      onMouseUp={longPressHandlers.onMouseUp}
-      onMouseMove={longPressHandlers.onMouseMove}
-      onMouseLeave={longPressHandlers.onMouseLeave}
+      onTouchStart={adjustmentMode ? handleAdjustmentDragStart : handleTouchStartWrapper}
+      onTouchEnd={adjustmentMode ? handleAdjustmentDragEnd : handleTouchEndWrapper}
+      onTouchMove={adjustmentMode ? handleAdjustmentDrag : handleTouchMoveWrapper}
+      onMouseDown={adjustmentMode ? handleAdjustmentDragStart : longPressHandlers.onMouseDown}
+      onMouseUp={adjustmentMode ? handleAdjustmentDragEnd : longPressHandlers.onMouseUp}
+      onMouseMove={adjustmentMode ? handleAdjustmentDrag : longPressHandlers.onMouseMove}
+      onMouseLeave={adjustmentMode ? handleAdjustmentDragEnd : longPressHandlers.onMouseLeave}
     >
       <canvas ref={canvasRef} className="hidden" />
 
-      <video
-        ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
-        playsInline
-        autoPlay
-        muted
-      />
+      {adjustmentMode && frozenFrame ? (
+        <img
+          src={frozenFrame}
+          alt="Frozen frame"
+          className="absolute inset-0 w-full h-full object-cover"
+          draggable={false}
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          playsInline
+          autoPlay
+          muted
+        />
+      )}
 
-      {isLoading && <LoadingOverlay />}
-      {error && <ErrorOverlay error={error} onRetry={onRetry} />}
+      {isLoading && !adjustmentMode && <LoadingOverlay />}
+      {error && !adjustmentMode && <ErrorOverlay error={error} onRetry={onRetry} />}
 
       <div className="absolute inset-0 viewfinder-overlay pointer-events-none" />
 
-      {isReady && <Reticle config={reticleConfig} dynamicColor={reticleColor} position={displayPosition} />}
+      {(isReady || adjustmentMode) && <Reticle config={reticleConfig} dynamicColor={reticleColor} position={displayPosition} />}
 
-      {isReady && note && (
+      {isReady && note && !adjustmentMode && (
         <NoteOverlay note={note} />
       )}
 
-      {isReady && showLevelIndicator && (
+      {isReady && showLevelIndicator && !adjustmentMode && (
         <LevelIndicator
           tilt={orientationData.tilt}
           roll={orientationData.roll}
         />
       )}
 
-      {isReady && stabilizationEnabled && (
+      {isReady && stabilizationEnabled && !adjustmentMode && (
         <StabilityIndicator stability={stability ?? 0} isStable={isStable ?? false} />
       )}
 
-      {showMaskButton && onMask && (
+      {showMaskButton && onMask && !adjustmentMode && (
         <button
           className="absolute right-4 top-32 z-30 rounded-xl bg-card/80 backdrop-blur-sm border border-border/50 text-primary hover:bg-card flex items-center justify-center w-12 h-12 shadow-lg transition-colors safe-top"
           onClick={onMask}
@@ -167,6 +223,39 @@ export const CameraViewfinder = memo(function CameraViewfinder({
           <EyeOff className="w-5 h-5 drop-shadow-[0_0_4px_hsl(var(--primary)/0.5)]" />
         </button>
       )}
+
+      {adjustmentMode && (
+        <AdjustmentControls
+          onConfirm={onAdjustmentConfirm}
+          onCancel={onAdjustmentCancel}
+        />
+      )}
+    </div>
+  );
+});
+
+interface AdjustmentControlsProps {
+  onConfirm?: () => void;
+  onCancel?: () => void;
+}
+
+const AdjustmentControls = memo(function AdjustmentControls({ onConfirm, onCancel }: AdjustmentControlsProps) {
+  return (
+    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-6">
+      <button
+        className="w-14 h-14 rounded-full bg-red-500/90 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-red-600 flex items-center justify-center shadow-lg transition-colors"
+        onClick={onCancel}
+        data-testid="button-adjustment-cancel"
+      >
+        <X className="w-7 h-7" />
+      </button>
+      <button
+        className="w-14 h-14 rounded-full bg-emerald-500/90 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-emerald-600 flex items-center justify-center shadow-lg transition-colors"
+        onClick={onConfirm}
+        data-testid="button-adjustment-confirm"
+      >
+        <Check className="w-7 h-7" />
+      </button>
     </div>
   );
 });

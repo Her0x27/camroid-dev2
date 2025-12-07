@@ -67,6 +67,8 @@ export const reticleConfigSchema = z.object({
   autoColor: z.boolean().default(true), // auto-adjust color based on background
   colorScheme: z.enum(["contrast", "tactical", "neon", "monochrome", "warm"]).default("tactical"), // color palette for auto-color
   tapToPosition: z.boolean().default(true), // enable tap-to-position and capture on long press
+  longPressDelay: z.number().min(300).max(1500).default(500), // long press delay in ms
+  manualAdjustment: z.boolean().default(false), // enable manual position adjustment on frozen frame before capture
 });
 
 // Custom reticle position (transient, not persisted)
@@ -151,6 +153,8 @@ export const defaultSettings: Settings = {
     autoColor: true,
     colorScheme: "tactical",
     tapToPosition: true,
+    longPressDelay: 500,
+    manualAdjustment: false,
   },
   gpsEnabled: true,
   orientationEnabled: true,
