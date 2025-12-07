@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useCamera } from "@/hooks/use-camera";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -7,6 +7,7 @@ import { useCaptureSound } from "@/hooks/use-capture-sound";
 import { useStabilization } from "@/hooks/use-stabilization";
 import { useColorSampling } from "@/hooks/use-color-sampling";
 import { useCaptureController } from "@/hooks/use-capture-controller";
+import { useAdjustmentMode } from "@/hooks/use-adjustment-mode";
 import { useSettings } from "@/lib/settings-context";
 import { usePrivacy } from "@/lib/privacy-context";
 import { getPhotoCounts, getLatestPhoto } from "@/lib/db";
@@ -16,19 +17,13 @@ import {
   type SavedPhotoResult,
   type CloudUploadResult,
 } from "@/lib/capture-helpers";
+import { sampleContrastingColor } from "@/lib/canvas-utils";
 import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { CameraControls, PhotoNoteDialog, CameraViewfinder } from "./components";
-import { getContrastingColor } from "@/components/reticles";
 import { CAMERA } from "@/lib/constants";
 import type { ReticlePosition } from "@shared/schema";
-
-interface AdjustmentMode {
-  active: boolean;
-  frozenFrame: string | null;
-  position: ReticlePosition;
-}
 
 export default function CameraPage() {
   const [, navigate] = useLocation();
@@ -43,16 +38,6 @@ export default function CameraPage() {
   const [lastPhotoId, setLastPhotoId] = useState<string | null>(null);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
-  const [adjustmentMode, setAdjustmentMode] = useState<AdjustmentMode>({
-    active: false,
-    frozenFrame: null,
-    position: { x: 50, y: 50 },
-  });
-  const [adjustmentReticleColor, setAdjustmentReticleColor] = useState<string>(CAMERA.DEFAULT_RETICLE_COLOR);
-  const frozenImageRef = useRef<HTMLImageElement | null>(null);
-  const latestAdjustmentPositionRef = useRef<ReticlePosition>({ x: 50, y: 50 });
-  const latestReticleSizeRef = useRef<number>(CAMERA.DEFAULT_RETICLE_SIZE);
-  const pendingSampleRef = useRef<boolean>(false);
   
   const {
     isCapturing,
@@ -99,14 +84,35 @@ export default function CameraPage() {
     videoRef,
   });
 
+  const [adjustmentActive, setAdjustmentActive] = useState(false);
+
   const reticleColor = useColorSampling({
     videoRef,
-    enabled: isReady && settings.reticle.enabled && !adjustmentMode.active,
+    enabled: isReady && settings.reticle.enabled && !adjustmentActive,
     autoColor: settings.reticle.autoColor,
     reticleSize: settings.reticle.size,
     colorScheme: settings.reticle.colorScheme || "tactical",
-    reticlePosition: adjustmentMode.active ? adjustmentMode.position : undefined,
+    reticlePosition: undefined,
   });
+
+  const {
+    adjustmentMode,
+    adjustmentReticleColor,
+    activateAdjustment,
+    updatePosition,
+    confirmAdjustment,
+    cancelAdjustment,
+  } = useAdjustmentMode({
+    videoRef,
+    reticleSize: settings.reticle.size,
+    colorScheme: settings.reticle.colorScheme || "tactical",
+    autoColor: settings.reticle.autoColor,
+    currentReticleColor: reticleColor,
+  });
+
+  useEffect(() => {
+    setAdjustmentActive(adjustmentMode.active);
+  }, [adjustmentMode.active]);
 
   useEffect(() => {
     const loadPhotos = async () => {
@@ -295,175 +301,28 @@ export default function CameraPage() {
     await handleCaptureWithPosition();
   }, [handleCaptureWithPosition]);
 
-  const captureFrameForAdjustment = useCallback((): string | null => {
-    const video = videoRef.current;
-    if (!video || video.readyState < 2) return null;
-    
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    
-    ctx.drawImage(video, 0, 0);
-    return canvas.toDataURL('image/jpeg', 0.9);
-  }, [videoRef]);
-
   const sampleColorFromVideo = useCallback((position: ReticlePosition): string => {
     const video = videoRef.current;
-    if (!video || video.readyState < 2) return CAMERA.DEFAULT_RETICLE_COLOR;
+    if (!video) return CAMERA.DEFAULT_RETICLE_COLOR;
     
-    const videoWidth = video.videoWidth;
-    const videoHeight = video.videoHeight;
-    const minDimension = Math.min(videoWidth, videoHeight);
-    const sizePercent = settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE;
-    const reticleSizePx = Math.ceil(minDimension * (sizePercent / 100));
-    const sampleSize = Math.min(reticleSizePx, CAMERA.COLOR_SAMPLE_MAX_SIZE);
-    
-    const canvas = document.createElement('canvas');
-    canvas.width = sampleSize;
-    canvas.height = sampleSize;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return CAMERA.DEFAULT_RETICLE_COLOR;
-    
-    const sourceX = (videoWidth * position.x / 100) - (reticleSizePx / 2);
-    const sourceY = (videoHeight * position.y / 100) - (reticleSizePx / 2);
-    
-    try {
-      ctx.drawImage(
-        video,
-        sourceX, sourceY, reticleSizePx, reticleSizePx,
-        0, 0, sampleSize, sampleSize
-      );
-      const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize);
-      const data = imageData.data;
-      
-      let r = 0, g = 0, b = 0;
-      const pixelCount = data.length / 4;
-      
-      for (let i = 0; i < data.length; i += 4) {
-        r += data[i];
-        g += data[i + 1];
-        b += data[i + 2];
-      }
-      
-      r = Math.round(r / pixelCount);
-      g = Math.round(g / pixelCount);
-      b = Math.round(b / pixelCount);
-      
-      const scheme = settings.reticle.colorScheme || "tactical";
-      return getContrastingColor(r, g, b, scheme);
-    } catch {
-      return CAMERA.DEFAULT_RETICLE_COLOR;
-    }
+    return sampleContrastingColor(
+      video,
+      position,
+      settings.reticle.size || CAMERA.DEFAULT_RETICLE_SIZE,
+      settings.reticle.colorScheme || "tactical"
+    );
   }, [videoRef, settings.reticle.size, settings.reticle.colorScheme]);
-
-  const sampleColorFromImage = useCallback((img: HTMLImageElement) => {
-    const position = latestAdjustmentPositionRef.current;
-    const reticleSize = latestReticleSizeRef.current;
-    
-    const canvas = document.createElement('canvas');
-    const minDimension = Math.min(img.width, img.height);
-    const sizePercent = reticleSize || CAMERA.DEFAULT_RETICLE_SIZE;
-    const reticleSizePx = Math.ceil(minDimension * (sizePercent / 100));
-    const sampleSize = Math.min(reticleSizePx, CAMERA.COLOR_SAMPLE_MAX_SIZE);
-    
-    canvas.width = sampleSize;
-    canvas.height = sampleSize;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return;
-    
-    const sourceX = (img.width * position.x / 100) - (reticleSizePx / 2);
-    const sourceY = (img.height * position.y / 100) - (reticleSizePx / 2);
-    
-    try {
-      ctx.drawImage(
-        img,
-        sourceX, sourceY, reticleSizePx, reticleSizePx,
-        0, 0, sampleSize, sampleSize
-      );
-      const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize);
-      const data = imageData.data;
-      
-      let r = 0, g = 0, b = 0;
-      const pixelCount = data.length / 4;
-      
-      for (let i = 0; i < data.length; i += 4) {
-        r += data[i];
-        g += data[i + 1];
-        b += data[i + 2];
-      }
-      
-      r = Math.round(r / pixelCount);
-      g = Math.round(g / pixelCount);
-      b = Math.round(b / pixelCount);
-      
-      const scheme = settings.reticle.colorScheme || "tactical";
-      const newColor = getContrastingColor(r, g, b, scheme);
-      setAdjustmentReticleColor(newColor);
-    } catch {
-      // Ignore canvas security errors
-    }
-  }, [settings.reticle.colorScheme]);
-
-  const sampleColorFromFrozenFrame = useCallback((
-    imageSrc: string,
-    position: ReticlePosition,
-    reticleSize: number
-  ) => {
-    latestAdjustmentPositionRef.current = position;
-    latestReticleSizeRef.current = reticleSize;
-    
-    const img = frozenImageRef.current || new Image();
-    frozenImageRef.current = img;
-    
-    if (img.src !== imageSrc) {
-      pendingSampleRef.current = true;
-      img.onload = () => {
-        if (pendingSampleRef.current) {
-          pendingSampleRef.current = false;
-          sampleColorFromImage(img);
-        }
-      };
-      img.src = imageSrc;
-    } else if (img.complete) {
-      sampleColorFromImage(img);
-    } else {
-      pendingSampleRef.current = true;
-    }
-  }, [sampleColorFromImage]);
-
-  useEffect(() => {
-    if (adjustmentMode.active && adjustmentMode.frozenFrame && settings.reticle.autoColor) {
-      sampleColorFromFrozenFrame(
-        adjustmentMode.frozenFrame,
-        adjustmentMode.position,
-        settings.reticle.size
-      );
-    }
-  }, [adjustmentMode.active, adjustmentMode.frozenFrame, adjustmentMode.position, settings.reticle.autoColor, settings.reticle.size, sampleColorFromFrozenFrame]);
 
   const handleLongPressCapture = useCallback((position: ReticlePosition) => {
     if (settings.reticle.manualAdjustment) {
-      const frozenFrame = captureFrameForAdjustment();
-      if (frozenFrame) {
-        setAdjustmentMode({
-          active: true,
-          frozenFrame,
-          position,
-        });
-      }
+      activateAdjustment(position);
     } else {
       const colorAtPosition = settings.reticle.autoColor 
         ? sampleColorFromVideo(position) 
         : reticleColor;
       handleCaptureWithPosition(position, colorAtPosition);
     }
-  }, [handleCaptureWithPosition, settings.reticle.manualAdjustment, settings.reticle.autoColor, captureFrameForAdjustment, sampleColorFromVideo, reticleColor]);
-
-  const handleAdjustmentPositionChange = useCallback((position: ReticlePosition) => {
-    setAdjustmentMode(prev => ({ ...prev, position }));
-  }, []);
+  }, [handleCaptureWithPosition, settings.reticle.manualAdjustment, settings.reticle.autoColor, activateAdjustment, sampleColorFromVideo, reticleColor]);
 
   const handleCaptureFromFrozenFrame = useCallback(async (
     frozenFrame: string,
@@ -538,19 +397,11 @@ export default function CameraPage() {
   }, [isReady, isCapturing, accuracyBlocked, captureFromImage, geoData, orientationData, currentNote, captureConfig, playCapture, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingCompleteCallback, getAbortSignal, startCapture, captureSuccess, captureFailed]);
 
   const handleAdjustmentConfirm = useCallback(() => {
-    if (adjustmentMode.frozenFrame) {
-      handleCaptureFromFrozenFrame(
-        adjustmentMode.frozenFrame,
-        adjustmentMode.position,
-        adjustmentReticleColor
-      );
+    const result = confirmAdjustment();
+    if (result) {
+      handleCaptureFromFrozenFrame(result.frozenFrame, result.position, result.color);
     }
-    setAdjustmentMode({ active: false, frozenFrame: null, position: { x: 50, y: 50 } });
-  }, [handleCaptureFromFrozenFrame, adjustmentMode.frozenFrame, adjustmentMode.position, adjustmentReticleColor]);
-
-  const handleAdjustmentCancel = useCallback(() => {
-    setAdjustmentMode({ active: false, frozenFrame: null, position: { x: 50, y: 50 } });
-  }, []);
+  }, [confirmAdjustment, handleCaptureFromFrozenFrame]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -606,9 +457,9 @@ export default function CameraPage() {
         adjustmentMode={adjustmentMode.active}
         frozenFrame={adjustmentMode.frozenFrame}
         adjustmentPosition={adjustmentMode.position}
-        onAdjustmentPositionChange={handleAdjustmentPositionChange}
+        onAdjustmentPositionChange={updatePosition}
         onAdjustmentConfirm={handleAdjustmentConfirm}
-        onAdjustmentCancel={handleAdjustmentCancel}
+        onAdjustmentCancel={cancelAdjustment}
       />
 
       <CameraControls

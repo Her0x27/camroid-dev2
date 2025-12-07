@@ -1,4 +1,6 @@
-import { IMAGE } from "./constants";
+import { getContrastingColor } from "@/components/reticles";
+import { CAMERA, IMAGE } from "./constants";
+import type { ColorScheme, ReticlePosition } from "@shared/schema";
 
 export interface CanvasSize {
   width: number;
@@ -170,4 +172,112 @@ export function drawRoundedRect(
   ctx.lineTo(x, y + radius);
   ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
+}
+
+export interface ColorSampleConfig {
+  source: HTMLVideoElement | HTMLImageElement;
+  position: ReticlePosition;
+  reticleSize: number;
+  colorScheme: ColorScheme;
+  canvas?: HTMLCanvasElement;
+  ctx?: CanvasRenderingContext2D;
+}
+
+export interface ColorSampleResult {
+  color: string;
+  r: number;
+  g: number;
+  b: number;
+}
+
+function getSourceDimensions(source: HTMLVideoElement | HTMLImageElement): { width: number; height: number } {
+  if (source instanceof HTMLVideoElement) {
+    return { width: source.videoWidth, height: source.videoHeight };
+  }
+  return { width: source.width, height: source.height };
+}
+
+function isSourceReady(source: HTMLVideoElement | HTMLImageElement): boolean {
+  if (source instanceof HTMLVideoElement) {
+    return source.readyState >= 2;
+  }
+  return source.complete && source.naturalWidth > 0;
+}
+
+export function sampleColorFromSource(config: ColorSampleConfig): ColorSampleResult | null {
+  const { source, position, reticleSize, colorScheme, canvas: providedCanvas, ctx: providedCtx } = config;
+
+  if (!isSourceReady(source)) {
+    return null;
+  }
+
+  const { width, height } = getSourceDimensions(source);
+  if (width === 0 || height === 0) {
+    return null;
+  }
+
+  const minDimension = Math.min(width, height);
+  const sizePercent = reticleSize || CAMERA.DEFAULT_RETICLE_SIZE;
+  const reticleSizePx = Math.ceil(minDimension * (sizePercent / 100));
+  const sampleSize = Math.min(reticleSizePx, CAMERA.COLOR_SAMPLE_MAX_SIZE);
+
+  const canvas = providedCanvas || document.createElement("canvas");
+  if (canvas.width !== sampleSize || canvas.height !== sampleSize) {
+    canvas.width = sampleSize;
+    canvas.height = sampleSize;
+  }
+
+  const ctx = providedCtx || canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) {
+    return null;
+  }
+
+  const sourceX = (width * position.x / 100) - (reticleSizePx / 2);
+  const sourceY = (height * position.y / 100) - (reticleSizePx / 2);
+
+  try {
+    ctx.drawImage(
+      source,
+      sourceX, sourceY, reticleSizePx, reticleSizePx,
+      0, 0, sampleSize, sampleSize
+    );
+
+    const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize);
+    const data = imageData.data;
+
+    let r = 0, g = 0, b = 0;
+    const pixelCount = data.length / 4;
+
+    for (let i = 0; i < data.length; i += 4) {
+      r += data[i];
+      g += data[i + 1];
+      b += data[i + 2];
+    }
+
+    r = Math.round(r / pixelCount);
+    g = Math.round(g / pixelCount);
+    b = Math.round(b / pixelCount);
+
+    const scheme = colorScheme || "tactical";
+    const color = getContrastingColor(r, g, b, scheme);
+
+    return { color, r, g, b };
+  } catch {
+    return null;
+  }
+}
+
+export function sampleContrastingColor(
+  source: HTMLVideoElement | HTMLImageElement,
+  position: ReticlePosition,
+  reticleSize: number,
+  colorScheme: ColorScheme
+): string {
+  const result = sampleColorFromSource({
+    source,
+    position,
+    reticleSize,
+    colorScheme,
+  });
+  return result?.color ?? CAMERA.DEFAULT_RETICLE_COLOR;
 }

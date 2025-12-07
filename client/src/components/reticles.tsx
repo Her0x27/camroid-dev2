@@ -147,6 +147,11 @@ const COLOR_SCHEMES: Record<ColorScheme, {
   },
 };
 
+export function getDefaultColorForScheme(scheme: ColorScheme = "tactical"): string {
+  const palette = COLOR_SCHEMES[scheme] || COLOR_SCHEMES.tactical;
+  return palette.dark[0];
+}
+
 export function getContrastingColor(r: number, g: number, b: number, scheme: ColorScheme = "tactical"): string {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   const palette = COLOR_SCHEMES[scheme] || COLOR_SCHEMES.tactical;
