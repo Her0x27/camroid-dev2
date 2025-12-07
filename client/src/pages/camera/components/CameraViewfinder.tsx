@@ -162,14 +162,17 @@ export const CameraViewfinder = memo(function CameraViewfinder({
       
       if (container && video && video.videoWidth > 0 && video.videoHeight > 0) {
         const rect = container.getBoundingClientRect();
-        const videoPosition = convertScreenToVideoCoordinates(screenPosition, {
+        const params = {
           containerWidth: rect.width,
           containerHeight: rect.height,
           videoWidth: video.videoWidth,
           videoHeight: video.videoHeight,
-        });
+        };
+        const videoPosition = convertScreenToVideoCoordinates(screenPosition, params);
+        console.log('[LongPress] screen:', screenPosition, 'video:', videoPosition, 'params:', params);
         onLongPressCapture?.(videoPosition);
       } else {
+        console.log('[LongPress] no conversion, using screen:', screenPosition);
         onLongPressCapture?.(screenPosition);
       }
       
