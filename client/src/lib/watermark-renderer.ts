@@ -10,7 +10,7 @@ import {
   drawRoundedRectPath,
   type IconDrawFunction,
 } from "./canvas-icons";
-import type { ReticleConfig } from "@shared/schema";
+import type { ReticleConfig, ReticlePosition } from "@shared/schema";
 
 export interface WatermarkMetadata {
   latitude?: number | null;
@@ -24,6 +24,7 @@ export interface WatermarkMetadata {
   reticleConfig?: ReticleConfig;
   reticleColor?: string;
   watermarkScale?: number;
+  reticlePosition?: ReticlePosition;
 }
 
 interface ColumnItem {
@@ -70,13 +71,15 @@ function drawReticle(
   width: number,
   height: number,
   reticleConfig: ReticleConfig | undefined,
-  reticleColor: string | undefined
+  reticleColor: string | undefined,
+  reticlePosition?: ReticlePosition
 ): void {
   if (reticleConfig?.enabled === false) return;
 
   const minDimension = Math.min(width, height);
-  const centerX = width / 2;
-  const centerY = height / 2;
+
+  const centerX = reticlePosition ? (width * reticlePosition.x / 100) : (width / 2);
+  const centerY = reticlePosition ? (height * reticlePosition.y / 100) : (height / 2);
 
   const sizePercent = reticleConfig?.size || 20;
   const reticleSize = Math.ceil(minDimension * (sizePercent / 100) / 2);
@@ -254,7 +257,7 @@ export function drawWatermark(
   const watermarkScale = (metadata.watermarkScale || 100) / 100;
   const layout = calculateLayout(width, height, watermarkScale);
 
-  drawReticle(ctx, width, height, metadata.reticleConfig, metadata.reticleColor);
+  drawReticle(ctx, width, height, metadata.reticleConfig, metadata.reticleColor, metadata.reticlePosition);
 
   if (metadata.reticleConfig?.showMetadata !== false) {
     drawMetadataPanel(ctx, metadata, layout);

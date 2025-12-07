@@ -1,13 +1,22 @@
 import { useCallback, useMemo } from "react";
-import { useTouchTracking } from "./use-touch-tracking";
+import { useTouchTracking, type Position } from "./use-touch-tracking";
 import { LONG_PRESS } from "@/lib/constants";
+
+export interface LongPressPositionPercent {
+  x: number;
+  y: number;
+  percentX: number;
+  percentY: number;
+}
 
 export interface UseLongPressOptions<T = void> {
   onLongPress?: (data: T) => void;
+  onLongPressWithPosition?: (position: LongPressPositionPercent) => void;
   data?: T;
   delay?: number;
   moveThreshold?: number;
   disabled?: boolean;
+  containerRef?: React.RefObject<HTMLElement>;
 }
 
 export interface LongPressHandlers {
@@ -24,16 +33,35 @@ export interface LongPressHandlers {
 export function useLongPress<T = void>(options: UseLongPressOptions<T>): LongPressHandlers {
   const {
     onLongPress,
+    onLongPressWithPosition,
     data,
     delay = LONG_PRESS.DEFAULT_DELAY_MS,
     moveThreshold = LONG_PRESS.DEFAULT_MOVE_THRESHOLD_PX,
     disabled = false,
+    containerRef,
   } = options;
 
   const handleLongPressCallback = useMemo(() => {
     if (!onLongPress) return undefined;
     return () => onLongPress(data as T);
   }, [onLongPress, data]);
+
+  const handleLongPressWithPositionCallback = useMemo(() => {
+    if (!onLongPressWithPosition) return undefined;
+    return (position: Position) => {
+      const container = containerRef?.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const x = position.x - rect.left;
+        const y = position.y - rect.top;
+        const percentX = Math.max(0, Math.min(100, (x / rect.width) * 100));
+        const percentY = Math.max(0, Math.min(100, (y / rect.height) * 100));
+        onLongPressWithPosition({ x, y, percentX, percentY });
+      } else {
+        onLongPressWithPosition({ x: position.x, y: position.y, percentX: 50, percentY: 50 });
+      }
+    };
+  }, [onLongPressWithPosition, containerRef]);
 
   const {
     handleStart,
@@ -43,6 +71,7 @@ export function useLongPress<T = void>(options: UseLongPressOptions<T>): LongPre
     wasLongPress,
   } = useTouchTracking({
     onLongPress: handleLongPressCallback,
+    onLongPressWithPosition: handleLongPressWithPositionCallback,
     longPressDelay: delay,
     moveThreshold,
     disabled,

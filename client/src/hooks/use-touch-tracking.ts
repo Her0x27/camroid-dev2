@@ -14,6 +14,7 @@ export interface TouchTrackingState {
 
 export interface UseTouchTrackingOptions {
   onLongPress?: () => void;
+  onLongPressWithPosition?: (position: Position) => void;
   longPressDelay?: number;
   moveThreshold?: number;
   disabled?: boolean;
@@ -31,6 +32,7 @@ export interface TouchTrackingHandlers {
 export function useTouchTracking(options: UseTouchTrackingOptions): TouchTrackingHandlers {
   const {
     onLongPress,
+    onLongPressWithPosition,
     longPressDelay = LONG_PRESS.DEFAULT_DELAY_MS,
     moveThreshold = LONG_PRESS.DEFAULT_MOVE_THRESHOLD_PX,
     disabled = false,
@@ -69,14 +71,19 @@ export function useTouchTracking(options: UseTouchTrackingOptions): TouchTrackin
       longPressFiredRef.current = false;
       isActiveRef.current = true;
 
-      if (onLongPress) {
+      if (onLongPress || onLongPressWithPosition) {
         timerRef.current = setTimeout(() => {
           longPressFiredRef.current = true;
-          onLongPress();
+          if (onLongPressWithPosition && startPosRef.current) {
+            onLongPressWithPosition(startPosRef.current);
+          }
+          if (onLongPress) {
+            onLongPress();
+          }
         }, longPressDelay);
       }
     },
-    [disabled, onLongPress, longPressDelay]
+    [disabled, onLongPress, onLongPressWithPosition, longPressDelay]
   );
 
   const handleMove = useCallback(

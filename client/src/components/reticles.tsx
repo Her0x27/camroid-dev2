@@ -1,13 +1,14 @@
 import { memo } from "react";
-import type { ReticleConfig, ColorScheme } from "@shared/schema";
+import type { ReticleConfig, ColorScheme, ReticlePosition } from "@shared/schema";
 
 interface ReticleProps {
   config: ReticleConfig;
   dynamicColor?: string;
   className?: string;
+  position?: ReticlePosition | null;
 }
 
-export const Reticle = memo(function Reticle({ config, dynamicColor, className = "" }: ReticleProps) {
+export const Reticle = memo(function Reticle({ config, dynamicColor, className = "", position }: ReticleProps) {
   if (!config.enabled) return null;
 
   const sizePercent = config.size || 20;
@@ -18,7 +19,7 @@ export const Reticle = memo(function Reticle({ config, dynamicColor, className =
   
   const outlineColor = getOutlineColorForReticle(color);
 
-  const style: React.CSSProperties = {
+  const svgStyle: React.CSSProperties = {
     opacity: config.opacity / 100,
     width: `${sizePercent}vmin`,
     height: `${sizePercent}vmin`,
@@ -27,14 +28,35 @@ export const Reticle = memo(function Reticle({ config, dynamicColor, className =
   const svgStrokeWidth = strokeWidthPercent;
   const outlineStrokeWidth = strokeWidthPercent + 2;
 
+  const hasCustomPosition = position && (position.x !== 50 || position.y !== 50);
+
+  const containerStyle: React.CSSProperties = hasCustomPosition
+    ? {
+        position: "absolute" as const,
+        left: `${position!.x}%`,
+        top: `${position!.y}%`,
+        transform: "translate(-50%, -50%)",
+        zIndex: 1,
+        pointerEvents: "none" as const,
+      }
+    : {
+        position: "absolute" as const,
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1,
+        pointerEvents: "none" as const,
+      };
+
   return (
     <div 
-      className={`absolute inset-0 pointer-events-none flex items-center justify-center ${className}`}
-      style={{ zIndex: 1 }}
+      className={className}
+      style={containerStyle}
     >
       <svg
         viewBox="0 0 100 100"
-        style={style}
+        style={svgStyle}
         className="drop-shadow-lg"
       >
         <line 

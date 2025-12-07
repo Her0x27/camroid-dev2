@@ -1,10 +1,11 @@
-import { memo, RefObject } from "react";
+import { memo, RefObject, useRef, useCallback, useState } from "react";
 import { Camera, EyeOff, FileText, Crosshair } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reticle } from "@/components/reticles";
 import { LevelIndicator } from "@/components/level-indicator";
 import { useI18n } from "@/lib/i18n";
-import type { ReticleConfig } from "@shared/schema";
+import { useLongPress, type LongPressPositionPercent } from "@/hooks/use-long-press";
+import type { ReticleConfig, ReticlePosition } from "@shared/schema";
 
 interface CameraViewfinderProps {
   videoRef: RefObject<HTMLVideoElement>;
@@ -27,6 +28,8 @@ interface CameraViewfinderProps {
   stabilizationEnabled?: boolean;
   stability?: number;
   isStable?: boolean;
+  onLongPressCapture?: (position: ReticlePosition) => void;
+  reticlePosition?: ReticlePosition | null;
 }
 
 export const CameraViewfinder = memo(function CameraViewfinder({
@@ -46,9 +49,83 @@ export const CameraViewfinder = memo(function CameraViewfinder({
   stabilizationEnabled,
   stability,
   isStable,
+  onLongPressCapture,
+  reticlePosition,
 }: CameraViewfinderProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [tempPosition, setTempPosition] = useState<ReticlePosition | null>(null);
+
+  const handleLongPressWithPosition = useCallback(
+    (pos: LongPressPositionPercent) => {
+      const position: ReticlePosition = { x: pos.percentX, y: pos.percentY };
+      onLongPressCapture?.(position);
+      setTempPosition(null);
+    },
+    [onLongPressCapture]
+  );
+
+  const longPressHandlers = useLongPress({
+    onLongPressWithPosition: reticleConfig.tapToPosition ? handleLongPressWithPosition : undefined,
+    containerRef: containerRef as React.RefObject<HTMLElement>,
+    disabled: !isReady || !reticleConfig.tapToPosition,
+    delay: 500,
+  });
+
+  const handleTouchStartWrapper = useCallback(
+    (e: React.TouchEvent) => {
+      if (reticleConfig.tapToPosition && isReady && e.touches.length === 1) {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect) {
+          const touch = e.touches[0];
+          const x = touch.clientX - rect.left;
+          const y = touch.clientY - rect.top;
+          const percentX = Math.max(0, Math.min(100, (x / rect.width) * 100));
+          const percentY = Math.max(0, Math.min(100, (y / rect.height) * 100));
+          setTempPosition({ x: percentX, y: percentY });
+        }
+      }
+      longPressHandlers.onTouchStart(e);
+    },
+    [reticleConfig.tapToPosition, isReady, longPressHandlers]
+  );
+
+  const handleTouchEndWrapper = useCallback(() => {
+    setTempPosition(null);
+    longPressHandlers.onTouchEnd();
+  }, [longPressHandlers]);
+
+  const handleTouchMoveWrapper = useCallback(
+    (e: React.TouchEvent) => {
+      if (reticleConfig.tapToPosition && isReady && e.touches.length === 1) {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect) {
+          const touch = e.touches[0];
+          const x = touch.clientX - rect.left;
+          const y = touch.clientY - rect.top;
+          const percentX = Math.max(0, Math.min(100, (x / rect.width) * 100));
+          const percentY = Math.max(0, Math.min(100, (y / rect.height) * 100));
+          setTempPosition({ x: percentX, y: percentY });
+        }
+      }
+      longPressHandlers.onTouchMove(e);
+    },
+    [reticleConfig.tapToPosition, isReady, longPressHandlers]
+  );
+
+  const displayPosition = tempPosition || reticlePosition || null;
+
   return (
-    <div className="relative flex-1 overflow-hidden">
+    <div 
+      ref={containerRef}
+      className="relative flex-1 overflow-hidden"
+      onTouchStart={handleTouchStartWrapper}
+      onTouchEnd={handleTouchEndWrapper}
+      onTouchMove={handleTouchMoveWrapper}
+      onMouseDown={longPressHandlers.onMouseDown}
+      onMouseUp={longPressHandlers.onMouseUp}
+      onMouseMove={longPressHandlers.onMouseMove}
+      onMouseLeave={longPressHandlers.onMouseLeave}
+    >
       <canvas ref={canvasRef} className="hidden" />
 
       <video
@@ -64,7 +141,7 @@ export const CameraViewfinder = memo(function CameraViewfinder({
 
       <div className="absolute inset-0 viewfinder-overlay pointer-events-none" />
 
-      {isReady && <Reticle config={reticleConfig} dynamicColor={reticleColor} />}
+      {isReady && <Reticle config={reticleConfig} dynamicColor={reticleColor} position={displayPosition} />}
 
       {isReady && note && (
         <NoteOverlay note={note} />

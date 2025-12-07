@@ -20,6 +20,7 @@ import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { CameraControls, PhotoNoteDialog, CameraViewfinder } from "./components";
+import type { ReticlePosition } from "@shared/schema";
 
 export default function CameraPage() {
   const [, navigate] = useLocation();
@@ -198,7 +199,7 @@ export default function CameraPage() {
     processingComplete();
   }, [processingComplete]);
 
-  const handleCapture = useCallback(async () => {
+  const handleCaptureWithPosition = useCallback(async (position?: ReticlePosition) => {
     if (!isReady || isCapturing || accuracyBlocked) return;
 
     const signal = getAbortSignal();
@@ -207,7 +208,7 @@ export default function CameraPage() {
     const noteText = currentNote.trim();
 
     try {
-      if (captureConfig.stabilization.enabled) {
+      if (!position && captureConfig.stabilization.enabled) {
         await waitForStability();
       }
 
@@ -227,6 +228,7 @@ export default function CameraPage() {
         reticleConfig: captureConfig.reticle,
         reticleColor: reticleColor,
         watermarkScale: captureConfig.watermarkScale,
+        reticlePosition: position,
       });
 
       if (!result) {
@@ -268,6 +270,14 @@ export default function CameraPage() {
       captureFailed();
     }
   }, [isReady, isCapturing, accuracyBlocked, capturePhoto, geoData, orientationData, currentNote, reticleColor, captureConfig, playCapture, waitForStability, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingCompleteCallback, getAbortSignal, startCapture, captureSuccess, captureFailed]);
+
+  const handleCapture = useCallback(async () => {
+    await handleCaptureWithPosition();
+  }, [handleCaptureWithPosition]);
+
+  const handleLongPressCapture = useCallback((position: ReticlePosition) => {
+    handleCaptureWithPosition(position);
+  }, [handleCaptureWithPosition]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -319,6 +329,7 @@ export default function CameraPage() {
         stabilizationEnabled={settings.stabilization?.enabled}
         stability={stability}
         isStable={isStable}
+        onLongPressCapture={handleLongPressCapture}
       />
 
       <CameraControls
