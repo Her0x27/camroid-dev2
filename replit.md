@@ -105,3 +105,16 @@ The application includes a privacy/masking feature that displays a 2048 game ins
 
 ### Server (Minimal)
 - **Express**: Serves static files.
+
+## Recent Refactoring (December 2025)
+
+### Code Architecture Improvements
+- **useAdjustmentMode hook** (`client/src/hooks/use-adjustment-mode.ts`): Manages manual reticle adjustment mode state, frozen frame capture, and color sampling. Reduces CameraPage complexity.
+- **sampleColorFromSource utility** (`client/src/lib/canvas-utils.ts`): Unified color sampling from video/image sources with canvas reuse optimization to prevent per-frame allocation.
+- **getDefaultColorForScheme** (`client/src/components/reticles.tsx`): Returns the default reticle color for a given colorScheme (palette.dark[0]).
+- **UI barrel export** (`client/src/components/ui/index.ts`): Simplifies imports for shadcn/ui components.
+
+### Color Handling
+- `useColorSampling` returns a synchronously computed color: `autoColor ? sampledColor : defaultColor`
+- This eliminates flash when toggling autoColor setting
+- Color is derived from colorScheme palette when autoColor is disabled
