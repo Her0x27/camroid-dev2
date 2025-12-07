@@ -72,6 +72,7 @@ export default function CameraPage() {
     error: cameraError,
     startCamera,
     capturePhoto,
+    captureFromImage,
   } = useCamera({ 
     facingMode: settings.cameraFacing, 
     photoQuality: settings.photoQuality,
@@ -464,10 +465,88 @@ export default function CameraPage() {
     setAdjustmentMode(prev => ({ ...prev, position }));
   }, []);
 
+  const handleCaptureFromFrozenFrame = useCallback(async (
+    frozenFrame: string,
+    position: ReticlePosition,
+    customReticleColor: string
+  ) => {
+    if (!isReady || isCapturing || accuracyBlocked) return;
+
+    const signal = getAbortSignal();
+    startCapture();
+    const timestamp = Date.now();
+    const noteText = currentNote.trim();
+
+    try {
+      if (captureConfig.soundEnabled) {
+        playCapture();
+      }
+
+      const result = await captureFromImage(frozenFrame, {
+        latitude: geoData.latitude,
+        longitude: geoData.longitude,
+        altitude: geoData.altitude,
+        accuracy: geoData.accuracy,
+        heading: orientationData.heading,
+        tilt: orientationData.tilt,
+        note: noteText || undefined,
+        timestamp,
+        reticleConfig: captureConfig.reticle,
+        reticleColor: customReticleColor,
+        watermarkScale: captureConfig.watermarkScale,
+        reticlePosition: position,
+      });
+
+      if (!result) {
+        throw new Error(t.camera.failedToCapture);
+      }
+
+      setLastPhotoThumb(result.thumbnailData);
+      captureSuccess();
+
+      const photoData: PhotoData = {
+        geoData: {
+          latitude: geoData.latitude,
+          longitude: geoData.longitude,
+          altitude: geoData.altitude,
+          accuracy: geoData.accuracy,
+        },
+        orientationData: {
+          heading: orientationData.heading,
+          tilt: orientationData.tilt,
+        },
+        note: noteText || undefined,
+        timestamp,
+      };
+
+      processCaptureDeferred({
+        result,
+        photoData,
+        enhancementSettings: captureConfig.enhancement,
+        imgbbSettings: captureConfig.imgbb,
+        isOnline: navigator.onLine,
+        onPhotoSaved: handlePhotoSaved,
+        onCloudUpload: handleCloudUpload,
+        onError: handleProcessingError,
+        onComplete: handleProcessingCompleteCallback,
+        signal,
+      });
+    } catch (error) {
+      logger.error("Photo capture from frozen frame failed", error);
+      captureFailed();
+    }
+  }, [isReady, isCapturing, accuracyBlocked, captureFromImage, geoData, orientationData, currentNote, captureConfig, playCapture, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingCompleteCallback, getAbortSignal, startCapture, captureSuccess, captureFailed]);
+
   const handleAdjustmentConfirm = useCallback(() => {
-    handleCaptureWithPosition(adjustmentMode.position, adjustmentReticleColor);
+    if (adjustmentMode.frozenFrame) {
+      handleCaptureFromFrozenFrame(
+        adjustmentMode.frozenFrame,
+        adjustmentMode.position,
+        adjustmentReticleColor
+      );
+    }
     setAdjustmentMode({ active: false, frozenFrame: null, position: { x: 50, y: 50 } });
-  }, [handleCaptureWithPosition, adjustmentMode.position, adjustmentReticleColor]);
+  }, [handleCaptureFromFrozenFrame, adjustmentMode.frozenFrame, adjustmentMode.position, adjustmentReticleColor]);
 
   const handleAdjustmentCancel = useCallback(() => {
     setAdjustmentMode({ active: false, frozenFrame: null, position: { x: 50, y: 50 } });

@@ -22,6 +22,11 @@ export interface CameraCapabilities {
 
 type PhotoMetadata = WatermarkMetadata;
 
+export interface CaptureResult {
+  imageData: string;
+  thumbnailData: string;
+}
+
 interface UseCameraReturn {
   videoRef: React.RefObject<HTMLVideoElement>;
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -30,7 +35,8 @@ interface UseCameraReturn {
   error: string | null;
   startCamera: () => Promise<void>;
   stopCamera: () => void;
-  capturePhoto: (metadata?: PhotoMetadata) => Promise<{ imageData: string; thumbnailData: string } | null>;
+  capturePhoto: (metadata?: PhotoMetadata) => Promise<CaptureResult | null>;
+  captureFromImage: (imageSource: string, metadata?: PhotoMetadata, quality?: number) => Promise<CaptureResult | null>;
   switchCamera: () => Promise<void>;
   currentFacing: "user" | "environment";
   availableCameras: CameraDevice[];
@@ -280,6 +286,63 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
     return { imageData, thumbnailData };
   }, [isReady]);
 
+  const captureFromImage = useCallback(async (
+    imageSource: string,
+    metadata?: PhotoMetadata,
+    quality?: number
+  ): Promise<CaptureResult | null> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        
+        if (!ctx) {
+          resolve(null);
+          return;
+        }
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+        drawWatermark(ctx, canvas.width, canvas.height, metadata);
+
+        const finalQuality = quality ?? photoQuality;
+        const imageData = canvas.toDataURL("image/jpeg", finalQuality / 100);
+
+        const thumbCanvas = document.createElement("canvas");
+        const thumbCtx = thumbCanvas.getContext("2d");
+        const thumbSize = 300;
+        const aspectRatio = img.width / img.height;
+        
+        if (aspectRatio > 1) {
+          thumbCanvas.width = thumbSize;
+          thumbCanvas.height = thumbSize / aspectRatio;
+        } else {
+          thumbCanvas.height = thumbSize;
+          thumbCanvas.width = thumbSize * aspectRatio;
+        }
+
+        if (thumbCtx) {
+          thumbCtx.drawImage(img, 0, 0, img.width, img.height, 0, 0, thumbCanvas.width, thumbCanvas.height);
+          drawWatermark(thumbCtx, thumbCanvas.width, thumbCanvas.height, metadata);
+        }
+
+        const thumbnailData = thumbCanvas.toDataURL("image/jpeg", 0.7);
+
+        resolve({ imageData, thumbnailData });
+      };
+      
+      img.onerror = () => {
+        logger.error("Failed to load image for capture");
+        resolve(null);
+      };
+      
+      img.src = imageSource;
+    });
+  }, [photoQuality]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -296,6 +359,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
     startCamera,
     stopCamera,
     capturePhoto,
+    captureFromImage,
     switchCamera,
     currentFacing,
     availableCameras,
