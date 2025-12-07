@@ -8,7 +8,7 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 **Статус предыдущих задач:** ✅ ВСЕ ЗАДАЧИ ВЫПОЛНЕНЫ (разделы 1-9).
 
-**Clean Code Audit (Раздел 9):** ✅ Код чист. Не обнаружено: неиспользуемых импортов, мёртвого кода, избыточных типов, console.log вне логгера, @ts-ignore, as any.
+**Clean Code Audit (Раздел 9):** ⚠️ Найдено 6 проблем (см. раздел 10.1)
 
 **Новые задачи (Раздел 10):** 9 новых задач выявлено:
 - 🔴 Высокий приоритет: 2 задачи (дублирование color sampling)
@@ -686,6 +686,42 @@ TypeScript и ESLint проверки не выявили неиспользуе
 ⬜ [IMP-1] [ОПЦИОНАЛЬНО] Создать client/src/components/ui/index.ts с реэкспортом популярных компонентов
 ```
 
+### 10.6 ESLint проблемы (декабрь 2025)
+**Последняя проверка:** 07.12.2025
+
+#### Console.log в продакшен коде
+**Местоположение:** `client/src/pages/camera/components/CameraViewfinder.tsx`
+
+- Строка 172: `console.log('[LongPress] screen:', screenPosition, 'video:', videoPosition, 'params:', params);`
+- Строка 175: `console.log('[LongPress] no conversion, using screen:', screenPosition);`
+
+**Решение:** Заменить на `logger.debug()` или удалить
+
+```
+⬜ [CLEAN-1] Заменить console.log на logger.debug в CameraViewfinder.tsx:172
+⬜ [CLEAN-2] Заменить console.log на logger.debug в CameraViewfinder.tsx:175
+```
+
+#### Unused underscore variables (ESLint warning)
+**Местоположение:** `client/src/lib/db/photo-service.ts`
+
+Паттерн деструктуризации `{ imageData: _, thumbnailData: __ }` вызывает ESLint warning (assigned but never used). Это корректный паттерн TypeScript для исключения полей.
+
+**Решение:** Добавить префикс underscore к именам переменных для подавления ESLint warning.
+
+```
+⬜ [CLEAN-3] Переименовать _ → _imageData, __ → _thumbnailData в photo-service.ts:147
+⬜ [CLEAN-4] Переименовать _ → _imageData в photo-service.ts:174
+⬜ [CLEAN-5] Переименовать _ → _imageData в photo-service.ts:240
+```
+
+#### actionTypes warning
+**Местоположение:** `client/src/hooks/use-toast.ts:19`
+
+Переменная `actionTypes` объявлена, но используется только как тип.
+
+**Решение:** Уже есть eslint-disable комментарий, проблема известна и допустима.
+
 ---
 
 ## Чек-лист новых задач (декабрь 2024)
@@ -712,6 +748,16 @@ TypeScript и ESLint проверки не выявили неиспользуе
 ⬜ [DUP-5] Создать базовый хук useSensorWithThreshold
 ⬜ [DUP-6] Рефакторить use-orientation.ts для использования базового хука
 ⬜ [IMP-1] Создать barrel export для UI компонентов
+```
+
+### Clean Code (декабрь 2025)
+
+```
+⬜ [CLEAN-1] Заменить console.log на logger.debug в CameraViewfinder.tsx:172
+⬜ [CLEAN-2] Заменить console.log на logger.debug в CameraViewfinder.tsx:175
+⬜ [CLEAN-3] Переименовать _ → _imageData в photo-service.ts:147
+⬜ [CLEAN-4] Переименовать _ → _imageData в photo-service.ts:174
+⬜ [CLEAN-5] Переименовать _ → _imageData в photo-service.ts:240
 ```
 
 ---
