@@ -144,7 +144,7 @@ export async function getPhotosSummary(sortOrder: "newest" | "oldest" = "newest"
       const cursor = (event.target as IDBRequest).result;
       if (cursor) {
         const photo = cursor.value as Photo;
-        const { imageData: _, thumbnailData: __, ...summary } = photo;
+        const { imageData: _imageData, thumbnailData: _thumbnailData, ...summary } = photo;
         summaries.push(summary);
         cursor.continue();
       } else {
@@ -171,7 +171,7 @@ export async function getPhotosWithThumbnails(sortOrder: "newest" | "oldest" = "
       const cursor = (event.target as IDBRequest).result;
       if (cursor) {
         const photo = cursor.value as Photo;
-        const { imageData: _, ...withThumbnail } = photo;
+        const { imageData: _imageData, ...withThumbnail } = photo;
         photos.push(withThumbnail);
         cursor.continue();
       } else {
@@ -237,7 +237,7 @@ export async function getPhotosWithThumbnailsPaginated(
           matchingCount++;
           
           if (photos.length < limit) {
-            const { imageData: _, ...withThumbnail } = photo;
+            const { imageData: _imageData, ...withThumbnail } = photo;
             photos.push(withThumbnail);
             lastTimestamp = photo.metadata.timestamp;
           }

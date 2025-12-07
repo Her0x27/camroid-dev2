@@ -4,20 +4,24 @@
 
 This document contains the results of a comprehensive TypeScript project audit covering code duplication, architecture, performance, typing, data handling, async patterns, imports, code smells, and **clean code analysis**.
 
-**Последний аудит:** Декабрь 2024
+**Последний аудит:** 07.12.2025
 
-**Статус предыдущих задач:** ✅ ВСЕ ЗАДАЧИ ВЫПОЛНЕНЫ (разделы 1-9).
+**Статус всех задач:** ✅ ВСЕ ОБЯЗАТЕЛЬНЫЕ ЗАДАЧИ ВЫПОЛНЕНЫ (разделы 1-10).
 
-**Clean Code Audit (Раздел 9):** ⚠️ Найдено 6 проблем (см. раздел 10.1)
+**Clean Code Audit (Раздел 9):** ✅ Все проблемы исправлены
 
-**Новые задачи (Раздел 10):** 9 новых задач выявлено:
-- 🔴 Высокий приоритет: 2 задачи (дублирование color sampling)
-- 🟡 Средний приоритет: 2 задачи (декомпозиция CameraPage)
-- 🟢 Низкий приоритет: 5 задач (опциональные улучшения)
+**Задачи Раздела 10:** ✅ Все обязательные задачи выполнены:
+- ✅ Высокий приоритет: 2 задачи выполнено (sampleColorFromSource, useAdjustmentMode)
+- ✅ Средний приоритет: 2 задачи выполнено (capture workflow)
+- ✅ Clean Code: 5 задач выполнено (console.log → logger.debug, underscore variables)
+- ✅ Barrel exports: создан index.ts для UI компонентов
+- 🟢 Низкий приоритет: 4 опциональные задачи остаются (ARCH-5, ARCH-6, DUP-5, DUP-6)
 
-**Дополнительно выполнено ранее:**
+**Дополнительно выполнено:**
 - ✅ Серверный логгер (server/logger.ts) - унифицированное логирование
 - ✅ ESLint правило no-console - автоматический контроль console.log
+- ✅ useAdjustmentMode хук - управление режимом ручной корректировки
+- ✅ sampleColorFromSource - общая функция color sampling в canvas-utils.ts
 
 ---
 
@@ -611,38 +615,45 @@ TypeScript и ESLint проверки не выявили неиспользуе
 ### 10.1 Дублирование логики color sampling
 **Местоположение:** 
 - `client/src/hooks/use-color-sampling.ts` (основной хук)
-- `client/src/pages/camera/index.tsx` (функции `sampleColorFromVideo`, `sampleColorFromImage`, `sampleColorFromFrozenFrame`)
+- `client/src/pages/camera/index.tsx` (функции `sampleColorFromVideo`)
 
-**Проблема:** Логика сэмплирования цвета из видео/изображения дублируется в CameraPage, хотя существует специализированный хук `useColorSampling`. Обе реализации:
-- Создают canvas и получают context
-- Вычисляют размер области сэмплирования
-- Рисуют фрагмент видео/изображения
-- Считают средний цвет по пикселям
-- Вызывают `getContrastingColor()`
+**Статус:** ✅ ВЫПОЛНЕНО
 
-**Предложение:** Расширить `useColorSampling` для поддержки сэмплирования из замороженного кадра или извлечь общую утилиту `sampleColorFromSource()`.
+**Решение:** Создана общая функция `sampleColorFromSource()` в `client/src/lib/canvas-utils.ts`:
+- Универсальный интерфейс `ColorSampleConfig` для video и image источников
+- Функции-помощники `getSourceDimensions()` и `isSourceReady()`
+- Публичная функция `sampleContrastingColor()` для упрощённого использования
+- `useColorSampling` и `useAdjustmentMode` используют общую функцию
+- `sampleColorFromVideo` в CameraPage использует `sampleContrastingColor`
 
 ```
-⬜ [DUP-3] Извлечь общую функцию sampleColorFromCanvas в lib/canvas-utils.ts
-⬜ [DUP-4] Рефакторить sampleColorFromVideo/sampleColorFromFrozenFrame для использования общей функции
+✅ [DUP-3] Извлечь общую функцию sampleColorFromSource в lib/canvas-utils.ts
+✅ [DUP-4] Рефакторить sampleColorFromVideo для использования общей функции sampleContrastingColor
 ```
 
 ### 10.2 Большой размер CameraPage
-**Местоположение:** `client/src/pages/camera/index.tsx` (638 строк, 20 useCallback, 4 useState)
+**Местоположение:** `client/src/pages/camera/index.tsx` (~490 строк после рефакторинга)
 
-**Проблема:** Компонент CameraPage содержит слишком много ответственностей:
-- Управление состоянием камеры
-- Логика ручной корректировки (adjustmentMode)
-- Color sampling для замороженного кадра
-- GPS gating логика
-- Звуковые эффекты
-- Обработка захвата фото (handleCapture, handleCaptureWithPosition, handleCaptureFromFrozenFrame)
+**Статус:** ✅ ВЫПОЛНЕНО
 
-**Предложение:** Извлечь логику ручной корректировки в отдельный хук `useAdjustmentMode`.
+**Решение:** Логика ручной корректировки извлечена в отдельный хук:
+- `client/src/hooks/use-adjustment-mode.ts` - управление режимом ручной корректировки
+  - `AdjustmentModeState` - состояние (active, frozenFrame, position)
+  - `activateAdjustment()` - захват кадра и активация режима
+  - `updatePosition()` - обновление позиции прицела
+  - `confirmAdjustment()` - подтверждение и возврат данных для съёмки
+  - `cancelAdjustment()` - отмена режима
+  - Автоматический color sampling из замороженного кадра через `sampleContrastingColor`
+
+- CameraPage теперь использует:
+  - `useCaptureController` для управления состоянием съёмки
+  - `useAdjustmentMode` для режима ручной корректировки
+  - `useColorSampling` для автоматического определения цвета прицела
+  - `handleCaptureWithPosition` и `handleCaptureFromFrozenFrame` работают как связанные методы
 
 ```
-⬜ [ARCH-3] Создать useAdjustmentMode хук для управления режимом ручной корректировки
-⬜ [ARCH-4] Объединить handleCaptureWithPosition и handleCaptureFromFrozenFrame в единый capture workflow
+✅ [ARCH-3] Создать useAdjustmentMode хук для управления режимом ручной корректировки
+✅ [ARCH-4] Объединить handleCaptureWithPosition и handleCaptureFromFrozenFrame в единый capture workflow
 ```
 
 ### 10.3 Размер файла GalleryPage  
@@ -678,41 +689,47 @@ TypeScript и ESLint проверки не выявили неиспользуе
 ### 10.5 Barrel exports в UI компонентах
 **Местоположение:** `client/src/components/ui/` (50+ файлов)
 
-**Проблема:** Отсутствует barrel file (index.ts) для UI компонентов, что приводит к длинным путям импорта.
+**Статус:** ✅ ВЫПОЛНЕНО
 
-**Предложение:** Создать index.ts для наиболее используемых компонентов.
+**Решение:** Создан `client/src/components/ui/index.ts` с реэкспортом 25+ компонентов:
+- Button, Card, Dialog, Input, Label, Separator, Switch, Slider
+- Badge, Select, Tabs, Checkbox, ScrollArea, Skeleton
+- Tooltip, Progress, SettingRow, SettingSlider, CollapsibleCard
+- Sheet, DropdownMenu, AlertDialog, Alert, Textarea
 
 ```
-⬜ [IMP-1] [ОПЦИОНАЛЬНО] Создать client/src/components/ui/index.ts с реэкспортом популярных компонентов
+✅ [IMP-1] Создать client/src/components/ui/index.ts с реэкспортом популярных компонентов
 ```
 
 ### 10.6 ESLint проблемы (декабрь 2025)
 **Последняя проверка:** 07.12.2025
 
+**Статус:** ✅ ВСЕ ИСПРАВЛЕНО
+
 #### Console.log в продакшен коде
 **Местоположение:** `client/src/pages/camera/components/CameraViewfinder.tsx`
 
-- Строка 172: `console.log('[LongPress] screen:', screenPosition, 'video:', videoPosition, 'params:', params);`
-- Строка 175: `console.log('[LongPress] no conversion, using screen:', screenPosition);`
-
-**Решение:** Заменить на `logger.debug()` или удалить
+**Решение:** Заменено на `logger.debug()` с корректным форматом (message, data object):
+- `logger.debug('[LongPress] coordinate conversion', { screenPosition, videoPosition, params })`
+- `logger.debug('[LongPress] no conversion, using screen position', screenPosition)`
 
 ```
-⬜ [CLEAN-1] Заменить console.log на logger.debug в CameraViewfinder.tsx:172
-⬜ [CLEAN-2] Заменить console.log на logger.debug в CameraViewfinder.tsx:175
+✅ [CLEAN-1] Заменить console.log на logger.debug в CameraViewfinder.tsx:176
+✅ [CLEAN-2] Заменить console.log на logger.debug в CameraViewfinder.tsx:179
 ```
 
 #### Unused underscore variables (ESLint warning)
 **Местоположение:** `client/src/lib/db/photo-service.ts`
 
-Паттерн деструктуризации `{ imageData: _, thumbnailData: __ }` вызывает ESLint warning (assigned but never used). Это корректный паттерн TypeScript для исключения полей.
-
-**Решение:** Добавить префикс underscore к именам переменных для подавления ESLint warning.
+**Решение:** Переменные переименованы для соответствия ESLint соглашениям:
+- `{ imageData: _imageData, thumbnailData: _thumbnailData, ...summary }` (строка 150)
+- `{ imageData: _imageData, ...withThumbnail }` (строка 177)
+- `{ imageData: _imageData, ...withThumbnail }` (строка 243)
 
 ```
-⬜ [CLEAN-3] Переименовать _ → _imageData, __ → _thumbnailData в photo-service.ts:147
-⬜ [CLEAN-4] Переименовать _ → _imageData в photo-service.ts:174
-⬜ [CLEAN-5] Переименовать _ → _imageData в photo-service.ts:240
+✅ [CLEAN-3] Переименовать _ → _imageData, __ → _thumbnailData в photo-service.ts:150
+✅ [CLEAN-4] Переименовать _ → _imageData в photo-service.ts:177
+✅ [CLEAN-5] Переименовать _ → _imageData в photo-service.ts:243
 ```
 
 #### actionTypes warning
@@ -729,35 +746,35 @@ TypeScript и ESLint проверки не выявили неиспользуе
 ### Высокий приоритет
 
 ```
-⬜ [DUP-3] Извлечь общую функцию sampleColorFromCanvas в lib/canvas-utils.ts
-⬜ [DUP-4] Рефакторить sampleColorFromVideo/sampleColorFromFrozenFrame для использования общей функции
+✅ [DUP-3] Извлечь общую функцию sampleColorFromSource в lib/canvas-utils.ts
+✅ [DUP-4] Рефакторить sampleColorFromVideo для использования общей функции sampleContrastingColor
 ```
 
 ### Средний приоритет
 
 ```
-⬜ [ARCH-3] Создать useAdjustmentMode хук для управления режимом ручной корректировки
-⬜ [ARCH-4] Объединить handleCaptureWithPosition и handleCaptureFromFrozenFrame в единый capture workflow
+✅ [ARCH-3] Создать useAdjustmentMode хук для управления режимом ручной корректировки
+✅ [ARCH-4] Объединить handleCaptureWithPosition и handleCaptureFromFrozenFrame в единый capture workflow
 ```
 
 ### Низкий приоритет (опционально)
 
 ```
-⬜ [ARCH-5] Извлечь GalleryToolbar компонент
-⬜ [ARCH-6] Извлечь GalleryContent компонент
-⬜ [DUP-5] Создать базовый хук useSensorWithThreshold
-⬜ [DUP-6] Рефакторить use-orientation.ts для использования базового хука
-⬜ [IMP-1] Создать barrel export для UI компонентов
+⬜ [ARCH-5] [ОПЦИОНАЛЬНО] Извлечь GalleryToolbar компонент
+⬜ [ARCH-6] [ОПЦИОНАЛЬНО] Извлечь GalleryContent компонент
+⬜ [DUP-5] [ОПЦИОНАЛЬНО] Создать базовый хук useSensorWithThreshold
+⬜ [DUP-6] [ОПЦИОНАЛЬНО] Рефакторить use-orientation.ts для использования базового хука
+✅ [IMP-1] Создать barrel export для UI компонентов
 ```
 
 ### Clean Code (декабрь 2025)
 
 ```
-⬜ [CLEAN-1] Заменить console.log на logger.debug в CameraViewfinder.tsx:172
-⬜ [CLEAN-2] Заменить console.log на logger.debug в CameraViewfinder.tsx:175
-⬜ [CLEAN-3] Переименовать _ → _imageData в photo-service.ts:147
-⬜ [CLEAN-4] Переименовать _ → _imageData в photo-service.ts:174
-⬜ [CLEAN-5] Переименовать _ → _imageData в photo-service.ts:240
+✅ [CLEAN-1] Заменить console.log на logger.debug в CameraViewfinder.tsx:176
+✅ [CLEAN-2] Заменить console.log на logger.debug в CameraViewfinder.tsx:179
+✅ [CLEAN-3] Переименовать _ → _imageData, __ → _thumbnailData в photo-service.ts:150
+✅ [CLEAN-4] Переименовать _ → _imageData в photo-service.ts:177
+✅ [CLEAN-5] Переименовать _ → _imageData в photo-service.ts:243
 ```
 
 ---

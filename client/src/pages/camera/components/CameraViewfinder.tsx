@@ -6,6 +6,7 @@ import { LevelIndicator } from "@/components/level-indicator";
 import { useI18n } from "@/lib/i18n";
 import { useLongPress, type LongPressPositionPercent } from "@/hooks/use-long-press";
 import { convertScreenToVideoCoordinates, convertVideoToScreenCoordinates } from "@/lib/canvas-utils";
+import { logger } from "@/lib/logger";
 import type { ReticleConfig, ReticlePosition } from "@shared/schema";
 
 interface LongPressIndicatorProps {
@@ -169,10 +170,10 @@ export const CameraViewfinder = memo(function CameraViewfinder({
           videoHeight: video.videoHeight,
         };
         const videoPosition = convertScreenToVideoCoordinates(screenPosition, params);
-        console.log('[LongPress] screen:', screenPosition, 'video:', videoPosition, 'params:', params);
+        logger.debug('[LongPress] coordinate conversion', { screenPosition, videoPosition, params });
         onLongPressCapture?.(videoPosition);
       } else {
-        console.log('[LongPress] no conversion, using screen:', screenPosition);
+        logger.debug('[LongPress] no conversion, using screen position', screenPosition);
         onLongPressCapture?.(screenPosition);
       }
       
