@@ -182,6 +182,8 @@ export const ru: Translations = {
         monochrome: "Монохром",
         warm: "Тёплая",
       },
+      tapToPosition: "Съёмка удержанием",
+      tapToPositionDesc: "Удержание пальца на экране для позиционирования прицела и съёмки",
     },
     
     capture: {

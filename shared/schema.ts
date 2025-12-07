@@ -66,7 +66,14 @@ export const reticleConfigSchema = z.object({
   showMetadata: z.boolean().default(true),
   autoColor: z.boolean().default(true), // auto-adjust color based on background
   colorScheme: z.enum(["contrast", "tactical", "neon", "monochrome", "warm"]).default("tactical"), // color palette for auto-color
+  tapToPosition: z.boolean().default(true), // enable tap-to-position and capture on long press
 });
+
+// Custom reticle position (transient, not persisted)
+export interface ReticlePosition {
+  x: number; // percentage 0-100
+  y: number; // percentage 0-100
+}
 
 export type ReticleConfig = z.infer<typeof reticleConfigSchema>;
 
@@ -143,6 +150,7 @@ export const defaultSettings: Settings = {
     showMetadata: true,
     autoColor: true,
     colorScheme: "tactical",
+    tapToPosition: true,
   },
   gpsEnabled: true,
   orientationEnabled: true,

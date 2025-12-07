@@ -180,6 +180,8 @@ export const en = {
         monochrome: "Monochrome",
         warm: "Warm",
       },
+      tapToPosition: "Tap to Position",
+      tapToPositionDesc: "Long press on screen to position crosshair and capture photo",
     },
     
     capture: {
