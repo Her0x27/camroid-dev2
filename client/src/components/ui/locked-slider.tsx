@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
 
 interface LockedSliderProps {
   value: number[];
@@ -8,6 +9,7 @@ interface LockedSliderProps {
   max: number;
   step: number;
   "data-testid"?: string;
+  className?: string;
 }
 
 export function LockedSlider({
@@ -17,6 +19,7 @@ export function LockedSlider({
   max,
   step,
   "data-testid": testId,
+  className,
 }: LockedSliderProps) {
   const [isLocked, setIsLocked] = useState(true);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,7 +58,7 @@ export function LockedSlider({
         transition: "opacity 150ms ease",
         cursor: isLocked ? "not-allowed" : "grab",
       }}
-      className="select-none"
+      className={cn("select-none", className)}
     >
       <Slider
         value={value}

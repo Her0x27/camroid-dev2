@@ -387,7 +387,7 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <main className={`p-4 max-w-2xl mx-auto ${isMobile ? 'pb-24' : 'pb-8'} safe-bottom`}>
+      <main className={`p-4 max-w-2xl mx-auto ${isMobile ? 'pb-32' : 'pb-20'} safe-bottom`}>
         <AnimatedContainer className="space-y-4">
           {!isSearching && (
             <AnimatedItem>

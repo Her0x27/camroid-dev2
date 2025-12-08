@@ -34,22 +34,22 @@ export function CollapsibleCard({
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader 
-            className="pb-3 cursor-pointer select-none hover-elevate rounded-t-lg bg-[hsl(var(--card-header))]"
+            className="pb-3 cursor-pointer select-none hover-elevate rounded-t-lg bg-[hsl(var(--card-header))] min-h-[64px] touch-manipulation active:bg-muted/30"
             data-testid={testId ? `${testId}-trigger` : undefined}
           >
-            <div className="flex items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <span className="text-primary">{icon}</span>
-                {title}
+            <div className="flex items-center justify-between gap-3">
+              <CardTitle className="flex items-center gap-3 text-base">
+                <span className="text-primary shrink-0">{icon}</span>
+                <span className="leading-tight">{title}</span>
               </CardTitle>
               <ChevronDown 
                 className={cn(
-                  "w-5 h-5 text-muted-foreground transition-transform duration-200",
+                  "w-5 h-5 text-muted-foreground transition-transform duration-200 shrink-0",
                   isOpen && "rotate-180"
                 )}
               />
             </div>
-            <CardDescription className="pr-6">
+            <CardDescription className="pr-8 mt-1 leading-tight">
               {description}
             </CardDescription>
           </CardHeader>
