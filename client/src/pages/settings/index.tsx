@@ -25,7 +25,6 @@ import { usePWA } from "@/hooks/use-pwa";
 import { usePrivacy } from "@/lib/privacy-context";
 import { useStorage } from "@/hooks/use-storage";
 import { useTheme } from "@/lib/theme-context";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { validateApiKey } from "@/lib/imgbb";
 import { PatternLock, patternToString } from "@/components/pattern-lock";
 import { logger } from "@/lib/logger";
@@ -43,7 +42,7 @@ import {
   PWASection,
   ResetSection,
 } from "./sections";
-import { QuickSettings, SettingsTabs, SettingsSearch, type SettingsCategory } from "./components";
+import { QuickSettings, SettingsChips, SettingsSearch, type SettingsCategory } from "./components";
 import { AnimatedContainer, AnimatedItem } from "@/components/animated-section";
 
 export default function SettingsPage() {
@@ -53,7 +52,6 @@ export default function SettingsPage() {
   const { canInstall, isInstalled, isInstalling, install, showIOSInstructions } = usePWA();
   const { settings: privacySettings, updateSettings: updatePrivacySettings } = usePrivacy();
   const { theme, setTheme } = useTheme();
-  const isMobile = useIsMobile();
   
   const [activeCategory, setActiveCategory] = useState<SettingsCategory>("camera");
   const [searchQuery, setSearchQuery] = useState("");
@@ -371,23 +369,33 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
-        <div className="flex items-center gap-3 px-4 py-3 max-w-2xl mx-auto">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-            data-testid="button-back-camera"
-            className="shrink-0"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div className="flex-1">
-            <SettingsSearch value={searchQuery} onChange={setSearchQuery} />
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center gap-3 px-4 py-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
+              data-testid="button-back-camera"
+              className="shrink-0 h-9 w-9"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="flex-1">
+              <SettingsSearch value={searchQuery} onChange={setSearchQuery} />
+            </div>
           </div>
+          {!isSearching && (
+            <div className="px-4 pb-2">
+              <SettingsChips
+                activeCategory={activeCategory}
+                onCategoryChange={setActiveCategory}
+              />
+            </div>
+          )}
         </div>
       </header>
 
-      <main className={`p-4 max-w-2xl mx-auto ${isMobile ? 'pb-32' : 'pb-20'} safe-bottom`}>
+      <main className="p-4 max-w-2xl mx-auto pb-8 safe-bottom">
         <AnimatedContainer className="space-y-4">
           {!isSearching && (
             <AnimatedItem>
@@ -421,35 +429,6 @@ export default function SettingsPage() {
           )}
         </AnimatedContainer>
       </main>
-
-      {isMobile && !isSearching && (
-        <SettingsTabs
-          activeCategory={activeCategory}
-          onCategoryChange={setActiveCategory}
-        />
-      )}
-
-      {!isMobile && !isSearching && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-          <div className="bg-card/95 backdrop-blur-sm border border-card-border rounded-full px-2 py-1 shadow-lg">
-            <div className="flex gap-1">
-              {(["camera", "interface", "data", "system"] as SettingsCategory[]).map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                    activeCategory === cat
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  {t.settings.categories[cat as keyof typeof t.settings.categories]}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <AlertDialogContent>

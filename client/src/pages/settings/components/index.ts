@@ -1,3 +1,3 @@
 export { QuickSettings } from "./QuickSettings";
-export { SettingsTabs, type SettingsCategory } from "./SettingsTabs";
+export { SettingsChips, type SettingsCategory } from "./SettingsChips";
 export { SettingsSearch } from "./SettingsSearch";
