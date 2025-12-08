@@ -53,6 +53,8 @@ export const ReticleSection = memo(function ReticleSection({
             testId="slider-reticle-size"
           />
 
+          <Separator />
+
           <SettingSlider
             icon={<Crosshair className="w-4 h-4" />}
             label={t.settings.crosshair.thickness}
@@ -64,6 +66,8 @@ export const ReticleSection = memo(function ReticleSection({
             step={1}
             testId="slider-stroke-width"
           />
+
+          <Separator />
 
           <SettingSlider
             icon={<Eye className="w-4 h-4" />}

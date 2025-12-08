@@ -80,6 +80,8 @@ export const ImageQualitySection = memo(function ImageQualitySection({
             testId="slider-sharpness"
           />
 
+          <Separator />
+
           <SettingSlider
             icon={<Waves className="w-4 h-4" />}
             label={t.settings.imageQuality.denoise}
@@ -91,6 +93,8 @@ export const ImageQualitySection = memo(function ImageQualitySection({
             step={5}
             testId="slider-denoise"
           />
+
+          <Separator />
 
           <SettingSlider
             icon={<SunMedium className="w-4 h-4" />}

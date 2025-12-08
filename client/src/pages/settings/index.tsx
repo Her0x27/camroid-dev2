@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Crosshair } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -209,7 +208,6 @@ export default function SettingsPage() {
             updateSettings={updateSettings}
           />
         </AnimatedItem>
-        <Separator className="my-4" />
         <AnimatedItem>
           <ImageQualitySection
             settings={settings}
@@ -231,14 +229,12 @@ export default function SettingsPage() {
             t={t}
           />
         </AnimatedItem>
-        <Separator className="my-4" />
         <AnimatedItem>
           <ReticleSection
             settings={settings}
             updateReticle={updateReticle}
           />
         </AnimatedItem>
-        <Separator className="my-4" />
         <AnimatedItem>
           <WatermarkSection
             settings={settings}
@@ -256,7 +252,6 @@ export default function SettingsPage() {
             updateSettings={updateSettings}
           />
         </AnimatedItem>
-        <Separator className="my-4" />
         <AnimatedItem>
           <CloudUploadSection
             settings={settings}
@@ -269,7 +264,6 @@ export default function SettingsPage() {
             t={t}
           />
         </AnimatedItem>
-        <Separator className="my-4" />
         <AnimatedItem>
           <StorageSection
             storageInfo={storageInfo}
@@ -283,7 +277,6 @@ export default function SettingsPage() {
         <AnimatedItem>
           <ThemeSection />
         </AnimatedItem>
-        <Separator className="my-4" />
         <AnimatedItem>
           <PWASection
             canInstall={canInstall}
@@ -294,7 +287,6 @@ export default function SettingsPage() {
             t={t}
           />
         </AnimatedItem>
-        <Separator className="my-4" />
         <AnimatedItem>
           <PrivacySection
             privacySettings={privacySettings}
@@ -303,7 +295,6 @@ export default function SettingsPage() {
             t={t}
           />
         </AnimatedItem>
-        <Separator className="my-4" />
         <AnimatedItem>
           <ResetSection
             onShowResetDialog={handleShowResetDialog}
