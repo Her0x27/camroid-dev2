@@ -3,6 +3,12 @@ import { Camera, Palette, Database, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 
+function triggerHapticFeedback() {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    navigator.vibrate(10);
+  }
+}
+
 export type SettingsCategory = "camera" | "interface" | "data" | "system";
 
 interface SettingsChipsProps {
@@ -56,7 +62,10 @@ export const SettingsChips = memo(function SettingsChips({
           <button
             key={chip.id}
             ref={isActive ? activeChipRef : null}
-            onClick={() => onCategoryChange(chip.id)}
+            onClick={() => {
+              triggerHapticFeedback();
+              onCategoryChange(chip.id);
+            }}
             className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all",
               "touch-manipulation active:scale-95 select-none shrink-0",

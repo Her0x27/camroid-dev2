@@ -1,8 +1,14 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { Target, MapPin, Volume2, VolumeX, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import type { Settings, StabilizationSettings } from "@shared/schema";
+
+function triggerHapticFeedback() {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    navigator.vibrate(10);
+  }
+}
 
 interface QuickSettingButtonProps {
   icon: React.ReactNode;
@@ -17,9 +23,14 @@ const QuickSettingButton = memo(function QuickSettingButton({
   active,
   onClick,
 }: QuickSettingButtonProps) {
+  const handleClick = useCallback(() => {
+    triggerHapticFeedback();
+    onClick();
+  }, [onClick]);
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       className={cn(
         "flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-lg transition-all touch-manipulation",
         "active:scale-95 select-none w-full border",
