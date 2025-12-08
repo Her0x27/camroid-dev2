@@ -59,11 +59,43 @@ function calculateLayout(width: number, height: number, watermarkScale: number):
   };
 }
 
-function hexToRgba(hex: string, alpha: number): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+function parseColor(color: string): { r: number; g: number; b: number } | null {
+  const hexMatch = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+  if (hexMatch) {
+    return {
+      r: parseInt(hexMatch[1], 16),
+      g: parseInt(hexMatch[2], 16),
+      b: parseInt(hexMatch[3], 16)
+    };
+  }
+  
+  const rgbaMatch = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(color);
+  if (rgbaMatch) {
+    return {
+      r: parseInt(rgbaMatch[1], 10),
+      g: parseInt(rgbaMatch[2], 10),
+      b: parseInt(rgbaMatch[3], 10)
+    };
+  }
+  
+  return null;
+}
+
+function colorToRgba(color: string, alpha: number): string {
+  const rgb = parseColor(color);
+  if (rgb) {
+    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+  }
+  return `rgba(34, 197, 94, ${alpha})`;
+}
+
+function getOutlineColorForReticle(mainColor: string, opacity: number): string {
+  const rgb = parseColor(mainColor);
+  if (rgb) {
+    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
+    return luminance > 0.5 ? `rgba(0,0,0,${opacity * 0.6})` : `rgba(255,255,255,${opacity * 0.6})`;
+  }
+  return `rgba(0,0,0,${opacity * 0.6})`;
 }
 
 function drawReticle(
@@ -84,21 +116,34 @@ function drawReticle(
   const sizePercent = reticleConfig?.size || 20;
   const reticleSize = Math.ceil(minDimension * (sizePercent / 100) / 2);
 
-  const opacity = reticleConfig?.opacity ? reticleConfig.opacity / 100 : 0.5;
+  const opacity = reticleConfig?.opacity ? reticleConfig.opacity / 100 : 1;
 
-  let colorValue: string;
-  if (reticleConfig?.autoColor && reticleColor) {
-    colorValue = hexToRgba(reticleColor, opacity);
-  } else {
-    colorValue = `rgba(34, 197, 94, ${opacity})`;
-  }
+  const defaultColor = "#22c55e";
+  const mainColor = (reticleConfig?.autoColor && reticleColor) ? reticleColor : defaultColor;
+  const colorValue = colorToRgba(mainColor, opacity);
+  const outlineColor = getOutlineColorForReticle(mainColor, opacity);
 
   const strokeWidthPercent = reticleConfig?.strokeWidth || 3;
   const scaledStrokeWidth = Math.max(1, Math.ceil(reticleSize * 2 * (strokeWidthPercent / 100)));
+  const outlineStrokeWidth = Math.max(2, scaledStrokeWidth + Math.ceil(scaledStrokeWidth * 0.2));
+
+  ctx.lineCap = "round";
+
+  ctx.strokeStyle = outlineColor;
+  ctx.lineWidth = outlineStrokeWidth;
+
+  ctx.beginPath();
+  ctx.moveTo(centerX - reticleSize, centerY);
+  ctx.lineTo(centerX + reticleSize, centerY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY - reticleSize);
+  ctx.lineTo(centerX, centerY + reticleSize);
+  ctx.stroke();
 
   ctx.strokeStyle = colorValue;
   ctx.lineWidth = scaledStrokeWidth;
-  ctx.lineCap = "round";
 
   ctx.beginPath();
   ctx.moveTo(centerX - reticleSize, centerY);
