@@ -30,7 +30,7 @@ export function CollapsibleCard({
   }
 
   return (
-    <Card data-testid={testId}>
+    <Card data-testid={testId} className="settings-card transition-all duration-200">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader 
