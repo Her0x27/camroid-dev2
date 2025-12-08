@@ -21,17 +21,20 @@ const QuickSettingButton = memo(function QuickSettingButton({
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl transition-all touch-manipulation",
-        "active:scale-95 select-none w-full",
+        "flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-lg transition-all touch-manipulation",
+        "active:scale-95 select-none w-full border",
         active
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "bg-muted/50 text-muted-foreground hover:bg-muted"
+          ? "bg-primary/15 text-primary border-primary/50 shadow-[0_0_12px_hsl(var(--primary)/0.2)]"
+          : "bg-card/50 text-muted-foreground border-border/50 hover:bg-muted/50 hover:border-border"
       )}
     >
-      <div className="w-5 h-5 flex items-center justify-center shrink-0">
+      <div className={cn(
+        "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+        active ? "bg-primary/20" : "bg-muted/50"
+      )}>
         {icon}
       </div>
-      <span className="text-xs font-medium truncate">{label}</span>
+      <span className="text-[11px] font-medium truncate">{label}</span>
     </button>
   );
 });
@@ -54,33 +57,31 @@ export const QuickSettings = memo(function QuickSettings({
   const { t } = useI18n();
 
   return (
-    <div className="bg-card border border-card-border rounded-xl p-3">
-      <div className="grid grid-cols-2 gap-2">
-        <QuickSettingButton
-          icon={<Target className="w-4 h-4" />}
-          label={t.settings.quickSettings.stabilization}
-          active={settings.stabilization?.enabled ?? false}
-          onClick={() => updateStabilization({ enabled: !settings.stabilization?.enabled })}
-        />
-        <QuickSettingButton
-          icon={<MapPin className="w-4 h-4" />}
-          label={t.settings.quickSettings.gps}
-          active={settings.gpsEnabled}
-          onClick={() => updateSettings({ gpsEnabled: !settings.gpsEnabled })}
-        />
-        <QuickSettingButton
-          icon={settings.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-          label={t.settings.quickSettings.sound}
-          active={settings.soundEnabled}
-          onClick={() => updateSettings({ soundEnabled: !settings.soundEnabled })}
-        />
-        <QuickSettingButton
-          icon={theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          label={t.settings.quickSettings.theme}
-          active={theme === "dark"}
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        />
-      </div>
+    <div className="grid grid-cols-4 gap-2">
+      <QuickSettingButton
+        icon={<Target className="w-4 h-4" />}
+        label={t.settings.quickSettings.stabilization}
+        active={settings.stabilization?.enabled ?? false}
+        onClick={() => updateStabilization({ enabled: !settings.stabilization?.enabled })}
+      />
+      <QuickSettingButton
+        icon={<MapPin className="w-4 h-4" />}
+        label={t.settings.quickSettings.gps}
+        active={settings.gpsEnabled}
+        onClick={() => updateSettings({ gpsEnabled: !settings.gpsEnabled })}
+      />
+      <QuickSettingButton
+        icon={settings.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+        label={t.settings.quickSettings.sound}
+        active={settings.soundEnabled}
+        onClick={() => updateSettings({ soundEnabled: !settings.soundEnabled })}
+      />
+      <QuickSettingButton
+        icon={theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+        label={t.settings.quickSettings.theme}
+        active={theme === "dark"}
+        onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      />
     </div>
   );
 });

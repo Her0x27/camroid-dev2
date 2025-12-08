@@ -497,7 +497,7 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <main className="p-4 max-w-2xl mx-auto pb-8 safe-bottom">
+      <main className="p-4 max-w-2xl mx-auto pb-20 safe-bottom">
         <AnimatedContainer className="space-y-4">
           {!isSearching && (
             <AnimatedItem>
@@ -516,21 +516,21 @@ export default function SettingsPage() {
           ) : (
             categorySections[activeCategory]
           )}
-
-          {!isSearching && (
-            <AnimatedItem>
-              <div className="text-center text-xs text-muted-foreground space-y-0.5 pt-6">
-                <div className="flex items-center justify-center gap-2">
-                  <Crosshair className="w-3.5 h-3.5 text-primary" />
-                  <span className="font-semibold">{t.settings.appInfo.title}</span>
-                </div>
-                <p>{t.settings.appInfo.subtitle}</p>
-                <p className="opacity-75">{t.settings.appInfo.storageNote}</p>
-              </div>
-            </AnimatedItem>
-          )}
         </AnimatedContainer>
       </main>
+
+      <footer className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border safe-bottom z-40">
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <div className="text-center text-xs text-muted-foreground space-y-0.5">
+            <div className="flex items-center justify-center gap-2">
+              <Crosshair className="w-3.5 h-3.5 text-primary" />
+              <span className="font-semibold">{t.settings.appInfo.title}</span>
+            </div>
+            <p>{t.settings.appInfo.subtitle}</p>
+            <p className="opacity-75">{t.settings.appInfo.storageNote}</p>
+          </div>
+        </div>
+      </footer>
 
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <AlertDialogContent>
