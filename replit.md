@@ -150,3 +150,12 @@ Reorganized settings page for better mobile ergonomics and compactness:
 - Reduced bottom padding (pb-32 → pb-8) since no bottom tabs
 - Single unified header with search + category chips
 - Works identically on mobile and desktop (no separate desktop floating panel)
+
+**Slider Descriptions:**
+- Added descriptive text for image quality sliders (sharpness, denoise, contrast)
+- Added descriptive text for reticle sliders (size, thickness, opacity)
+- Reduced slider component spacing (space-y-3 → space-y-2) for compact layout
+
+**Footer:**
+- App info block now displays on all category tabs, not just "System"
+- Smaller icon (w-3.5) and tighter spacing (space-y-0.5) for minimal footprint
