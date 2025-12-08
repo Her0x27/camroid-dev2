@@ -22,13 +22,17 @@ export const ReticleSection = memo(function ReticleSection({
   const { t } = useI18n();
   const { activatePreview, deactivatePreview } = usePreview();
   
-  const handleInteractionStart = useCallback(() => {
-    activatePreview("reticle");
-  }, [activatePreview]);
+  const handleSizeStart = useCallback(() => {
+    activatePreview({ type: "reticle-size", label: t.settings.crosshair.size });
+  }, [activatePreview, t]);
   
-  const handleInteractionEnd = useCallback(() => {
-    deactivatePreview();
-  }, [deactivatePreview]);
+  const handleThicknessStart = useCallback(() => {
+    activatePreview({ type: "reticle-thickness", label: t.settings.crosshair.thickness });
+  }, [activatePreview, t]);
+  
+  const handleOpacityStart = useCallback(() => {
+    activatePreview({ type: "reticle-opacity", label: t.settings.crosshair.opacity });
+  }, [activatePreview, t]);
   
   return (
     <CollapsibleCard
@@ -61,8 +65,8 @@ export const ReticleSection = memo(function ReticleSection({
             max={50}
             step={1}
             testId="slider-reticle-size"
-            onInteractionStart={handleInteractionStart}
-            onInteractionEnd={handleInteractionEnd}
+            onInteractionStart={handleSizeStart}
+            onInteractionEnd={deactivatePreview}
           />
 
           <Separator />
@@ -77,8 +81,8 @@ export const ReticleSection = memo(function ReticleSection({
             max={30}
             step={1}
             testId="slider-stroke-width"
-            onInteractionStart={handleInteractionStart}
-            onInteractionEnd={handleInteractionEnd}
+            onInteractionStart={handleThicknessStart}
+            onInteractionEnd={deactivatePreview}
           />
 
           <Separator />
@@ -93,8 +97,8 @@ export const ReticleSection = memo(function ReticleSection({
             max={100}
             step={5}
             testId="slider-opacity"
-            onInteractionStart={handleInteractionStart}
-            onInteractionEnd={handleInteractionEnd}
+            onInteractionStart={handleOpacityStart}
+            onInteractionEnd={deactivatePreview}
           />
 
           <Separator />

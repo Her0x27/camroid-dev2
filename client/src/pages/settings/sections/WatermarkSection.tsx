@@ -22,13 +22,9 @@ export const WatermarkSection = memo(function WatermarkSection({
   const { t } = useI18n();
   const { activatePreview, deactivatePreview } = usePreview();
   
-  const handleInteractionStart = useCallback(() => {
-    activatePreview("watermark");
-  }, [activatePreview]);
-  
-  const handleInteractionEnd = useCallback(() => {
-    deactivatePreview();
-  }, [deactivatePreview]);
+  const handleScaleStart = useCallback(() => {
+    activatePreview({ type: "watermark-scale", label: t.settings.watermark.watermarkSize });
+  }, [activatePreview, t]);
   
   return (
     <CollapsibleCard
@@ -60,8 +56,8 @@ export const WatermarkSection = memo(function WatermarkSection({
             max={150}
             step={10}
             testId="slider-watermark-scale"
-            onInteractionStart={handleInteractionStart}
-            onInteractionEnd={handleInteractionEnd}
+            onInteractionStart={handleScaleStart}
+            onInteractionEnd={deactivatePreview}
           />
         </>
       )}

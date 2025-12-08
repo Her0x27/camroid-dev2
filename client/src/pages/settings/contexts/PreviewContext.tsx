@@ -1,30 +1,33 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 
-type PreviewSource = "reticle" | "watermark" | null;
+type PreviewSlider = {
+  type: "reticle-size" | "reticle-thickness" | "reticle-opacity" | "watermark-scale";
+  label: string;
+} | null;
 
 interface PreviewContextValue {
   isPreviewActive: boolean;
-  previewSource: PreviewSource;
-  activatePreview: (source: PreviewSource) => void;
+  activeSlider: PreviewSlider;
+  activatePreview: (slider: NonNullable<PreviewSlider>) => void;
   deactivatePreview: () => void;
 }
 
 const PreviewContext = createContext<PreviewContextValue | null>(null);
 
 export function PreviewProvider({ children }: { children: ReactNode }) {
-  const [previewSource, setPreviewSource] = useState<PreviewSource>(null);
+  const [activeSlider, setActiveSlider] = useState<PreviewSlider>(null);
 
-  const activatePreview = useCallback((source: PreviewSource) => {
-    setPreviewSource(source);
+  const activatePreview = useCallback((slider: NonNullable<PreviewSlider>) => {
+    setActiveSlider(slider);
   }, []);
 
   const deactivatePreview = useCallback(() => {
-    setPreviewSource(null);
+    setActiveSlider(null);
   }, []);
 
   const value: PreviewContextValue = {
-    isPreviewActive: previewSource !== null,
-    previewSource,
+    isPreviewActive: activeSlider !== null,
+    activeSlider,
     activatePreview,
     deactivatePreview,
   };

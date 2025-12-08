@@ -470,13 +470,13 @@ function SettingsPageContent() {
     );
   }, [isSearching, searchQuery, searchableSections, t.settings.search.noResults]);
 
-  const glassClass = isPreviewActive 
-    ? "bg-background/70 backdrop-blur-md" 
-    : "bg-background/95 backdrop-blur-sm";
+  if (isPreviewActive) {
+    return null;
+  }
 
   return (
-    <div className={`min-h-dvh flex flex-col ${isPreviewActive ? "bg-transparent" : "bg-background"}`}>
-      <header className={`sticky top-0 z-50 border-b border-border safe-top transition-all duration-200 ${glassClass}`}>
+    <div className="min-h-dvh flex flex-col bg-background">
+      <header className="sticky top-0 z-50 border-b border-border safe-top bg-background/95 backdrop-blur-sm">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-3 px-4 py-2">
             <Button
@@ -503,8 +503,8 @@ function SettingsPageContent() {
         </div>
       </header>
 
-      <main className={`flex-1 p-4 max-w-2xl mx-auto w-full transition-all duration-200 ${isPreviewActive ? "relative z-10" : ""}`}>
-        <AnimatedContainer className={`space-y-4 transition-all duration-200 ${isPreviewActive ? "[&_.settings-card]:bg-card/60 [&_.settings-card]:backdrop-blur-md" : ""}`}>
+      <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
+        <AnimatedContainer className="space-y-4">
           {!isSearching && (
             <AnimatedItem>
               <QuickSettings
@@ -525,7 +525,7 @@ function SettingsPageContent() {
         </AnimatedContainer>
       </main>
 
-      <footer className={`border-t border-border py-4 safe-bottom transition-all duration-200 ${glassClass}`}>
+      <footer className="border-t border-border py-4 safe-bottom bg-background/95 backdrop-blur-sm">
         <div className="max-w-2xl mx-auto px-4">
           <div className="text-center text-xs text-muted-foreground space-y-0.5">
             <div className="flex items-center justify-center gap-2">
