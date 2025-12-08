@@ -5,7 +5,6 @@ import { Reticle } from "@/components/reticles";
 import { LevelIndicator } from "@/components/level-indicator";
 import { useI18n } from "@/lib/i18n";
 import { useLongPress, type LongPressPositionPercent } from "@/hooks/use-long-press";
-import { convertScreenToVideoCoordinates, convertVideoToScreenCoordinates } from "@/lib/canvas-utils";
 import { logger } from "@/lib/logger";
 import type { ReticleConfig, ReticlePosition } from "@shared/schema";
 
@@ -158,28 +157,12 @@ export const CameraViewfinder = memo(function CameraViewfinder({
       const screenPosition: ReticlePosition = { x: pos.percentX, y: pos.percentY };
       setIsLongPressing(false);
       
-      const container = containerRef.current;
-      const video = videoRef.current;
-      
-      if (container && video && video.videoWidth > 0 && video.videoHeight > 0) {
-        const rect = container.getBoundingClientRect();
-        const params = {
-          containerWidth: rect.width,
-          containerHeight: rect.height,
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-        };
-        const videoPosition = convertScreenToVideoCoordinates(screenPosition, params);
-        logger.debug('[LongPress] coordinate conversion', { screenPosition, videoPosition, params });
-        onLongPressCapture?.(videoPosition);
-      } else {
-        logger.debug('[LongPress] no conversion, using screen position', screenPosition);
-        onLongPressCapture?.(screenPosition);
-      }
+      logger.debug('[LongPress] using screen position directly', { screenPosition });
+      onLongPressCapture?.(screenPosition);
       
       setTempPosition(null);
     },
-    [onLongPressCapture, videoRef]
+    [onLongPressCapture]
   );
 
   const longPressHandlers = useLongPress({
@@ -199,7 +182,6 @@ export const CameraViewfinder = memo(function CameraViewfinder({
     if (!adjustmentMode || !isDragging) return;
     
     const container = containerRef.current;
-    const video = videoRef.current;
     const rect = container?.getBoundingClientRect();
     if (!rect) return;
     
@@ -218,20 +200,8 @@ export const CameraViewfinder = memo(function CameraViewfinder({
     const percentX = Math.max(0, Math.min(100, (x / rect.width) * 100));
     const percentY = Math.max(0, Math.min(100, (y / rect.height) * 100));
     
-    const screenPosition: ReticlePosition = { x: percentX, y: percentY };
-    
-    if (video && video.videoWidth > 0 && video.videoHeight > 0) {
-      const videoPosition = convertScreenToVideoCoordinates(screenPosition, {
-        containerWidth: rect.width,
-        containerHeight: rect.height,
-        videoWidth: video.videoWidth,
-        videoHeight: video.videoHeight,
-      });
-      onAdjustmentPositionChange?.(videoPosition);
-    } else {
-      onAdjustmentPositionChange?.(screenPosition);
-    }
-  }, [adjustmentMode, isDragging, onAdjustmentPositionChange, videoRef]);
+    onAdjustmentPositionChange?.({ x: percentX, y: percentY });
+  }, [adjustmentMode, isDragging, onAdjustmentPositionChange]);
 
   const handleAdjustmentDragEnd = useCallback(() => {
     setIsDragging(false);
@@ -291,19 +261,7 @@ export const CameraViewfinder = memo(function CameraViewfinder({
   );
 
   const displayPosition = (() => {
-    const container = containerRef.current;
-    const video = videoRef.current;
-    
     if (adjustmentMode && adjustmentPosition) {
-      if (container && video && video.videoWidth > 0 && video.videoHeight > 0) {
-        const rect = container.getBoundingClientRect();
-        return convertVideoToScreenCoordinates(adjustmentPosition, {
-          containerWidth: rect.width,
-          containerHeight: rect.height,
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-        });
-      }
       return adjustmentPosition;
     }
     
@@ -312,15 +270,6 @@ export const CameraViewfinder = memo(function CameraViewfinder({
     }
     
     if (reticlePosition) {
-      if (container && video && video.videoWidth > 0 && video.videoHeight > 0) {
-        const rect = container.getBoundingClientRect();
-        return convertVideoToScreenCoordinates(reticlePosition, {
-          containerWidth: rect.width,
-          containerHeight: rect.height,
-          videoWidth: video.videoWidth,
-          videoHeight: video.videoHeight,
-        });
-      }
       return reticlePosition;
     }
     
