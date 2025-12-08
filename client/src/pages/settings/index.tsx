@@ -497,7 +497,7 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <main className="p-4 max-w-2xl mx-auto pb-40 safe-bottom">
+      <main className="p-4 max-w-2xl mx-auto pb-4">
         <AnimatedContainer className="space-y-4">
           {!isSearching && (
             <AnimatedItem>
@@ -517,10 +517,8 @@ export default function SettingsPage() {
             categorySections[activeCategory]
           )}
         </AnimatedContainer>
-      </main>
 
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border safe-bottom z-40">
-        <div className="max-w-2xl mx-auto px-4 py-3">
+        <footer className="mt-8 border-t border-border pt-4 pb-4 safe-bottom">
           <div className="text-center text-xs text-muted-foreground space-y-0.5">
             <div className="flex items-center justify-center gap-2">
               <Crosshair className="w-3.5 h-3.5 text-primary" />
@@ -529,8 +527,8 @@ export default function SettingsPage() {
             <p>{t.settings.appInfo.subtitle}</p>
             <p className="opacity-75">{t.settings.appInfo.storageNote}</p>
           </div>
-        </div>
-      </footer>
+        </footer>
+      </main>
 
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <AlertDialogContent>
