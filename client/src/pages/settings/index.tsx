@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Crosshair } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,8 @@ import { useI18n } from "@/lib/i18n";
 import { usePWA } from "@/hooks/use-pwa";
 import { usePrivacy } from "@/lib/privacy-context";
 import { useStorage } from "@/hooks/use-storage";
+import { useTheme } from "@/lib/theme-context";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { validateApiKey } from "@/lib/imgbb";
 import { PatternLock, patternToString } from "@/components/pattern-lock";
 import { logger } from "@/lib/logger";
@@ -41,6 +43,7 @@ import {
   PWASection,
   ResetSection,
 } from "./sections";
+import { QuickSettings, SettingsTabs, SettingsSearch, type SettingsCategory } from "./components";
 import { AnimatedContainer, AnimatedItem } from "@/components/animated-section";
 
 export default function SettingsPage() {
@@ -49,7 +52,11 @@ export default function SettingsPage() {
   const { language, setLanguage, availableLanguages, t } = useI18n();
   const { canInstall, isInstalled, isInstalling, install, showIOSInstructions } = usePWA();
   const { settings: privacySettings, updateSettings: updatePrivacySettings } = usePrivacy();
+  const { theme, setTheme } = useTheme();
+  const isMobile = useIsMobile();
   
+  const [activeCategory, setActiveCategory] = useState<SettingsCategory>("camera");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [showPatternSetup, setShowPatternSetup] = useState(false);
@@ -179,7 +186,7 @@ export default function SettingsPage() {
       validationAbortControllerRef.current = null;
       setIsValidating(false);
     }
-  }, [apiKeyInput, settings.imgbb, updateSettings]);
+  }, [apiKeyInput, settings.imgbb, updateSettings, t]);
 
   const handleImgbbUpdate = useCallback((updates: Partial<typeof settings.imgbb>) => {
     updateSettings({
@@ -194,135 +201,255 @@ export default function SettingsPage() {
   const handleShowResetDialog = useCallback(() => setShowResetDialog(true), []);
   const handleShowPatternSetup = useCallback(() => setShowPatternSetup(true), []);
 
+  const categorySections = useMemo(() => ({
+    camera: (
+      <>
+        <AnimatedItem>
+          <CameraSettingsSection
+            settings={settings}
+            updateSettings={updateSettings}
+          />
+        </AnimatedItem>
+        <AnimatedItem>
+          <ImageQualitySection
+            settings={settings}
+            updateStabilization={updateStabilization}
+            updateEnhancement={updateEnhancement}
+          />
+        </AnimatedItem>
+      </>
+    ),
+    interface: (
+      <>
+        <AnimatedItem>
+          <GeneralSettingsSection
+            settings={settings}
+            updateSettings={updateSettings}
+            language={language}
+            setLanguage={setLanguage}
+            availableLanguages={availableLanguages}
+            t={t}
+          />
+        </AnimatedItem>
+        <AnimatedItem>
+          <ReticleSection
+            settings={settings}
+            updateReticle={updateReticle}
+          />
+        </AnimatedItem>
+        <AnimatedItem>
+          <WatermarkSection
+            settings={settings}
+            updateSettings={updateSettings}
+            updateReticle={updateReticle}
+          />
+        </AnimatedItem>
+      </>
+    ),
+    data: (
+      <>
+        <AnimatedItem>
+          <CaptureLocationSection
+            settings={settings}
+            updateSettings={updateSettings}
+          />
+        </AnimatedItem>
+        <AnimatedItem>
+          <CloudUploadSection
+            settings={settings}
+            apiKeyInput={apiKeyInput}
+            onApiKeyChange={handleApiKeyChange}
+            isValidating={isValidating}
+            validationError={validationError}
+            onValidateApiKey={handleValidateApiKey}
+            onImgbbUpdate={handleImgbbUpdate}
+            t={t}
+          />
+        </AnimatedItem>
+        <AnimatedItem>
+          <StorageSection
+            storageInfo={storageInfo}
+            onShowClearDialog={handleShowClearDialog}
+          />
+        </AnimatedItem>
+      </>
+    ),
+    system: (
+      <>
+        <AnimatedItem>
+          <ThemeSection />
+        </AnimatedItem>
+        <AnimatedItem>
+          <PWASection
+            canInstall={canInstall}
+            isInstalled={isInstalled}
+            isInstalling={isInstalling}
+            install={install}
+            showIOSInstructions={showIOSInstructions}
+            t={t}
+          />
+        </AnimatedItem>
+        <AnimatedItem>
+          <PrivacySection
+            privacySettings={privacySettings}
+            updatePrivacySettings={updatePrivacySettings}
+            onShowPatternSetup={handleShowPatternSetup}
+            t={t}
+          />
+        </AnimatedItem>
+        <AnimatedItem>
+          <ResetSection
+            onShowResetDialog={handleShowResetDialog}
+            t={t}
+          />
+        </AnimatedItem>
+      </>
+    ),
+  }), [
+    settings, updateSettings, updateReticle, updateStabilization, updateEnhancement,
+    language, setLanguage, availableLanguages, t, apiKeyInput, handleApiKeyChange,
+    isValidating, validationError, handleValidateApiKey, handleImgbbUpdate,
+    storageInfo, handleShowClearDialog, canInstall, isInstalled, isInstalling,
+    install, showIOSInstructions, privacySettings, updatePrivacySettings,
+    handleShowPatternSetup, handleShowResetDialog
+  ]);
+
+  const isSearching = searchQuery.length > 0;
+  
+  const allSections = useMemo(() => {
+    if (!isSearching) return null;
+    
+    return (
+      <>
+        <AnimatedItem>
+          <CameraSettingsSection settings={settings} updateSettings={updateSettings} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <ImageQualitySection settings={settings} updateStabilization={updateStabilization} updateEnhancement={updateEnhancement} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <GeneralSettingsSection settings={settings} updateSettings={updateSettings} language={language} setLanguage={setLanguage} availableLanguages={availableLanguages} t={t} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <ReticleSection settings={settings} updateReticle={updateReticle} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <WatermarkSection settings={settings} updateSettings={updateSettings} updateReticle={updateReticle} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <CaptureLocationSection settings={settings} updateSettings={updateSettings} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <CloudUploadSection settings={settings} apiKeyInput={apiKeyInput} onApiKeyChange={handleApiKeyChange} isValidating={isValidating} validationError={validationError} onValidateApiKey={handleValidateApiKey} onImgbbUpdate={handleImgbbUpdate} t={t} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <StorageSection storageInfo={storageInfo} onShowClearDialog={handleShowClearDialog} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <ThemeSection />
+        </AnimatedItem>
+        <AnimatedItem>
+          <PWASection canInstall={canInstall} isInstalled={isInstalled} isInstalling={isInstalling} install={install} showIOSInstructions={showIOSInstructions} t={t} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <PrivacySection privacySettings={privacySettings} updatePrivacySettings={updatePrivacySettings} onShowPatternSetup={handleShowPatternSetup} t={t} />
+        </AnimatedItem>
+        <AnimatedItem>
+          <ResetSection onShowResetDialog={handleShowResetDialog} t={t} />
+        </AnimatedItem>
+      </>
+    );
+  }, [
+    isSearching, settings, updateSettings, updateReticle, updateStabilization, updateEnhancement,
+    language, setLanguage, availableLanguages, t, apiKeyInput, handleApiKeyChange,
+    isValidating, validationError, handleValidateApiKey, handleImgbbUpdate,
+    storageInfo, handleShowClearDialog, canInstall, isInstalled, isInstalling,
+    install, showIOSInstructions, privacySettings, updatePrivacySettings,
+    handleShowPatternSetup, handleShowResetDialog
+  ]);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
-        <div className="flex items-center gap-4 px-4 py-3">
+        <div className="flex items-center gap-3 px-4 py-3 max-w-2xl mx-auto">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/")}
             data-testid="button-back-camera"
+            className="shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-lg font-semibold">{t.settings.title}</h1>
+          <div className="flex-1">
+            <SettingsSearch value={searchQuery} onChange={setSearchQuery} />
+          </div>
         </div>
       </header>
 
-      <main className="p-4 max-w-2xl mx-auto safe-bottom pb-8">
+      <main className={`p-4 max-w-2xl mx-auto ${isMobile ? 'pb-24' : 'pb-8'} safe-bottom`}>
         <AnimatedContainer className="space-y-4">
-          <AnimatedItem>
-            <GeneralSettingsSection
-              settings={settings}
-              updateSettings={updateSettings}
-              language={language}
-              setLanguage={setLanguage}
-              availableLanguages={availableLanguages}
-              t={t}
-            />
-          </AnimatedItem>
+          {!isSearching && (
+            <AnimatedItem>
+              <QuickSettings
+                settings={settings}
+                updateSettings={updateSettings}
+                updateStabilization={updateStabilization}
+                theme={theme}
+                setTheme={setTheme}
+              />
+            </AnimatedItem>
+          )}
 
-          <AnimatedItem>
-            <CameraSettingsSection
-              settings={settings}
-              updateSettings={updateSettings}
-            />
-          </AnimatedItem>
+          {isSearching ? (
+            allSections
+          ) : (
+            categorySections[activeCategory]
+          )}
 
-          <AnimatedItem>
-            <ImageQualitySection
-              settings={settings}
-              updateStabilization={updateStabilization}
-              updateEnhancement={updateEnhancement}
-            />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <CaptureLocationSection
-              settings={settings}
-              updateSettings={updateSettings}
-            />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <WatermarkSection
-              settings={settings}
-              updateSettings={updateSettings}
-              updateReticle={updateReticle}
-            />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <ReticleSection
-              settings={settings}
-              updateReticle={updateReticle}
-            />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <CloudUploadSection
-              settings={settings}
-              apiKeyInput={apiKeyInput}
-              onApiKeyChange={handleApiKeyChange}
-              isValidating={isValidating}
-              validationError={validationError}
-              onValidateApiKey={handleValidateApiKey}
-              onImgbbUpdate={handleImgbbUpdate}
-              t={t}
-            />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <StorageSection
-              storageInfo={storageInfo}
-              onShowClearDialog={handleShowClearDialog}
-            />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <PrivacySection
-              privacySettings={privacySettings}
-              updatePrivacySettings={updatePrivacySettings}
-              onShowPatternSetup={handleShowPatternSetup}
-              t={t}
-            />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <PWASection
-              canInstall={canInstall}
-              isInstalled={isInstalled}
-              isInstalling={isInstalling}
-              install={install}
-              showIOSInstructions={showIOSInstructions}
-              t={t}
-            />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <ThemeSection />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <ResetSection
-              onShowResetDialog={handleShowResetDialog}
-              t={t}
-            />
-          </AnimatedItem>
-
-          <AnimatedItem>
-            <div className="text-center text-xs text-muted-foreground space-y-1 pt-4">
-              <div className="flex items-center justify-center gap-2">
-                <Crosshair className="w-4 h-4 text-primary" />
-                <span className="font-semibold">{t.settings.appInfo.title}</span>
+          {!isSearching && activeCategory === "system" && (
+            <AnimatedItem>
+              <div className="text-center text-xs text-muted-foreground space-y-1 pt-4">
+                <div className="flex items-center justify-center gap-2">
+                  <Crosshair className="w-4 h-4 text-primary" />
+                  <span className="font-semibold">{t.settings.appInfo.title}</span>
+                </div>
+                <p>{t.settings.appInfo.subtitle}</p>
+                <p>{t.settings.appInfo.storageNote}</p>
               </div>
-              <p>{t.settings.appInfo.subtitle}</p>
-              <p>{t.settings.appInfo.storageNote}</p>
-            </div>
-          </AnimatedItem>
+            </AnimatedItem>
+          )}
         </AnimatedContainer>
       </main>
+
+      {isMobile && !isSearching && (
+        <SettingsTabs
+          activeCategory={activeCategory}
+          onCategoryChange={setActiveCategory}
+        />
+      )}
+
+      {!isMobile && !isSearching && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+          <div className="bg-card/95 backdrop-blur-sm border border-card-border rounded-full px-2 py-1 shadow-lg">
+            <div className="flex gap-1">
+              {(["camera", "interface", "data", "system"] as SettingsCategory[]).map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    activeCategory === cat
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  {t.settings.categories[cat as keyof typeof t.settings.categories]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <AlertDialogContent>

@@ -330,6 +330,30 @@ export const ru: Translations = {
       storageNote: "Фото хранятся локально на вашем устройстве",
     },
     
+    categories: {
+      camera: "Камера",
+      cameraDesc: "Разрешение, качество, стабилизация",
+      interface: "Интерфейс",
+      interfaceDesc: "Прицел, водяной знак, язык",
+      data: "Данные",
+      dataDesc: "GPS, облако, хранилище",
+      system: "Система",
+      systemDesc: "Тема, PWA, приватность, сброс",
+    },
+    
+    quickSettings: {
+      title: "Быстрые настройки",
+      stabilization: "Стабилизация",
+      gps: "GPS",
+      sound: "Звук",
+      theme: "Тема",
+    },
+    
+    search: {
+      placeholder: "Поиск настроек...",
+      noResults: "Настройки не найдены",
+    },
+    
     theme: {
       title: "Тема",
       description: "Настройки светлого и тёмного режима",

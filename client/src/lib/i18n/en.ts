@@ -328,6 +328,30 @@ export const en = {
       storageNote: "Photos are stored locally on your device",
     },
     
+    categories: {
+      camera: "Camera",
+      cameraDesc: "Resolution, quality, stabilization",
+      interface: "Interface",
+      interfaceDesc: "Crosshair, watermark, language",
+      data: "Data",
+      dataDesc: "GPS, cloud, storage",
+      system: "System",
+      systemDesc: "Theme, PWA, privacy, reset",
+    },
+    
+    quickSettings: {
+      title: "Quick Settings",
+      stabilization: "Stabilization",
+      gps: "GPS",
+      sound: "Sound",
+      theme: "Theme",
+    },
+    
+    search: {
+      placeholder: "Search settings...",
+      noResults: "No settings found",
+    },
+    
     theme: {
       title: "Theme",
       description: "Light and dark mode settings",
