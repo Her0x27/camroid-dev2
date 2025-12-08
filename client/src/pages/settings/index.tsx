@@ -497,7 +497,7 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <main className="p-4 max-w-2xl mx-auto pb-20 safe-bottom">
+      <main className="p-4 max-w-2xl mx-auto pb-32 safe-bottom">
         <AnimatedContainer className="space-y-4">
           {!isSearching && (
             <AnimatedItem>
