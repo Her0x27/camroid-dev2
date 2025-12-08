@@ -31,7 +31,7 @@ export const SettingSlider = memo(function SettingSlider({
   className,
 }: SettingSliderProps) {
   return (
-    <div className={cn("space-y-3 py-2 touch-manipulation", className)}>
+    <div className={cn("space-y-2 py-2 touch-manipulation", className)}>
       <div className="flex items-center justify-between gap-4 min-h-[40px]">
         <Label className="flex items-center gap-3 flex-1 min-w-0">
           {icon && (

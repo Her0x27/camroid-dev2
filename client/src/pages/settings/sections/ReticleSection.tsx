@@ -44,6 +44,7 @@ export const ReticleSection = memo(function ReticleSection({
           <SettingSlider
             icon={<Crosshair className="w-4 h-4" />}
             label={t.settings.crosshair.size}
+            description={t.settings.crosshair.sizeDesc}
             value={settings.reticle.size}
             onValueChange={(value) => updateReticle({ size: value })}
             min={1}
@@ -55,6 +56,7 @@ export const ReticleSection = memo(function ReticleSection({
           <SettingSlider
             icon={<Crosshair className="w-4 h-4" />}
             label={t.settings.crosshair.thickness}
+            description={t.settings.crosshair.thicknessDesc}
             value={settings.reticle.strokeWidth || 3}
             onValueChange={(value) => updateReticle({ strokeWidth: value })}
             min={1}
@@ -66,6 +68,7 @@ export const ReticleSection = memo(function ReticleSection({
           <SettingSlider
             icon={<Eye className="w-4 h-4" />}
             label={t.settings.crosshair.opacity}
+            description={t.settings.crosshair.opacityDesc}
             value={settings.reticle.opacity}
             onValueChange={(value) => updateReticle({ opacity: value })}
             min={10}

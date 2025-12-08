@@ -71,6 +71,7 @@ export const ImageQualitySection = memo(function ImageQualitySection({
           <SettingSlider
             icon={<Focus className="w-4 h-4" />}
             label={t.settings.imageQuality.sharpness}
+            description={t.settings.imageQuality.sharpnessDesc}
             value={settings.enhancement.sharpness}
             onValueChange={(value) => updateEnhancement({ sharpness: value })}
             min={0}
@@ -82,6 +83,7 @@ export const ImageQualitySection = memo(function ImageQualitySection({
           <SettingSlider
             icon={<Waves className="w-4 h-4" />}
             label={t.settings.imageQuality.denoise}
+            description={t.settings.imageQuality.denoiseDesc}
             value={settings.enhancement.denoise}
             onValueChange={(value) => updateEnhancement({ denoise: value })}
             min={0}
@@ -93,6 +95,7 @@ export const ImageQualitySection = memo(function ImageQualitySection({
           <SettingSlider
             icon={<SunMedium className="w-4 h-4" />}
             label={t.settings.imageQuality.contrast}
+            description={t.settings.imageQuality.contrastDesc}
             value={settings.enhancement.contrast}
             onValueChange={(value) => updateEnhancement({ contrast: value })}
             min={0}

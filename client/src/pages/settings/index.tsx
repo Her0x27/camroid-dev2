@@ -415,15 +415,15 @@ export default function SettingsPage() {
             categorySections[activeCategory]
           )}
 
-          {!isSearching && activeCategory === "system" && (
+          {!isSearching && (
             <AnimatedItem>
-              <div className="text-center text-xs text-muted-foreground space-y-1 pt-4">
+              <div className="text-center text-xs text-muted-foreground space-y-0.5 pt-6">
                 <div className="flex items-center justify-center gap-2">
-                  <Crosshair className="w-4 h-4 text-primary" />
+                  <Crosshair className="w-3.5 h-3.5 text-primary" />
                   <span className="font-semibold">{t.settings.appInfo.title}</span>
                 </div>
                 <p>{t.settings.appInfo.subtitle}</p>
-                <p>{t.settings.appInfo.storageNote}</p>
+                <p className="opacity-75">{t.settings.appInfo.storageNote}</p>
               </div>
             </AnimatedItem>
           )}
