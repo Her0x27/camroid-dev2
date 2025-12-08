@@ -363,6 +363,10 @@ export const en = {
       light: "Light",
       dark: "Dark",
     },
+    
+    preview: {
+      demoNote: "Demo note for preview",
+    },
   },
   
   game2048: {

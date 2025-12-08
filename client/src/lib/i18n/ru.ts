@@ -365,6 +365,10 @@ export const ru: Translations = {
       light: "Светлая",
       dark: "Тёмная",
     },
+    
+    preview: {
+      demoNote: "Демо-заметка для превью",
+    },
   },
   
   game2048: {
