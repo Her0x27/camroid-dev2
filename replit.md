@@ -131,3 +131,22 @@ The camera preview uses CSS `object-cover` which crops the video to fill the con
 - Adjustment drag converts screen position → video position for storage
 - Display position converts video position → screen position for rendering
 - `tempPosition` (during long-press indicator) stays in screen-space since it's purely visual
+
+### Settings Page Optimization (December 2025)
+Reorganized settings page for better mobile ergonomics and compactness:
+
+**Navigation Changes:**
+- Removed bottom tab bar navigation (`SettingsTabs` component)
+- Replaced with compact horizontal chip navigation (`SettingsChips`) in sticky header
+- Category chips scroll horizontally with auto-centering on active category
+- Freed up ~60px of screen space previously occupied by bottom tabs
+
+**QuickSettings Optimization:**
+- Changed from horizontal scroll to compact 2x2 grid layout
+- Reduced padding (p-4 → p-3) for tighter mobile layout
+- Icons and labels inline for better touch targets
+
+**Layout Improvements:**
+- Reduced bottom padding (pb-32 → pb-8) since no bottom tabs
+- Single unified header with search + category chips
+- Works identically on mobile and desktop (no separate desktop floating panel)
