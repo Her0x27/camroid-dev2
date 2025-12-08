@@ -11,6 +11,7 @@ import {
   type IconDrawFunction,
 } from "./canvas-icons";
 import type { ReticleConfig, ReticlePosition } from "@shared/schema";
+import { colorToRgba, getContrastingOutlineColor } from "./color-utils";
 
 export interface WatermarkMetadata {
   latitude?: number | null;
@@ -59,45 +60,6 @@ function calculateLayout(width: number, height: number, watermarkScale: number):
   };
 }
 
-function parseColor(color: string): { r: number; g: number; b: number } | null {
-  const hexMatch = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
-  if (hexMatch) {
-    return {
-      r: parseInt(hexMatch[1], 16),
-      g: parseInt(hexMatch[2], 16),
-      b: parseInt(hexMatch[3], 16)
-    };
-  }
-  
-  const rgbaMatch = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(color);
-  if (rgbaMatch) {
-    return {
-      r: parseInt(rgbaMatch[1], 10),
-      g: parseInt(rgbaMatch[2], 10),
-      b: parseInt(rgbaMatch[3], 10)
-    };
-  }
-  
-  return null;
-}
-
-function colorToRgba(color: string, alpha: number): string {
-  const rgb = parseColor(color);
-  if (rgb) {
-    return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
-  }
-  return `rgba(34, 197, 94, ${alpha})`;
-}
-
-function getOutlineColorForReticle(mainColor: string, opacity: number): string {
-  const rgb = parseColor(mainColor);
-  if (rgb) {
-    const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-    return luminance > 0.5 ? `rgba(0,0,0,${opacity * 0.6})` : `rgba(255,255,255,${opacity * 0.6})`;
-  }
-  return `rgba(0,0,0,${opacity * 0.6})`;
-}
-
 function drawReticle(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -121,7 +83,7 @@ function drawReticle(
   const defaultColor = "#22c55e";
   const mainColor = (reticleConfig?.autoColor && reticleColor) ? reticleColor : defaultColor;
   const colorValue = colorToRgba(mainColor, opacity);
-  const outlineColor = getOutlineColorForReticle(mainColor, opacity);
+  const outlineColor = getContrastingOutlineColor(mainColor, opacity);
 
   const strokeWidthPercent = reticleConfig?.strokeWidth || 3;
   const scaledStrokeWidth = Math.max(1, Math.ceil(reticleSize * 2 * (strokeWidthPercent / 100)));

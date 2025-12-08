@@ -2,12 +2,7 @@ import { memo, useRef, useEffect } from "react";
 import { Camera, Palette, Database, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
-
-function triggerHapticFeedback() {
-  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-    navigator.vibrate(10);
-  }
-}
+import { triggerHapticFeedback } from "@/lib/haptic-utils";
 
 export type SettingsCategory = "camera" | "interface" | "data" | "system";
 

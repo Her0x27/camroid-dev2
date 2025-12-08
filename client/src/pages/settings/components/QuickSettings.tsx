@@ -2,13 +2,8 @@ import { memo, useCallback } from "react";
 import { Target, MapPin, Volume2, VolumeX, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
+import { triggerHapticFeedback } from "@/lib/haptic-utils";
 import type { Settings, StabilizationSettings } from "@shared/schema";
-
-function triggerHapticFeedback() {
-  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-    navigator.vibrate(10);
-  }
-}
 
 interface QuickSettingButtonProps {
   icon: React.ReactNode;

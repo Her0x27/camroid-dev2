@@ -1,5 +1,6 @@
 import { memo } from "react";
 import type { ReticleConfig, ColorScheme, ReticlePosition } from "@shared/schema";
+import { getOutlineColorForReticle } from "@/lib/color-utils";
 
 interface ReticleProps {
   config: ReticleConfig;
@@ -84,36 +85,6 @@ export const Reticle = memo(function Reticle({ config, dynamicColor, className =
     </div>
   );
 });
-
-function getOutlineColorForReticle(mainColor: string): string {
-  const rgb = parseColor(mainColor);
-  if (!rgb) return "rgba(0,0,0,0.6)";
-  
-  const luminance = (0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b) / 255;
-  return luminance > 0.5 ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.6)";
-}
-
-function parseColor(color: string): { r: number; g: number; b: number } | null {
-  const hexMatch = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
-  if (hexMatch) {
-    return {
-      r: parseInt(hexMatch[1], 16),
-      g: parseInt(hexMatch[2], 16),
-      b: parseInt(hexMatch[3], 16)
-    };
-  }
-  
-  const rgbaMatch = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i.exec(color);
-  if (rgbaMatch) {
-    return {
-      r: parseInt(rgbaMatch[1], 10),
-      g: parseInt(rgbaMatch[2], 10),
-      b: parseInt(rgbaMatch[3], 10)
-    };
-  }
-  
-  return null;
-}
 
 const COLOR_SCHEMES: Record<ColorScheme, {
   light: string[];
