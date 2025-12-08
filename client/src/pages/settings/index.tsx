@@ -503,7 +503,7 @@ function SettingsPageContent() {
         </div>
       </header>
 
-      <main className={`flex-1 p-4 max-w-2xl mx-auto w-full transition-all duration-200 ${isPreviewActive ? "relative z-10" : ""}`}>
+      <main className={`flex-1 p-4 max-w-2xl mx-auto w-full transition-all duration-200 ${isPreviewActive ? "relative z-10 " + glassClass : ""}`}>
         <AnimatedContainer className="space-y-4">
           {!isSearching && (
             <AnimatedItem>
