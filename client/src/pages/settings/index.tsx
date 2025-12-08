@@ -314,57 +314,159 @@ export default function SettingsPage() {
 
   const isSearching = searchQuery.length > 0;
   
-  const allSections = useMemo(() => {
-    if (!isSearching) return null;
-    
-    return (
-      <>
-        <AnimatedItem>
-          <CameraSettingsSection settings={settings} updateSettings={updateSettings} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <ImageQualitySection settings={settings} updateStabilization={updateStabilization} updateEnhancement={updateEnhancement} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <GeneralSettingsSection settings={settings} updateSettings={updateSettings} language={language} setLanguage={setLanguage} availableLanguages={availableLanguages} t={t} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <ReticleSection settings={settings} updateReticle={updateReticle} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <WatermarkSection settings={settings} updateSettings={updateSettings} updateReticle={updateReticle} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <CaptureLocationSection settings={settings} updateSettings={updateSettings} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <CloudUploadSection settings={settings} apiKeyInput={apiKeyInput} onApiKeyChange={handleApiKeyChange} isValidating={isValidating} validationError={validationError} onValidateApiKey={handleValidateApiKey} onImgbbUpdate={handleImgbbUpdate} t={t} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <StorageSection storageInfo={storageInfo} onShowClearDialog={handleShowClearDialog} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <ThemeSection />
-        </AnimatedItem>
-        <AnimatedItem>
-          <PWASection canInstall={canInstall} isInstalled={isInstalled} isInstalling={isInstalling} install={install} showIOSInstructions={showIOSInstructions} t={t} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <PrivacySection privacySettings={privacySettings} updatePrivacySettings={updatePrivacySettings} onShowPatternSetup={handleShowPatternSetup} t={t} />
-        </AnimatedItem>
-        <AnimatedItem>
-          <ResetSection onShowResetDialog={handleShowResetDialog} t={t} />
-        </AnimatedItem>
-      </>
-    );
-  }, [
-    isSearching, settings, updateSettings, updateReticle, updateStabilization, updateEnhancement,
+  const searchableSections = useMemo(() => [
+    {
+      id: 'camera',
+      keywords: [
+        t.settings.camera.title, t.settings.camera.description,
+        t.settings.camera.resolution, t.settings.camera.quality,
+        'камера', 'разрешение', 'качество', 'фото', '1080p', '4k', '720p',
+        'camera', 'resolution', 'quality', 'photo'
+      ],
+      component: <CameraSettingsSection settings={settings} updateSettings={updateSettings} />
+    },
+    {
+      id: 'imageQuality',
+      keywords: [
+        t.settings.imageQuality.title, t.settings.imageQuality.description,
+        t.settings.imageQuality.stabilization, t.settings.imageQuality.enhancement,
+        'стабилизация', 'детализация', 'качество', 'изображение',
+        'stabilization', 'enhancement', 'image', 'quality'
+      ],
+      component: <ImageQualitySection settings={settings} updateStabilization={updateStabilization} updateEnhancement={updateEnhancement} />
+    },
+    {
+      id: 'general',
+      keywords: [
+        t.settings.general.title, t.settings.general.description,
+        t.settings.general.captureSound, t.settings.general.language,
+        'звук', 'язык', 'основные', 'затвор',
+        'sound', 'language', 'general'
+      ],
+      component: <GeneralSettingsSection settings={settings} updateSettings={updateSettings} language={language} setLanguage={setLanguage} availableLanguages={availableLanguages} t={t} />
+    },
+    {
+      id: 'reticle',
+      keywords: [
+        t.settings.crosshair.title, t.settings.crosshair.description,
+        t.settings.crosshair.size, t.settings.crosshair.thickness, t.settings.crosshair.opacity,
+        'прицел', 'размер', 'толщина', 'прозрачность', 'цвет',
+        'crosshair', 'reticle', 'size', 'color'
+      ],
+      component: <ReticleSection settings={settings} updateReticle={updateReticle} />
+    },
+    {
+      id: 'watermark',
+      keywords: [
+        t.settings.watermark.title, t.settings.watermark.description,
+        t.settings.watermark.showMetadata, t.settings.watermark.watermarkSize,
+        'водяной', 'знак', 'метаданные',
+        'watermark', 'metadata'
+      ],
+      component: <WatermarkSection settings={settings} updateSettings={updateSettings} updateReticle={updateReticle} />
+    },
+    {
+      id: 'capture',
+      keywords: [
+        t.settings.capture.title, t.settings.capture.description,
+        t.settings.capture.gpsLocation, t.settings.capture.compassOrientation,
+        'gps', 'геолокация', 'координаты', 'компас', 'ориентация', 'съёмка', 'уровень',
+        'location', 'compass', 'capture'
+      ],
+      component: <CaptureLocationSection settings={settings} updateSettings={updateSettings} />
+    },
+    {
+      id: 'cloud',
+      keywords: [
+        t.settings.cloud.title, t.settings.cloud.description,
+        'облако', 'imgbb', 'api', 'загрузка', 'ключ',
+        'cloud', 'upload', 'api key'
+      ],
+      component: <CloudUploadSection settings={settings} apiKeyInput={apiKeyInput} onApiKeyChange={handleApiKeyChange} isValidating={isValidating} validationError={validationError} onValidateApiKey={handleValidateApiKey} onImgbbUpdate={handleImgbbUpdate} t={t} />
+    },
+    {
+      id: 'storage',
+      keywords: [
+        t.settings.storage.title, t.settings.storage.description,
+        'хранилище', 'память', 'очистить', 'фото',
+        'storage', 'memory', 'clear', 'photos'
+      ],
+      component: <StorageSection storageInfo={storageInfo} onShowClearDialog={handleShowClearDialog} />
+    },
+    {
+      id: 'theme',
+      keywords: [
+        t.settings.theme.title, t.settings.theme.description,
+        'тема', 'темная', 'светлая', 'оформление',
+        'theme', 'dark', 'light', 'appearance'
+      ],
+      component: <ThemeSection />
+    },
+    {
+      id: 'pwa',
+      keywords: [
+        t.settings.pwa.title, t.settings.pwa.description,
+        'установка', 'приложение', 'pwa',
+        'install', 'app', 'pwa'
+      ],
+      component: <PWASection canInstall={canInstall} isInstalled={isInstalled} isInstalling={isInstalling} install={install} showIOSInstructions={showIOSInstructions} t={t} />
+    },
+    {
+      id: 'privacy',
+      keywords: [
+        t.settings.privacy.title, t.settings.privacy.description,
+        'приватность', 'безопасность', 'пароль', 'графический ключ', 'блокировка',
+        'privacy', 'security', 'pattern', 'lock'
+      ],
+      component: <PrivacySection privacySettings={privacySettings} updatePrivacySettings={updatePrivacySettings} onShowPatternSetup={handleShowPatternSetup} t={t} />
+    },
+    {
+      id: 'reset',
+      keywords: [
+        t.settings.reset.title, t.settings.reset.description,
+        'сброс', 'настройки', 'по умолчанию',
+        'reset', 'default', 'settings'
+      ],
+      component: <ResetSection onShowResetDialog={handleShowResetDialog} t={t} />
+    },
+  ], [
+    settings, updateSettings, updateReticle, updateStabilization, updateEnhancement,
     language, setLanguage, availableLanguages, t, apiKeyInput, handleApiKeyChange,
     isValidating, validationError, handleValidateApiKey, handleImgbbUpdate,
     storageInfo, handleShowClearDialog, canInstall, isInstalled, isInstalling,
     install, showIOSInstructions, privacySettings, updatePrivacySettings,
     handleShowPatternSetup, handleShowResetDialog
   ]);
+
+  const filteredSections = useMemo(() => {
+    if (!isSearching) return null;
+    
+    const query = searchQuery.toLowerCase().trim();
+    
+    const matchingSections = searchableSections.filter(section =>
+      section.keywords.filter(Boolean).some(keyword => 
+        keyword.toLowerCase().includes(query)
+      )
+    );
+    
+    if (matchingSections.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          {t.settings.search.noResults}
+        </div>
+      );
+    }
+    
+    return (
+      <>
+        {matchingSections.map(section => (
+          <AnimatedItem key={section.id}>
+            {section.component}
+          </AnimatedItem>
+        ))}
+      </>
+    );
+  }, [isSearching, searchQuery, searchableSections, t.settings.search.noResults]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -410,7 +512,7 @@ export default function SettingsPage() {
           )}
 
           {isSearching ? (
-            allSections
+            filteredSections
           ) : (
             categorySections[activeCategory]
           )}
