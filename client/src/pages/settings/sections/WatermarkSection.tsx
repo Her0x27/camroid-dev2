@@ -1,10 +1,11 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { ImageIcon, Eye, Type } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { SettingRow } from "@/components/ui/setting-row";
 import { SettingSlider } from "@/components/ui/setting-slider";
 import { useI18n } from "@/lib/i18n";
+import { usePreview } from "../contexts/PreviewContext";
 import type { Settings, ReticleConfig } from "@shared/schema";
 
 interface WatermarkSectionProps {
@@ -19,6 +20,15 @@ export const WatermarkSection = memo(function WatermarkSection({
   updateReticle,
 }: WatermarkSectionProps) {
   const { t } = useI18n();
+  const { activatePreview, deactivatePreview } = usePreview();
+  
+  const handleInteractionStart = useCallback(() => {
+    activatePreview("watermark");
+  }, [activatePreview]);
+  
+  const handleInteractionEnd = useCallback(() => {
+    deactivatePreview();
+  }, [deactivatePreview]);
   
   return (
     <CollapsibleCard
@@ -50,6 +60,8 @@ export const WatermarkSection = memo(function WatermarkSection({
             max={150}
             step={10}
             testId="slider-watermark-scale"
+            onInteractionStart={handleInteractionStart}
+            onInteractionEnd={handleInteractionEnd}
           />
         </>
       )}

@@ -42,11 +42,13 @@ import {
   PWASection,
   ResetSection,
 } from "./sections";
-import { QuickSettings, SettingsChips, SettingsSearch, type SettingsCategory } from "./components";
+import { QuickSettings, SettingsChips, SettingsSearch, SettingsPreview, type SettingsCategory } from "./components";
 import { AnimatedContainer, AnimatedItem } from "@/components/animated-section";
+import { PreviewProvider, usePreview } from "./contexts/PreviewContext";
 
-export default function SettingsPage() {
+function SettingsPageContent() {
   const [, navigate] = useLocation();
+  const { isPreviewActive } = usePreview();
   const { settings, updateSettings, updateReticle, updateStabilization, updateEnhancement, resetSettings } = useSettings();
   const { language, setLanguage, availableLanguages, t } = useI18n();
   const { canInstall, isInstalled, isInstalling, install, showIOSInstructions } = usePWA();
@@ -468,9 +470,13 @@ export default function SettingsPage() {
     );
   }, [isSearching, searchQuery, searchableSections, t.settings.search.noResults]);
 
+  const glassClass = isPreviewActive 
+    ? "bg-background/70 backdrop-blur-md" 
+    : "bg-background/95 backdrop-blur-sm";
+
   return (
-    <div className="min-h-dvh bg-background flex flex-col">
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
+    <div className={`min-h-dvh flex flex-col ${isPreviewActive ? "bg-transparent" : "bg-background"}`}>
+      <header className={`sticky top-0 z-50 border-b border-border safe-top transition-all duration-200 ${glassClass}`}>
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-3 px-4 py-2">
             <Button
@@ -497,7 +503,7 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
+      <main className={`flex-1 p-4 max-w-2xl mx-auto w-full transition-all duration-200 ${isPreviewActive ? "relative z-10" : ""}`}>
         <AnimatedContainer className="space-y-4">
           {!isSearching && (
             <AnimatedItem>
@@ -519,7 +525,7 @@ export default function SettingsPage() {
         </AnimatedContainer>
       </main>
 
-      <footer className="border-t border-border py-4 safe-bottom">
+      <footer className={`border-t border-border py-4 safe-bottom transition-all duration-200 ${glassClass}`}>
         <div className="max-w-2xl mx-auto px-4">
           <div className="text-center text-xs text-muted-foreground space-y-0.5">
             <div className="flex items-center justify-center gap-2">
@@ -626,5 +632,14 @@ export default function SettingsPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <PreviewProvider>
+      <SettingsPreview />
+      <SettingsPageContent />
+    </PreviewProvider>
   );
 }

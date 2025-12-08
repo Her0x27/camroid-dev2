@@ -10,6 +10,8 @@ interface LockedSliderProps {
   step: number;
   "data-testid"?: string;
   className?: string;
+  onInteractionStart?: () => void;
+  onInteractionEnd?: () => void;
 }
 
 export function LockedSlider({
@@ -20,18 +22,25 @@ export function LockedSlider({
   step,
   "data-testid": testId,
   className,
+  onInteractionStart,
+  onInteractionEnd,
 }: LockedSliderProps) {
   const [isLocked, setIsLocked] = useState(true);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const canChangeRef = useRef(false);
+  const interactionStartedRef = useRef(false);
 
   const handlePointerDown = useCallback(() => {
     canChangeRef.current = false;
     timeoutRef.current = setTimeout(() => {
       canChangeRef.current = true;
       setIsLocked(false);
+      if (!interactionStartedRef.current) {
+        interactionStartedRef.current = true;
+        onInteractionStart?.();
+      }
     }, 500);
-  }, []);
+  }, [onInteractionStart]);
 
   const handlePointerUp = useCallback(() => {
     if (timeoutRef.current) {
@@ -40,7 +49,11 @@ export function LockedSlider({
     }
     canChangeRef.current = false;
     setIsLocked(true);
-  }, []);
+    if (interactionStartedRef.current) {
+      interactionStartedRef.current = false;
+      onInteractionEnd?.();
+    }
+  }, [onInteractionEnd]);
 
   const handleValueChange = useCallback((newValue: number[]) => {
     if (canChangeRef.current) {
@@ -53,6 +66,8 @@ export function LockedSlider({
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      onTouchCancel={handlePointerUp}
       style={{
         opacity: isLocked ? 0.6 : 1,
         transition: "opacity 150ms ease",

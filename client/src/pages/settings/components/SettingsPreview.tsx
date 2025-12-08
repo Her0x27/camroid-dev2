@@ -1,8 +1,10 @@
-import { memo, useRef, useEffect } from "react";
+import { memo, useRef, useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useSettings } from "@/lib/settings-context";
 import { usePreview } from "../contexts/PreviewContext";
 import { drawWatermark, type WatermarkMetadata } from "@/lib/watermark-renderer";
 import { useI18n } from "@/lib/i18n";
+import { getDefaultColorForScheme } from "@/components/reticles";
 import previewImage from "@/assets/preview-background.jpg";
 
 const DEMO_METADATA = {
@@ -20,9 +22,21 @@ export const SettingsPreview = memo(function SettingsPreview() {
   const { t } = useI18n();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
-    if (!isPreviewActive) return;
+    if (imageRef.current) return;
+    
+    const img = new Image();
+    img.onload = () => {
+      imageRef.current = img;
+      setImageLoaded(true);
+    };
+    img.src = previewImage;
+  }, []);
+
+  useEffect(() => {
+    if (!isPreviewActive || !imageLoaded) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -64,6 +78,10 @@ export const SettingsPreview = memo(function SettingsPreview() {
       ctx.fillRect(0, 0, containerWidth, containerHeight);
       ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
 
+      const reticleColor = settings.reticle.autoColor 
+        ? "#22c55e" 
+        : getDefaultColorForScheme(settings.reticle.colorScheme);
+
       const metadata: WatermarkMetadata = {
         latitude: settings.gpsEnabled ? DEMO_METADATA.latitude : null,
         longitude: settings.gpsEnabled ? DEMO_METADATA.longitude : null,
@@ -74,33 +92,33 @@ export const SettingsPreview = memo(function SettingsPreview() {
         note: settings.reticle.showMetadata ? t.settings.preview.demoNote : undefined,
         timestamp: Date.now(),
         reticleConfig: settings.reticle,
-        reticleColor: "#22c55e",
+        reticleColor,
         watermarkScale: settings.watermarkScale,
+        reticlePosition: { x: 50, y: 50 },
       };
 
       drawWatermark(ctx, containerWidth, containerHeight, metadata);
     };
 
-    if (!imageRef.current) {
-      const img = new Image();
-      img.onload = () => {
-        imageRef.current = img;
-        drawPreview();
-      };
-      img.src = previewImage;
-    } else {
-      drawPreview();
-    }
-  }, [isPreviewActive, settings, t]);
-
-  if (!isPreviewActive) return null;
+    drawPreview();
+  }, [isPreviewActive, imageLoaded, settings, t]);
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full"
-      />
-    </div>
+    <AnimatePresence>
+      {isPreviewActive && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-0 pointer-events-none"
+        >
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full"
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 });

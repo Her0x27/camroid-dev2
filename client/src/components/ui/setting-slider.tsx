@@ -15,6 +15,8 @@ interface SettingSliderProps {
   unit?: string;
   testId?: string;
   className?: string;
+  onInteractionStart?: () => void;
+  onInteractionEnd?: () => void;
 }
 
 export const SettingSlider = memo(function SettingSlider({
@@ -29,6 +31,8 @@ export const SettingSlider = memo(function SettingSlider({
   unit = "%",
   testId,
   className,
+  onInteractionStart,
+  onInteractionEnd,
 }: SettingSliderProps) {
   return (
     <div className={cn("space-y-2 py-2 touch-manipulation", className)}>
@@ -61,6 +65,8 @@ export const SettingSlider = memo(function SettingSlider({
           step={step}
           data-testid={testId}
           className="touch-manipulation"
+          onInteractionStart={onInteractionStart}
+          onInteractionEnd={onInteractionEnd}
         />
       </div>
     </div>

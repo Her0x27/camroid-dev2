@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useCallback } from "react";
 import { Crosshair, Eye, Palette, Hand, Timer, Move } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SettingRow } from "@/components/ui/setting-row";
 import { SettingSlider } from "@/components/ui/setting-slider";
 import { useI18n } from "@/lib/i18n";
+import { usePreview } from "../contexts/PreviewContext";
 import type { Settings, ReticleConfig, ColorScheme } from "@shared/schema";
 
 interface ReticleSectionProps {
@@ -19,6 +20,15 @@ export const ReticleSection = memo(function ReticleSection({
   updateReticle,
 }: ReticleSectionProps) {
   const { t } = useI18n();
+  const { activatePreview, deactivatePreview } = usePreview();
+  
+  const handleInteractionStart = useCallback(() => {
+    activatePreview("reticle");
+  }, [activatePreview]);
+  
+  const handleInteractionEnd = useCallback(() => {
+    deactivatePreview();
+  }, [deactivatePreview]);
   
   return (
     <CollapsibleCard
@@ -51,6 +61,8 @@ export const ReticleSection = memo(function ReticleSection({
             max={50}
             step={1}
             testId="slider-reticle-size"
+            onInteractionStart={handleInteractionStart}
+            onInteractionEnd={handleInteractionEnd}
           />
 
           <Separator />
@@ -65,6 +77,8 @@ export const ReticleSection = memo(function ReticleSection({
             max={30}
             step={1}
             testId="slider-stroke-width"
+            onInteractionStart={handleInteractionStart}
+            onInteractionEnd={handleInteractionEnd}
           />
 
           <Separator />
@@ -79,6 +93,8 @@ export const ReticleSection = memo(function ReticleSection({
             max={100}
             step={5}
             testId="slider-opacity"
+            onInteractionStart={handleInteractionStart}
+            onInteractionEnd={handleInteractionEnd}
           />
 
           <Separator />
