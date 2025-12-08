@@ -469,7 +469,7 @@ export default function SettingsPage() {
   }, [isSearching, searchQuery, searchableSections, t.settings.search.noResults]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background flex flex-col">
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-3 px-4 py-2">
@@ -497,7 +497,7 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <main className="p-4 max-w-2xl mx-auto pb-4">
+      <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
         <AnimatedContainer className="space-y-4">
           {!isSearching && (
             <AnimatedItem>
@@ -517,8 +517,10 @@ export default function SettingsPage() {
             categorySections[activeCategory]
           )}
         </AnimatedContainer>
+      </main>
 
-        <footer className="mt-8 border-t border-border pt-4 pb-4 safe-bottom">
+      <footer className="border-t border-border py-4 safe-bottom">
+        <div className="max-w-2xl mx-auto px-4">
           <div className="text-center text-xs text-muted-foreground space-y-0.5">
             <div className="flex items-center justify-center gap-2">
               <Crosshair className="w-3.5 h-3.5 text-primary" />
@@ -527,8 +529,8 @@ export default function SettingsPage() {
             <p>{t.settings.appInfo.subtitle}</p>
             <p className="opacity-75">{t.settings.appInfo.storageNote}</p>
           </div>
-        </footer>
-      </main>
+        </div>
+      </footer>
 
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <AlertDialogContent>
