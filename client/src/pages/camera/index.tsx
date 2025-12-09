@@ -16,6 +16,7 @@ import {
   type PhotoData,
   type SavedPhotoResult,
   type CloudUploadResult,
+  type CloudProviderUploadSettings,
 } from "@/lib/capture-helpers";
 import { sampleContrastingColor } from "@/lib/canvas-utils";
 import { logger } from "@/lib/logger";
@@ -166,6 +167,34 @@ export default function CameraPage() {
     return geoData.accuracy > (settings.accuracyLimit || 20);
   }, [settings.gpsEnabled, settings.accuracyLimit, geoData.accuracy]);
 
+  const cloudUploadSettings = useMemo((): CloudProviderUploadSettings => {
+    const providerId = settings.cloud?.selectedProvider || "imgbb";
+    if (providerId === "imgbb") {
+      return {
+        autoUpload: settings.imgbb?.autoUpload ?? false,
+        providerId,
+        settings: {
+          isValidated: settings.imgbb?.isValidated ?? false,
+          apiKey: settings.imgbb?.apiKey ?? "",
+          expiration: settings.imgbb?.expiration ?? 0,
+          autoUpload: settings.imgbb?.autoUpload ?? false,
+        },
+      };
+    }
+    // For non-ImgBB providers, use saved settings from cloud.providers
+    // Preserve saved validation state - don't override with { isValidated: false }
+    const savedProviderSettings = settings.cloud?.providers?.[providerId];
+    const providerSettings = savedProviderSettings ?? { isValidated: false };
+    const autoUploadValue = typeof providerSettings.autoUpload === 'boolean' 
+      ? providerSettings.autoUpload 
+      : false;
+    return {
+      autoUpload: autoUploadValue,
+      providerId,
+      settings: providerSettings,
+    };
+  }, [settings.cloud, settings.imgbb]);
+
   const captureConfig = useMemo(() => ({
     reticle: settings.reticle,
     watermarkScale: settings.watermarkScale || 100,
@@ -180,19 +209,12 @@ export default function CameraPage() {
       denoise: settings.enhancement?.denoise ?? 0,
       contrast: settings.enhancement?.contrast ?? 0,
     },
-    imgbb: {
-      autoUpload: settings.imgbb?.autoUpload ?? false,
-      isValidated: settings.imgbb?.isValidated ?? false,
-      apiKey: settings.imgbb?.apiKey ?? "",
-      expiration: settings.imgbb?.expiration ?? 0,
-    },
   }), [
     settings.reticle,
     settings.watermarkScale,
     settings.soundEnabled,
     settings.stabilization,
     settings.enhancement,
-    settings.imgbb,
   ]);
 
   const handlePhotoSaved = useCallback((result: SavedPhotoResult) => {
@@ -283,7 +305,7 @@ export default function CameraPage() {
         result,
         photoData,
         enhancementSettings: captureConfig.enhancement,
-        imgbbSettings: captureConfig.imgbb,
+        cloudSettings: cloudUploadSettings,
         isOnline: navigator.onLine,
         onPhotoSaved: handlePhotoSaved,
         onCloudUpload: handleCloudUpload,
@@ -295,7 +317,7 @@ export default function CameraPage() {
       logger.error("Photo capture failed", error);
       captureFailed();
     }
-  }, [isReady, isCapturing, accuracyBlocked, capturePhoto, geoData, orientationData, currentNote, reticleColor, captureConfig, playCapture, waitForStability, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingCompleteCallback, getAbortSignal, startCapture, captureSuccess, captureFailed]);
+  }, [isReady, isCapturing, accuracyBlocked, capturePhoto, geoData, orientationData, currentNote, reticleColor, captureConfig, cloudUploadSettings, playCapture, waitForStability, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingCompleteCallback, getAbortSignal, startCapture, captureSuccess, captureFailed]);
 
   const handleCapture = useCallback(async () => {
     await handleCaptureWithPosition();
@@ -382,7 +404,7 @@ export default function CameraPage() {
         result,
         photoData,
         enhancementSettings: captureConfig.enhancement,
-        imgbbSettings: captureConfig.imgbb,
+        cloudSettings: cloudUploadSettings,
         isOnline: navigator.onLine,
         onPhotoSaved: handlePhotoSaved,
         onCloudUpload: handleCloudUpload,
@@ -394,7 +416,7 @@ export default function CameraPage() {
       logger.error("Photo capture from frozen frame failed", error);
       captureFailed();
     }
-  }, [isReady, isCapturing, accuracyBlocked, captureFromImage, geoData, orientationData, currentNote, captureConfig, playCapture, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingCompleteCallback, getAbortSignal, startCapture, captureSuccess, captureFailed]);
+  }, [isReady, isCapturing, accuracyBlocked, captureFromImage, geoData, orientationData, currentNote, captureConfig, cloudUploadSettings, playCapture, t, handlePhotoSaved, handleCloudUpload, handleProcessingError, handleProcessingCompleteCallback, getAbortSignal, startCapture, captureSuccess, captureFailed]);
 
   const handleAdjustmentConfirm = useCallback(() => {
     const result = confirmAdjustment();

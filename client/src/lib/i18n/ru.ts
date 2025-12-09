@@ -245,6 +245,7 @@ export const ru: Translations = {
     cloud: {
       title: "Облако (ImgBB)",
       description: "Автоматическая загрузка в облако ImgBB",
+      provider: "Облачный провайдер",
       apiToken: "API-токен",
       enterApiKey: "Введите API-ключ ImgBB",
       validate: "Проверить",

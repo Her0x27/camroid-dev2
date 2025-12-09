@@ -1,6 +1,6 @@
 import { enhanceImage } from "./image-enhancement";
 import { savePhoto, updatePhoto, saveNoteToHistory } from "./db";
-import { uploadToImgBB } from "./imgbb";
+import { cloudProviderRegistry, type ProviderSettings } from "@/cloud-providers";
 import { logger } from "./logger";
 import { deferToIdle, yieldToMain } from "./idle-utils";
 import type { InsertPhoto } from "@shared/schema";
@@ -33,11 +33,10 @@ export interface EnhancementSettings {
   contrast: number;
 }
 
-export interface ImgbbSettings {
+export interface CloudProviderUploadSettings {
   autoUpload: boolean;
-  isValidated: boolean;
-  apiKey: string;
-  expiration: number;
+  providerId: string;
+  settings: ProviderSettings;
 }
 
 export interface SavedPhotoResult {
@@ -106,11 +105,16 @@ export interface CloudUploadResult {
 export async function autoUploadToCloud(
   photoId: string,
   imageData: string,
-  imgbbSettings: ImgbbSettings,
+  cloudSettings: CloudProviderUploadSettings,
   isOnline: boolean,
   signal?: AbortSignal
 ): Promise<CloudUploadResult> {
-  if (!imgbbSettings.autoUpload || !imgbbSettings.isValidated || !imgbbSettings.apiKey) {
+  if (!cloudSettings.autoUpload || !cloudSettings.settings?.isValidated) {
+    return { success: true, uploaded: false };
+  }
+
+  const provider = cloudProviderRegistry.get(cloudSettings.providerId);
+  if (!provider) {
     return { success: true, uploaded: false };
   }
 
@@ -123,10 +127,9 @@ export async function autoUploadToCloud(
   }
 
   try {
-    const uploadResult = await uploadToImgBB(
+    const uploadResult = await provider.upload(
       imageData,
-      imgbbSettings.apiKey,
-      imgbbSettings.expiration,
+      cloudSettings.settings,
       signal
     );
 
@@ -159,7 +162,7 @@ export interface DeferredProcessingParams {
   result: CaptureResult;
   photoData: PhotoData;
   enhancementSettings: EnhancementSettings;
-  imgbbSettings: ImgbbSettings;
+  cloudSettings: CloudProviderUploadSettings;
   isOnline: boolean;
   onPhotoSaved: (result: SavedPhotoResult) => void;
   onCloudUpload: (result: CloudUploadResult) => void;
@@ -173,7 +176,7 @@ export function processCaptureDeferred(params: DeferredProcessingParams): void {
     result,
     photoData,
     enhancementSettings,
-    imgbbSettings,
+    cloudSettings,
     isOnline,
     onPhotoSaved,
     onCloudUpload,
@@ -236,7 +239,7 @@ export function processCaptureDeferred(params: DeferredProcessingParams): void {
       const uploadResult = await autoUploadToCloud(
         savedPhoto.id,
         result.imageData,
-        imgbbSettings,
+        cloudSettings,
         isOnline,
         signal
       );

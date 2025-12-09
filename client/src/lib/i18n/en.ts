@@ -243,6 +243,7 @@ export const en = {
     cloud: {
       title: "Cloud Upload (ImgBB)",
       description: "Automatic photo upload to ImgBB cloud",
+      provider: "Cloud Provider",
       apiToken: "API Token",
       enterApiKey: "Enter ImgBB API key",
       validate: "Validate",

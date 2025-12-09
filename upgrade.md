@@ -435,39 +435,42 @@ interface ThemeConfig {
 ## Чек-лист задач
 
 ### 1. Создание типов и интерфейсов
-- [ ] Создать `client/src/cloud-providers/types.ts` — интерфейс CloudProvider
-- [ ] Определить UploadResult, ValidationResult и ProviderSettings
-- [ ] Добавить поддержку специфичных настроек для каждого провайдера
+- [x] Создать `client/src/cloud-providers/types.ts` — интерфейс CloudProvider
+- [x] Определить UploadResult, ValidationResult и ProviderSettings
+- [x] Добавить поддержку специфичных настроек для каждого провайдера
 
 ### 2. Реестр провайдеров
-- [ ] Создать `client/src/cloud-providers/registry.ts` — CloudProviderRegistry
-- [ ] Методы: register, get, getAll, getDefault
+- [x] Создать `client/src/cloud-providers/registry.ts` — CloudProviderRegistry
+- [x] Методы: register, get, getAll, getDefault
 
 ### 3. Рефакторинг ImgBB как провайдера
-- [ ] Создать `client/src/cloud-providers/providers/imgbb/`
-- [ ] Перенести логику из `lib/imgbb.ts` в провайдер
-- [ ] Создать config.ts с метаданными провайдера
-- [ ] Зарегистрировать в реестре
+- [x] Создать `client/src/cloud-providers/providers/imgbb/`
+- [x] Перенести логику из `lib/imgbb.ts` в провайдер
+- [x] Создать config.ts с метаданными провайдера
+- [x] Зарегистрировать в реестре
 
 ### 4. Обновление схемы настроек
-- [ ] Добавить `selectedProvider` в Settings
-- [ ] Обновить cloudDataSchema для унификации
-- [ ] Сохранить обратную совместимость с imgbb
+- [x] Добавить `selectedProvider` в Settings (settings.cloud.selectedProvider)
+- [x] Обновить cloudDataSchema для унификации
+- [x] Сохранить обратную совместимость с imgbb
 
 ### 5. Унифицированный upload-helpers
-- [ ] Рефактор `upload-helpers.ts` для работы с любым провайдером
-- [ ] Динамический выбор провайдера по настройкам
+- [x] Рефактор `upload-helpers.ts` для работы с любым провайдером
+- [x] Динамический выбор провайдера по настройкам
+- [x] Рефактор `capture-helpers.ts` для поддержки провайдеров
+- [x] Рефактор `use-photo-mutations.ts` для поддержки провайдеров
 
 ### 6. UI компоненты
-- [ ] Создать `ProviderSelector` компонент
-- [ ] Обновить `CloudUploadSection` для динамического UI провайдера
-- [ ] Добавить UI настроек специфичных для каждого провайдера
+- [x] Создать `ProviderSelector` компонент
+- [x] Создать `ProviderSettingsForm` компонент
+- [x] Обновить `CloudUploadSection` для динамического UI провайдера
+- [x] Обновить `settings/index.tsx` с handlers для провайдеров
 
 ### 7. Переводы
-- [ ] Добавить переводы для новых элементов UI (ru/en)
+- [x] Добавить переводы для новых элементов UI (ru/en)
 
 ### 8. Документация
-- [ ] Обновить replit.md с примерами добавления новых провайдеров
+- [x] Обновить replit.md с примерами добавления новых провайдеров
 
 ---
 
@@ -475,14 +478,14 @@ interface ThemeConfig {
 
 | Задача | Статус | Дата |
 |--------|--------|------|
-| Типы и интерфейсы | ⏳ Ожидает | - |
-| Реестр провайдеров | ⏳ Ожидает | - |
-| Рефактор ImgBB | ⏳ Ожидает | - |
-| Обновление схемы | ⏳ Ожидает | - |
-| Upload-helpers | ⏳ Ожидает | - |
-| UI компоненты | ⏳ Ожидает | - |
-| Переводы | ⏳ Ожидает | - |
-| Документация | ⏳ Ожидает | - |
+| Типы и интерфейсы | ✅ Готово | 09.12.2025 |
+| Реестр провайдеров | ✅ Готово | 09.12.2025 |
+| Рефактор ImgBB | ✅ Готово | 09.12.2025 |
+| Обновление схемы | ✅ Готово | 09.12.2025 |
+| Upload-helpers | ✅ Готово | 09.12.2025 |
+| UI компоненты | ✅ Готово | 09.12.2025 |
+| Переводы | ✅ Готово | 09.12.2025 |
+| Документация | ✅ Готово | 09.12.2025 |
 
 ---
 

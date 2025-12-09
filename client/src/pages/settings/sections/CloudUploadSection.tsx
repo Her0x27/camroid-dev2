@@ -1,21 +1,12 @@
-import { memo } from "react";
-import { 
-  Cloud, 
-  Key, 
-  Clock, 
-  Upload, 
-  CheckCircle, 
-  XCircle, 
-  Loader2 
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { LockedSlider } from "@/components/ui/locked-slider";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
+import { memo, useMemo } from "react";
+import { Cloud, Separator } from "lucide-react";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
-import type { Settings, ImgbbSettings } from "@shared/schema";
+import { ProviderSelector } from "@/components/ui/provider-selector";
+import { ProviderSettingsForm } from "@/components/ui/provider-settings-form";
+import { cloudProviderRegistry, type ProviderSettings } from "@/cloud-providers";
+import { Label } from "@/components/ui/label";
+import { Separator as UISeparator } from "@/components/ui/separator";
+import type { Settings, ImgbbSettings, CloudSettings } from "@shared/schema";
 import type { Translations } from "@/lib/i18n";
 
 interface CloudUploadSectionProps {
@@ -26,6 +17,8 @@ interface CloudUploadSectionProps {
   validationError: string | null;
   onValidateApiKey: () => void;
   onImgbbUpdate: (updates: Partial<ImgbbSettings>) => void;
+  onCloudUpdate?: (updates: Partial<CloudSettings>) => void;
+  onProviderSettingsUpdate?: (providerId: string, updates: Partial<ProviderSettings>) => void;
   t: Translations;
 }
 
@@ -37,8 +30,76 @@ export const CloudUploadSection = memo(function CloudUploadSection({
   validationError,
   onValidateApiKey,
   onImgbbUpdate,
+  onCloudUpdate,
+  onProviderSettingsUpdate,
   t,
 }: CloudUploadSectionProps) {
+  const selectedProviderId = settings.cloud?.selectedProvider || "imgbb";
+  const provider = cloudProviderRegistry.get(selectedProviderId);
+  
+  const providerSettings = useMemo((): ProviderSettings => {
+    if (selectedProviderId === "imgbb") {
+      return {
+        isValidated: settings.imgbb?.isValidated ?? false,
+        apiKey: settings.imgbb?.apiKey ?? "",
+        expiration: settings.imgbb?.expiration ?? 0,
+        autoUpload: settings.imgbb?.autoUpload ?? false,
+      };
+    }
+    const stored = settings.cloud?.providers?.[selectedProviderId];
+    if (stored) {
+      return stored;
+    }
+    return provider?.getDefaultSettings() || { isValidated: false };
+  }, [selectedProviderId, settings.imgbb, settings.cloud?.providers, provider]);
+
+  const handleProviderChange = (providerId: string) => {
+    onCloudUpdate?.({ selectedProvider: providerId });
+  };
+
+  const handleSettingsChange = (updates: Partial<ProviderSettings>) => {
+    if (selectedProviderId === "imgbb") {
+      onImgbbUpdate(updates as Partial<ImgbbSettings>);
+      if ('apiKey' in updates && updates.apiKey !== settings.imgbb?.apiKey) {
+        onApiKeyChange(updates.apiKey as string);
+      }
+    } else {
+      onProviderSettingsUpdate?.(selectedProviderId, updates);
+    }
+  };
+
+  const handleApiKeyInputChange = (value: string) => {
+    onApiKeyChange(value);
+    if (selectedProviderId === "imgbb" && settings.imgbb?.isValidated) {
+      onImgbbUpdate({ isValidated: false });
+    }
+  };
+
+  const formTranslations = useMemo(() => ({
+    validate: t.settings.cloud.validate,
+    apiKeyValidated: t.settings.cloud.apiKeyValidated,
+    configureFirst: t.settings.cloud.configureFirst,
+    getApiKey: t.settings.cloud.getApiKey,
+    neverExpires: t.settings.cloud.neverExpires,
+    hours24: t.settings.cloud.hours24,
+    never: t.common.never,
+    seconds: t.common.seconds,
+  }), [t]);
+
+  const currentSettings = useMemo((): ProviderSettings => {
+    if (selectedProviderId === "imgbb") {
+      return {
+        ...providerSettings,
+        apiKey: apiKeyInput,
+      };
+    }
+    return providerSettings;
+  }, [selectedProviderId, providerSettings, apiKeyInput]);
+
+  if (!provider) {
+    return null;
+  }
+
   return (
     <CollapsibleCard
       icon={<Cloud className="w-5 h-5" />}
@@ -48,111 +109,24 @@ export const CloudUploadSection = memo(function CloudUploadSection({
       defaultOpen={false}
     >
       <div className="space-y-3">
-        <Label className="flex items-center gap-2">
-          <Key className="w-4 h-4" />
-          {t.settings.cloud.apiToken}
-        </Label>
-        <div className="flex gap-2">
-          <Input
-            type="password"
-            placeholder={t.settings.cloud.enterApiKey}
-            value={apiKeyInput}
-            onChange={(e) => onApiKeyChange(e.target.value)}
-            data-testid="input-imgbb-api-key"
-          />
-          <Button
-            variant="outline"
-            onClick={onValidateApiKey}
-            disabled={isValidating || !apiKeyInput.trim()}
-            data-testid="button-validate-api-key"
-          >
-            {isValidating ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : settings.imgbb?.isValidated ? (
-              <CheckCircle className="w-4 h-4 text-green-500" />
-            ) : (
-              t.settings.cloud.validate
-            )}
-          </Button>
-        </div>
-        {validationError && (
-          <p className="text-xs text-destructive flex items-center gap-1">
-            <XCircle className="w-3 h-3" />
-            {validationError}
-          </p>
-        )}
-        {settings.imgbb?.isValidated && !validationError && (
-          <p className="text-xs text-green-500 flex items-center gap-1">
-            <CheckCircle className="w-3 h-3" />
-            {t.settings.cloud.apiKeyValidated}
-          </p>
-        )}
-        <p className="text-xs text-muted-foreground">
-          {t.settings.cloud.getApiKey}{" "}
-          <a 
-            href="https://api.imgbb.com/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            api.imgbb.com
-          </a>
-        </p>
-      </div>
-
-      <Separator />
-
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label className="flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            {t.settings.cloud.photoExpiration}
-          </Label>
-          <span className="text-sm text-muted-foreground font-mono">
-            {(settings.imgbb?.expiration || 0) === 0 
-              ? t.common.never 
-              : `${settings.imgbb?.expiration} ${t.common.seconds}`}
-          </span>
-        </div>
-        <LockedSlider
-          value={[settings.imgbb?.expiration || 0]}
-          onValueChange={([value]) => onImgbbUpdate({ expiration: value })}
-          min={0}
-          max={86400}
-          step={60}
-          data-testid="slider-imgbb-expiration"
-        />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{t.settings.cloud.neverExpires}</span>
-          <span>{t.settings.cloud.hours24}</span>
-        </div>
-      </div>
-
-      <Separator />
-
-      <div className="flex items-center justify-between">
-        <Label htmlFor="auto-upload" className="flex items-center gap-2 cursor-pointer">
-          <Upload className="w-4 h-4" />
-          <div>
-            <span>{t.settings.cloud.autoUpload}</span>
-            <p className="text-xs text-muted-foreground font-normal">
-              {t.settings.cloud.autoUploadDesc}
-            </p>
-          </div>
-        </Label>
-        <Switch
-          id="auto-upload"
-          checked={settings.imgbb?.autoUpload || false}
-          onCheckedChange={(checked) => onImgbbUpdate({ autoUpload: checked })}
-          disabled={!settings.imgbb?.isValidated}
-          data-testid="switch-auto-upload"
+        <Label>{t.settings.cloud.provider || "Cloud Provider"}</Label>
+        <ProviderSelector
+          selectedProviderId={selectedProviderId}
+          onProviderChange={handleProviderChange}
         />
       </div>
-      {!settings.imgbb?.isValidated && (
-        <p className="text-xs text-amber-500">
-          {t.settings.cloud.configureFirst}
-        </p>
-      )}
+
+      <UISeparator />
+
+      <ProviderSettingsForm
+        provider={provider}
+        settings={currentSettings}
+        onSettingsChange={handleSettingsChange}
+        isValidating={isValidating}
+        validationError={validationError}
+        onValidate={onValidateApiKey}
+        t={formTranslations}
+      />
     </CollapsibleCard>
   );
 });

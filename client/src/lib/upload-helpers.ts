@@ -1,12 +1,11 @@
-import { uploadMultipleToImgBB } from "./imgbb";
+import { cloudProviderRegistry, type ProviderSettings } from "@/cloud-providers";
 import { updatePhoto, getPhotoImageData } from "./db";
 import { logger } from "./logger";
 import type { PhotoWithThumbnail } from "@shared/schema";
 
 export interface UploadSettings {
-  apiKey: string;
-  isValidated: boolean;
-  expiration: number;
+  providerId: string;
+  settings: ProviderSettings;
 }
 
 export interface UploadValidationResult {
@@ -16,10 +15,15 @@ export interface UploadValidationResult {
 }
 
 export function validateUploadSettings(
-  settings: Partial<UploadSettings> | undefined,
+  uploadSettings: Partial<UploadSettings> | undefined,
   photos: PhotoWithThumbnail[]
 ): UploadValidationResult {
-  if (!settings?.apiKey || !settings.isValidated) {
+  if (!uploadSettings?.providerId || !uploadSettings?.settings?.isValidated) {
+    return { isValid: false, error: "no_api_key", photosToUpload: [] };
+  }
+
+  const provider = cloudProviderRegistry.get(uploadSettings.providerId);
+  if (!provider) {
     return { isValid: false, error: "no_api_key", photosToUpload: [] };
   }
 
@@ -40,10 +44,15 @@ export interface UploadResult {
 
 export async function executePhotoUpload(
   photos: PhotoWithThumbnail[],
-  settings: UploadSettings,
+  uploadSettings: UploadSettings,
   onProgress: (completed: number, total: number) => void,
   signal: AbortSignal
 ): Promise<UploadResult> {
+  const provider = cloudProviderRegistry.get(uploadSettings.providerId);
+  if (!provider) {
+    throw new Error(`Cloud provider "${uploadSettings.providerId}" not found`);
+  }
+
   const photosWithImageData: { id: string; imageData: string }[] = [];
   
   for (const photo of photos) {
@@ -55,10 +64,9 @@ export async function executePhotoUpload(
     }
   }
   
-  const results = await uploadMultipleToImgBB(
+  const results = await provider.uploadMultiple(
     photosWithImageData,
-    settings.apiKey,
-    settings.expiration || 0,
+    uploadSettings.settings,
     onProgress,
     3,
     signal

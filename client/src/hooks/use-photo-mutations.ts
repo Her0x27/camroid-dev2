@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { deletePhoto, updatePhoto, clearAllPhotos } from "@/lib/db";
-import { uploadToImgBB } from "@/lib/imgbb";
+import { cloudProviderRegistry, type ProviderSettings } from "@/cloud-providers";
 import { withErrorHandling, type AsyncResult } from "@/lib/async-utils";
 import type { Photo, CloudData } from "@shared/schema";
 
@@ -10,7 +10,7 @@ export interface UsePhotoMutationsResult {
   deletePhotoById: (id: string) => Promise<MutationResult>;
   deleteMultiple: (ids: string[]) => Promise<MutationResult>;
   updatePhotoById: (id: string, updates: Partial<Photo>) => Promise<MutationResult<Photo>>;
-  uploadPhotoToCloud: (photo: Photo, apiKey: string, expiration?: number) => Promise<MutationResult<CloudData>>;
+  uploadPhotoToCloud: (photo: Photo, providerId: string, settings: ProviderSettings) => Promise<MutationResult<CloudData>>;
   clearAll: () => Promise<MutationResult>;
   isDeleting: boolean;
   isUpdating: boolean;
@@ -59,12 +59,17 @@ export function usePhotoMutations(): UsePhotoMutationsResult {
 
   const uploadPhotoToCloud = useCallback(async (
     photo: Photo,
-    apiKey: string,
-    expiration: number = 0
+    providerId: string,
+    settings: ProviderSettings
   ): Promise<MutationResult<CloudData>> => {
     return withErrorHandling(
       async () => {
-        const result = await uploadToImgBB(photo.imageData, apiKey, expiration);
+        const provider = cloudProviderRegistry.get(providerId);
+        if (!provider) {
+          throw new Error(`Cloud provider "${providerId}" not found`);
+        }
+
+        const result = await provider.upload(photo.imageData, settings);
         
         if (!result.success || !result.cloudData) {
           throw new Error(result.error || "Upload failed");

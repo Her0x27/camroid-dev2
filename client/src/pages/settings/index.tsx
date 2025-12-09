@@ -28,6 +28,7 @@ import { useTheme } from "@/lib/theme-context";
 import { validateApiKey } from "@/lib/imgbb";
 import { PatternLock, patternToString } from "@/components/pattern-lock";
 import { logger } from "@/lib/logger";
+import type { ProviderSettings } from "@/cloud-providers";
 import {
   GeneralSettingsSection,
   WatermarkSection,
@@ -197,6 +198,31 @@ function SettingsPageContent() {
     });
   }, [settings.imgbb, updateSettings]);
 
+  const handleCloudUpdate = useCallback((updates: Partial<typeof settings.cloud>) => {
+    updateSettings({
+      cloud: {
+        selectedProvider: settings.cloud?.selectedProvider || 'imgbb',
+        providers: settings.cloud?.providers || {},
+        ...updates,
+      },
+    });
+  }, [settings.cloud, updateSettings]);
+
+  const handleProviderSettingsUpdate = useCallback((providerId: string, updates: Partial<ProviderSettings>) => {
+    updateSettings({
+      cloud: {
+        selectedProvider: settings.cloud?.selectedProvider || 'imgbb',
+        providers: {
+          ...settings.cloud?.providers,
+          [providerId]: {
+            ...settings.cloud?.providers?.[providerId],
+            ...updates,
+          },
+        },
+      },
+    });
+  }, [settings.cloud, updateSettings]);
+
   const handleShowClearDialog = useCallback(() => setShowClearDialog(true), []);
   const handleShowResetDialog = useCallback(() => setShowResetDialog(true), []);
   const handleShowPatternSetup = useCallback(() => setShowPatternSetup(true), []);
@@ -263,6 +289,8 @@ function SettingsPageContent() {
             validationError={validationError}
             onValidateApiKey={handleValidateApiKey}
             onImgbbUpdate={handleImgbbUpdate}
+            onCloudUpdate={handleCloudUpdate}
+            onProviderSettingsUpdate={handleProviderSettingsUpdate}
             t={t}
           />
         </AnimatedItem>
@@ -309,6 +337,7 @@ function SettingsPageContent() {
     settings, updateSettings, updateReticle, updateStabilization, updateEnhancement,
     language, setLanguage, availableLanguages, t, apiKeyInput, handleApiKeyChange,
     isValidating, validationError, handleValidateApiKey, handleImgbbUpdate,
+    handleCloudUpdate, handleProviderSettingsUpdate,
     storageInfo, handleShowClearDialog, canInstall, isInstalled, isInstalling,
     install, showIOSInstructions, privacySettings, updatePrivacySettings,
     handleShowPatternSetup, handleShowResetDialog
@@ -384,7 +413,7 @@ function SettingsPageContent() {
         'облако', 'imgbb', 'api', 'загрузка', 'ключ',
         'cloud', 'upload', 'api key'
       ],
-      component: <CloudUploadSection settings={settings} apiKeyInput={apiKeyInput} onApiKeyChange={handleApiKeyChange} isValidating={isValidating} validationError={validationError} onValidateApiKey={handleValidateApiKey} onImgbbUpdate={handleImgbbUpdate} t={t} />
+      component: <CloudUploadSection settings={settings} apiKeyInput={apiKeyInput} onApiKeyChange={handleApiKeyChange} isValidating={isValidating} validationError={validationError} onValidateApiKey={handleValidateApiKey} onImgbbUpdate={handleImgbbUpdate} onCloudUpdate={handleCloudUpdate} onProviderSettingsUpdate={handleProviderSettingsUpdate} t={t} />
     },
     {
       id: 'storage',
@@ -435,6 +464,7 @@ function SettingsPageContent() {
     settings, updateSettings, updateReticle, updateStabilization, updateEnhancement,
     language, setLanguage, availableLanguages, t, apiKeyInput, handleApiKeyChange,
     isValidating, validationError, handleValidateApiKey, handleImgbbUpdate,
+    handleCloudUpdate, handleProviderSettingsUpdate,
     storageInfo, handleShowClearDialog, canInstall, isInstalled, isInstalling,
     install, showIOSInstructions, privacySettings, updatePrivacySettings,
     handleShowPatternSetup, handleShowResetDialog

@@ -232,3 +232,71 @@ export const yourTheme: ThemeConfig = {
 import { yourTheme } from "./your-theme";
 themeRegistry.register(yourTheme);
 ```
+
+### Extensible Cloud Provider System (December 2025)
+Cloud upload providers are managed through a registry pattern similar to games and themes:
+
+**Architecture:**
+```
+client/src/cloud-providers/
+├── types.ts                        # CloudProvider, UploadResult, ProviderSettings interfaces
+├── registry.ts                     # CloudProviderRegistry: register/get providers
+├── index.ts                        # Export all providers + register them
+└── providers/
+    └── imgbb/
+        ├── index.ts                # ImgBB provider implementation
+        ├── config.ts               # Metadata: id, name, icon, getApiKeyUrl
+        └── types.ts                # ImgBB-specific settings
+```
+
+**CloudProvider Interface:**
+```typescript
+interface CloudProvider {
+  id: string;
+  name: string;
+  icon: React.ComponentType;
+  getApiKeyUrl?: string;
+  getDefaultSettings(): ProviderSettings;
+  getSettingsSchema(): SettingsField[];
+  validateSettings(settings: ProviderSettings): Promise<ValidationResult>;
+  upload(imageBase64: string, settings: ProviderSettings): Promise<UploadResult>;
+}
+```
+
+**Adding a new cloud provider:**
+1. Create folder `client/src/cloud-providers/providers/your-provider/`
+2. Create `config.ts` with provider metadata:
+```typescript
+import { Cloud } from "lucide-react";
+import type { CloudProviderMetadata } from "../../types";
+
+export const yourProviderConfig: CloudProviderMetadata = {
+  id: 'your-provider',
+  name: 'Your Provider Name',
+  icon: Cloud,
+  getApiKeyUrl: 'https://your-provider.com/api-keys',
+};
+```
+3. Create `index.ts` implementing CloudProvider interface:
+```typescript
+import type { CloudProvider, UploadResult, ProviderSettings } from "../../types";
+import { yourProviderConfig } from "./config";
+
+export const yourProvider: CloudProvider = {
+  ...yourProviderConfig,
+  getDefaultSettings: () => ({ isValidated: false, apiKey: '' }),
+  getSettingsSchema: () => [{ type: 'apiKey', key: 'apiKey', label: 'API Key' }],
+  validateSettings: async (settings) => { /* validation logic */ },
+  upload: async (imageBase64, settings) => { /* upload logic */ },
+};
+```
+4. Register in `client/src/cloud-providers/index.ts`:
+```typescript
+import { yourProvider } from "./providers/your-provider";
+cloudProviderRegistry.register(yourProvider);
+```
+
+**Settings Storage:**
+- Provider-specific settings are stored in `settings.cloud.providers[providerId]`
+- Selected provider is stored in `settings.cloud.selectedProvider`
+- ImgBB settings remain in `settings.imgbb` for backward compatibility

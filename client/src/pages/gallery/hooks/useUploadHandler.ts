@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useMemo } from "react";
 import { useSettings } from "@/lib/settings-context";
 import { useToast } from "@/hooks/use-toast";
 import { useUploadProgress } from "@/hooks/use-upload-progress";
@@ -7,6 +7,7 @@ import {
   validateUploadSettings,
   executePhotoUpload,
   getUploadToastMessage,
+  type UploadSettings,
 } from "@/lib/upload-helpers";
 import type { PhotoWithThumbnail } from "@shared/schema";
 
@@ -28,6 +29,28 @@ export function useUploadHandler(options: UseUploadHandlerOptions) {
   
   const uploadAbortControllerRef = useRef<AbortController | null>(null);
 
+  const uploadSettings = useMemo((): UploadSettings | undefined => {
+    const providerId = settings.cloud?.selectedProvider || "imgbb";
+    if (providerId === "imgbb" && settings.imgbb?.apiKey && settings.imgbb?.isValidated) {
+      return {
+        providerId,
+        settings: {
+          isValidated: settings.imgbb.isValidated,
+          apiKey: settings.imgbb.apiKey,
+          expiration: settings.imgbb.expiration ?? 0,
+        },
+      };
+    }
+    const providerSettings = settings.cloud?.providers?.[providerId];
+    if (providerSettings?.isValidated) {
+      return {
+        providerId,
+        settings: providerSettings,
+      };
+    }
+    return undefined;
+  }, [settings.cloud, settings.imgbb]);
+
   const handleCancelUpload = useCallback(() => {
     if (uploadAbortControllerRef.current) {
       uploadAbortControllerRef.current.abort();
@@ -41,7 +64,7 @@ export function useUploadHandler(options: UseUploadHandlerOptions) {
   }, [finishUpload, toast, t]);
 
   const handleUploadPhotos = useCallback(async (photos: PhotoWithThumbnail[]) => {
-    const validation = validateUploadSettings(settings.imgbb, photos);
+    const validation = validateUploadSettings(uploadSettings, photos);
 
     if (!validation.isValid) {
       if (validation.error === "no_api_key") {
@@ -62,11 +85,7 @@ export function useUploadHandler(options: UseUploadHandlerOptions) {
     try {
       const result = await executePhotoUpload(
         validation.photosToUpload,
-        {
-          apiKey: settings.imgbb!.apiKey,
-          isValidated: settings.imgbb!.isValidated,
-          expiration: settings.imgbb!.expiration ?? 0,
-        },
+        uploadSettings!,
         updateProgress,
         uploadAbortControllerRef.current.signal
       );
@@ -107,7 +126,7 @@ export function useUploadHandler(options: UseUploadHandlerOptions) {
       uploadAbortControllerRef.current = null;
       finishUpload();
     }
-  }, [settings.imgbb, toast, t, startUpload, updateProgress, finishUpload, onPhotoUpdated, onUploadComplete]);
+  }, [uploadSettings, toast, t, startUpload, updateProgress, finishUpload, onPhotoUpdated, onUploadComplete]);
 
   const cleanup = useCallback(() => {
     if (uploadAbortControllerRef.current) {

@@ -61,7 +61,24 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const loadSettings = async () => {
       try {
         const stored = await getSettings();
-        setSettings(stored);
+        // Merge with defaults to ensure all properties exist (especially cloud.providers)
+        const merged: Settings = {
+          ...defaultSettings,
+          ...stored,
+          reticle: { ...defaultSettings.reticle, ...stored.reticle },
+          cloud: {
+            ...defaultSettings.cloud,
+            ...stored.cloud,
+            providers: {
+              ...defaultSettings.cloud.providers,
+              ...stored.cloud?.providers,
+            },
+          },
+          imgbb: { ...defaultSettings.imgbb, ...stored.imgbb },
+          stabilization: { ...defaultSettings.stabilization, ...stored.stabilization },
+          enhancement: { ...defaultSettings.enhancement, ...stored.enhancement },
+        };
+        setSettings(merged);
       } catch (error) {
         logger.error("Failed to load settings", error);
       } finally {
