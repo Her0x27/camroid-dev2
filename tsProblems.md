@@ -985,27 +985,27 @@ TypeScript и ESLint проверки не выявили неиспользуе
 
 | Файл | Статус | Действие |
 |------|--------|----------|
-| `accordion.tsx` | ❌ Не используется | Удалить |
-| `aspect-ratio.tsx` | ❌ Не используется | Удалить |
-| `avatar.tsx` | ❌ Не используется | Удалить |
-| `breadcrumb.tsx` | ❌ Не используется | Удалить |
-| `calendar.tsx` | ❌ Не используется | Удалить |
-| `carousel.tsx` | ❌ Не используется | Удалить |
-| `command.tsx` | ❌ Не используется | Удалить |
-| `context-menu.tsx` | ❌ Не используется | Удалить |
-| `drawer.tsx` | ❌ Не используется | Удалить |
-| `form.tsx` | ❌ Не используется | Удалить |
-| `hover-card.tsx` | ❌ Не используется | Удалить |
-| `input-otp.tsx` | ❌ Не используется | Удалить |
-| `menubar.tsx` | ❌ Не используется | Удалить |
-| `navigation-menu.tsx` | ❌ Не используется | Удалить |
-| `pagination.tsx` | ❌ Не используется | Удалить |
-| `radio-group.tsx` | ❌ Не используется | Удалить |
-| `resizable.tsx` | ❌ Не используется | Удалить |
-| `sidebar.tsx` | ❌ Не используется | Удалить |
-| `table.tsx` | ❌ Не используется | Удалить |
-| `toggle.tsx` | ❌ Не используется | Удалить |
-| `toggle-group.tsx` | ❌ Не используется | Удалить |
+| `accordion.tsx` | ✅ Удалён | - |
+| `aspect-ratio.tsx` | ✅ Удалён | - |
+| `avatar.tsx` | ✅ Удалён | - |
+| `breadcrumb.tsx` | ✅ Удалён | - |
+| `calendar.tsx` | ✅ Удалён | - |
+| `carousel.tsx` | ✅ Удалён | - |
+| `command.tsx` | ✅ Удалён | - |
+| `context-menu.tsx` | ✅ Удалён | - |
+| `drawer.tsx` | ✅ Удалён | - |
+| `form.tsx` | ✅ Удалён | - |
+| `hover-card.tsx` | ✅ Удалён | - |
+| `input-otp.tsx` | ✅ Удалён | - |
+| `menubar.tsx` | ✅ Удалён | - |
+| `navigation-menu.tsx` | ✅ Удалён | - |
+| `pagination.tsx` | ✅ Удалён | - |
+| `radio-group.tsx` | ✅ Удалён | - |
+| `resizable.tsx` | ✅ Удалён | - |
+| `sidebar.tsx` | ✅ Удалён | - |
+| `table.tsx` | ✅ Удалён | - |
+| `toggle.tsx` | ✅ Удалён | - |
+| `toggle-group.tsx` | ✅ Удалён | - |
 
 **Команда для удаления:**
 ```bash
@@ -1041,8 +1041,8 @@ rm client/src/components/ui/{accordion,aspect-ratio,avatar,breadcrumb,calendar,c
 ### Высокий приоритет (уменьшение размера бандла)
 
 ```
-[ ] [CLEAN-6] Удалить 21 неиспользуемый UI-компонент из client/src/components/ui/
-[ ] [CLEAN-7] Обновить client/src/components/ui/index.ts после удаления (убрать экспорты если есть)
+✅ [CLEAN-6] Удалить 21 неиспользуемый UI-компонент из client/src/components/ui/
+✅ [CLEAN-7] Обновить client/src/components/ui/index.ts после удаления (не требовалось - компоненты не экспортировались)
 ```
 
 ### Проверено (без проблем)
