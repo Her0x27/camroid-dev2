@@ -554,6 +554,10 @@ interface CloudProvider {
 2. **components/ui/index.ts**
    - Добавлены экспорты: `ProviderSelector`, `ProviderSettingsForm`
 
+3. **shared/schema.ts** (09.12.2025)
+   - Добавлен публичный API ключ ImgBB по умолчанию
+   - `isValidated: true` по умолчанию для imgbb настроек
+
 ### LSP диагностика
 
 После проверки и исправлений: **0 ошибок**

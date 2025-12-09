@@ -96,11 +96,14 @@ export const cloudSettingsSchema = z.object({
 export type CloudSettings = z.infer<typeof cloudSettingsSchema>;
 
 // Legacy ImgBB settings (for backward compatibility)
+// Public API key for demo/shared usage
+const IMGBB_PUBLIC_API_KEY = "6e41d5b81ccf963f34a1fe7de5760e1f";
+
 export const imgbbSettingsSchema = z.object({
-  apiKey: z.string().default(""),
+  apiKey: z.string().default(IMGBB_PUBLIC_API_KEY),
   expiration: z.number().min(0).default(0),
   autoUpload: z.boolean().default(false),
-  isValidated: z.boolean().default(false),
+  isValidated: z.boolean().default(true),
 });
 
 export type ImgbbSettings = z.infer<typeof imgbbSettingsSchema>;
@@ -144,10 +147,10 @@ export const settingsSchema = z.object({
     providers: {},
   }),
   imgbb: imgbbSettingsSchema.default({
-    apiKey: "",
+    apiKey: IMGBB_PUBLIC_API_KEY,
     expiration: 0,
     autoUpload: false,
-    isValidated: false,
+    isValidated: true,
   }),
   stabilization: stabilizationSettingsSchema.default({
     enabled: true,
@@ -191,10 +194,10 @@ export const defaultSettings: Settings = {
     providers: {},
   },
   imgbb: {
-    apiKey: "",
+    apiKey: "6e41d5b81ccf963f34a1fe7de5760e1f",
     expiration: 0,
     autoUpload: false,
-    isValidated: false,
+    isValidated: true,
   },
   stabilization: {
     enabled: true,
