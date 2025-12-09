@@ -107,18 +107,18 @@ export const ProviderSettingsForm = memo(function ProviderSettingsForm({
   const getLabel = (labelKey: string) => fieldTranslations[labelKey] || labelKey;
   const getDescription = (descriptionKey?: string) => descriptionKey ? fieldTranslations[descriptionKey] : undefined;
   const getPlaceholder = (placeholderKey?: string) => placeholderKey ? fieldTranslations[placeholderKey] : undefined;
+  const apiKeyField = provider.settingsFields.find(f => f.required && f.type === "password");
+  
   const handleFieldChange = useCallback(
     (key: string, value: unknown) => {
-      if (key === provider.settingsFields.find(f => f.required)?.key) {
+      if (apiKeyField && key === apiKeyField.key) {
         onSettingsChange({ [key]: value, isValidated: false });
       } else {
         onSettingsChange({ [key]: value });
       }
     },
-    [onSettingsChange, provider.settingsFields]
+    [onSettingsChange, apiKeyField]
   );
-
-  const apiKeyField = provider.settingsFields.find(f => f.required && f.type === "password");
   const otherFields = provider.settingsFields.filter(f => f !== apiKeyField);
 
   return (
