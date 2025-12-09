@@ -18,13 +18,14 @@ export interface TransientMetadata {
   tilt: number | null;
 }
 
-// Cloud upload data from ImgBB
+// Cloud upload data (provider-agnostic)
 export const cloudDataSchema = z.object({
-  url: z.string(), // direct image URL
-  viewerUrl: z.string(), // viewer page URL
-  deleteUrl: z.string(), // URL to delete the image
-  uploadedAt: z.number(), // timestamp when uploaded
-  expiresAt: z.number().nullable(), // null means no expiration
+  url: z.string(),
+  viewerUrl: z.string(),
+  deleteUrl: z.string(),
+  uploadedAt: z.number(),
+  expiresAt: z.number().nullable(),
+  provider: z.string().optional(),
 });
 
 export type CloudData = z.infer<typeof cloudDataSchema>;
@@ -79,12 +80,27 @@ export interface ReticlePosition {
 
 export type ReticleConfig = z.infer<typeof reticleConfigSchema>;
 
-// ImgBB cloud upload settings
+// Cloud provider settings (unified structure)
+export const cloudProviderSettingsSchema = z.object({
+  isValidated: z.boolean().default(false),
+}).passthrough();
+
+export type CloudProviderSettings = z.infer<typeof cloudProviderSettingsSchema>;
+
+// Cloud settings with provider selection
+export const cloudSettingsSchema = z.object({
+  selectedProvider: z.string().default("imgbb"),
+  providers: z.record(z.string(), cloudProviderSettingsSchema).default({}),
+});
+
+export type CloudSettings = z.infer<typeof cloudSettingsSchema>;
+
+// Legacy ImgBB settings (for backward compatibility)
 export const imgbbSettingsSchema = z.object({
-  apiKey: z.string().default("3a60e9c6714113cafe732777909133d7"),
-  expiration: z.number().min(0).default(0), // 0 = no expiration
+  apiKey: z.string().default(""),
+  expiration: z.number().min(0).default(0),
   autoUpload: z.boolean().default(false),
-  isValidated: z.boolean().default(false), // whether API key has been validated
+  isValidated: z.boolean().default(false),
 });
 
 export type ImgbbSettings = z.infer<typeof imgbbSettingsSchema>;
@@ -118,13 +134,17 @@ export const settingsSchema = z.object({
   autoSaveLocation: z.boolean().default(true),
   cameraFacing: z.enum(["user", "environment"]).default("environment"),
   soundEnabled: z.boolean().default(false),
-  accuracyLimit: z.number().min(5).max(100).default(20), // GPS accuracy limit in meters
-  watermarkScale: z.number().min(50).max(150).default(100), // Watermark size as percentage
-  showLevelIndicator: z.boolean().default(false), // Show geometric level indicator
-  cameraResolution: z.enum(["auto", "4k", "1080p", "720p", "480p"]).default("auto"), // Camera resolution
-  photoQuality: z.number().min(50).max(100).default(90), // JPEG quality percentage
+  accuracyLimit: z.number().min(5).max(100).default(20),
+  watermarkScale: z.number().min(50).max(150).default(100),
+  showLevelIndicator: z.boolean().default(false),
+  cameraResolution: z.enum(["auto", "4k", "1080p", "720p", "480p"]).default("auto"),
+  photoQuality: z.number().min(50).max(100).default(90),
+  cloud: cloudSettingsSchema.default({
+    selectedProvider: "imgbb",
+    providers: {},
+  }),
   imgbb: imgbbSettingsSchema.default({
-    apiKey: "3a60e9c6714113cafe732777909133d7",
+    apiKey: "",
     expiration: 0,
     autoUpload: false,
     isValidated: false,
@@ -166,8 +186,12 @@ export const defaultSettings: Settings = {
   showLevelIndicator: false,
   cameraResolution: "1080p",
   photoQuality: 90,
+  cloud: {
+    selectedProvider: "imgbb",
+    providers: {},
+  },
   imgbb: {
-    apiKey: "3a60e9c6714113cafe732777909133d7",
+    apiKey: "",
     expiration: 0,
     autoUpload: false,
     isValidated: false,

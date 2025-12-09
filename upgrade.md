@@ -419,3 +419,106 @@ interface ThemeConfig {
   };
 }
 ```
+
+---
+
+# Upgrade: Расширяемая система облачных провайдеров (v6)
+
+## Описание
+Рефакторинг архитектуры для поддержки множественных облачных сервисов загрузки изображений:
+- Унифицированный интерфейс CloudProvider
+- Реестр провайдеров (по аналогии с games и themes)
+- Рефактор ImgBB как первого провайдера
+- UI для выбора провайдера в настройках
+- Возможность легко добавлять новые сервисы (Imgur, Cloudinary, S3 и др.)
+
+## Чек-лист задач
+
+### 1. Создание типов и интерфейсов
+- [ ] Создать `client/src/cloud-providers/types.ts` — интерфейс CloudProvider
+- [ ] Определить UploadResult, ValidationResult и ProviderSettings
+- [ ] Добавить поддержку специфичных настроек для каждого провайдера
+
+### 2. Реестр провайдеров
+- [ ] Создать `client/src/cloud-providers/registry.ts` — CloudProviderRegistry
+- [ ] Методы: register, get, getAll, getDefault
+
+### 3. Рефакторинг ImgBB как провайдера
+- [ ] Создать `client/src/cloud-providers/providers/imgbb/`
+- [ ] Перенести логику из `lib/imgbb.ts` в провайдер
+- [ ] Создать config.ts с метаданными провайдера
+- [ ] Зарегистрировать в реестре
+
+### 4. Обновление схемы настроек
+- [ ] Добавить `selectedProvider` в Settings
+- [ ] Обновить cloudDataSchema для унификации
+- [ ] Сохранить обратную совместимость с imgbb
+
+### 5. Унифицированный upload-helpers
+- [ ] Рефактор `upload-helpers.ts` для работы с любым провайдером
+- [ ] Динамический выбор провайдера по настройкам
+
+### 6. UI компоненты
+- [ ] Создать `ProviderSelector` компонент
+- [ ] Обновить `CloudUploadSection` для динамического UI провайдера
+- [ ] Добавить UI настроек специфичных для каждого провайдера
+
+### 7. Переводы
+- [ ] Добавить переводы для новых элементов UI (ru/en)
+
+### 8. Документация
+- [ ] Обновить replit.md с примерами добавления новых провайдеров
+
+---
+
+## Прогресс v6
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| Типы и интерфейсы | ⏳ Ожидает | - |
+| Реестр провайдеров | ⏳ Ожидает | - |
+| Рефактор ImgBB | ⏳ Ожидает | - |
+| Обновление схемы | ⏳ Ожидает | - |
+| Upload-helpers | ⏳ Ожидает | - |
+| UI компоненты | ⏳ Ожидает | - |
+| Переводы | ⏳ Ожидает | - |
+| Документация | ⏳ Ожидает | - |
+
+---
+
+## Архитектура: Система облачных провайдеров
+
+```
+client/src/cloud-providers/
+├── types.ts              # CloudProvider interface
+├── registry.ts           # CloudProviderRegistry
+├── index.ts              # Export all providers + register them
+└── providers/
+    └── imgbb/
+        ├── index.ts      # ImgBB provider implementation
+        ├── config.ts     # Metadata: name, icon, fields
+        └── types.ts      # ImgBB-specific types
+```
+
+### CloudProvider Interface
+```typescript
+interface CloudProvider {
+  id: string;                    // 'imgbb', 'imgur', 'cloudinary'
+  name: string;                  // Display name
+  icon: React.ComponentType;     // Icon for selector
+  description: string;           // Provider description
+  
+  // Settings UI configuration
+  settingsFields: ProviderSettingField[];
+  
+  // API methods
+  validateSettings(settings: Record<string, unknown>): Promise<ValidationResult>;
+  upload(imageBase64: string, settings: Record<string, unknown>, signal?: AbortSignal): Promise<UploadResult>;
+  uploadMultiple(images: ImageData[], settings: Record<string, unknown>, onProgress?: ProgressCallback, signal?: AbortSignal): Promise<Map<string, UploadResult>>;
+}
+```
+
+### Добавление нового провайдера
+1. Создать папку `client/src/cloud-providers/providers/yourprovider/`
+2. Реализовать CloudProvider interface
+3. Зарегистрировать в `client/src/cloud-providers/index.ts`
