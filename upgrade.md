@@ -312,3 +312,110 @@ client/src/pages/settings/
 | Наклон | Всегда (демо-данные) |
 | Заметка | settings.reticle.showMetadata === true |
 | Timestamp | Всегда |
+
+---
+
+# Upgrade: Рефакторинг архитектуры (v5)
+
+## Описание
+Рефакторинг архитектуры приложения для расширяемости:
+1. **Расширяемая система игр** — возможность добавлять новые игры для PRIVACY_MODE
+2. **Расширяемая система тем** — возможность создавать и выбирать пользовательские темы
+3. **Удаление quickTaps** — устаревший тип жеста с багом безопасности
+
+## Чек-лист задач
+
+### 1. Удаление GestureType: quickTaps
+- [ ] Удалить 'quickTaps' из типа GestureType в config.ts
+- [ ] Удалить 'quickTaps' из типа в privacy-context.tsx
+- [ ] Удалить обработку quickTaps в use-secret-gesture.ts
+- [ ] Удалить опцию quickTaps из PrivacySection.tsx
+- [ ] Удалить переводы quickTaps из en.ts и ru.ts
+- [ ] Обновить UNLOCK_GESTURE по умолчанию на 'patternUnlock'
+- [ ] Удалить QUICK_TAP_COUNT из constants.ts
+
+### 2. Расширяемая система игр для PRIVACY_MODE
+- [ ] Создать `client/src/games/types.ts` — интерфейс GameConfig
+- [ ] Создать `client/src/games/registry.ts` — реестр игр
+- [ ] Переместить Game2048 в `client/src/games/game-2048/`
+- [ ] Добавить поле `selectedGame` в PrivacySettings
+- [ ] Создать `GameSelector` компонент для PrivacySection
+- [ ] Обновить GamePage для динамического выбора игры
+- [ ] Обновить favicon/title на основе metadata игры
+
+### 3. Расширяемая система тем
+- [ ] Создать `client/src/themes/types.ts` — интерфейс ThemeConfig
+- [ ] Создать `client/src/themes/registry.ts` — реестр тем
+- [ ] Создать `client/src/themes/tactical-dark.ts` — тёмная тема
+- [ ] Создать `client/src/themes/tactical-light.ts` — светлая тема
+- [ ] Обновить ThemeContext для поддержки кастомных тем
+- [ ] Создать `ThemeSelector` компонент для ThemeSection
+- [ ] Динамическая генерация CSS-переменных из конфига темы
+
+### 4. Обновление документации
+- [ ] Обновить replit.md с новой архитектурой
+- [ ] Добавить примеры создания новых игр
+- [ ] Добавить примеры создания новых тем
+
+---
+
+## Прогресс v5
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| Удаление quickTaps | ⏳ В процессе | 09.12.2025 |
+| Система игр | ⏳ Ожидает | - |
+| Система тем | ⏳ Ожидает | - |
+| Документация | ⏳ Ожидает | - |
+
+---
+
+## Архитектура: Система игр
+
+```
+client/src/games/
+├── types.ts              # GameConfig interface
+├── registry.ts           # GameRegistry: register/get games
+├── index.ts              # Export all games
+└── game-2048/
+    ├── index.tsx         # Game2048 component
+    ├── use-game.ts       # useGame2048 hook
+    └── config.ts         # Metadata: title, favicon, icon
+```
+
+### GameConfig Interface
+```typescript
+interface GameConfig {
+  id: string;                    // 'game-2048', 'game-snake'
+  title: string;                 // Document title when active
+  favicon: string;               // Path to favicon
+  icon: React.ComponentType;     // Icon for selector
+  component: React.LazyExoticComponent<GameComponent>;
+}
+```
+
+## Архитектура: Система тем
+
+```
+client/src/themes/
+├── types.ts              # ThemeConfig interface
+├── registry.ts           # ThemeRegistry: register/get themes
+├── apply-theme.ts        # Apply theme to DOM
+├── index.ts              # Export all themes
+├── tactical-dark.ts      # Default dark theme
+└── tactical-light.ts     # Default light theme
+```
+
+### ThemeConfig Interface
+```typescript
+interface ThemeConfig {
+  id: string;                    // 'tactical-dark', 'tactical-light'
+  name: string;                  // Display name
+  colors: {
+    background: string;          // HSL values
+    foreground: string;
+    primary: string;
+    // ... all CSS variables
+  };
+}
+```
