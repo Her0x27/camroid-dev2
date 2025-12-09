@@ -972,3 +972,85 @@ TypeScript и ESLint проверки не выявили неиспользуе
 - Performance Patterns (Memoization, Parallel operations, Virtualization)
 - State Management (Settings Context, captureConfig memoization)
 - Code Organization (File size guidelines, Component structure)
+
+---
+
+## 12. Анализ неиспользуемых UI-компонентов (09.12.2024)
+
+### 12.1 Неиспользуемые UI-компоненты (21 файл)
+
+**Местоположение:** `client/src/components/ui/`
+
+**Проблема:** Эти файлы не импортируются нигде в проекте (ShadCN/UI компоненты добавлены при инициализации, но не используются):
+
+| Файл | Статус | Действие |
+|------|--------|----------|
+| `accordion.tsx` | ❌ Не используется | Удалить |
+| `aspect-ratio.tsx` | ❌ Не используется | Удалить |
+| `avatar.tsx` | ❌ Не используется | Удалить |
+| `breadcrumb.tsx` | ❌ Не используется | Удалить |
+| `calendar.tsx` | ❌ Не используется | Удалить |
+| `carousel.tsx` | ❌ Не используется | Удалить |
+| `command.tsx` | ❌ Не используется | Удалить |
+| `context-menu.tsx` | ❌ Не используется | Удалить |
+| `drawer.tsx` | ❌ Не используется | Удалить |
+| `form.tsx` | ❌ Не используется | Удалить |
+| `hover-card.tsx` | ❌ Не используется | Удалить |
+| `input-otp.tsx` | ❌ Не используется | Удалить |
+| `menubar.tsx` | ❌ Не используется | Удалить |
+| `navigation-menu.tsx` | ❌ Не используется | Удалить |
+| `pagination.tsx` | ❌ Не используется | Удалить |
+| `radio-group.tsx` | ❌ Не используется | Удалить |
+| `resizable.tsx` | ❌ Не используется | Удалить |
+| `sidebar.tsx` | ❌ Не используется | Удалить |
+| `table.tsx` | ❌ Не используется | Удалить |
+| `toggle.tsx` | ❌ Не используется | Удалить |
+| `toggle-group.tsx` | ❌ Не используется | Удалить |
+
+**Команда для удаления:**
+```bash
+rm client/src/components/ui/{accordion,aspect-ratio,avatar,breadcrumb,calendar,carousel,command,context-menu,drawer,form,hover-card,input-otp,menubar,navigation-menu,pagination,radio-group,resizable,sidebar,table,toggle,toggle-group}.tsx
+```
+
+**Примерная экономия:** ~2000-6000 строк кода, ~20-50KB в бандле
+
+### 12.2 Ложноположительные результаты
+
+Эти элементы были ошибочно определены как неиспользуемые:
+
+| Элемент | Файл | Причина корректности |
+|---------|------|----------------------|
+| `IconDrawFunction` | canvas-icons.ts | ✅ Используется в `watermark-renderer.ts` |
+| `createCanvas` | canvas-utils.ts | ✅ Используется в `image-enhancement.ts` |
+| `ErrorBoundaryContent` | error-boundary.tsx | ✅ Используется внутри `ErrorBoundary` |
+| `OTPInputContext` | input-otp.tsx | ✅ Используется через `React.useContext()` |
+
+### 12.3 Отсутствие критических проблем
+
+| Критерий | Статус | Найдено |
+|----------|--------|---------|
+| debugger statements | ✅ Чисто | 0 |
+| @ts-ignore/@ts-nocheck | ✅ Чисто | 0 |
+| Console.log (кроме logger) | ✅ Чисто | 0 |
+| Закомментированный код | ✅ Чисто | 0 |
+
+---
+
+## Чек-лист задач Clean Code (09.12.2024)
+
+### Высокий приоритет (уменьшение размера бандла)
+
+```
+[ ] [CLEAN-6] Удалить 21 неиспользуемый UI-компонент из client/src/components/ui/
+[ ] [CLEAN-7] Обновить client/src/components/ui/index.ts после удаления (убрать экспорты если есть)
+```
+
+### Проверено (без проблем)
+
+```
+✅ Console.log/debugger - только централизованный логгер
+✅ @ts-ignore/@ts-nocheck - не найдено
+✅ IconDrawFunction - используется в watermark-renderer.ts
+✅ createCanvas - используется в image-enhancement.ts
+✅ ErrorBoundaryContent - используется внутри ErrorBoundary
+```
