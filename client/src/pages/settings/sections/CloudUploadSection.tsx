@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import { Cloud, Separator } from "lucide-react";
+import { Cloud } from "lucide-react";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { ProviderSelector } from "@/components/ui/provider-selector";
 import { ProviderSettingsForm } from "@/components/ui/provider-settings-form";
@@ -65,13 +65,6 @@ export const CloudUploadSection = memo(function CloudUploadSection({
       }
     } else {
       onProviderSettingsUpdate?.(selectedProviderId, updates);
-    }
-  };
-
-  const handleApiKeyInputChange = (value: string) => {
-    onApiKeyChange(value);
-    if (selectedProviderId === "imgbb" && settings.imgbb?.isValidated) {
-      onImgbbUpdate({ isValidated: false });
     }
   };
 

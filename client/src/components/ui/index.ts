@@ -22,3 +22,5 @@ export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 export { AlertDialog, AlertDialogPortal, AlertDialogOverlay, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "./alert-dialog";
 export { Alert, AlertTitle, AlertDescription } from "./alert";
 export { Textarea } from "./textarea";
+export { ProviderSelector } from "./provider-selector";
+export { ProviderSettingsForm } from "./provider-settings-form";
