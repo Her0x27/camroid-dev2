@@ -1,45 +1,68 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { themeRegistry, applyTheme } from "@/themes";
 
-type Theme = "light" | "dark";
+type ThemeMode = "light" | "dark";
 
 interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  theme: ThemeMode;
+  themeId: string;
+  setTheme: (theme: ThemeMode) => void;
+  setThemeById: (themeId: string) => void;
   toggleTheme: () => void;
+  availableThemes: { id: string; name: string; mode: ThemeMode }[];
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const DEFAULT_DARK_THEME = "tactical-dark";
+const DEFAULT_LIGHT_THEME = "tactical-light";
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    // Load from localStorage or default to dark
-    const saved = localStorage.getItem("theme") as Theme | null;
-    return saved || "dark";
+  const [themeId, setThemeIdState] = useState<string>(() => {
+    const saved = localStorage.getItem("themeId");
+    if (saved && themeRegistry.get(saved)) {
+      return saved;
+    }
+    const savedMode = localStorage.getItem("theme") as ThemeMode | null;
+    return savedMode === "light" ? DEFAULT_LIGHT_THEME : DEFAULT_DARK_THEME;
   });
 
-  useEffect(() => {
-    // Update DOM class
-    const root = document.documentElement;
-    if (theme === "light") {
-      root.classList.add("light");
-    } else {
-      root.classList.remove("light");
-    }
-    
-    // Save to localStorage
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+  const currentTheme = themeRegistry.get(themeId);
+  const theme: ThemeMode = currentTheme?.mode || "dark";
 
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
+  useEffect(() => {
+    const themeConfig = themeRegistry.get(themeId);
+    if (themeConfig) {
+      applyTheme(themeConfig);
+      localStorage.setItem("themeId", themeId);
+      localStorage.setItem("theme", themeConfig.mode);
+    }
+  }, [themeId]);
+
+  const setTheme = (newTheme: ThemeMode) => {
+    const newThemeId = newTheme === "light" ? DEFAULT_LIGHT_THEME : DEFAULT_DARK_THEME;
+    setThemeIdState(newThemeId);
+  };
+
+  const setThemeById = (newThemeId: string) => {
+    if (themeRegistry.get(newThemeId)) {
+      setThemeIdState(newThemeId);
+    }
   };
 
   const toggleTheme = () => {
-    setThemeState((prev) => (prev === "dark" ? "light" : "dark"));
+    const newThemeId = theme === "dark" ? DEFAULT_LIGHT_THEME : DEFAULT_DARK_THEME;
+    setThemeIdState(newThemeId);
   };
 
+  const availableThemes = themeRegistry.getAll().map((t) => ({
+    id: t.id,
+    name: t.name,
+    mode: t.mode,
+  }));
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, themeId, setTheme, setThemeById, toggleTheme, availableThemes }}>
       {children}
     </ThemeContext.Provider>
   );

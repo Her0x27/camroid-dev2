@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { CONFIG } from "@/config";
 
-export type GestureType = 'quickTaps' | 'patternUnlock' | 'severalFingers';
+export type GestureType = 'patternUnlock' | 'severalFingers';
 
 interface PrivacySettings {
   enabled: boolean;
@@ -9,6 +9,7 @@ interface PrivacySettings {
   autoLockMinutes: number;
   secretPattern: string;
   unlockFingers: number;
+  selectedGame: string;
 }
 
 interface PrivacyContextType {
@@ -35,6 +36,7 @@ const defaultSettings: PrivacySettings = {
   autoLockMinutes: CONFIG.AUTO_LOCK_MINUTES,
   secretPattern: CONFIG.UNLOCK_PATTERN,
   unlockFingers: CONFIG.UNLOCK_FINGERS,
+  selectedGame: 'game-2048',
 };
 
 const isPrivacyModeForced = CONFIG.PRIVACY_MODE;

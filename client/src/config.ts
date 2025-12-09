@@ -2,7 +2,7 @@
  * Application Configuration
  */
 
-export type GestureType = 'quickTaps' | 'patternUnlock' | 'severalFingers';
+export type GestureType = 'patternUnlock' | 'severalFingers';
 
 export const CONFIG = {
   // === PRIVACY MODE ===
@@ -12,7 +12,6 @@ export const CONFIG = {
 
   // === UNLOCK CONFIGURATION ===
   // Type of gesture required to unlock the camera when privacy mode is active
-  // 'quickTaps': Requires taps in specific corners (WARNING: currently has a security bug - use patternUnlock instead)
   // 'patternUnlock': Requires drawing a specific pattern on the screen (recommended)
   // 'severalFingers': Requires touching the screen with multiple fingers simultaneously (3-9 fingers)
   UNLOCK_GESTURE: 'severalFingers' as GestureType,

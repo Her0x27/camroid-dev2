@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Gamepad2, Eye, Hand, Clock3, Settings2, Fingerprint } from "lucide-react";
+import { Gamepad2, Eye, Hand, Clock3, Settings2, Fingerprint, Dices } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { LockedSlider } from "@/components/ui/locked-slider";
@@ -13,14 +13,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
+import { gameRegistry } from "@/games";
 import type { Translations } from "@/lib/i18n";
 
 interface PrivacySettings {
   enabled: boolean;
-  gestureType: 'quickTaps' | 'patternUnlock' | 'severalFingers';
+  gestureType: 'patternUnlock' | 'severalFingers';
   secretPattern: string;
   autoLockMinutes: number;
   unlockFingers: number;
+  selectedGame: string;
 }
 
 interface PrivacySectionProps {
@@ -68,28 +70,55 @@ export const PrivacySection = memo(function PrivacySection({
 
           <div className="space-y-3">
             <Label className="flex items-center gap-2">
+              <Dices className="w-4 h-4" />
+              {t.settings.privacy.coverGame}
+            </Label>
+            <Select
+              value={privacySettings.selectedGame}
+              onValueChange={(value) => updatePrivacySettings({ selectedGame: value })}
+            >
+              <SelectTrigger data-testid="select-cover-game">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {gameRegistry.getAll().map((game) => (
+                  <SelectItem key={game.id} value={game.id}>
+                    <span className="flex items-center gap-2">
+                      <game.icon className="w-4 h-4" />
+                      {game.title}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {t.settings.privacy.coverGameDesc}
+            </p>
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <Label className="flex items-center gap-2">
               <Hand className="w-4 h-4" />
               {t.settings.privacy.secretGesture}
             </Label>
             <Select
               value={privacySettings.gestureType}
-              onValueChange={(value) => updatePrivacySettings({ gestureType: value as 'quickTaps' | 'patternUnlock' | 'severalFingers' })}
+              onValueChange={(value) => updatePrivacySettings({ gestureType: value as 'patternUnlock' | 'severalFingers' })}
             >
               <SelectTrigger data-testid="select-gesture-type">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="quickTaps">{t.settings.privacy.quickTaps}</SelectItem>
                 <SelectItem value="patternUnlock">{t.settings.privacy.patternUnlock}</SelectItem>
                 <SelectItem value="severalFingers">{t.settings.privacy.severalFingers}</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              {privacySettings.gestureType === 'quickTaps' 
-                ? t.settings.privacy.quickTapsHint 
-                : privacySettings.gestureType === 'patternUnlock'
-                  ? t.settings.privacy.patternUnlockHint
-                  : t.settings.privacy.severalFingersHint}
+              {privacySettings.gestureType === 'patternUnlock'
+                ? t.settings.privacy.patternUnlockHint
+                : t.settings.privacy.severalFingersHint}
             </p>
           </div>
 

@@ -168,13 +168,13 @@ const HowToPlaySection = memo(function HowToPlaySection() {
 
 interface Game2048Props {
   onSecretGesture?: () => void;
-  gestureType?: 'quickTaps' | 'patternUnlock' | 'severalFingers';
+  gestureType?: 'patternUnlock' | 'severalFingers';
   secretPattern?: string;
   unlockFingers?: number;
   onActivity?: () => void;
 }
 
-export function Game2048({ onSecretGesture, gestureType = 'quickTaps', secretPattern = '', unlockFingers = 4, onActivity }: Game2048Props) {
+export function Game2048({ onSecretGesture, gestureType = 'patternUnlock', secretPattern = '', unlockFingers = 4, onActivity }: Game2048Props) {
   const { t } = useI18n();
   const {
     grid,
