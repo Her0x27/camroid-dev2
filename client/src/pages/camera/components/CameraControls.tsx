@@ -163,7 +163,7 @@ const GalleryButton = memo(function GalleryButton({
   return (
     <div className="absolute left-4 flex items-center">
       <button
-        className="rounded-xl bg-card/80 backdrop-blur-sm border border-border/50 text-primary hover:bg-card relative flex items-center justify-center w-14 h-14 shadow-lg transition-colors"
+        className="text-white relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
         onClick={onNavigate}
         data-testid="button-gallery"
       >
@@ -171,20 +171,20 @@ const GalleryButton = memo(function GalleryButton({
           <img 
             src={lastPhotoThumb} 
             alt={t.camera.lastPhoto} 
-            className="w-full h-full object-cover opacity-80 rounded-lg"
+            className="w-12 h-12 object-cover rounded-lg shadow-lg"
           />
         ) : (
-          <Images className="w-6 h-6 drop-shadow-[0_0_4px_hsl(var(--primary)/0.5)]" />
+          <Images className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
         )}
         {isProcessing && (
           <span 
-            className="absolute inset-0 rounded-xl border-2 border-primary animate-pulse"
+            className="absolute inset-0 rounded-lg border-2 border-white/60 animate-pulse"
             data-testid="indicator-processing"
           />
         )}
         {photoCount > 0 && (
           <span 
-            className="absolute -top-1.5 -right-1.5 min-w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md border border-primary-foreground/20"
+            className="absolute -top-1 -right-1 min-w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md"
             data-testid="badge-photo-count"
           >
             <Camera className="w-2.5 h-2.5" />
@@ -193,7 +193,7 @@ const GalleryButton = memo(function GalleryButton({
         )}
         {cloudCount > 0 && (
           <span 
-            className="absolute -bottom-1.5 -right-1.5 min-w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md border border-white/20"
+            className="absolute -bottom-1 -right-1 min-w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md"
             data-testid="badge-cloud-count"
           >
             <CloudUpload className="w-2.5 h-2.5" />
@@ -219,22 +219,22 @@ const RightControls = memo(function RightControls({
   return (
     <div className="absolute right-4 flex items-center gap-3">
       <button
-        className="rounded-xl bg-card/80 backdrop-blur-sm border border-border/50 text-primary hover:bg-card relative flex items-center justify-center w-14 h-14 shadow-lg transition-colors"
+        className="text-white relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
         onClick={onOpenNote}
         data-testid="button-note"
       >
-        <FileText className="w-6 h-6 drop-shadow-[0_0_4px_hsl(var(--primary)/0.5)]" />
+        <FileText className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
         {hasNote && (
-          <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-primary rounded-full shadow-[0_0_6px_hsl(var(--primary))] border border-primary-foreground/30" />
+          <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-primary rounded-full shadow-[0_0_6px_hsl(var(--primary))]" />
         )}
       </button>
 
       <button
-        className="rounded-xl bg-card/80 backdrop-blur-sm border border-border/50 text-primary hover:bg-card flex items-center justify-center w-14 h-14 shadow-lg transition-colors"
+        className="text-white flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
         onClick={onNavigateSettings}
         data-testid="button-settings"
       >
-        <Settings2 className="w-6 h-6 drop-shadow-[0_0_4px_hsl(var(--primary)/0.5)]" />
+        <Settings2 className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
       </button>
     </div>
   );
