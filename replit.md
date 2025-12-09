@@ -74,12 +74,13 @@ Six customizable reticle types (None, Crosshair, Grid, Rangefinder, Tactical, Mi
 
 ### Privacy Mode
 
-The application includes a privacy/masking feature that displays a 2048 game instead of the camera interface:
-- **Auto-lock on minimize**: When PRIVACY_MODE is enabled, the app automatically locks and shows the 2048 mask when minimized, backgrounded, or when the tab loses visibility.
+The application includes a privacy/masking feature that displays a game instead of the camera interface:
+- **Auto-lock on minimize**: When PRIVACY_MODE is enabled, the app automatically locks and shows the game mask when minimized, backgrounded, or when the tab loses visibility.
 - **App switcher protection**: A black overlay instantly covers the screen when the app goes to background, hiding content from the app switcher preview on Android/iOS.
 - **Event handling**: Uses `visibilitychange`, `pagehide`/`pageshow` (for Safari iOS), and `blur`/`focus` (for mobile devices) events for comprehensive cross-platform support.
-- **Unlock gestures**: Configurable unlock methods including quick taps, pattern unlock, and multi-finger gestures.
+- **Unlock gestures**: Configurable unlock methods including pattern unlock and multi-finger gestures.
 - **Auto-lock timer**: Configurable inactivity timeout for automatic locking.
+- **Extensible game system**: Games are registered via `gameRegistry` and can be selected in settings.
 
 ## External Dependencies
 
@@ -159,3 +160,75 @@ Reorganized settings page for better mobile ergonomics and compactness:
 **Footer:**
 - App info block now displays on all category tabs, not just "System"
 - Smaller icon (w-3.5) and tighter spacing (space-y-0.5) for minimal footprint
+
+### Extensible Game System (December 2025)
+Games for privacy mode are managed through a registry pattern:
+
+**Architecture:**
+```
+client/src/games/
+├── types.ts              # GameConfig interface
+├── registry.ts           # GameRegistry: register/get games
+├── index.ts              # Export all games + register them
+└── game-2048/
+    ├── index.ts          # Game2048 component export
+    └── config.ts         # Metadata: title, favicon, icon
+```
+
+**Adding a new game:**
+1. Create folder `client/src/games/game-yourname/`
+2. Create `config.ts` with GameConfig:
+```typescript
+import { lazy } from "react";
+import { YourIcon } from "lucide-react";
+import type { GameConfig } from "../types";
+
+export const yourGameConfig: GameConfig = {
+  id: 'game-yourname',
+  title: 'Your Game',
+  favicon: '/your-game-icon.svg',
+  icon: YourIcon,
+  component: lazy(() => import("./YourGameComponent")),
+};
+```
+3. Register in `client/src/games/index.ts`:
+```typescript
+import { yourGameConfig } from "./game-yourname";
+gameRegistry.register(yourGameConfig);
+```
+
+### Extensible Theme System (December 2025)
+Themes are managed through a registry pattern with dynamic CSS variable application:
+
+**Architecture:**
+```
+client/src/themes/
+├── types.ts              # ThemeConfig, ThemeColors interfaces
+├── registry.ts           # ThemeRegistry: register/get themes
+├── apply-theme.ts        # Apply theme CSS variables to DOM
+├── index.ts              # Export all themes + register them
+├── tactical-dark.ts      # Default dark theme
+└── tactical-light.ts     # Default light theme
+```
+
+**Adding a new theme:**
+1. Create `client/src/themes/your-theme.ts`:
+```typescript
+import type { ThemeConfig } from "./types";
+
+export const yourTheme: ThemeConfig = {
+  id: 'your-theme',
+  name: 'Your Theme',
+  mode: 'dark', // or 'light'
+  colors: {
+    background: '0 0% 4%',
+    foreground: '0 0% 95%',
+    // ... all color values in HSL format
+  },
+};
+```
+2. Register in `client/src/themes/index.ts`:
+```typescript
+import { yourTheme } from "./your-theme";
+themeRegistry.register(yourTheme);
+```

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { CONFIG } from "@/config";
+import { gameRegistry } from "@/games";
 
 export type GestureType = 'patternUnlock' | 'severalFingers';
 
@@ -28,7 +29,7 @@ const PrivacyContext = createContext<PrivacyContextType | null>(null);
 const STORAGE_KEY = "game-settings";
 const UNLOCKED_KEY = "game-unlocked";
 const FAVICON_CAMERA = "/favicon.svg";
-const FAVICON_GAME = "/game-icon.svg";
+const TITLE_CAMERA = "Camroid M";
 
 const defaultSettings: PrivacySettings = {
   enabled: CONFIG.PRIVACY_MODE,
@@ -94,15 +95,25 @@ function saveUnlockedState(unlocked: boolean): void {
   }
 }
 
-function updateFavicon(isLocked: boolean): void {
+function updateFavicon(isLocked: boolean, selectedGame?: string): void {
   const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
   if (link) {
-    link.href = isLocked ? FAVICON_GAME : FAVICON_CAMERA;
+    if (isLocked && selectedGame) {
+      const gameConfig = gameRegistry.get(selectedGame);
+      link.href = gameConfig?.favicon || '/game-icon.svg';
+    } else {
+      link.href = FAVICON_CAMERA;
+    }
   }
 }
 
-function updateTitle(isLocked: boolean): void {
-  document.title = isLocked ? "2048" : "Camroid M";
+function updateTitle(isLocked: boolean, selectedGame?: string): void {
+  if (isLocked && selectedGame) {
+    const gameConfig = gameRegistry.get(selectedGame);
+    document.title = gameConfig?.title || '2048';
+  } else {
+    document.title = TITLE_CAMERA;
+  }
 }
 
 export function PrivacyProvider({ children }: { children: ReactNode }) {
@@ -132,19 +143,19 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     if (!settings.enabled) return;
     setIsLocked(true);
     saveUnlockedState(false);
-    updateFavicon(true);
-    updateTitle(true);
-  }, [settings.enabled]);
+    updateFavicon(true, settings.selectedGame);
+    updateTitle(true, settings.selectedGame);
+  }, [settings.enabled, settings.selectedGame]);
   
   const toggleLock = useCallback(() => {
     setIsLocked(prev => {
       const newValue = !prev;
       saveUnlockedState(!newValue);
-      updateFavicon(newValue);
-      updateTitle(newValue);
+      updateFavicon(newValue, settings.selectedGame);
+      updateTitle(newValue, settings.selectedGame);
       return newValue;
     });
-  }, []);
+  }, [settings.selectedGame]);
   
   const updateSettings = useCallback((updates: Partial<PrivacySettings>) => {
     if (isPrivacyModeForced && 'enabled' in updates && !updates.enabled) {
@@ -159,8 +170,8 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
         if (updates.enabled) {
           setIsLocked(true);
           saveUnlockedState(false);
-          updateFavicon(true);
-          updateTitle(true);
+          updateFavicon(true, newSettings.selectedGame);
+          updateTitle(true, newSettings.selectedGame);
         } else {
           setIsLocked(false);
           saveUnlockedState(false);
@@ -187,13 +198,13 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
   
   useEffect(() => {
     if (settings.enabled) {
-      updateFavicon(isLocked);
-      updateTitle(isLocked);
+      updateFavicon(isLocked, settings.selectedGame);
+      updateTitle(isLocked, settings.selectedGame);
     } else {
       updateFavicon(false);
       updateTitle(false);
     }
-  }, [settings.enabled, isLocked]);
+  }, [settings.enabled, settings.selectedGame, isLocked]);
   
   useEffect(() => {
     resetInactivityTimer();

@@ -326,36 +326,36 @@ client/src/pages/settings/
 ## Чек-лист задач
 
 ### 1. Удаление GestureType: quickTaps
-- [ ] Удалить 'quickTaps' из типа GestureType в config.ts
-- [ ] Удалить 'quickTaps' из типа в privacy-context.tsx
-- [ ] Удалить обработку quickTaps в use-secret-gesture.ts
-- [ ] Удалить опцию quickTaps из PrivacySection.tsx
-- [ ] Удалить переводы quickTaps из en.ts и ru.ts
-- [ ] Обновить UNLOCK_GESTURE по умолчанию на 'patternUnlock'
-- [ ] Удалить QUICK_TAP_COUNT из constants.ts
+- [x] Удалить 'quickTaps' из типа GestureType в config.ts
+- [x] Удалить 'quickTaps' из типа в privacy-context.tsx
+- [x] Удалить обработку quickTaps в use-secret-gesture.ts
+- [x] Удалить опцию quickTaps из PrivacySection.tsx
+- [x] Удалить переводы quickTaps из en.ts и ru.ts
+- [x] Обновить UNLOCK_GESTURE по умолчанию на 'severalFingers'
+- [x] Удалить QUICK_TAP_COUNT из constants.ts
 
 ### 2. Расширяемая система игр для PRIVACY_MODE
-- [ ] Создать `client/src/games/types.ts` — интерфейс GameConfig
-- [ ] Создать `client/src/games/registry.ts` — реестр игр
-- [ ] Переместить Game2048 в `client/src/games/game-2048/`
-- [ ] Добавить поле `selectedGame` в PrivacySettings
-- [ ] Создать `GameSelector` компонент для PrivacySection
-- [ ] Обновить GamePage для динамического выбора игры
-- [ ] Обновить favicon/title на основе metadata игры
+- [x] Создать `client/src/games/types.ts` — интерфейс GameConfig
+- [x] Создать `client/src/games/registry.ts` — реестр игр
+- [x] Переместить Game2048 в `client/src/games/game-2048/`
+- [x] Добавить поле `selectedGame` в PrivacySettings
+- [x] Создать `GameSelector` компонент для PrivacySection
+- [x] Обновить GamePage для динамического выбора игры
+- [x] Обновить favicon/title на основе metadata игры
 
 ### 3. Расширяемая система тем
-- [ ] Создать `client/src/themes/types.ts` — интерфейс ThemeConfig
-- [ ] Создать `client/src/themes/registry.ts` — реестр тем
-- [ ] Создать `client/src/themes/tactical-dark.ts` — тёмная тема
-- [ ] Создать `client/src/themes/tactical-light.ts` — светлая тема
-- [ ] Обновить ThemeContext для поддержки кастомных тем
-- [ ] Создать `ThemeSelector` компонент для ThemeSection
-- [ ] Динамическая генерация CSS-переменных из конфига темы
+- [x] Создать `client/src/themes/types.ts` — интерфейс ThemeConfig
+- [x] Создать `client/src/themes/registry.ts` — реестр тем
+- [x] Создать `client/src/themes/tactical-dark.ts` — тёмная тема
+- [x] Создать `client/src/themes/tactical-light.ts` — светлая тема
+- [x] Обновить ThemeContext для поддержки кастомных тем
+- [x] Создать `ThemeSelector` компонент для ThemeSection
+- [x] Динамическая генерация CSS-переменных из конфига темы
 
 ### 4. Обновление документации
-- [ ] Обновить replit.md с новой архитектурой
-- [ ] Добавить примеры создания новых игр
-- [ ] Добавить примеры создания новых тем
+- [x] Обновить replit.md с новой архитектурой
+- [x] Добавить примеры создания новых игр
+- [x] Добавить примеры создания новых тем
 
 ---
 
@@ -363,10 +363,10 @@ client/src/pages/settings/
 
 | Задача | Статус | Дата |
 |--------|--------|------|
-| Удаление quickTaps | ⏳ В процессе | 09.12.2025 |
-| Система игр | ⏳ Ожидает | - |
-| Система тем | ⏳ Ожидает | - |
-| Документация | ⏳ Ожидает | - |
+| Удаление quickTaps | ✅ Готово | 09.12.2025 |
+| Система игр | ✅ Готово | 09.12.2025 |
+| Система тем | ✅ Готово | 09.12.2025 |
+| Документация | ✅ Готово | 09.12.2025 |
 
 ---
 
