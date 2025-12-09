@@ -7,6 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import type { CloudProvider, ProviderSettings, ProviderSettingField } from "@/cloud-providers";
 
+interface FieldTranslations {
+  [key: string]: string | undefined;
+}
+
 interface ProviderSettingsFormProps {
   provider: CloudProvider;
   settings: ProviderSettings;
@@ -14,6 +18,7 @@ interface ProviderSettingsFormProps {
   isValidating: boolean;
   validationError: string | null;
   onValidate: () => void;
+  fieldTranslations: FieldTranslations;
   t: {
     validate: string;
     apiKeyValidated: string;
@@ -30,7 +35,8 @@ function renderFieldValue(
   field: ProviderSettingField,
   value: unknown,
   onChange: (newValue: unknown) => void,
-  isValidated: boolean
+  isValidated: boolean,
+  placeholder?: string
 ) {
   switch (field.type) {
     case "password":
@@ -38,7 +44,7 @@ function renderFieldValue(
       return (
         <Input
           type={field.type}
-          placeholder={field.placeholder}
+          placeholder={placeholder}
           value={(value as string) || ""}
           onChange={(e) => onChange(e.target.value)}
           data-testid={`input-${field.key}`}
@@ -49,7 +55,7 @@ function renderFieldValue(
       return (
         <Input
           type="number"
-          placeholder={field.placeholder}
+          placeholder={placeholder}
           value={(value as number) || 0}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           min={field.min}
@@ -95,8 +101,12 @@ export const ProviderSettingsForm = memo(function ProviderSettingsForm({
   isValidating,
   validationError,
   onValidate,
+  fieldTranslations,
   t,
 }: ProviderSettingsFormProps) {
+  const getLabel = (labelKey: string) => fieldTranslations[labelKey] || labelKey;
+  const getDescription = (descriptionKey?: string) => descriptionKey ? fieldTranslations[descriptionKey] : undefined;
+  const getPlaceholder = (placeholderKey?: string) => placeholderKey ? fieldTranslations[placeholderKey] : undefined;
   const handleFieldChange = useCallback(
     (key: string, value: unknown) => {
       if (key === provider.settingsFields.find(f => f.required)?.key) {
@@ -116,14 +126,15 @@ export const ProviderSettingsForm = memo(function ProviderSettingsForm({
       {apiKeyField && (
         <div className="space-y-3">
           <Label className="flex items-center gap-2">
-            {apiKeyField.label}
+            {getLabel(apiKeyField.labelKey)}
           </Label>
           <div className="flex gap-2">
             {renderFieldValue(
               apiKeyField,
               settings[apiKeyField.key],
               (value) => handleFieldChange(apiKeyField.key, value),
-              settings.isValidated
+              settings.isValidated,
+              getPlaceholder(apiKeyField.placeholderKey)
             )}
             <Button
               variant="outline"
@@ -172,12 +183,16 @@ export const ProviderSettingsForm = memo(function ProviderSettingsForm({
         const isSlider = field.type === "slider";
         const isSwitch = field.type === "switch";
 
+        const label = getLabel(field.labelKey);
+        const description = getDescription(field.descriptionKey);
+        const placeholder = getPlaceholder(field.placeholderKey);
+
         if (isSlider) {
           return (
             <div key={field.key} className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label className="flex items-center gap-2">
-                  {field.label}
+                  {label}
                 </Label>
                 <span className="text-sm text-muted-foreground font-mono">
                   {(value as number) === 0
@@ -185,7 +200,7 @@ export const ProviderSettingsForm = memo(function ProviderSettingsForm({
                     : `${value} ${t.seconds}`}
                 </span>
               </div>
-              {renderFieldValue(field, value, (v) => handleFieldChange(field.key, v), settings.isValidated)}
+              {renderFieldValue(field, value, (v) => handleFieldChange(field.key, v), settings.isValidated, placeholder)}
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{t.neverExpires}</span>
                 <span>{t.hours24}</span>
@@ -199,26 +214,26 @@ export const ProviderSettingsForm = memo(function ProviderSettingsForm({
             <div key={field.key} className="flex items-center justify-between">
               <Label htmlFor={field.key} className="flex items-center gap-2 cursor-pointer">
                 <div>
-                  <span>{field.label}</span>
-                  {field.description && (
+                  <span>{label}</span>
+                  {description && (
                     <p className="text-xs text-muted-foreground font-normal">
-                      {field.description}
+                      {description}
                     </p>
                   )}
                 </div>
               </Label>
-              {renderFieldValue(field, value, (v) => handleFieldChange(field.key, v), settings.isValidated)}
+              {renderFieldValue(field, value, (v) => handleFieldChange(field.key, v), settings.isValidated, placeholder)}
             </div>
           );
         }
 
         return (
           <div key={field.key} className="space-y-2">
-            <Label>{field.label}</Label>
-            {field.description && (
-              <p className="text-xs text-muted-foreground">{field.description}</p>
+            <Label>{label}</Label>
+            {description && (
+              <p className="text-xs text-muted-foreground">{description}</p>
             )}
-            {renderFieldValue(field, value, (v) => handleFieldChange(field.key, v), settings.isValidated)}
+            {renderFieldValue(field, value, (v) => handleFieldChange(field.key, v), settings.isValidated, placeholder)}
           </div>
         );
       })}

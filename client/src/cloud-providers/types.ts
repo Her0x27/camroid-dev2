@@ -31,9 +31,9 @@ export type ProviderFieldType = "text" | "password" | "number" | "switch" | "sli
 export interface ProviderSettingField {
   key: string;
   type: ProviderFieldType;
-  label: string;
-  description?: string;
-  placeholder?: string;
+  labelKey: string;
+  descriptionKey?: string;
+  placeholderKey?: string;
   defaultValue: unknown;
   min?: number;
   max?: number;

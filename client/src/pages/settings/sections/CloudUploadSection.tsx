@@ -79,6 +79,15 @@ export const CloudUploadSection = memo(function CloudUploadSection({
     seconds: t.common.seconds,
   }), [t]);
 
+  const fieldTranslations = useMemo(() => ({
+    apiKey: t.settings.cloud.apiKey,
+    enterApiKey: t.settings.cloud.enterApiKey,
+    photoExpiration: t.settings.cloud.photoExpiration,
+    photoExpirationDesc: t.settings.cloud.photoExpirationDesc,
+    autoUpload: t.settings.cloud.autoUpload,
+    autoUploadDesc: t.settings.cloud.autoUploadDesc,
+  }), [t]);
+
   const currentSettings = useMemo((): ProviderSettings => {
     if (selectedProviderId === "imgbb") {
       return {
@@ -118,6 +127,7 @@ export const CloudUploadSection = memo(function CloudUploadSection({
         isValidating={isValidating}
         validationError={validationError}
         onValidate={onValidateApiKey}
+        fieldTranslations={fieldTranslations}
         t={formTranslations}
       />
     </CollapsibleCard>
