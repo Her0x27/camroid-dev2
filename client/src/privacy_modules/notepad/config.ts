@@ -1,8 +1,8 @@
 import { lazy } from "react";
 import { FileText } from "lucide-react";
-import type { DisguiseConfig } from "../types";
+import type { PrivacyModuleConfig } from "../types";
 
-export const notepadConfig: DisguiseConfig = {
+export const notepadConfig: PrivacyModuleConfig = {
   id: 'notepad',
   title: 'Notepad',
   favicon: '/notepad-icon.svg',

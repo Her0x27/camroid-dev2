@@ -5,7 +5,7 @@ import { useSecretGesture } from "@/hooks/use-secret-gesture";
 import { PatternOverlay } from "@/components/pattern-overlay";
 import { usePWABanner } from "@/hooks/use-pwa-banner";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
-import type { DisguiseProps } from "../types";
+import type { PrivacyModuleProps } from "../types";
 
 type Operation = '+' | '-' | '*' | '/' | null;
 
@@ -60,9 +60,9 @@ export function Calculator({
   gestureType = 'patternUnlock',
   secretPattern = '',
   unlockFingers = 4,
-  disguiseUnlockValue = '123456=',
-  onDisguiseUnlock,
-}: DisguiseProps) {
+  unlockValue = '123456=',
+  onUnlock,
+}: PrivacyModuleProps) {
   const [state, setState] = useState<CalculatorState>({
     display: '0',
     previousValue: null,
@@ -86,7 +86,7 @@ export function Calculator({
   const pwa = usePWABanner();
 
   const checkSecretSequence = useCallback((newChar: string) => {
-    if (!disguiseUnlockValue || !onDisguiseUnlock) return;
+    if (!unlockValue || !onUnlock) return;
 
     if (sequenceTimeoutRef.current) {
       clearTimeout(sequenceTimeoutRef.current);
@@ -94,15 +94,15 @@ export function Calculator({
 
     inputSequenceRef.current += newChar;
 
-    if (inputSequenceRef.current === disguiseUnlockValue) {
+    if (inputSequenceRef.current === unlockValue) {
       inputSequenceRef.current = '';
-      onDisguiseUnlock();
+      onUnlock();
       return;
     }
 
-    if (!disguiseUnlockValue.startsWith(inputSequenceRef.current)) {
+    if (!unlockValue.startsWith(inputSequenceRef.current)) {
       inputSequenceRef.current = newChar;
-      if (!disguiseUnlockValue.startsWith(inputSequenceRef.current)) {
+      if (!unlockValue.startsWith(inputSequenceRef.current)) {
         inputSequenceRef.current = '';
       }
     }
@@ -110,7 +110,7 @@ export function Calculator({
     sequenceTimeoutRef.current = setTimeout(() => {
       inputSequenceRef.current = '';
     }, 3000);
-  }, [disguiseUnlockValue, onDisguiseUnlock]);
+  }, [unlockValue, onUnlock]);
 
   useEffect(() => {
     return () => {

@@ -7,7 +7,7 @@ import { useSecretGesture } from "@/hooks/use-secret-gesture";
 import { PatternOverlay } from "@/components/pattern-overlay";
 import { usePWABanner } from "@/hooks/use-pwa-banner";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
-import type { DisguiseProps } from "../types";
+import type { PrivacyModuleProps } from "../types";
 
 interface Note {
   id: string;
@@ -99,9 +99,9 @@ export function Notepad({
   gestureType = 'patternUnlock',
   secretPattern = '',
   unlockFingers = 4,
-  disguiseUnlockValue = 'secret',
-  onDisguiseUnlock,
-}: DisguiseProps) {
+  unlockValue = 'secret',
+  onUnlock,
+}: PrivacyModuleProps) {
   const [notes, setNotes] = useState<Note[]>(loadNotes);
   const [currentNoteId, setCurrentNoteId] = useState<string | null>(() => {
     const savedId = loadCurrentNoteId();
@@ -145,18 +145,18 @@ export function Notepad({
   }, [currentNoteId]);
 
   const checkSecretPhrase = useCallback((text: string) => {
-    if (!disguiseUnlockValue || !onDisguiseUnlock) return;
+    if (!unlockValue || !onUnlock) return;
 
     if (secretCheckTimeoutRef.current) {
       clearTimeout(secretCheckTimeoutRef.current);
     }
 
     secretCheckTimeoutRef.current = setTimeout(() => {
-      if (text.includes(disguiseUnlockValue)) {
-        onDisguiseUnlock();
+      if (text.includes(unlockValue)) {
+        onUnlock();
       }
     }, 500);
-  }, [disguiseUnlockValue, onDisguiseUnlock]);
+  }, [unlockValue, onUnlock]);
 
   useEffect(() => {
     return () => {

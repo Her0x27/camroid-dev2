@@ -1,28 +1,28 @@
 import { Suspense } from "react";
 import { usePrivacy } from "@/lib/privacy-context";
-import { disguiseRegistry } from "@/disguises";
+import { privacyModuleRegistry } from "@/privacy_modules";
 
-export default function DisguisePage() {
+export default function PrivacyModulePage() {
   const { settings, showCamera } = usePrivacy();
 
-  const disguiseConfig = disguiseRegistry.get(settings.selectedDisguise) || disguiseRegistry.getDefault();
+  const moduleConfig = privacyModuleRegistry.get(settings.selectedModule) || privacyModuleRegistry.getDefault();
   
-  if (!disguiseConfig) {
-    return <div>No disguise configured</div>;
+  if (!moduleConfig) {
+    return <div>No privacy module configured</div>;
   }
 
-  const DisguiseComponent = disguiseConfig.component;
-  const disguiseUnlockValue = settings.disguiseUnlockValues[settings.selectedDisguise] || '';
+  const ModuleComponent = moduleConfig.component;
+  const unlockValue = settings.moduleUnlockValues[settings.selectedModule] || '';
 
   return (
     <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-      <DisguiseComponent
+      <ModuleComponent
         onSecretGesture={showCamera}
         gestureType={settings.gestureType}
         secretPattern={settings.secretPattern}
         unlockFingers={settings.unlockFingers}
-        disguiseUnlockValue={disguiseUnlockValue}
-        onDisguiseUnlock={showCamera}
+        unlockValue={unlockValue}
+        onUnlock={showCamera}
       />
     </Suspense>
   );

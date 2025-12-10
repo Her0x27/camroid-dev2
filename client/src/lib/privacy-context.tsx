@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { CONFIG } from "@/config";
-import { disguiseRegistry } from "@/disguises";
+import { privacyModuleRegistry } from "@/privacy_modules";
 
 export type GestureType = 'patternUnlock' | 'severalFingers';
 
@@ -10,8 +10,8 @@ interface PrivacySettings {
   autoLockMinutes: number;
   secretPattern: string;
   unlockFingers: number;
-  selectedDisguise: string;
-  disguiseUnlockValues: Record<string, string>;
+  selectedModule: string;
+  moduleUnlockValues: Record<string, string>;
 }
 
 interface PrivacyContextType {
@@ -27,8 +27,8 @@ interface PrivacyContextType {
 
 const PrivacyContext = createContext<PrivacyContextType | null>(null);
 
-const STORAGE_KEY = "disguise-settings";
-const UNLOCKED_KEY = "disguise-unlocked";
+const STORAGE_KEY = "privacy-settings";
+const UNLOCKED_KEY = "privacy-unlocked";
 const FAVICON_CAMERA = "/favicon.svg";
 const TITLE_CAMERA = "Camroid M";
 
@@ -38,8 +38,8 @@ const defaultSettings: PrivacySettings = {
   autoLockMinutes: CONFIG.AUTO_LOCK_MINUTES,
   secretPattern: CONFIG.UNLOCK_PATTERN,
   unlockFingers: CONFIG.UNLOCK_FINGERS,
-  selectedDisguise: CONFIG.SELECTED_DISGUISE,
-  disguiseUnlockValues: { ...CONFIG.DISGUISE_UNLOCK_VALUES },
+  selectedModule: CONFIG.SELECTED_MODULE,
+  moduleUnlockValues: { ...CONFIG.MODULE_UNLOCK_VALUES },
 };
 
 const isPrivacyModeForced = CONFIG.PRIVACY_MODE;
@@ -60,9 +60,9 @@ export function loadPrivacySettings(): PrivacySettings {
       return {
         ...defaultSettings,
         ...parsed,
-        disguiseUnlockValues: {
-          ...CONFIG.DISGUISE_UNLOCK_VALUES,
-          ...parsed.disguiseUnlockValues,
+        moduleUnlockValues: {
+          ...CONFIG.MODULE_UNLOCK_VALUES,
+          ...parsed.moduleUnlockValues,
         },
       };
     }
@@ -105,22 +105,22 @@ function saveUnlockedState(unlocked: boolean): void {
   }
 }
 
-function updateFavicon(isLocked: boolean, selectedDisguise?: string): void {
+function updateFavicon(isLocked: boolean, selectedModule?: string): void {
   const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
   if (link) {
-    if (isLocked && selectedDisguise) {
-      const disguiseConfig = disguiseRegistry.get(selectedDisguise);
-      link.href = disguiseConfig?.favicon || '/game-icon.svg';
+    if (isLocked && selectedModule) {
+      const moduleConfig = privacyModuleRegistry.get(selectedModule);
+      link.href = moduleConfig?.favicon || '/game-icon.svg';
     } else {
       link.href = FAVICON_CAMERA;
     }
   }
 }
 
-function updateTitle(isLocked: boolean, selectedDisguise?: string): void {
-  if (isLocked && selectedDisguise) {
-    const disguiseConfig = disguiseRegistry.get(selectedDisguise);
-    document.title = disguiseConfig?.title || '2048';
+function updateTitle(isLocked: boolean, selectedModule?: string): void {
+  if (isLocked && selectedModule) {
+    const moduleConfig = privacyModuleRegistry.get(selectedModule);
+    document.title = moduleConfig?.title || '2048';
   } else {
     document.title = TITLE_CAMERA;
   }
@@ -153,19 +153,19 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     if (!settings.enabled) return;
     setIsLocked(true);
     saveUnlockedState(false);
-    updateFavicon(true, settings.selectedDisguise);
-    updateTitle(true, settings.selectedDisguise);
-  }, [settings.enabled, settings.selectedDisguise]);
+    updateFavicon(true, settings.selectedModule);
+    updateTitle(true, settings.selectedModule);
+  }, [settings.enabled, settings.selectedModule]);
   
   const toggleLock = useCallback(() => {
     setIsLocked(prev => {
       const newValue = !prev;
       saveUnlockedState(!newValue);
-      updateFavicon(newValue, settings.selectedDisguise);
-      updateTitle(newValue, settings.selectedDisguise);
+      updateFavicon(newValue, settings.selectedModule);
+      updateTitle(newValue, settings.selectedModule);
       return newValue;
     });
-  }, [settings.selectedDisguise]);
+  }, [settings.selectedModule]);
   
   const updateSettings = useCallback((updates: Partial<PrivacySettings>) => {
     if (isPrivacyModeForced && 'enabled' in updates && !updates.enabled) {
@@ -180,8 +180,8 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
         if (updates.enabled) {
           setIsLocked(true);
           saveUnlockedState(false);
-          updateFavicon(true, newSettings.selectedDisguise);
-          updateTitle(true, newSettings.selectedDisguise);
+          updateFavicon(true, newSettings.selectedModule);
+          updateTitle(true, newSettings.selectedModule);
         } else {
           setIsLocked(false);
           saveUnlockedState(false);
@@ -208,13 +208,13 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
   
   useEffect(() => {
     if (settings.enabled) {
-      updateFavicon(isLocked, settings.selectedDisguise);
-      updateTitle(isLocked, settings.selectedDisguise);
+      updateFavicon(isLocked, settings.selectedModule);
+      updateTitle(isLocked, settings.selectedModule);
     } else {
       updateFavicon(false);
       updateTitle(false);
     }
-  }, [settings.enabled, settings.selectedDisguise, isLocked]);
+  }, [settings.enabled, settings.selectedModule, isLocked]);
   
   useEffect(() => {
     resetInactivityTimer();

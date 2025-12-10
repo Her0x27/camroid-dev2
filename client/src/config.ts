@@ -6,27 +6,27 @@ export type GestureType = 'patternUnlock' | 'severalFingers';
 
 export const CONFIG = {
   // === PRIVACY MODE ===
-  // Set to true to hide the camera and show only the disguise app for all users
+  // Set to true to hide the camera and show only the privacy module app for all users
   // Set to false to allow users to access the camera (privacy mode becomes optional)
   PRIVACY_MODE: false,
 
-  // === DISGUISE CONFIGURATION ===
-  // Default disguise app to show when privacy mode is active
+  // === PRIVACY MODULE CONFIGURATION ===
+  // Default privacy module app to show when privacy mode is active
   // Available: 'game-2048', 'calculator', 'notepad'
-  SELECTED_DISGUISE: 'game-2048',
+  SELECTED_MODULE: 'game-2048',
 
-  // Unlock values for each disguise app (unique unlock method per disguise)
+  // Unlock values for each privacy module app (unique unlock method per module)
   // - calculator: sequence of digits ending with '=' (e.g., '123456=')
   // - notepad: secret phrase to type (e.g., 'secret')
   // - game-2048: not used (uses universal unlock methods)
-  DISGUISE_UNLOCK_VALUES: {
+  MODULE_UNLOCK_VALUES: {
     'calculator': '123456=',
     'notepad': 'secret',
     'game-2048': '',
   } as Record<string, string>,
 
   // === UNIVERSAL UNLOCK CONFIGURATION ===
-  // These methods work as fallback for all disguises
+  // These methods work as fallback for all privacy modules
   
   // Type of gesture required to unlock the camera when privacy mode is active
   // 'patternUnlock': Requires drawing a specific pattern on the screen (recommended)

@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
-import { disguiseRegistry } from "@/disguises";
+import { privacyModuleRegistry } from "@/privacy_modules";
 import type { Translations } from "@/lib/i18n";
 
 interface PrivacySettings {
@@ -23,8 +23,8 @@ interface PrivacySettings {
   secretPattern: string;
   autoLockMinutes: number;
   unlockFingers: number;
-  selectedDisguise: string;
-  disguiseUnlockValues: Record<string, string>;
+  selectedModule: string;
+  moduleUnlockValues: Record<string, string>;
 }
 
 interface PrivacySectionProps {
@@ -40,14 +40,14 @@ export const PrivacySection = memo(function PrivacySection({
   onShowPatternSetup,
   t,
 }: PrivacySectionProps) {
-  const currentDisguise = disguiseRegistry.get(privacySettings.selectedDisguise);
-  const currentUnlockValue = privacySettings.disguiseUnlockValues[privacySettings.selectedDisguise] || '';
+  const currentModule = privacyModuleRegistry.get(privacySettings.selectedModule);
+  const currentUnlockValue = privacySettings.moduleUnlockValues[privacySettings.selectedModule] || '';
 
-  const handleDisguiseUnlockValueChange = (value: string) => {
+  const handleModuleUnlockValueChange = (value: string) => {
     updatePrivacySettings({
-      disguiseUnlockValues: {
-        ...privacySettings.disguiseUnlockValues,
-        [privacySettings.selectedDisguise]: value,
+      moduleUnlockValues: {
+        ...privacySettings.moduleUnlockValues,
+        [privacySettings.selectedModule]: value,
       },
     });
   };
@@ -85,49 +85,49 @@ export const PrivacySection = memo(function PrivacySection({
           <div className="space-y-3">
             <Label className="flex items-center gap-2">
               <Layers className="w-4 h-4" />
-              {t.settings.privacy.disguise}
+              {t.settings.privacy.module}
             </Label>
             <Select
-              value={privacySettings.selectedDisguise}
-              onValueChange={(value) => updatePrivacySettings({ selectedDisguise: value })}
+              value={privacySettings.selectedModule}
+              onValueChange={(value) => updatePrivacySettings({ selectedModule: value })}
             >
-              <SelectTrigger data-testid="select-disguise">
+              <SelectTrigger data-testid="select-module">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {disguiseRegistry.getAll().map((disguise) => (
-                  <SelectItem key={disguise.id} value={disguise.id}>
+                {privacyModuleRegistry.getAll().map((module) => (
+                  <SelectItem key={module.id} value={module.id}>
                     <span className="flex items-center gap-2">
-                      <disguise.icon className="w-4 h-4" />
-                      {disguise.title}
+                      <module.icon className="w-4 h-4" />
+                      {module.title}
                     </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              {t.settings.privacy.disguiseDesc}
+              {t.settings.privacy.moduleDesc}
             </p>
           </div>
 
-          {currentDisguise && currentDisguise.unlockMethod.type !== 'swipePattern' && (
+          {currentModule && currentModule.unlockMethod.type !== 'swipePattern' && (
             <>
               <Separator />
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Settings2 className="w-4 h-4" />
-                  {(t.settings.privacy.disguiseUnlock as Record<string, string>)[currentDisguise.unlockMethod.labelKey] || currentDisguise.unlockMethod.labelKey}
+                  {(t.settings.privacy.moduleUnlock as Record<string, string>)[currentModule.unlockMethod.labelKey] || currentModule.unlockMethod.labelKey}
                 </Label>
                 <Input
                   type="text"
                   value={currentUnlockValue}
-                  onChange={(e) => handleDisguiseUnlockValueChange(e.target.value)}
-                  placeholder={(t.settings.privacy.disguiseUnlock as Record<string, string>)[currentDisguise.unlockMethod.placeholderKey || ''] || currentDisguise.unlockMethod.defaultValue}
-                  data-testid="input-disguise-unlock"
+                  onChange={(e) => handleModuleUnlockValueChange(e.target.value)}
+                  placeholder={(t.settings.privacy.moduleUnlock as Record<string, string>)[currentModule.unlockMethod.placeholderKey || ''] || currentModule.unlockMethod.defaultValue}
+                  data-testid="input-module-unlock"
                 />
-                {currentDisguise.unlockMethod.descriptionKey && (
+                {currentModule.unlockMethod.descriptionKey && (
                   <p className="text-xs text-muted-foreground">
-                    {(t.settings.privacy.disguiseUnlock as Record<string, string>)[currentDisguise.unlockMethod.descriptionKey] || ''}
+                    {(t.settings.privacy.moduleUnlock as Record<string, string>)[currentModule.unlockMethod.descriptionKey] || ''}
                   </p>
                 )}
               </div>

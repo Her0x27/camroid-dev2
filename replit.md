@@ -74,13 +74,15 @@ Six customizable reticle types (None, Crosshair, Grid, Rangefinder, Tactical, Mi
 
 ### Privacy Mode
 
-The application includes a privacy/masking feature that displays a game instead of the camera interface:
-- **Auto-lock on minimize**: When PRIVACY_MODE is enabled, the app automatically locks and shows the game mask when minimized, backgrounded, or when the tab loses visibility.
+The application includes a privacy/masking feature that displays a cover app (calculator, notepad, game) instead of the camera interface:
+- **Auto-lock on minimize**: When PRIVACY_MODE is enabled, the app automatically locks and shows the privacy module when minimized, backgrounded, or when the tab loses visibility.
 - **App switcher protection**: A black overlay instantly covers the screen when the app goes to background, hiding content from the app switcher preview on Android/iOS.
 - **Event handling**: Uses `visibilitychange`, `pagehide`/`pageshow` (for Safari iOS), and `blur`/`focus` (for mobile devices) events for comprehensive cross-platform support.
-- **Unlock gestures**: Configurable unlock methods including pattern unlock and multi-finger gestures.
+- **Per-module unlock methods**: Each privacy module has its own unlock method (calculator uses digit sequence, notepad uses secret phrase).
+- **Universal unlock gestures**: Configurable fallback unlock methods including pattern unlock and multi-finger gestures.
 - **Auto-lock timer**: Configurable inactivity timeout for automatic locking.
-- **Extensible game system**: Games are registered via `gameRegistry` and can be selected in settings.
+- **Extensible module system**: Privacy modules are registered via `privacyModuleRegistry` and can be selected in settings.
+- **Neutral code terminology**: All code uses neutral names like `privacy_modules`, `PrivacyModuleConfig`, `selectedModule` for code discretion.
 
 ## External Dependencies
 
@@ -161,41 +163,63 @@ Reorganized settings page for better mobile ergonomics and compactness:
 - App info block now displays on all category tabs, not just "System"
 - Smaller icon (w-3.5) and tighter spacing (space-y-0.5) for minimal footprint
 
-### Extensible Game System (December 2025)
-Games for privacy mode are managed through a registry pattern:
+### Extensible Privacy Module System (December 2025)
+Privacy modules for masking the camera are managed through a registry pattern:
 
 **Architecture:**
 ```
-client/src/games/
-├── types.ts              # GameConfig interface
-├── registry.ts           # GameRegistry: register/get games
-├── index.ts              # Export all games + register them
-└── game-2048/
-    ├── index.ts          # Game2048 component export
-    └── config.ts         # Metadata: title, favicon, icon
+client/src/privacy_modules/
+├── types.ts              # PrivacyModuleConfig, PrivacyModuleProps, UnlockMethod
+├── registry.ts           # PrivacyModuleRegistry: register/get modules
+├── index.ts              # Export all modules + register them
+├── game-2048/
+│   └── config.ts         # Game 2048 (uses universal unlock methods)
+├── calculator/
+│   ├── Calculator.tsx    # Calculator component
+│   └── config.ts         # unlockMethod: sequence (e.g., '123456=')
+└── notepad/
+    ├── Notepad.tsx       # Notepad component
+    └── config.ts         # unlockMethod: phrase (e.g., 'secret')
 ```
 
-**Adding a new game:**
-1. Create folder `client/src/games/game-yourname/`
-2. Create `config.ts` with GameConfig:
+**Adding a new privacy module:**
+1. Create folder `client/src/privacy_modules/your-module/`
+2. Create `config.ts` with PrivacyModuleConfig:
 ```typescript
 import { lazy } from "react";
 import { YourIcon } from "lucide-react";
-import type { GameConfig } from "../types";
+import type { PrivacyModuleConfig } from "../types";
 
-export const yourGameConfig: GameConfig = {
-  id: 'game-yourname',
-  title: 'Your Game',
-  favicon: '/your-game-icon.svg',
+export const yourModuleConfig: PrivacyModuleConfig = {
+  id: 'your-module',
+  title: 'Your Module',
+  favicon: '/your-module-icon.svg',
   icon: YourIcon,
-  component: lazy(() => import("./YourGameComponent")),
+  component: lazy(() => import("./YourModuleComponent")),
+  unlockMethod: {
+    type: 'sequence', // or 'phrase', 'swipePattern', 'tapSequence'
+    defaultValue: '1234',
+    labelKey: 'sequenceLabel',
+    placeholderKey: 'sequencePlaceholder',
+    descriptionKey: 'sequenceDesc',
+  },
+  supportsUniversalUnlock: true,
 };
 ```
-3. Register in `client/src/games/index.ts`:
+3. Create component implementing `PrivacyModuleProps`:
 ```typescript
-import { yourGameConfig } from "./game-yourname";
-gameRegistry.register(yourGameConfig);
+import type { PrivacyModuleProps } from "../types";
+
+export function YourModule({ unlockValue, onUnlock, onSecretGesture, ... }: PrivacyModuleProps) {
+  // Implement your module with unlock logic
+}
 ```
+4. Register in `client/src/privacy_modules/index.ts`:
+```typescript
+import { yourModuleConfig } from "./your-module";
+privacyModuleRegistry.register(yourModuleConfig);
+```
+5. Add translations in `lib/i18n/en.ts` and `lib/i18n/ru.ts` for labelKey, placeholderKey, descriptionKey
 
 ### Extensible Theme System (December 2025)
 Themes are managed through a registry pattern with dynamic CSS variable application:

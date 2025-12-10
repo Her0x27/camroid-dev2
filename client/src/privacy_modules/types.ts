@@ -10,22 +10,22 @@ export interface UnlockMethod {
   descriptionKey?: string;
 }
 
-export interface DisguiseProps {
+export interface PrivacyModuleProps {
   onSecretGesture?: () => void;
   gestureType?: 'patternUnlock' | 'severalFingers';
   secretPattern?: string;
   unlockFingers?: number;
   onActivity?: () => void;
-  disguiseUnlockValue?: string;
-  onDisguiseUnlock?: () => void;
+  unlockValue?: string;
+  onUnlock?: () => void;
 }
 
-export interface DisguiseConfig {
+export interface PrivacyModuleConfig {
   id: string;
   title: string;
   favicon: string;
   icon: ComponentType<{ className?: string }>;
-  component: LazyExoticComponent<ComponentType<DisguiseProps>>;
+  component: LazyExoticComponent<ComponentType<PrivacyModuleProps>>;
   unlockMethod: UnlockMethod;
   supportsUniversalUnlock: boolean;
 }

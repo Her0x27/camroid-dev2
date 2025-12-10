@@ -271,12 +271,12 @@ export const en = {
     
     privacy: {
       title: "Privacy Mode",
-      description: "Hide camera behind a disguise app",
+      description: "Hide camera behind an app",
       enabled: "Enable Privacy Mode",
       enabledDesc: "Hide camera behind an app",
-      disguise: "Disguise",
-      disguiseDesc: "App displayed when camera is hidden",
-      disguiseUnlock: {
+      module: "Application",
+      moduleDesc: "App displayed when camera is hidden",
+      moduleUnlock: {
         sequenceLabel: "Secret Sequence",
         sequencePlaceholder: "e.g., 123456=",
         sequenceDesc: "Enter this sequence in calculator to unlock",

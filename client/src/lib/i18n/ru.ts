@@ -273,12 +273,12 @@ export const ru: Translations = {
     
     privacy: {
       title: "Режим приватности",
-      description: "Скрыть камеру за приложением-маскировкой",
+      description: "Скрыть камеру за приложением",
       enabled: "Включить приватность",
       enabledDesc: "Скрыть камеру за приложением",
-      disguise: "Маскировка",
-      disguiseDesc: "Приложение, отображаемое когда камера скрыта",
-      disguiseUnlock: {
+      module: "Приложение",
+      moduleDesc: "Приложение, отображаемое когда камера скрыта",
+      moduleUnlock: {
         sequenceLabel: "Секретная последовательность",
         sequencePlaceholder: "Например: 123456=",
         sequenceDesc: "Введите эту последовательность в калькуляторе для разблокировки",
