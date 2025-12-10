@@ -613,13 +613,13 @@ interface CloudProvider {
 ## Чек-лист задач
 
 ### 1. Обновление стилей кнопок
-- [ ] Убрать bg-card/80 backdrop-blur-sm border у GalleryButton
-- [ ] Убрать bg-card/80 backdrop-blur-sm border у NoteButton
-- [ ] Убрать bg-card/80 backdrop-blur-sm border у SettingsButton
-- [ ] Минималистичный стиль — только иконка с тенью
+- [x] Убрать bg-card/80 backdrop-blur-sm border у GalleryButton
+- [x] Убрать bg-card/80 backdrop-blur-sm border у NoteButton
+- [x] Убрать bg-card/80 backdrop-blur-sm border у SettingsButton
+- [x] Минималистичный стиль — только иконка с тенью (drop-shadow)
 
 ### 2. Обновление иконок
-- [ ] Заменить иконки на минималистичные варианты
+- [x] Заменить иконки на минималистичные варианты (Images, FileText, Settings2)
 
 ---
 
@@ -627,8 +627,8 @@ interface CloudProvider {
 
 | Задача | Статус | Дата |
 |--------|--------|------|
-| Обновление стилей | ⏳ В работе | 09.12.2025 |
-| Обновление иконок | ⏳ Ожидает | - |
+| Обновление стилей | ✅ Готово | 10.12.2025 |
+| Обновление иконок | ✅ Готово | 10.12.2025 |
 
 ---
 
@@ -955,32 +955,32 @@ interface PrivacyModuleProps {
 - [x] Добавить раздел v13 с чек-листом задач
 
 ### 2. Обновление схемы настроек (shared/schema.ts)
-- [ ] Добавить `expandedSections: Record<string, boolean>` в settingsSchema
-- [ ] Добавить в defaultSettings пустой объект
+- [x] Добавить `expandedSections: Record<string, boolean>` в settingsSchema
+- [x] Добавить в defaultSettings пустой объект
 
 ### 3. Обновление CollapsibleCard
-- [ ] Добавить controlled mode: `sectionId`, `isOpen`, `onOpenChange`
-- [ ] По умолчанию `defaultOpen = false`
-- [ ] Поддержка обоих режимов (controlled и uncontrolled)
+- [x] Добавить controlled mode: `sectionId`, `isOpen`, `onOpenChange`
+- [x] По умолчанию `defaultOpen = false`
+- [x] Поддержка обоих режимов (controlled и uncontrolled)
 
 ### 4. Обновление settings-context.tsx
-- [ ] Добавить `toggleSection(sectionId: string)` функцию
-- [ ] Добавить `isSectionOpen(sectionId: string)` функцию
+- [x] Добавить `toggleSection(sectionId: string)` функцию
+- [x] Добавить `isSectionOpen(sectionId: string)` функцию
 
 ### 5. Обновление секций настроек
-- [ ] Передавать sectionId и состояние во все секции
-- [ ] Интегрировать toggleSection
+- [x] Передавать sectionId и состояние во все секции
+- [x] Интегрировать toggleSection
 
 ### 6. Создание CategoryTips компонента
-- [ ] Красивый дизайн с иконками и градиентом
-- [ ] Информативные подсказки для каждой категории
-- [ ] Рекомендации по оптимальным значениям
+- [x] Красивый дизайн с иконками и градиентом
+- [x] Информативные подсказки для каждой категории
+- [x] Рекомендации по оптимальным значениям
 
 ### 7. Переводы (ru.ts, en.ts)
-- [ ] Добавить переводы для подсказок всех категорий
+- [x] Добавить переводы для подсказок всех категорий
 
 ### 8. Интеграция CategoryTips
-- [ ] Добавить в settings/index.tsx под секциями каждой категории
+- [x] Добавить в settings/index.tsx под секциями каждой категории
 
 ---
 
@@ -989,13 +989,13 @@ interface PrivacyModuleProps {
 | Задача | Статус | Дата |
 |--------|--------|------|
 | Обновление upgrade.md | ✅ Готово | 10.12.2025 |
-| Схема настроек | ⏳ В работе | - |
-| CollapsibleCard | ⏳ Ожидает | - |
-| settings-context.tsx | ⏳ Ожидает | - |
-| Секции настроек | ⏳ Ожидает | - |
-| CategoryTips | ⏳ Ожидает | - |
-| Переводы | ⏳ Ожидает | - |
-| Интеграция | ⏳ Ожидает | - |
+| Схема настроек | ✅ Готово | 10.12.2025 |
+| CollapsibleCard | ✅ Готово | 10.12.2025 |
+| settings-context.tsx | ✅ Готово | 10.12.2025 |
+| Секции настроек | ✅ Готово | 10.12.2025 |
+| CategoryTips | ✅ Готово | 10.12.2025 |
+| Переводы | ✅ Готово | 10.12.2025 |
+| Интеграция | ✅ Готово | 10.12.2025 |
 
 ---
 
@@ -1019,3 +1019,54 @@ interface PrivacyModuleProps {
 | **Интерфейс** | Прицел, водяной знак, уровень, язык |
 | **Данные** | GPS, точность, облачное хранилище |
 | **Система** | Тема, приватность, PWA |
+
+---
+
+# Верификация всех Upgrade'ов (10.12.2025)
+
+## Итоговая проверка
+
+Проведена полная верификация реализации всех upgrade'ов v1-v13.
+
+### Результаты проверки
+
+| Upgrade | Версия | Статус | Примечание |
+|---------|--------|--------|------------|
+| Позиционирование прицела | v1 | ✅ Готово | Полностью реализован |
+| Реорганизация настроек | v2 | ✅ Готово | QuickSettings, SettingsChips, поиск |
+| Компактная навигация | v2.1 | ✅ Готово | Chips вместо табов |
+| Описания слайдеров | v3 | ✅ Готово | Описания + footer |
+| Live Preview | v4 | ✅ Готово | SettingsPreview, PreviewContext |
+| Рефакторинг архитектуры | v5 | ✅ Готово | Privacy Modules, Themes |
+| Облачные провайдеры | v6 | ✅ Готово | CloudProviderRegistry, ImgBB |
+| Локализация провайдеров | v7 | ✅ Готово | Полная локализация |
+| Минималистичные кнопки | v8 | ✅ Готово | drop-shadow, без фона |
+| Privacy Modules | v9 | ✅ Готово | Calculator, Notepad, Game2048 |
+| Диалог возможностей | v10 | ✅ Готово | AppCapabilitiesDialog |
+| Детализация возможностей | v11 | ✅ Готово | Privacy section, platform tips |
+| Разделение permissions/features | v12 | ✅ Готово | appFeatures секция |
+| Сворачивание секций | v13 | ✅ Готово | expandedSections, CategoryTips |
+
+### Проверенные компоненты
+
+| Компонент | Файл | Статус |
+|-----------|------|--------|
+| CameraControls | pages/camera/components/CameraControls.tsx | ✅ Минималистичные кнопки |
+| CollapsibleCard | components/ui/collapsible-card.tsx | ✅ Controlled mode |
+| settings-context | lib/settings-context.tsx | ✅ toggleSection, isSectionOpen |
+| CategoryTips | pages/settings/components/CategoryTips.tsx | ✅ Градиент, подсказки |
+| Переводы ru.ts | lib/i18n/ru.ts | ✅ categoryTips для 4 категорий |
+| Переводы en.ts | lib/i18n/en.ts | ✅ categoryTips для 4 категорий |
+| Schema | shared/schema.ts | ✅ expandedSections |
+
+### LSP диагностика
+
+```
+После полной проверки: 0 ошибок
+```
+
+### Результат
+
+**Все upgrade'ы v1-v13 полностью реализованы, проверены и работают корректно.**
+
+Приложение запущено и функционирует без ошибок.
