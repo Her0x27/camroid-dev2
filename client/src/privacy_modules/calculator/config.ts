@@ -19,7 +19,11 @@ export function isValidSequenceChar(char: string): boolean {
 export const calculatorConfig: PrivacyModuleConfig = {
   id: 'calculator',
   title: 'Calculator',
-  favicon: '/calculator-icon.svg',
+  favicon: {
+    ios: '/calculator-icon-ios.svg',
+    android: '/calculator-icon-android.svg',
+    default: '/calculator-icon.svg',
+  },
   icon: CalculatorIcon,
   component: lazy(() => import("./Calculator")),
   unlockMethod: {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { getConfig, initConfig, subscribeToConfig, updateConfig as updateRemoteConfig, isBackendAvailable, type DynamicConfig } from "./config-loader";
 import { privacyModuleRegistry } from "@/privacy_modules";
+import { resolveFavicon } from "@/privacy_modules/types";
 
 export type GestureType = 'patternUnlock' | 'severalFingers';
 
@@ -127,7 +128,7 @@ function updateFavicon(isLocked: boolean, selectedModule?: string): void {
   if (link) {
     if (isLocked && selectedModule) {
       const moduleConfig = privacyModuleRegistry.get(selectedModule);
-      link.href = moduleConfig?.favicon || '/game-icon.svg';
+      link.href = moduleConfig ? resolveFavicon(moduleConfig.favicon) : '/game-icon.svg';
     } else {
       link.href = FAVICON_CAMERA;
     }

@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { privacyModuleRegistry } from "@/privacy_modules";
+import { resolveFavicon } from "@/privacy_modules/types";
 
 interface ModulePreviewProps {
   moduleId: string;
@@ -40,14 +41,14 @@ export const ModulePreview = memo(function ModulePreview({ moduleId, unlockLabel
           <div className="text-xs text-muted-foreground mb-1">Favicon</div>
           <div className="flex items-center gap-2">
             <img 
-              src={module.favicon} 
+              src={resolveFavicon(module.favicon)} 
               alt={module.title} 
               className="w-6 h-6"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
-            <span className="text-sm font-mono truncate">{module.favicon}</span>
+            <span className="text-sm font-mono truncate">{resolveFavicon(module.favicon)}</span>
           </div>
         </div>
         <div className="bg-background/50 rounded-lg p-3 border border-border/30">

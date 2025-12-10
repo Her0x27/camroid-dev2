@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <linearGradient id="notesBgIos" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffcc02"/>
+      <stop offset="100%" style="stop-color:#f5a623"/>
+    </linearGradient>
+    <linearGradient id="paperGradIos" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#f5f5f5"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="112" height="112" rx="24" fill="url(#notesBgIos)"/>
+  <rect x="24" y="20" width="72" height="88" rx="4" fill="url(#paperGradIos)"/>
+  <path d="M72 20 L96 20 L96 44 Z" fill="#e8e8e8"/>
+  <path d="M72 20 L72 44 L96 44" fill="none" stroke="#d0d0d0" stroke-width="1"/>
+  <line x1="32" y1="38" x2="64" y2="38" stroke="#c7c7cc" stroke-width="2" stroke-linecap="round"/>
+  <line x1="32" y1="50" x2="88" y2="50" stroke="#c7c7cc" stroke-width="2" stroke-linecap="round"/>
+  <line x1="32" y1="62" x2="88" y2="62" stroke="#c7c7cc" stroke-width="2" stroke-linecap="round"/>
+  <line x1="32" y1="74" x2="72" y2="74" stroke="#c7c7cc" stroke-width="2" stroke-linecap="round"/>
+  <line x1="32" y1="86" x2="80" y2="86" stroke="#c7c7cc" stroke-width="2" stroke-linecap="round"/>
+  <line x1="32" y1="98" x2="56" y2="98" stroke="#c7c7cc" stroke-width="2" stroke-linecap="round"/>
+</svg>

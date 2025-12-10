@@ -20,10 +20,36 @@ export interface PrivacyModuleProps {
   onUnlock?: () => void;
 }
 
+export interface PlatformFavicon {
+  ios: string;
+  android: string;
+  default: string;
+}
+
+export function resolveFavicon(favicon: string | PlatformFavicon): string {
+  if (typeof favicon === 'string') {
+    return favicon;
+  }
+  
+  if (typeof navigator === 'undefined') {
+    return favicon.default;
+  }
+  
+  const ua = navigator.userAgent;
+  if (/iPad|iPhone|iPod/.test(ua)) {
+    return favicon.ios;
+  }
+  if (/Android/.test(ua)) {
+    return favicon.android;
+  }
+  
+  return favicon.default;
+}
+
 export interface PrivacyModuleConfig {
   id: string;
   title: string;
-  favicon: string;
+  favicon: string | PlatformFavicon;
   icon: ComponentType<{ className?: string }>;
   component: LazyExoticComponent<ComponentType<PrivacyModuleProps>>;
   unlockMethod: UnlockMethod;
