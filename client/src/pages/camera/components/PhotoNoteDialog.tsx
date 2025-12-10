@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { FileText, History } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileText, History, Sparkles, X, Check, Trash2 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useI18n } from "@/lib/i18n";
@@ -26,7 +25,6 @@ export function PhotoNoteDialog({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   
-  // Load note history when dialog opens
   useEffect(() => {
     if (open) {
       getNoteHistory()
@@ -35,17 +33,15 @@ export function PhotoNoteDialog({
     }
   }, [open]);
   
-  // Filter suggestions based on current input
   const filteredSuggestions = useMemo(() => {
     if (!note.trim()) {
-      // Show all history when input is empty
-      return noteHistory.slice(0, 10);
+      return noteHistory.slice(0, 8);
     }
     
     const lowerNote = note.toLowerCase();
     return noteHistory
       .filter((n) => n.toLowerCase().includes(lowerNote) && n.toLowerCase() !== lowerNote)
-      .slice(0, 10);
+      .slice(0, 8);
   }, [note, noteHistory]);
   
   const handleSuggestionClick = (suggestion: string) => {
@@ -66,7 +62,6 @@ export function PhotoNoteDialog({
   };
   
   const handleInputBlur = (e: React.FocusEvent) => {
-    // Delay hiding to allow click on suggestion
     const relatedTarget = e.relatedTarget as HTMLElement;
     if (relatedTarget?.closest('[data-testid^="suggestion-note-"]')) {
       return;
@@ -74,17 +69,43 @@ export function PhotoNoteDialog({
     setTimeout(() => setShowSuggestions(false), 150);
   };
   
+  const handleClose = () => {
+    setShowSuggestions(false);
+    onOpenChange(false);
+  };
+  
+  const handleClear = () => {
+    onNoteChange("");
+    setShowSuggestions(false);
+    textareaRef.current?.focus();
+  };
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
-            {t.camera.addNote}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-sm p-0 gap-0 overflow-hidden border-0 bg-gradient-to-b from-background to-background/95">
+        <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
         
-        <div className="space-y-4 py-2">
+        <div className="px-5 pt-4 pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-semibold">{t.camera.addNote}</h2>
+                <p className="text-xs text-muted-foreground">{t.camera.enterNote}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleClose}
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors"
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+        
+        <div className="px-5 pb-5 space-y-4">
           <div className="relative">
             <Textarea
               ref={textareaRef}
@@ -93,31 +114,40 @@ export function PhotoNoteDialog({
               onChange={handleInputChange}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
-              className="min-h-[100px] resize-none"
+              className="min-h-[120px] resize-none bg-muted/30 border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 rounded-xl text-sm placeholder:text-muted-foreground/50"
               data-testid="input-note"
               autoFocus
             />
             
-            {/* Suggestions dropdown */}
+            {note.length > 0 && (
+              <div className="absolute bottom-2 right-2 text-[10px] text-muted-foreground/50 tabular-nums">
+                {note.length}
+              </div>
+            )}
+            
             {showSuggestions && filteredSuggestions.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-popover border border-border rounded-md shadow-lg overflow-hidden">
-                <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-muted/50">
-                  <History className="w-3.5 h-3.5 text-muted-foreground" />
+              <div className="absolute left-0 right-0 top-full mt-2 z-50 bg-popover/95 backdrop-blur-sm border border-border/50 rounded-xl shadow-xl overflow-hidden animate-in fade-in-0 slide-in-from-top-2 duration-200">
+                <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border/50 bg-muted/30">
+                  <div className="w-5 h-5 rounded-md bg-primary/10 flex items-center justify-center">
+                    <History className="w-3 h-3 text-primary" />
+                  </div>
                   <span className="text-xs text-muted-foreground font-medium">
                     {t.camera.noteSuggestions}
                   </span>
+                  <Sparkles className="w-3 h-3 text-primary/50 ml-auto" />
                 </div>
-                <ScrollArea className="max-h-[150px]">
+                <ScrollArea className="max-h-[160px]">
                   <div className="py-1">
                     {filteredSuggestions.map((suggestion, index) => (
                       <button
                         key={index}
                         type="button"
-                        className="w-full px-3 py-2 text-left text-sm hover-elevate transition-colors cursor-pointer"
+                        className="w-full px-3 py-2.5 text-left text-sm hover:bg-muted/50 transition-colors cursor-pointer flex items-start gap-2 group"
                         onClick={() => handleSuggestionClick(suggestion)}
                         data-testid={`suggestion-note-${index}`}
                       >
-                        {suggestion}
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary/40 mt-1.5 shrink-0 group-hover:bg-primary transition-colors" />
+                        <span className="line-clamp-2">{suggestion}</span>
                       </button>
                     ))}
                   </div>
@@ -126,29 +156,24 @@ export function PhotoNoteDialog({
             )}
           </div>
           
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => {
-                setShowSuggestions(false);
-                onOpenChange(false);
-              }}
-              data-testid="button-close-note"
-            >
-              {t.common.done}
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => {
-                onNoteChange("");
-                setShowSuggestions(false);
-              }}
+          <div className="flex gap-2">
+            <button
+              onClick={handleClear}
+              disabled={!note}
+              className="flex-1 h-10 rounded-xl border border-border/50 bg-muted/30 hover:bg-muted/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 text-sm font-medium"
               data-testid="button-clear-note"
             >
+              <Trash2 className="w-4 h-4" />
               {t.common.clear}
-            </Button>
+            </button>
+            <button
+              onClick={handleClose}
+              className="flex-1 h-10 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground transition-all flex items-center justify-center gap-2 text-sm font-medium shadow-lg shadow-primary/20"
+              data-testid="button-close-note"
+            >
+              <Check className="w-4 h-4" />
+              {t.common.done}
+            </button>
           </div>
         </div>
       </DialogContent>
