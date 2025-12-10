@@ -31,3 +31,5 @@ export { useStorage } from "./use-storage";
 export { useToast, toast } from "./use-toast";
 export { useTouchTracking } from "./use-touch-tracking";
 export { useUploadProgress } from "./use-upload-progress";
+export { usePatternSetup } from "./use-pattern-setup";
+export { useApiKeyValidation } from "./use-api-key-validation";

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Crosshair } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,12 +21,10 @@ import {
 } from "@/components/ui/dialog";
 import { useSettings } from "@/lib/settings-context";
 import { useI18n } from "@/lib/i18n";
-import { usePWA } from "@/hooks/use-pwa";
+import { usePWA, useStorage, usePatternSetup, useApiKeyValidation } from "@/hooks";
 import { usePrivacy } from "@/lib/privacy-context";
-import { useStorage } from "@/hooks/use-storage";
 import { useTheme } from "@/lib/theme-context";
-import { validateApiKey } from "@/lib/imgbb";
-import { PatternLock, patternToString } from "@/components/pattern-lock";
+import { PatternLock } from "@/components/pattern-lock";
 import { logger } from "@/lib/logger";
 import type { ProviderSettings } from "@/cloud-providers";
 import {
@@ -60,31 +58,43 @@ function SettingsPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
-  const [showPatternSetup, setShowPatternSetup] = useState(false);
-  const [patternStep, setPatternStep] = useState<'draw' | 'confirm'>('draw');
-  const [tempPattern, setTempPattern] = useState<string>('');
-  const [patternError, setPatternError] = useState(false);
   
   const { storageInfo, clearStorage } = useStorage();
-  
-  const [apiKeyInput, setApiKeyInput] = useState(settings.imgbb?.apiKey || "");
-  const [isValidating, setIsValidating] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
-  
-  const validationAbortControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
-    setApiKeyInput(settings.imgbb?.apiKey || "");
-  }, [settings.imgbb?.apiKey]);
-  
-  useEffect(() => {
-    return () => {
-      if (validationAbortControllerRef.current) {
-        validationAbortControllerRef.current.abort();
-        validationAbortControllerRef.current = null;
-      }
-    };
-  }, []);
+  const patternSetup = usePatternSetup({
+    onPatternConfirmed: (pattern) => updatePrivacySettings({ secretPattern: pattern }),
+  });
+
+  const handleApiKeyValidated = useCallback((apiKey: string) => {
+    updateSettings({
+      imgbb: {
+        ...settings.imgbb,
+        apiKey,
+        isValidated: true,
+      },
+    });
+  }, [settings.imgbb, updateSettings]);
+
+  const handleApiKeyInvalidated = useCallback(() => {
+    if (settings.imgbb?.isValidated) {
+      updateSettings({
+        imgbb: {
+          ...settings.imgbb,
+          isValidated: false,
+        },
+      });
+    }
+  }, [settings.imgbb, updateSettings]);
+
+  const apiKeyValidation = useApiKeyValidation({
+    initialApiKey: settings.imgbb?.apiKey || "",
+    onValidated: handleApiKeyValidated,
+    onInvalidated: handleApiKeyInvalidated,
+    translations: {
+      pleaseEnterApiKey: t.settings.cloud.pleaseEnterApiKey,
+      validationError: t.settings.cloud.validationError,
+    },
+  });
 
   const handleReset = useCallback(async () => {
     await resetSettings();
@@ -99,95 +109,6 @@ function SettingsPageContent() {
     }
     setShowClearDialog(false);
   }, [clearStorage]);
-
-  const handlePatternDraw = useCallback((pattern: number[]) => {
-    const patternStr = patternToString(pattern);
-    
-    if (patternStep === 'draw') {
-      setTempPattern(patternStr);
-      setPatternStep('confirm');
-      setPatternError(false);
-    } else {
-      if (patternStr === tempPattern) {
-        updatePrivacySettings({ secretPattern: patternStr });
-        setShowPatternSetup(false);
-        setPatternStep('draw');
-        setTempPattern('');
-        setPatternError(false);
-      } else {
-        setPatternError(true);
-        setTimeout(() => setPatternError(false), 1000);
-      }
-    }
-  }, [patternStep, tempPattern, updatePrivacySettings]);
-
-  const handleCancelPatternSetup = useCallback(() => {
-    setShowPatternSetup(false);
-    setPatternStep('draw');
-    setTempPattern('');
-    setPatternError(false);
-  }, []);
-
-  const handleApiKeyChange = useCallback((value: string) => {
-    setApiKeyInput(value);
-    if (settings.imgbb?.isValidated) {
-      updateSettings({
-        imgbb: {
-          ...settings.imgbb,
-          isValidated: false,
-        },
-      });
-    }
-  }, [settings.imgbb, updateSettings]);
-
-  const handleValidateApiKey = useCallback(async () => {
-    if (!apiKeyInput.trim()) {
-      setValidationError(t.settings.cloud.pleaseEnterApiKey);
-      return;
-    }
-
-    if (validationAbortControllerRef.current) {
-      validationAbortControllerRef.current.abort();
-    }
-    validationAbortControllerRef.current = new AbortController();
-
-    setIsValidating(true);
-    setValidationError(null);
-
-    try {
-      const result = await validateApiKey(
-        apiKeyInput.trim(),
-        validationAbortControllerRef.current.signal
-      );
-      
-      if (result.valid) {
-        await updateSettings({
-          imgbb: {
-            ...settings.imgbb,
-            apiKey: apiKeyInput.trim(),
-            isValidated: true,
-          },
-        });
-        setValidationError(null);
-      } else {
-        setValidationError(result.error || "Invalid API key");
-        await updateSettings({
-          imgbb: {
-            ...settings.imgbb,
-            isValidated: false,
-          },
-        });
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return;
-      }
-      setValidationError(t.settings.cloud.validationError);
-    } finally {
-      validationAbortControllerRef.current = null;
-      setIsValidating(false);
-    }
-  }, [apiKeyInput, settings.imgbb, updateSettings, t]);
 
   const handleImgbbUpdate = useCallback((updates: Partial<typeof settings.imgbb>) => {
     updateSettings({
@@ -225,7 +146,6 @@ function SettingsPageContent() {
 
   const handleShowClearDialog = useCallback(() => setShowClearDialog(true), []);
   const handleShowResetDialog = useCallback(() => setShowResetDialog(true), []);
-  const handleShowPatternSetup = useCallback(() => setShowPatternSetup(true), []);
 
   const createSectionHandler = useCallback((sectionId: string) => {
     return (open: boolean) => {
@@ -309,11 +229,11 @@ function SettingsPageContent() {
         <AnimatedItem>
           <CloudUploadSection
             settings={settings}
-            apiKeyInput={apiKeyInput}
-            onApiKeyChange={handleApiKeyChange}
-            isValidating={isValidating}
-            validationError={validationError}
-            onValidateApiKey={handleValidateApiKey}
+            apiKeyInput={apiKeyValidation.apiKeyInput}
+            onApiKeyChange={apiKeyValidation.handleApiKeyChange}
+            isValidating={apiKeyValidation.isValidating}
+            validationError={apiKeyValidation.validationError}
+            onValidateApiKey={apiKeyValidation.handleValidateApiKey}
             onImgbbUpdate={handleImgbbUpdate}
             onCloudUpdate={handleCloudUpdate}
             onProviderSettingsUpdate={handleProviderSettingsUpdate}
@@ -359,7 +279,7 @@ function SettingsPageContent() {
           <PrivacySection
             privacySettings={privacySettings}
             updatePrivacySettings={updatePrivacySettings}
-            onShowPatternSetup={handleShowPatternSetup}
+            onShowPatternSetup={patternSetup.openPatternSetup}
             t={t}
             isOpen={isSectionOpen("privacy")}
             onOpenChange={createSectionHandler("privacy")}
@@ -380,12 +300,11 @@ function SettingsPageContent() {
     ),
   }), [
     settings, updateSettings, updateReticle, updateStabilization, updateEnhancement,
-    language, setLanguage, availableLanguages, t, apiKeyInput, handleApiKeyChange,
-    isValidating, validationError, handleValidateApiKey, handleImgbbUpdate,
+    language, setLanguage, availableLanguages, t, apiKeyValidation, handleImgbbUpdate,
     handleCloudUpdate, handleProviderSettingsUpdate,
     storageInfo, handleShowClearDialog, canInstall, isInstalled, isInstalling,
     install, showIOSInstructions, privacySettings, updatePrivacySettings,
-    handleShowPatternSetup, handleShowResetDialog, isSectionOpen, createSectionHandler
+    patternSetup.openPatternSetup, handleShowResetDialog, isSectionOpen, createSectionHandler
   ]);
 
   const isSearching = searchQuery.length > 0;
@@ -458,7 +377,7 @@ function SettingsPageContent() {
         'облако', 'imgbb', 'api', 'загрузка', 'ключ',
         'cloud', 'upload', 'api key'
       ],
-      component: <CloudUploadSection settings={settings} apiKeyInput={apiKeyInput} onApiKeyChange={handleApiKeyChange} isValidating={isValidating} validationError={validationError} onValidateApiKey={handleValidateApiKey} onImgbbUpdate={handleImgbbUpdate} onCloudUpdate={handleCloudUpdate} onProviderSettingsUpdate={handleProviderSettingsUpdate} t={t} />
+      component: <CloudUploadSection settings={settings} apiKeyInput={apiKeyValidation.apiKeyInput} onApiKeyChange={apiKeyValidation.handleApiKeyChange} isValidating={apiKeyValidation.isValidating} validationError={apiKeyValidation.validationError} onValidateApiKey={apiKeyValidation.handleValidateApiKey} onImgbbUpdate={handleImgbbUpdate} onCloudUpdate={handleCloudUpdate} onProviderSettingsUpdate={handleProviderSettingsUpdate} t={t} />
     },
     {
       id: 'storage',
@@ -494,7 +413,7 @@ function SettingsPageContent() {
         'приватность', 'безопасность', 'пароль', 'графический ключ', 'блокировка',
         'privacy', 'security', 'pattern', 'lock'
       ],
-      component: <PrivacySection privacySettings={privacySettings} updatePrivacySettings={updatePrivacySettings} onShowPatternSetup={handleShowPatternSetup} t={t} />
+      component: <PrivacySection privacySettings={privacySettings} updatePrivacySettings={updatePrivacySettings} onShowPatternSetup={patternSetup.openPatternSetup} t={t} />
     },
     {
       id: 'reset',
@@ -507,12 +426,11 @@ function SettingsPageContent() {
     },
   ], [
     settings, updateSettings, updateReticle, updateStabilization, updateEnhancement,
-    language, setLanguage, availableLanguages, t, apiKeyInput, handleApiKeyChange,
-    isValidating, validationError, handleValidateApiKey, handleImgbbUpdate,
+    language, setLanguage, availableLanguages, t, apiKeyValidation, handleImgbbUpdate,
     handleCloudUpdate, handleProviderSettingsUpdate,
     storageInfo, handleShowClearDialog, canInstall, isInstalled, isInstalling,
     install, showIOSInstructions, privacySettings, updatePrivacySettings,
-    handleShowPatternSetup, handleShowResetDialog
+    patternSetup.openPatternSetup, handleShowResetDialog
   ]);
 
   const filteredSections = useMemo(() => {
@@ -651,31 +569,31 @@ function SettingsPageContent() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={showPatternSetup} onOpenChange={setShowPatternSetup}>
+      <Dialog open={patternSetup.isOpen} onOpenChange={patternSetup.setIsOpen}>
         <DialogContent data-testid="pattern-setup-dialog" className="w-full max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {patternStep === 'draw' ? t.settings.privacy.drawYourPattern : t.settings.privacy.confirmYourPattern}
+              {patternSetup.patternStep === 'draw' ? t.settings.privacy.drawYourPattern : t.settings.privacy.confirmYourPattern}
             </DialogTitle>
             <DialogDescription>
-              {patternStep === 'draw' 
+              {patternSetup.patternStep === 'draw' 
                 ? t.settings.privacy.patternDrawHint
                 : t.settings.privacy.patternConfirmHint}
             </DialogDescription>
           </DialogHeader>
           
           <div className="flex flex-col items-center gap-6 py-4">
-            <div className={`p-4 rounded-xl bg-muted/30 ${patternError ? 'animate-shake ring-2 ring-destructive' : ''}`}>
+            <div className={`p-4 rounded-xl bg-muted/30 ${patternSetup.patternError ? 'animate-shake ring-2 ring-destructive' : ''}`}>
               <PatternLock
-                onPatternComplete={handlePatternDraw}
+                onPatternComplete={patternSetup.handlePatternDraw}
                 size={220}
                 dotSize={18}
-                lineColor={patternError ? "hsl(var(--destructive))" : "hsl(var(--primary))"}
-                activeDotColor={patternError ? "hsl(var(--destructive))" : "hsl(var(--primary))"}
+                lineColor={patternSetup.patternError ? "hsl(var(--destructive))" : "hsl(var(--primary))"}
+                activeDotColor={patternSetup.patternError ? "hsl(var(--destructive))" : "hsl(var(--primary))"}
               />
             </div>
             
-            {patternError && (
+            {patternSetup.patternError && (
               <p className="text-sm text-destructive">
                 {t.settings.privacy.patternsDontMatch}
               </p>
@@ -683,14 +601,10 @@ function SettingsPageContent() {
           </div>
           
           <div className="flex gap-2 justify-end">
-            {patternStep === 'confirm' && (
+            {patternSetup.patternStep === 'confirm' && (
               <Button
                 variant="outline"
-                onClick={() => {
-                  setPatternStep('draw');
-                  setTempPattern('');
-                  setPatternError(false);
-                }}
+                onClick={patternSetup.goBackToDrawStep}
                 data-testid="button-pattern-back"
               >
                 {t.common.back}
@@ -698,7 +612,7 @@ function SettingsPageContent() {
             )}
             <Button
               variant="ghost"
-              onClick={handleCancelPatternSetup}
+              onClick={patternSetup.cancelPatternSetup}
               data-testid="button-pattern-cancel"
             >
               {t.common.cancel}
