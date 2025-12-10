@@ -312,6 +312,11 @@ export const en = {
       patternDrawHint: "Connect at least 4 dots to create your secret pattern",
       patternConfirmHint: "Draw the same pattern again to confirm",
       patternsDontMatch: "Patterns don't match. Try again.",
+      activationTitle: "Privacy Activation",
+      activationDesc: "Remember how to unlock the camera",
+      unlockMethods: "Unlock Methods",
+      activationWarning: "After minimizing the app, the camera will be hidden. Use the methods above to unlock.",
+      activationConfirm: "Got it, enable",
     },
     
     pwa: {
