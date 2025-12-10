@@ -29,11 +29,13 @@
 
 ### PhotoNoteDialog.tsx
 - **hideCloseButton**: Добавлен prop для DialogContent чтобы убрать дублирующий Radix close button
-- **Контейнер**: border border-border/60, rounded-2xl, shadow-2xl shadow-black/20
-- **Градиент**: h-px вместо h-1 (1px линия как в Welcome)
+- **Контейнер**: border border-border/60, rounded-2xl, shadow-2xl shadow-black/20, backdrop-blur-xl
+- **Градиент**: h-px (1px линия как в Welcome) — обычный элемент, не absolute
+- **DialogTitle**: sr-only для доступности + aria-describedby={undefined}
 - **Кнопки**: Заменены на компонент `<Button>`:
   - "Очистить" — variant="outline"
   - "Готово" — default variant (btn-gradient)
+- **Footer**: Вынесен в отдельный div с p-4 border-t bg-muted/20 как в Welcome
 - **Типографика**: text-sm для заголовка, text-[11px] для подзаголовка
 
 ---

@@ -86,10 +86,10 @@ export function PhotoNoteDialog({
       <DialogContent 
         hideCloseButton
         aria-describedby={undefined}
-        className="relative max-w-sm p-0 gap-0 overflow-hidden border border-border/60 rounded-2xl bg-background/95 backdrop-blur-xl shadow-2xl shadow-black/20"
+        className="max-w-sm p-0 gap-0 overflow-hidden border border-border/60 rounded-2xl bg-background/95 backdrop-blur-xl shadow-2xl shadow-black/20"
       >
         <DialogTitle className="sr-only">{t.camera.addNote}</DialogTitle>
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         
         <div className="flex items-center gap-3 p-4 border-b border-border/40">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
