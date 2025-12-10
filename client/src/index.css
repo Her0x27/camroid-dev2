@@ -69,6 +69,14 @@
   --chart-4: 43 74% 55%;
   --chart-5: 27 87% 55%;
   
+  /* Gradient colors for buttons */
+  --primary-dark: 142 70% 35%;
+  --primary-light: 142 70% 50%;
+  --primary-gradient: linear-gradient(180deg, hsl(142 70% 50%) 0%, hsl(142 70% 40%) 100%);
+  --primary-gradient-hover: linear-gradient(180deg, hsl(142 70% 55%) 0%, hsl(142 70% 45%) 100%);
+  --chip-active-gradient: linear-gradient(180deg, hsl(142 70% 48%) 0%, hsl(142 70% 38%) 100%);
+  --chip-inactive-bg: hsl(0 0% 15%);
+  
   /* Typography */
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-serif: Georgia, serif;
@@ -133,6 +141,12 @@
   --popover-border: 0 0% 88%;
   --primary: 142 70% 40%;
   --primary-foreground: 0 0% 100%;
+  --primary-dark: 142 70% 30%;
+  --primary-light: 142 70% 48%;
+  --primary-gradient: linear-gradient(180deg, hsl(142 70% 48%) 0%, hsl(142 70% 35%) 100%);
+  --primary-gradient-hover: linear-gradient(180deg, hsl(142 70% 52%) 0%, hsl(142 70% 40%) 100%);
+  --chip-active-gradient: linear-gradient(180deg, hsl(142 70% 45%) 0%, hsl(142 70% 32%) 100%);
+  --chip-inactive-bg: hsl(0 0% 92%);
   --secondary: 0 0% 92%;
   --secondary-foreground: 0 0% 9%;
   --muted: 0 0% 90%;
@@ -420,5 +434,43 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+  
+  /* Gradient button styles */
+  .btn-gradient {
+    background: var(--primary-gradient);
+    transition: all 0.2s ease;
+  }
+  
+  .btn-gradient:hover:not(:disabled) {
+    background: var(--primary-gradient-hover);
+  }
+  
+  .btn-gradient:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  
+  /* Chip gradient styles */
+  .chip-active {
+    background: var(--chip-active-gradient);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .chip-inactive {
+    background: var(--chip-inactive-bg);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+  }
+  
+  .chip-inactive:hover {
+    background: hsl(0 0% 18%);
+  }
+  
+  .light .chip-inactive {
+    background: hsl(0 0% 88%);
+  }
+  
+  .light .chip-inactive:hover {
+    background: hsl(0 0% 82%);
   }
 }
