@@ -1,5 +1,5 @@
-import { memo } from "react";
-import { Shield, Eye, Hand, Clock3, Settings2, Fingerprint, Layers } from "lucide-react";
+import { memo, useState } from "react";
+import { Shield, Eye, Hand, Clock3, Settings2, Fingerprint, Layers, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { LockedSlider } from "@/components/ui/locked-slider";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { privacyModuleRegistry } from "@/privacy_modules";
+import { ModulePreview } from "../components";
 import type { Translations } from "@/lib/i18n";
 
 interface PrivacySettings {
@@ -44,6 +45,7 @@ export const PrivacySection = memo(function PrivacySection({
   isOpen,
   onOpenChange,
 }: PrivacySectionProps) {
+  const [showPreview, setShowPreview] = useState(false);
   const currentModule = privacyModuleRegistry.get(privacySettings.selectedModule);
   const currentUnlockValue = privacySettings.moduleUnlockValues[privacySettings.selectedModule] || '';
 
@@ -114,6 +116,30 @@ export const PrivacySection = memo(function PrivacySection({
             <p className="text-xs text-muted-foreground">
               {t.settings.privacy.moduleDesc}
             </p>
+            
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mb-3"
+                onClick={() => setShowPreview(!showPreview)}
+              >
+                <span className="flex items-center gap-2">
+                  {showPreview ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  {t.settings.privacy.modulePreview}
+                </span>
+              </Button>
+              {showPreview && (
+                <ModulePreview 
+                  moduleId={privacySettings.selectedModule}
+                  unlockLabels={{
+                    sequenceLabel: (t.settings.privacy.moduleUnlock as Record<string, string>).sequenceLabel || 'Sequence',
+                    phraseLabel: (t.settings.privacy.moduleUnlock as Record<string, string>).phraseLabel || 'Phrase',
+                    swipePatternLabel: (t.settings.privacy.moduleUnlock as Record<string, string>).swipePatternLabel || 'Swipe Pattern',
+                  }}
+                />
+              )}
+            </div>
           </div>
 
           {currentModule && currentModule.unlockMethod.type !== 'swipePattern' && (

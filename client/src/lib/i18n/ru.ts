@@ -278,6 +278,7 @@ export const ru: Translations = {
       enabledDesc: "Скрыть камеру за приложением",
       module: "Приложение",
       moduleDesc: "Приложение, отображаемое когда камера скрыта",
+      modulePreview: "Предпросмотр",
       moduleUnlock: {
         sequenceLabel: "Секретная последовательность",
         sequencePlaceholder: "Например: 123456=",

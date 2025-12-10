@@ -276,6 +276,7 @@ export const en = {
       enabledDesc: "Hide camera behind an app",
       module: "Application",
       moduleDesc: "App displayed when camera is hidden",
+      modulePreview: "Preview",
       moduleUnlock: {
         sequenceLabel: "Secret Sequence",
         sequencePlaceholder: "e.g., 123456=",
