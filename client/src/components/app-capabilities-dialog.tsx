@@ -136,12 +136,12 @@ function PlatformTip({ tipKey, t }: { tipKey: PlatformTipKey; t: ReturnType<type
 }
 
 const appFeaturesList = [
-  { id: 'watermark', icon: Type, color: 'from-blue-500 to-cyan-500' },
-  { id: 'gpsProtection', icon: ShieldAlert, color: 'from-amber-500 to-orange-500' },
-  { id: 'reticle', icon: Crosshair, color: 'from-emerald-500 to-green-500' },
-  { id: 'reticleAdjustment', icon: Move, color: 'from-violet-500 to-purple-500' },
-  { id: 'autoColor', icon: Palette, color: 'from-pink-500 to-rose-500' },
-  { id: 'privacyMode', icon: EyeClosed, color: 'from-slate-500 to-zinc-500' },
+  { id: 'watermark', icon: Type },
+  { id: 'gpsProtection', icon: ShieldAlert },
+  { id: 'reticle', icon: Crosshair },
+  { id: 'reticleAdjustment', icon: Move },
+  { id: 'autoColor', icon: Palette },
+  { id: 'privacyMode', icon: EyeClosed },
 ] as const;
 
 const containerVariants = {
@@ -178,10 +178,10 @@ function FeatureItem({ feature, t }: {
   
   return (
     <div className="group relative flex items-center gap-2.5 p-2.5 rounded-md bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-200 cursor-default overflow-hidden">
-      <div className={`absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b ${feature.color} opacity-60 group-hover:opacity-100 transition-opacity`} />
+      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary/40 group-hover:bg-primary/70 transition-colors" />
       
-      <div className={`shrink-0 w-7 h-7 rounded-md bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-sm`}>
-        <Icon className="h-3.5 w-3.5 text-white" />
+      <div className="shrink-0 w-7 h-7 rounded-md bg-muted/80 flex items-center justify-center">
+        <Icon className="h-3.5 w-3.5 text-foreground/70" />
       </div>
       
       <div className="flex-1 min-w-0">
@@ -192,12 +192,6 @@ function FeatureItem({ feature, t }: {
           {t.capabilities.appFeatures[descKey]}
         </p>
       </div>
-      
-      <div className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle at 20% 50%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
-        }}
-      />
     </div>
   );
 }
