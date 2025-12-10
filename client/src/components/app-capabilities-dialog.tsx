@@ -27,6 +27,13 @@ import {
   EyeOff,
   Lock,
   Lightbulb,
+  Crosshair,
+  Type,
+  ShieldAlert,
+  Move,
+  Palette,
+  EyeClosed,
+  Sparkles,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -133,6 +140,45 @@ function PlatformTip({ tipKey, t }: { tipKey: PlatformTipKey; t: ReturnType<type
   );
 }
 
+const appFeaturesList = [
+  { id: 'watermark', icon: Type },
+  { id: 'gpsProtection', icon: ShieldAlert },
+  { id: 'reticle', icon: Crosshair },
+  { id: 'reticleAdjustment', icon: Move },
+  { id: 'autoColor', icon: Palette },
+  { id: 'privacyMode', icon: EyeClosed },
+] as const;
+
+function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
+  return (
+    <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 space-y-3">
+      <h4 className="text-sm font-medium flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-blue-500" />
+        {t.capabilities.appFeaturesTitle}
+      </h4>
+      
+      <div className="space-y-3">
+        {appFeaturesList.map((feature) => {
+          const Icon = feature.icon;
+          const titleKey = feature.id as keyof typeof t.capabilities.appFeatures;
+          const descKey = `${feature.id}Desc` as keyof typeof t.capabilities.appFeatures;
+          return (
+            <div key={feature.id} className="flex items-start gap-2">
+              <Icon className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
+              <div>
+                <span className="text-sm font-medium">{t.capabilities.appFeatures[titleKey]}</span>
+                <p className="text-xs text-muted-foreground">
+                  {t.capabilities.appFeatures[descKey]}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
   const { t } = useI18n();
   const [capabilities, setCapabilities] = useState<AppCapabilities | null>(null);
@@ -190,6 +236,10 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
         <DeviceInfoDisplay device={capabilities.device} />
 
         <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            {t.capabilities.permissionsTitle}
+          </h3>
+          
           {supportedCapabilities.length > 0 && (
             <div>
               <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2 flex items-center gap-1.5">
@@ -257,6 +307,8 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
               </ul>
             </div>
           )}
+          
+          <AppFeaturesSection t={t} />
           
           <PrivacySection t={t} />
           
