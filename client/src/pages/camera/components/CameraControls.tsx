@@ -163,7 +163,7 @@ const GalleryButton = memo(function GalleryButton({
   return (
     <div className="absolute left-4 flex items-center">
       <button
-        className="text-white relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+        className="text-emerald-400 relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
         onClick={onNavigate}
         data-testid="button-gallery"
       >
@@ -219,7 +219,7 @@ const RightControls = memo(function RightControls({
   return (
     <div className="absolute right-4 flex items-center gap-3">
       <button
-        className="text-white relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+        className="text-emerald-400 relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
         onClick={onOpenNote}
         data-testid="button-note"
       >
@@ -230,7 +230,7 @@ const RightControls = memo(function RightControls({
       </button>
 
       <button
-        className="text-white flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+        className="text-emerald-400 flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
         onClick={onNavigateSettings}
         data-testid="button-settings"
       >
