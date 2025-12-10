@@ -16,5 +16,11 @@
     "api.imgur.com",
     "api.cloudinary.com",
     "upload.imagekit.io"
-  ]
+  ],
+  "ORIGIN_VALIDATION": {
+    "mode": "disabled",
+    "allowedHosts": [],
+    "allowedPatterns": [],
+    "allowedSchemes": ["https", "http"]
+  }
 }
