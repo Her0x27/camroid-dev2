@@ -371,6 +371,8 @@ export const ru: Translations = {
       gps: "GPS",
       sound: "Звук",
       theme: "Тема",
+      autoColor: "Авто цвет",
+      adjustment: "Корректировка",
     },
     
     search: {

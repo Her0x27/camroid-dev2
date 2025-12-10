@@ -369,6 +369,8 @@ export const en = {
       gps: "GPS",
       sound: "Sound",
       theme: "Theme",
+      autoColor: "Auto Color",
+      adjustment: "Adjustment",
     },
     
     search: {

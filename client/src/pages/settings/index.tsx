@@ -504,6 +504,7 @@ function SettingsPageContent() {
                 settings={settings}
                 updateSettings={updateSettings}
                 updateStabilization={updateStabilization}
+                updateReticle={updateReticle}
                 theme={theme}
                 setTheme={setTheme}
               />

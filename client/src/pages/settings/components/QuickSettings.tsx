@@ -1,9 +1,9 @@
 import { memo, useCallback } from "react";
-import { Target, MapPin, Volume2, VolumeX, Sun, Moon } from "lucide-react";
+import { Target, MapPin, Volume2, VolumeX, Sun, Moon, Palette, Move } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { triggerHapticFeedback } from "@/lib/haptic-utils";
-import type { Settings, StabilizationSettings } from "@shared/schema";
+import type { Settings, StabilizationSettings, ReticleConfig } from "@shared/schema";
 
 interface QuickSettingButtonProps {
   icon: React.ReactNode;
@@ -49,6 +49,7 @@ interface QuickSettingsProps {
   settings: Settings;
   updateSettings: (updates: Partial<Settings>) => void;
   updateStabilization: (updates: Partial<StabilizationSettings>) => void;
+  updateReticle: (updates: Partial<ReticleConfig>) => void;
   theme: "light" | "dark";
   setTheme: (theme: "light" | "dark") => void;
 }
@@ -57,13 +58,14 @@ export const QuickSettings = memo(function QuickSettings({
   settings,
   updateSettings,
   updateStabilization,
+  updateReticle,
   theme,
   setTheme,
 }: QuickSettingsProps) {
   const { t } = useI18n();
 
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-3 gap-2">
       <QuickSettingButton
         icon={<Target className="w-4 h-4" />}
         label={t.settings.quickSettings.stabilization}
@@ -87,6 +89,18 @@ export const QuickSettings = memo(function QuickSettings({
         label={t.settings.quickSettings.theme}
         active={theme === "dark"}
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      />
+      <QuickSettingButton
+        icon={<Palette className="w-4 h-4" />}
+        label={t.settings.quickSettings.autoColor}
+        active={settings.reticle?.autoColor ?? true}
+        onClick={() => updateReticle({ autoColor: !settings.reticle?.autoColor })}
+      />
+      <QuickSettingButton
+        icon={<Move className="w-4 h-4" />}
+        label={t.settings.quickSettings.adjustment}
+        active={settings.reticle?.manualAdjustment ?? false}
+        onClick={() => updateReticle({ manualAdjustment: !settings.reticle?.manualAdjustment })}
       />
     </div>
   );
