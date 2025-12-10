@@ -1,4 +1,5 @@
 import { CONFIG as STATIC_CONFIG, type GestureType } from "@/config";
+import { logger } from "@/lib/logger";
 
 export interface DynamicConfig {
   PRIVACY_MODE: boolean;
@@ -69,6 +70,7 @@ async function checkBackendHealth(): Promise<boolean> {
       return data.backend === true;
     }
   } catch {
+    // Expected: network request may fail silently when backend unavailable
   }
   return false;
 }
@@ -103,6 +105,7 @@ export async function loadConfig(): Promise<DynamicConfig> {
           return configState.config!;
         }
       } catch {
+        // Expected: API config endpoint may not be available
       }
     }
 
@@ -125,6 +128,7 @@ export async function loadConfig(): Promise<DynamicConfig> {
         return configState.config!;
       }
     } catch {
+      // Expected: config.json file may not exist
     }
 
     configState = {
@@ -167,7 +171,7 @@ export async function updateConfig(
       return true;
     }
   } catch (error) {
-    console.error("Failed to update config:", error);
+    logger.error("Failed to update config", error);
   }
 
   return false;

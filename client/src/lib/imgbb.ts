@@ -1,5 +1,5 @@
 import type { CloudData } from "@shared/schema";
-import { isImgBBSuccess, isImgBBError } from "./imgbb-types";
+import { isImgBBSuccess, isImgBBError } from "@/cloud-providers/providers/imgbb/types";
 import { UPLOAD } from "./constants";
 import { isBackendAvailable } from "./config-loader";
 

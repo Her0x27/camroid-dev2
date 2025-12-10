@@ -11,6 +11,7 @@ import {
   validateUploadSettings,
   executePhotoUpload,
   getUploadToastMessage,
+  type UploadSettings,
 } from "@/lib/upload-helpers";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { UploadProgressOverlay } from "@/components/upload-progress-overlay";
@@ -160,6 +161,28 @@ export default function GalleryPage() {
     }));
   }, [folderStats]);
 
+  const uploadSettings = useMemo((): UploadSettings | undefined => {
+    const providerId = settings.cloud?.selectedProvider || "imgbb";
+    if (providerId === "imgbb" && settings.imgbb?.apiKey && settings.imgbb?.isValidated) {
+      return {
+        providerId,
+        settings: {
+          isValidated: settings.imgbb.isValidated,
+          apiKey: settings.imgbb.apiKey,
+          expiration: settings.imgbb.expiration ?? 0,
+        },
+      };
+    }
+    const providerSettings = settings.cloud?.providers?.[providerId];
+    if (providerSettings?.isValidated) {
+      return {
+        providerId,
+        settings: providerSettings,
+      };
+    }
+    return undefined;
+  }, [settings.cloud, settings.imgbb]);
+
   const refreshFolderStatsAfterMutation = useCallback(async () => {
     invalidateFolderCountsCache();
     try {
@@ -263,7 +286,7 @@ export default function GalleryPage() {
   }, [filteredPhotos, selectedIds, toast, t]);
 
   const handleUploadPhotos = useCallback(async (photos: PhotoWithThumbnail[]) => {
-    const validation = validateUploadSettings(settings.imgbb, photos);
+    const validation = validateUploadSettings(uploadSettings, photos);
 
     if (!validation.isValid) {
       if (validation.error === "no_api_key") {
@@ -284,11 +307,7 @@ export default function GalleryPage() {
     try {
       const result = await executePhotoUpload(
         validation.photosToUpload,
-        {
-          apiKey: settings.imgbb!.apiKey,
-          isValidated: settings.imgbb!.isValidated,
-          expiration: settings.imgbb!.expiration ?? 0,
-        },
+        uploadSettings!,
         updateProgress,
         uploadAbortControllerRef.current.signal
       );
@@ -334,7 +353,7 @@ export default function GalleryPage() {
       uploadAbortControllerRef.current = null;
       finishUpload();
     }
-  }, [settings.imgbb, toast, t, startUpload, updateProgress, finishUpload]);
+  }, [uploadSettings, toast, t, startUpload, updateProgress, finishUpload]);
 
   const handleUploadSelected = useCallback(async () => {
     const selectedPhotos = filteredPhotos.filter(p => selectedIds.has(p.id));

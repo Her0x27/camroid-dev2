@@ -187,6 +187,7 @@ export function isDismissed(): boolean {
   try {
     return localStorage.getItem(STORAGE_KEY) === 'true';
   } catch {
+    // Expected: localStorage may be unavailable in incognito mode
     return false;
   }
 }
@@ -199,5 +200,6 @@ export function setDismissed(value: boolean): void {
       localStorage.removeItem(STORAGE_KEY);
     }
   } catch {
+    // Expected: localStorage may be unavailable in incognito mode
   }
 }

@@ -17,6 +17,7 @@ export function usePWABanner(): UsePWABannerReturn {
     try {
       return localStorage.getItem(PWA_DISMISSED_KEY) === 'true';
     } catch {
+      // Expected: localStorage may be unavailable in incognito mode
       return false;
     }
   });
@@ -26,6 +27,7 @@ export function usePWABanner(): UsePWABannerReturn {
     try {
       localStorage.setItem(PWA_DISMISSED_KEY, 'true');
     } catch {
+      // Expected: localStorage may be unavailable in incognito mode
     }
   }, []);
   

@@ -25,20 +25,25 @@ function loadNotes(): Note[] {
     if (saved) {
       return JSON.parse(saved);
     }
-  } catch {}
+  } catch {
+    // Expected: localStorage may be unavailable or data corrupted
+  }
   return [];
 }
 
 function saveNotes(notes: Note[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
-  } catch {}
+  } catch {
+    // Expected: localStorage may be unavailable in incognito mode
+  }
 }
 
 function loadCurrentNoteId(): string | null {
   try {
     return localStorage.getItem(CURRENT_NOTE_KEY);
   } catch {
+    // Expected: localStorage may be unavailable in incognito mode
     return null;
   }
 }
@@ -50,7 +55,9 @@ function saveCurrentNoteId(id: string | null): void {
     } else {
       localStorage.removeItem(CURRENT_NOTE_KEY);
     }
-  } catch {}
+  } catch {
+    // Expected: localStorage may be unavailable in incognito mode
+  }
 }
 
 interface NoteListItemProps {

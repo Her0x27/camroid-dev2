@@ -38,6 +38,7 @@ function getSavedLanguage(): Language | null {
       return saved;
     }
   } catch {
+    // Expected: localStorage may be unavailable in incognito mode
   }
   return null;
 }
@@ -46,6 +47,7 @@ function saveLanguage(lang: Language): void {
   try {
     localStorage.setItem(STORAGE_KEY, lang);
   } catch {
+    // Expected: localStorage may be unavailable in incognito mode
   }
 }
 

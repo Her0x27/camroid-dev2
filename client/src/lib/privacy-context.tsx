@@ -80,6 +80,7 @@ export function loadPrivacySettings(): PrivacySettings {
       };
     }
   } catch {
+    // Expected: localStorage may be unavailable or data corrupted
   }
   return defaultSettings;
 }
@@ -92,6 +93,7 @@ function saveSettings(settings: PrivacySettings): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   } catch {
+    // Expected: localStorage may be unavailable in incognito mode
   }
 }
 
@@ -103,6 +105,7 @@ function loadUnlockedState(): boolean {
   try {
     return localStorage.getItem(UNLOCKED_KEY) === 'true';
   } catch {
+    // Expected: localStorage may be unavailable in incognito mode
     return false;
   }
 }
@@ -115,6 +118,7 @@ function saveUnlockedState(unlocked: boolean): void {
       localStorage.removeItem(UNLOCKED_KEY);
     }
   } catch {
+    // Expected: localStorage may be unavailable in incognito mode
   }
 }
 
