@@ -89,4 +89,25 @@ Each system defines interfaces, registration mechanisms, and configuration optio
 - **Google Fonts**: Roboto Mono (monospaced) and Inter (UI).
 
 ### Server (Minimal)
-- **Express**: Serves static files.
+- **Express**: Serves static files in development.
+
+### Go Backend (Production)
+
+The application includes an optional Go backend (`server-go/main.go`) for production deployment:
+
+**API Endpoints:**
+- `GET /api/health` - Backend availability check
+- `GET /api/config` - Get dynamic configuration
+- `POST /api/config` - Update privacy settings (saves to config.json)
+- `POST /api/imgbb` - CORS proxy for ImgBB uploads
+- `POST /api/proxy` - Generic CORS proxy for whitelisted hosts
+
+**Security:**
+- Origin/Referer validation using Replit slug matching
+- Host whitelist (`ALLOWED_PROXY_HOSTS` in config.json)
+- Proxy endpoints are stateless (no data saved)
+
+**Configuration:**
+- `client/public/config.json` - Privacy settings and allowed proxy hosts
+- Dynamic config loaded via `/api/config` when backend available
+- Fallback to static `/config.json` when backend unavailable
