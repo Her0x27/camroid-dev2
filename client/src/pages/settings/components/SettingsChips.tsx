@@ -62,11 +62,11 @@ export const SettingsChips = memo(function SettingsChips({
               onCategoryChange(chip.id);
             }}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all",
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap",
               "touch-manipulation active:scale-95 select-none shrink-0",
               isActive
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "bg-muted/60 text-muted-foreground hover:bg-muted"
+                ? "chip-active text-primary-foreground"
+                : "chip-inactive text-muted-foreground"
             )}
           >
             {chip.icon}
