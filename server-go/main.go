@@ -33,16 +33,24 @@ type Config struct {
         EnableLogging bool
 }
 
+type OriginValidationConfig struct {
+        Mode            string   `json:"mode"`
+        AllowedHosts    []string `json:"allowedHosts"`
+        AllowedPatterns []string `json:"allowedPatterns"`
+        AllowedSchemes  []string `json:"allowedSchemes"`
+}
+
 type AppConfig struct {
-        PrivacyMode        bool              `json:"PRIVACY_MODE"`
-        SelectedModule     string            `json:"SELECTED_MODULE"`
-        ModuleUnlockValues map[string]string `json:"MODULE_UNLOCK_VALUES"`
-        UnlockGesture      string            `json:"UNLOCK_GESTURE"`
-        UnlockPattern      string            `json:"UNLOCK_PATTERN"`
-        UnlockFingers      int               `json:"UNLOCK_FINGERS"`
-        AutoLockMinutes    int               `json:"AUTO_LOCK_MINUTES"`
-        DebugMode          bool              `json:"DEBUG_MODE"`
-        AllowedProxyHosts  []string          `json:"ALLOWED_PROXY_HOSTS"`
+        PrivacyMode        bool                   `json:"PRIVACY_MODE"`
+        SelectedModule     string                 `json:"SELECTED_MODULE"`
+        ModuleUnlockValues map[string]string      `json:"MODULE_UNLOCK_VALUES"`
+        UnlockGesture      string                 `json:"UNLOCK_GESTURE"`
+        UnlockPattern      string                 `json:"UNLOCK_PATTERN"`
+        UnlockFingers      int                    `json:"UNLOCK_FINGERS"`
+        AutoLockMinutes    int                    `json:"AUTO_LOCK_MINUTES"`
+        DebugMode          bool                   `json:"DEBUG_MODE"`
+        AllowedProxyHosts  []string               `json:"ALLOWED_PROXY_HOSTS"`
+        OriginValidation   OriginValidationConfig `json:"ORIGIN_VALIDATION"`
 }
 
 var (
@@ -220,11 +228,30 @@ func loadAppConfig(path string) error {
                         AutoLockMinutes:    5,
                         DebugMode:          false,
                         AllowedProxyHosts:  []string{"api.imgbb.com", "api.imgur.com", "api.cloudinary.com"},
+                        OriginValidation: OriginValidationConfig{
+                                Mode:            "disabled",
+                                AllowedHosts:    []string{},
+                                AllowedPatterns: []string{},
+                                AllowedSchemes:  []string{"https", "http"},
+                        },
                 }
                 return nil
         }
 
-        return json.Unmarshal(data, &appConfig)
+        if err := json.Unmarshal(data, &appConfig); err != nil {
+                return err
+        }
+
+        if appConfig.OriginValidation.Mode == "" {
+                appConfig.OriginValidation = OriginValidationConfig{
+                        Mode:            "disabled",
+                        AllowedHosts:    []string{},
+                        AllowedPatterns: []string{},
+                        AllowedSchemes:  []string{"https", "http"},
+                }
+        }
+
+        return nil
 }
 
 func saveAppConfig(path string) error {
@@ -251,25 +278,23 @@ func isHostAllowed(targetHost string) bool {
         return false
 }
 
-func extractReplitSlug(host string) string {
-        host = strings.TrimSuffix(host, ":443")
-        host = strings.TrimSuffix(host, ":80")
-        
-        suffixes := []string{".replit.dev", ".replit.app", ".repl.co", ".replit.co"}
-        for _, suffix := range suffixes {
-                if strings.HasSuffix(host, suffix) {
-                        slug := strings.TrimSuffix(host, suffix)
-                        parts := strings.Split(slug, "-")
-                        if len(parts) >= 2 {
-                                return parts[len(parts)-1]
-                        }
-                        return slug
-                }
+func matchHostPattern(host, pattern string) bool {
+        if strings.HasPrefix(pattern, "*.") {
+                suffix := pattern[1:]
+                return strings.HasSuffix(host, suffix) || host == pattern[2:]
         }
-        return ""
+        return strings.EqualFold(host, pattern)
 }
 
 func validateOrigin(r *http.Request) bool {
+        appConfigLock.RLock()
+        config := appConfig.OriginValidation
+        appConfigLock.RUnlock()
+
+        if config.Mode == "disabled" {
+                return true
+        }
+
         origin := r.Header.Get("Origin")
         referer := r.Header.Get("Referer")
 
@@ -278,41 +303,68 @@ func validateOrigin(r *http.Request) bool {
         }
 
         host := r.Host
-        hostSlug := extractReplitSlug(host)
+        host = strings.TrimSuffix(host, ":443")
+        host = strings.TrimSuffix(host, ":80")
+
+        var originHost string
+        var originScheme string
 
         if origin != "" {
                 originURL, err := url.Parse(origin)
                 if err != nil {
                         return false
                 }
-                if originURL.Host == host {
-                        return true
-                }
-                if hostSlug != "" {
-                        originSlug := extractReplitSlug(originURL.Host)
-                        if originSlug != "" && originSlug == hostSlug {
-                                return true
-                        }
-                }
-        }
-
-        if referer != "" {
+                originHost = originURL.Host
+                originScheme = originURL.Scheme
+        } else if referer != "" {
                 refererURL, err := url.Parse(referer)
                 if err != nil {
                         return false
                 }
-                if refererURL.Host == host {
-                        return true
-                }
-                if hostSlug != "" {
-                        refererSlug := extractReplitSlug(refererURL.Host)
-                        if refererSlug != "" && refererSlug == hostSlug {
-                                return true
+                originHost = refererURL.Host
+                originScheme = refererURL.Scheme
+        }
+
+        originHost = strings.TrimSuffix(originHost, ":443")
+        originHost = strings.TrimSuffix(originHost, ":80")
+
+        if len(config.AllowedSchemes) > 0 {
+                schemeAllowed := false
+                for _, s := range config.AllowedSchemes {
+                        if strings.EqualFold(originScheme, s) {
+                                schemeAllowed = true
+                                break
                         }
+                }
+                if !schemeAllowed {
+                        return false
                 }
         }
 
-        return false
+        switch config.Mode {
+        case "same-host":
+                return strings.EqualFold(originHost, host)
+
+        case "host-whitelist":
+                for _, allowed := range config.AllowedHosts {
+                        if strings.EqualFold(originHost, allowed) {
+                                return true
+                        }
+                }
+                return false
+
+        case "pattern-whitelist":
+                for _, pattern := range config.AllowedPatterns {
+                        if matchHostPattern(originHost, pattern) {
+                                return true
+                        }
+                }
+                return false
+
+        default:
+                log.Printf("Warning: Unknown ORIGIN_VALIDATION mode '%s', rejecting request (fail-closed)", config.Mode)
+                return false
+        }
 }
 
 func handleConfigGet(w http.ResponseWriter, r *http.Request) {
