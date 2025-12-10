@@ -103,11 +103,30 @@ The application includes an optional Go backend (`server-go/main.go`) for produc
 - `POST /api/proxy` - Generic CORS proxy for whitelisted hosts
 
 **Security:**
-- Origin/Referer validation using Replit slug matching
+- Configurable Origin validation via `ORIGIN_VALIDATION` in config.json
 - Host whitelist (`ALLOWED_PROXY_HOSTS` in config.json)
 - Proxy endpoints are stateless (no data saved)
+- Fail-closed security model for unknown validation modes
+
+**Origin Validation Modes:**
+- `disabled` - No origin checking (default for development)
+- `same-host` - Origin must match request Host
+- `host-whitelist` - Origin must be in `allowedHosts` list
+- `pattern-whitelist` - Origin must match patterns (supports `*.example.com` wildcards)
 
 **Configuration:**
-- `client/public/config.json` - Privacy settings and allowed proxy hosts
+- `client/public/config.json` - Privacy settings, allowed proxy hosts, and origin validation
 - Dynamic config loaded via `/api/config` when backend available
 - Fallback to static `/config.json` when backend unavailable
+
+**ORIGIN_VALIDATION Config Example:**
+```json
+{
+  "ORIGIN_VALIDATION": {
+    "mode": "host-whitelist",
+    "allowedHosts": ["example.com", "myapp.com"],
+    "allowedPatterns": ["*.example.com"],
+    "allowedSchemes": ["https", "http"]
+  }
+}
+```
