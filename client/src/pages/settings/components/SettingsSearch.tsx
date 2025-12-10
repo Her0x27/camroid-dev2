@@ -16,21 +16,21 @@ export const SettingsSearch = memo(function SettingsSearch({
 
   return (
     <div className="relative w-full">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none z-10" />
       <Input
         type="text"
         placeholder={t.settings.search.placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-10 pl-10 pr-10 w-full"
+        className="h-8 pl-8 pr-8 w-full text-sm"
       />
       {value && (
         <button
           type="button"
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
           onClick={() => onChange("")}
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5" />
         </button>
       )}
     </div>

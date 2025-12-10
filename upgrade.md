@@ -1,3 +1,70 @@
+# Upgrade: Платформо-зависимые иконки и UI v21
+
+## Описание
+Добавление платформо-зависимых иконок для модулей приватности и уменьшение поля поиска:
+- Иконки в стиле iOS для пользователей iPhone/iPad
+- Иконки в стиле Material Design для Android
+- Автоматическое определение платформы пользователя
+- Уменьшенное поле поиска настроек
+
+## Чек-лист задач
+
+- [x] Создать iOS-стиль иконки (squircle, Apple design)
+- [x] Создать Android-стиль иконки (Material Design, круглые)
+- [x] Добавить PlatformFavicon интерфейс в types.ts
+- [x] Добавить функцию resolveFavicon() для выбора иконки по ОС
+- [x] Обновить конфиги модулей (calculator, notepad, game-2048)
+- [x] Обновить privacy-context.tsx и ModulePreview.tsx
+- [x] Уменьшить поле поиска настроек
+
+---
+
+## Прогресс v21
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| iOS иконки | ✅ Готово | 10.12.2025 |
+| Android иконки | ✅ Готово | 10.12.2025 |
+| resolveFavicon | ✅ Готово | 10.12.2025 |
+| Конфиги модулей | ✅ Готово | 10.12.2025 |
+| Поле поиска | ✅ Готово | 10.12.2025 |
+
+## Изменения v21
+
+### Новые файлы иконок
+- `public/calculator-icon-ios.svg` — iOS-стиль (тёмный фон, оранжевый акцент, squircle)
+- `public/calculator-icon-android.svg` — Material Design (синий круг, белая карточка)
+- `public/notepad-icon-ios.svg` — Apple Notes стиль (жёлтый squircle, бумага)
+- `public/notepad-icon-android.svg` — Google Keep стиль (жёлтый круг, чеклист)
+- `client/public/game-icon-ios.svg` — iOS 2048 (squircle с плитками)
+- `client/public/game-icon-android.svg` — Material 2048 (круг с плитками)
+
+### privacy_modules/types.ts
+- Добавлен интерфейс `PlatformFavicon` с полями ios, android, default
+- Добавлена функция `resolveFavicon()` — определяет платформу по userAgent и возвращает соответствующий путь к иконке
+
+### Конфиги модулей
+- calculator/config.ts — favicon теперь объект PlatformFavicon
+- notepad/config.ts — favicon теперь объект PlatformFavicon
+- game-2048/config.ts — favicon теперь объект PlatformFavicon
+
+### privacy-context.tsx
+- Импортирована функция resolveFavicon
+- updateFavicon() использует resolveFavicon() для выбора правильной иконки
+
+### ModulePreview.tsx
+- Импортирована функция resolveFavicon
+- Превью иконки использует resolveFavicon() для отображения
+
+### SettingsSearch.tsx
+- Уменьшена высота: h-10 → h-8
+- Уменьшены отступы: pl-10/pr-10 → pl-8/pr-8
+- Уменьшен размер шрифта: добавлен text-sm
+- Уменьшены иконки: w-4/h-4 → w-3.5/h-3.5
+- Уменьшена кнопка очистки: w-6/h-6 → w-5/h-5
+
+---
+
 # Upgrade: UI/UX улучшения v20
 
 ## Описание
