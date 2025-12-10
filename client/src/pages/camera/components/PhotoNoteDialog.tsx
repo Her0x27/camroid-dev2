@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { FileText, History, Sparkles, X, Check, Trash2 } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useI18n } from "@/lib/i18n";
@@ -82,30 +83,31 @@ export function PhotoNoteDialog({
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm p-0 gap-0 overflow-hidden border-0 bg-gradient-to-b from-background to-background/95">
-        <div className="h-1 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+      <DialogContent 
+        hideCloseButton
+        aria-describedby={undefined}
+        className="relative max-w-sm p-0 gap-0 overflow-hidden border border-border/60 rounded-2xl bg-background/95 backdrop-blur-xl shadow-2xl shadow-black/20"
+      >
+        <DialogTitle className="sr-only">{t.camera.addNote}</DialogTitle>
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
         
-        <div className="px-5 pt-4 pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-base font-semibold">{t.camera.addNote}</h2>
-                <p className="text-xs text-muted-foreground">{t.camera.enterNote}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleClose}
-              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors"
-            >
-              <X className="w-4 h-4 text-muted-foreground" />
-            </button>
+        <div className="flex items-center gap-3 p-4 border-b border-border/40">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+            <FileText className="h-4.5 w-4.5 text-primary" />
           </div>
+          <div className="flex-1">
+            <h2 className="text-sm font-semibold">{t.camera.addNote}</h2>
+            <p className="text-[11px] text-muted-foreground">{t.camera.enterNote}</p>
+          </div>
+          <button
+            onClick={handleClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted/80 transition-colors"
+          >
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
         </div>
         
-        <div className="px-5 pb-5 space-y-4">
+        <div className="p-4 space-y-4">
           <div className="relative">
             <Textarea
               ref={textareaRef}
@@ -114,7 +116,7 @@ export function PhotoNoteDialog({
               onChange={handleInputChange}
               onFocus={handleInputFocus}
               onBlur={handleInputBlur}
-              className="min-h-[120px] resize-none bg-muted/30 border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 rounded-xl text-sm placeholder:text-muted-foreground/50"
+              className="min-h-[100px] resize-none bg-muted/30 border-muted-foreground/20 focus:border-primary/50 focus:ring-primary/20 rounded-xl text-sm placeholder:text-muted-foreground/50"
               data-testid="input-note"
               autoFocus
             />
@@ -155,25 +157,28 @@ export function PhotoNoteDialog({
               </div>
             )}
           </div>
-          
+        </div>
+        
+        <div className="p-4 border-t border-border/40 bg-muted/20">
           <div className="flex gap-2">
-            <button
+            <Button
+              variant="outline"
               onClick={handleClear}
               disabled={!note}
-              className="flex-1 h-10 rounded-xl border border-border/50 bg-muted/30 hover:bg-muted/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 text-sm font-medium"
+              className="flex-1 h-9 text-sm"
               data-testid="button-clear-note"
             >
               <Trash2 className="w-4 h-4" />
               {t.common.clear}
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleClose}
-              className="flex-1 h-10 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground transition-all flex items-center justify-center gap-2 text-sm font-medium shadow-lg shadow-primary/20"
+              className="flex-1 h-9 text-sm"
               data-testid="button-close-note"
             >
               <Check className="w-4 h-4" />
               {t.common.done}
-            </button>
+            </Button>
           </div>
         </div>
       </DialogContent>
