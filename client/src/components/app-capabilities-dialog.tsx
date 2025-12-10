@@ -79,6 +79,12 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
     onClose();
   };
 
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      handleClose();
+    }
+  };
+
   if (!capabilities) {
     return null;
   }
@@ -87,7 +93,7 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
   const unsupportedCapabilities = capabilities.capabilities.filter(c => !c.supported);
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t.capabilities.title}</DialogTitle>

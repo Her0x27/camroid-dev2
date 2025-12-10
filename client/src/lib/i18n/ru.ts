@@ -459,7 +459,10 @@ export const ru: Translations = {
     notes: {
       requiresPermission: "Требуется разрешение при первом использовании",
       limitedOnIOS: "Ограниченная поддержка на iOS",
-      addToHomeScreen: "Используйте 'На экран Домой' в Safari",
+      addToHomeScreen: "Используйте Поделиться → 'На экран Домой' в Safari",
+      usesSafari: "Откройте в Safari для установки как приложение",
+      installFromMenu: "Используйте меню браузера для установки",
+      firefoxDesktop: "Не поддерживается в Firefox на десктопе",
     },
   },
 

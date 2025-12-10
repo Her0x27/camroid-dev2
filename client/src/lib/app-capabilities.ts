@@ -38,12 +38,14 @@ export function getDeviceInfo(): DeviceInfo {
     browser = 'Opera';
   } else if (/Edg/.test(ua)) {
     browser = 'Edge';
-  } else if (/Chrome/.test(ua) && !/Chromium/.test(ua)) {
-    browser = 'Chrome';
-  } else if (/Safari/.test(ua) && !/Chrome/.test(ua)) {
-    browser = 'Safari';
   } else if (/Firefox/.test(ua)) {
     browser = 'Firefox';
+  } else if (/CriOS/.test(ua)) {
+    browser = 'Chrome';
+  } else if (/Safari/.test(ua) && !/Chrome/.test(ua) && !/Chromium/.test(ua)) {
+    browser = 'Safari';
+  } else if (/Chrome/.test(ua)) {
+    browser = 'Chrome';
   }
   
   const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua) || 
@@ -78,7 +80,7 @@ export async function checkAppCapabilities(): Promise<AppCapabilities> {
   });
   
   let hasStabilization = false;
-  if (hasCamera) {
+  if (hasCamera && navigator.mediaDevices?.enumerateDevices) {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const hasVideoInput = devices.some(d => d.kind === 'videoinput');
@@ -100,19 +102,26 @@ export async function checkAppCapabilities(): Promise<AppCapabilities> {
   });
   
   let canInstallPWA = false;
+  let pwaNote: string | undefined;
   if ('serviceWorker' in navigator) {
-    if (device.os === 'iOS' && device.browser === 'Safari') {
-      canInstallPWA = true;
+    if (device.os === 'iOS') {
+      canInstallPWA = device.browser === 'Safari';
+      pwaNote = canInstallPWA ? 'addToHomeScreen' : 'usesSafari';
     } else if (device.browser === 'Chrome' || device.browser === 'Edge' || device.browser === 'Samsung') {
       canInstallPWA = true;
+      pwaNote = 'installFromMenu';
     } else if (device.browser === 'Firefox' && device.os === 'Android') {
       canInstallPWA = true;
+      pwaNote = 'installFromMenu';
+    } else if (device.browser === 'Firefox') {
+      canInstallPWA = false;
+      pwaNote = 'firefoxDesktop';
     }
   }
   capabilities.push({
     id: 'pwa',
     supported: canInstallPWA,
-    note: device.os === 'iOS' ? 'addToHomeScreen' : undefined,
+    note: pwaNote,
   });
   
   const hasCloudUpload = true;

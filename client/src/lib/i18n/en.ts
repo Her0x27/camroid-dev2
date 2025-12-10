@@ -457,7 +457,10 @@ export const en = {
     notes: {
       requiresPermission: "Requires permission on first use",
       limitedOnIOS: "Limited support on iOS",
-      addToHomeScreen: "Use 'Add to Home Screen' in Safari",
+      addToHomeScreen: "Use Share → 'Add to Home Screen' in Safari",
+      usesSafari: "Open in Safari to install as app",
+      installFromMenu: "Use browser menu to install",
+      firefoxDesktop: "Not supported in Firefox on desktop",
     },
   },
 
