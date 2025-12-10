@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
-import { CONFIG } from "@/config";
+import { getConfig, initConfig, subscribeToConfig, updateConfig as updateRemoteConfig, isBackendAvailable, type DynamicConfig } from "./config-loader";
 import { privacyModuleRegistry } from "@/privacy_modules";
 
 export type GestureType = 'patternUnlock' | 'severalFingers';
@@ -18,6 +18,8 @@ interface PrivacyContextType {
   settings: PrivacySettings;
   isLocked: boolean;
   isBackgrounded: boolean;
+  isConfigLoading: boolean;
+  isBackendAvailable: boolean;
   showCamera: () => void;
   hideCamera: () => void;
   toggleLock: () => void;
@@ -32,20 +34,31 @@ const UNLOCKED_KEY = "privacy-unlocked";
 const FAVICON_CAMERA = "/favicon.svg";
 const TITLE_CAMERA = "Camroid M";
 
-const defaultSettings: PrivacySettings = {
-  enabled: CONFIG.PRIVACY_MODE,
-  gestureType: CONFIG.UNLOCK_GESTURE,
-  autoLockMinutes: CONFIG.AUTO_LOCK_MINUTES,
-  secretPattern: CONFIG.UNLOCK_PATTERN,
-  unlockFingers: CONFIG.UNLOCK_FINGERS,
-  selectedModule: CONFIG.SELECTED_MODULE,
-  moduleUnlockValues: { ...CONFIG.MODULE_UNLOCK_VALUES },
-};
+function configToSettings(config: DynamicConfig): PrivacySettings {
+  return {
+    enabled: config.PRIVACY_MODE,
+    gestureType: config.UNLOCK_GESTURE,
+    autoLockMinutes: config.AUTO_LOCK_MINUTES,
+    secretPattern: config.UNLOCK_PATTERN,
+    unlockFingers: config.UNLOCK_FINGERS,
+    selectedModule: config.SELECTED_MODULE,
+    moduleUnlockValues: { ...config.MODULE_UNLOCK_VALUES },
+  };
+}
 
-const isPrivacyModeForced = CONFIG.PRIVACY_MODE;
+function getDefaultSettings(): PrivacySettings {
+  return configToSettings(getConfig());
+}
+
+function isPrivacyModeForced(): boolean {
+  return getConfig().PRIVACY_MODE;
+}
 
 export function loadPrivacySettings(): PrivacySettings {
-  if (isPrivacyModeForced) {
+  const config = getConfig();
+  const defaultSettings = configToSettings(config);
+  
+  if (config.PRIVACY_MODE) {
     return { ...defaultSettings, enabled: true };
   }
   
@@ -61,7 +74,7 @@ export function loadPrivacySettings(): PrivacySettings {
         ...defaultSettings,
         ...parsed,
         moduleUnlockValues: {
-          ...CONFIG.MODULE_UNLOCK_VALUES,
+          ...config.MODULE_UNLOCK_VALUES,
           ...parsed.moduleUnlockValues,
         },
       };
@@ -72,7 +85,7 @@ export function loadPrivacySettings(): PrivacySettings {
 }
 
 function saveSettings(settings: PrivacySettings): void {
-  if (isPrivacyModeForced) {
+  if (isPrivacyModeForced()) {
     return;
   }
   
@@ -127,20 +140,37 @@ function updateTitle(isLocked: boolean, selectedModule?: string): void {
 }
 
 export function PrivacyProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<PrivacySettings>(loadPrivacySettings);
-  const [isLocked, setIsLocked] = useState(() => {
-    const saved = loadPrivacySettings();
-    if (saved.enabled) {
-      const wasUnlocked = loadUnlockedState();
-      return !wasUnlocked;
-    }
-    return false;
-  });
-  
+  const [isConfigLoading, setIsConfigLoading] = useState(true);
+  const [settings, setSettings] = useState<PrivacySettings>(getDefaultSettings);
+  const [isLocked, setIsLocked] = useState(false);
   const [isBackgrounded, setIsBackgrounded] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState(false);
   
   const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activityThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  useEffect(() => {
+    initConfig().then(() => {
+      const loadedSettings = loadPrivacySettings();
+      setSettings(loadedSettings);
+      setBackendAvailable(isBackendAvailable());
+      
+      if (loadedSettings.enabled) {
+        const wasUnlocked = loadUnlockedState();
+        setIsLocked(!wasUnlocked);
+        updateFavicon(!wasUnlocked, loadedSettings.selectedModule);
+        updateTitle(!wasUnlocked, loadedSettings.selectedModule);
+      }
+      
+      setIsConfigLoading(false);
+    });
+    
+    const unsubscribe = subscribeToConfig(() => {
+      setBackendAvailable(isBackendAvailable());
+    });
+    
+    return unsubscribe;
+  }, []);
   
   const showCamera = useCallback(() => {
     setIsLocked(false);
@@ -168,7 +198,7 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
   }, [settings.selectedModule]);
   
   const updateSettings = useCallback((updates: Partial<PrivacySettings>) => {
-    if (isPrivacyModeForced && 'enabled' in updates && !updates.enabled) {
+    if (isPrivacyModeForced() && 'enabled' in updates && !updates.enabled) {
       return;
     }
     
@@ -182,17 +212,25 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
           saveUnlockedState(false);
           updateFavicon(true, newSettings.selectedModule);
           updateTitle(true, newSettings.selectedModule);
+          
+          if (backendAvailable) {
+            updateRemoteConfig({ PRIVACY_MODE: true });
+          }
         } else {
           setIsLocked(false);
           saveUnlockedState(false);
           updateFavicon(false);
           updateTitle(false);
+          
+          if (backendAvailable) {
+            updateRemoteConfig({ PRIVACY_MODE: false });
+          }
         }
       }
       
       return newSettings;
     });
-  }, []);
+  }, [backendAvailable]);
   
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimerRef.current) {
@@ -307,6 +345,8 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
         settings,
         isLocked,
         isBackgrounded,
+        isConfigLoading,
+        isBackendAvailable: backendAvailable,
         showCamera,
         hideCamera,
         toggleLock,

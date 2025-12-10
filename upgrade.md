@@ -1,3 +1,118 @@
+# Upgrade: Go Backend Integration (v8)
+
+## Описание
+Реализация Go бэкенда для production-сборки приложения с поддержкой:
+- Отдача статических файлов (html/css/js/fonts/images)
+- SPA-режим: 404 → redirect to index.html
+- Динамическая конфигурация через config.json
+- CORS proxy для облачных сервисов с защитой
+- Поддержка работы приложения с бэкендом и без него
+
+## Чек-лист задач
+
+### 1. Динамическая конфигурация
+- [x] Создать `client/public/config.json` — настройки приватности + whitelist хостов
+- [x] Создать `client/src/lib/config-loader.ts` — динамическая загрузка конфига
+- [x] Обновить `privacy-context.tsx` — использовать динамический конфиг
+- [x] Поддержка работы без бэкенда (загрузка из статического config.json)
+
+### 2. Go сервер API
+- [x] `GET /api/config` — получение текущей конфигурации
+- [x] `POST /api/config` — обновление настроек приватности
+- [x] `POST /api/proxy` — CORS proxy для облачных сервисов
+- [x] Защита proxy: проверка Origin/Referer
+- [x] Whitelist разрешённых хостов из config.json
+
+### 3. Клиентская интеграция
+- [x] Обновить `imgbb.ts` — поддержка proxy при наличии бэкенда
+- [x] Обновить `build.sh` — копирование config.json в dist/public
+
+### 4. Документация
+- [x] Обновить upgrade.md
+
+---
+
+## Прогресс v8
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| Динамическая конфигурация | ✅ Готово | 10.12.2025 |
+| Go сервер API | ✅ Готово | 10.12.2025 |
+| Клиентская интеграция | ✅ Готово | 10.12.2025 |
+| Документация | ✅ Готово | 10.12.2025 |
+
+---
+
+## Архитектура решения
+
+### Структура файлов
+
+```
+client/
+├── public/
+│   └── config.json              # Динамическая конфигурация
+└── src/
+    └── lib/
+        ├── config-loader.ts     # Загрузчик конфигурации
+        ├── privacy-context.tsx  # Обновлён для динамического конфига
+        └── imgbb.ts             # Обновлён для поддержки proxy
+
+server-go/
+└── main.go                      # Go сервер с API
+
+dist/                            # Production build
+├── public/
+│   ├── config.json              # Копия конфигурации
+│   └── ...                      # Статические файлы
+├── server                       # Go binary
+└── run.sh                       # Скрипт запуска
+```
+
+### config.json структура
+
+```json
+{
+  "PRIVACY_MODE": false,
+  "SELECTED_MODULE": "game-2048",
+  "MODULE_UNLOCK_VALUES": {...},
+  "UNLOCK_GESTURE": "severalFingers",
+  "UNLOCK_PATTERN": "0-4-8-5",
+  "UNLOCK_FINGERS": 4,
+  "AUTO_LOCK_MINUTES": 5,
+  "DEBUG_MODE": false,
+  "ALLOWED_PROXY_HOSTS": [
+    "api.imgbb.com",
+    "api.imgur.com",
+    "api.cloudinary.com"
+  ]
+}
+```
+
+### API Endpoints
+
+| Endpoint | Method | Описание |
+|----------|--------|----------|
+| `/api/health` | GET | Проверка доступности бэкенда |
+| `/api/config` | GET | Получить текущую конфигурацию |
+| `/api/config` | POST | Обновить настройки (сохраняет в config.json) |
+| `/api/imgbb` | POST | Загрузка изображений через ImgBB API |
+| `/api/proxy` | POST | CORS proxy для других облачных сервисов |
+
+### Защита /api/proxy
+
+1. **Origin/Referer check** — запросы только с текущего домена
+2. **Host whitelist** — только разрешённые облачные сервисы из ALLOWED_PROXY_HOSTS
+3. **POST only** — только POST запросы принимаются
+
+### Режимы работы
+
+| Режим | Описание |
+|-------|----------|
+| С бэкендом | Config загружается через /api/config, изменения сохраняются на сервере |
+| Без бэкенда | Config загружается из статического /config.json, изменения только в localStorage |
+
+---
+
 # Upgrade: Позиционирование прицела долгим нажатием
 
 ## Описание функции

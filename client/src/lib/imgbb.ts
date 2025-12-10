@@ -1,11 +1,53 @@
 import type { CloudData } from "@shared/schema";
 import { isImgBBSuccess, isImgBBError } from "./imgbb-types";
 import { UPLOAD } from "./constants";
+import { isBackendAvailable } from "./config-loader";
 
 export interface UploadResult {
   success: boolean;
   cloudData?: CloudData;
   error?: string;
+}
+
+async function uploadViaProxy(
+  base64Data: string,
+  apiKey: string,
+  expiration: number,
+  signal?: AbortSignal
+): Promise<Response> {
+  return fetch("/api/imgbb", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      image: base64Data,
+      apiKey,
+      expiration,
+    }),
+    signal,
+  });
+}
+
+async function uploadDirect(
+  base64Data: string,
+  apiKey: string,
+  expiration: number,
+  signal?: AbortSignal
+): Promise<Response> {
+  const formData = new FormData();
+  formData.append("image", base64Data);
+
+  let url = `https://api.imgbb.com/1/upload?key=${apiKey}`;
+  if (expiration > 0) {
+    url += `&expiration=${expiration}`;
+  }
+
+  return fetch(url, {
+    method: "POST",
+    body: formData,
+    signal,
+  });
 }
 
 export async function validateApiKey(
@@ -19,17 +61,12 @@ export async function validateApiKey(
   try {
     const testImage = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     
-    const formData = new FormData();
-    formData.append("image", testImage);
-
-    const response = await fetch(
-      `https://api.imgbb.com/1/upload?expiration=60&key=${apiKey}`,
-      {
-        method: "POST",
-        body: formData,
-        signal,
-      }
-    );
+    let response: Response;
+    if (isBackendAvailable()) {
+      response = await uploadViaProxy(testImage, apiKey, 60, signal);
+    } else {
+      response = await uploadDirect(testImage, apiKey, 60, signal);
+    }
 
     const result: unknown = await response.json();
 
@@ -67,19 +104,12 @@ export async function uploadToImgBB(
   try {
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
     
-    const formData = new FormData();
-    formData.append("image", base64Data);
-
-    let url = `https://api.imgbb.com/1/upload?key=${apiKey}`;
-    if (expiration > 0) {
-      url += `&expiration=${expiration}`;
+    let response: Response;
+    if (isBackendAvailable()) {
+      response = await uploadViaProxy(base64Data, apiKey, expiration, signal);
+    } else {
+      response = await uploadDirect(base64Data, apiKey, expiration, signal);
     }
-
-    const response = await fetch(url, {
-      method: "POST",
-      body: formData,
-      signal,
-    });
 
     const result: unknown = await response.json();
 

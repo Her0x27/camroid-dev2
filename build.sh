@@ -110,6 +110,12 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "${GREEN}      ✓ Frontend build completed${NC}"
 
+# Copy config.json to dist/public (ensure it exists for Go server)
+if [ -f "client/public/config.json" ]; then
+    cp client/public/config.json dist/public/config.json
+    echo -e "${GREEN}      ✓ config.json copied to dist/public${NC}"
+fi
+
 # Step 4: Obfuscation (optional)
 if [ "$OBFUSCATE" = true ]; then
     echo -e "${YELLOW}[4/5] Obfuscating JavaScript files...${NC}"
