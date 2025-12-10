@@ -1142,3 +1142,14 @@ interface PrivacyModuleProps {
 - Заменено `text-emerald-400` на `text-primary` для всех кнопок
 - Заменено `bg-emerald-500` на `bg-primary` для бейджей
 - Теперь все кнопки используют тематический цвет primary
+
+## Компоненты с обновлёнными стилями
+
+| Компонент | Файл | Стиль |
+|-----------|------|-------|
+| Button (default) | components/ui/button.tsx | btn-gradient |
+| SettingsChips | pages/settings/components/SettingsChips.tsx | chip-active |
+| TabsTrigger | components/ui/tabs.tsx | tab-gradient |
+| CameraControls | pages/camera/components/CameraControls.tsx | text-primary |
+
+Все кнопки с текстом теперь используют согласованные градиентные стили с прозрачностью.
