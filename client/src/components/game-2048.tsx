@@ -1,5 +1,5 @@
 import { useEffect, useRef, memo, useMemo } from "react";
-import { RefreshCw, Trophy, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react";
+import { RefreshCw, Trophy } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { GESTURE } from "@/lib/constants";
 import { useGame2048 } from "@/hooks/use-game-2048";
@@ -35,7 +35,7 @@ const GameTile = memo(function GameTile({ value, rowIdx, colIdx }: GameTileProps
   
   return (
     <div
-      className={`flex items-center justify-center rounded-lg font-bold transition-all duration-100 ${style.bg} ${style.text} ${fontSize}`}
+      className={`aspect-square flex items-center justify-center rounded-lg font-bold transition-all duration-100 overflow-hidden ${style.bg} ${style.text} ${fontSize}`}
       data-testid={`tile-${rowIdx}-${colIdx}`}
     >
       {value > 0 ? value : ''}
@@ -75,45 +75,6 @@ const GameOverlay = memo(function GameOverlay({ gameOver, won, onNewGame, onKeep
             {t.game2048.keepPlaying}
           </button>
         )}
-      </div>
-    </div>
-  );
-});
-
-interface MobileControlsProps {
-  onMove: (direction: 'left' | 'right' | 'up' | 'down') => void;
-}
-
-const MobileControls = memo(function MobileControls({ onMove }: MobileControlsProps) {
-  return (
-    <div className="mt-6 md:hidden">
-      <div className="flex justify-center mb-2">
-        <button 
-          onClick={() => onMove('up')} 
-          className="w-14 h-14 flex items-center justify-center bg-[#333333] rounded-xl active:bg-[#555555] touch-none"
-        >
-          <ArrowUp className="w-6 h-6 text-white" />
-        </button>
-      </div>
-      <div className="flex justify-center gap-2">
-        <button 
-          onClick={() => onMove('left')} 
-          className="w-14 h-14 flex items-center justify-center bg-[#333333] rounded-xl active:bg-[#555555] touch-none"
-        >
-          <ArrowLeft className="w-6 h-6 text-white" />
-        </button>
-        <button 
-          onClick={() => onMove('down')} 
-          className="w-14 h-14 flex items-center justify-center bg-[#333333] rounded-xl active:bg-[#555555] touch-none"
-        >
-          <ArrowDown className="w-6 h-6 text-white" />
-        </button>
-        <button 
-          onClick={() => onMove('right')} 
-          className="w-14 h-14 flex items-center justify-center bg-[#333333] rounded-xl active:bg-[#555555] touch-none"
-        >
-          <ArrowRight className="w-6 h-6 text-white" />
-        </button>
       </div>
     </div>
   );
@@ -276,8 +237,6 @@ export function Game2048({ onSecretGesture, gestureType = 'patternUnlock', secre
         <p className="text-center text-gray-500 text-sm mt-4">
           {t.game2048.swipeToMove}
         </p>
-        
-        <MobileControls onMove={handleMove} />
       </div>
       
       {showPatternOverlay && (
