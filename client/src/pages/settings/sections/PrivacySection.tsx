@@ -1,10 +1,11 @@
 import { memo } from "react";
-import { Gamepad2, Eye, Hand, Clock3, Settings2, Fingerprint, Dices } from "lucide-react";
+import { Shield, Eye, Hand, Clock3, Settings2, Fingerprint, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { LockedSlider } from "@/components/ui/locked-slider";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -13,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
-import { gameRegistry } from "@/games";
+import { disguiseRegistry } from "@/disguises";
 import type { Translations } from "@/lib/i18n";
 
 interface PrivacySettings {
@@ -22,7 +23,8 @@ interface PrivacySettings {
   secretPattern: string;
   autoLockMinutes: number;
   unlockFingers: number;
-  selectedGame: string;
+  selectedDisguise: string;
+  disguiseUnlockValues: Record<string, string>;
 }
 
 interface PrivacySectionProps {
@@ -38,9 +40,21 @@ export const PrivacySection = memo(function PrivacySection({
   onShowPatternSetup,
   t,
 }: PrivacySectionProps) {
+  const currentDisguise = disguiseRegistry.get(privacySettings.selectedDisguise);
+  const currentUnlockValue = privacySettings.disguiseUnlockValues[privacySettings.selectedDisguise] || '';
+
+  const handleDisguiseUnlockValueChange = (value: string) => {
+    updatePrivacySettings({
+      disguiseUnlockValues: {
+        ...privacySettings.disguiseUnlockValues,
+        [privacySettings.selectedDisguise]: value,
+      },
+    });
+  };
+
   return (
     <CollapsibleCard
-      icon={<Gamepad2 className="w-5 h-5" />}
+      icon={<Shield className="w-5 h-5" />}
       title={t.settings.privacy.title}
       description={t.settings.privacy.description}
       testId="section-privacy"
@@ -70,31 +84,55 @@ export const PrivacySection = memo(function PrivacySection({
 
           <div className="space-y-3">
             <Label className="flex items-center gap-2">
-              <Dices className="w-4 h-4" />
-              {t.settings.privacy.coverGame}
+              <Layers className="w-4 h-4" />
+              {t.settings.privacy.disguise}
             </Label>
             <Select
-              value={privacySettings.selectedGame}
-              onValueChange={(value) => updatePrivacySettings({ selectedGame: value })}
+              value={privacySettings.selectedDisguise}
+              onValueChange={(value) => updatePrivacySettings({ selectedDisguise: value })}
             >
-              <SelectTrigger data-testid="select-cover-game">
+              <SelectTrigger data-testid="select-disguise">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {gameRegistry.getAll().map((game) => (
-                  <SelectItem key={game.id} value={game.id}>
+                {disguiseRegistry.getAll().map((disguise) => (
+                  <SelectItem key={disguise.id} value={disguise.id}>
                     <span className="flex items-center gap-2">
-                      <game.icon className="w-4 h-4" />
-                      {game.title}
+                      <disguise.icon className="w-4 h-4" />
+                      {disguise.title}
                     </span>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              {t.settings.privacy.coverGameDesc}
+              {t.settings.privacy.disguiseDesc}
             </p>
           </div>
+
+          {currentDisguise && currentDisguise.unlockMethod.type !== 'swipePattern' && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Settings2 className="w-4 h-4" />
+                  {(t.settings.privacy.disguiseUnlock as Record<string, string>)[currentDisguise.unlockMethod.labelKey] || currentDisguise.unlockMethod.labelKey}
+                </Label>
+                <Input
+                  type="text"
+                  value={currentUnlockValue}
+                  onChange={(e) => handleDisguiseUnlockValueChange(e.target.value)}
+                  placeholder={(t.settings.privacy.disguiseUnlock as Record<string, string>)[currentDisguise.unlockMethod.placeholderKey || ''] || currentDisguise.unlockMethod.defaultValue}
+                  data-testid="input-disguise-unlock"
+                />
+                {currentDisguise.unlockMethod.descriptionKey && (
+                  <p className="text-xs text-muted-foreground">
+                    {(t.settings.privacy.disguiseUnlock as Record<string, string>)[currentDisguise.unlockMethod.descriptionKey] || ''}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
 
           <Separator />
 

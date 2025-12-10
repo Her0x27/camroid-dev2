@@ -629,3 +629,146 @@ interface CloudProvider {
 |--------|--------|------|
 | Обновление стилей | ⏳ В работе | 09.12.2025 |
 | Обновление иконок | ⏳ Ожидает | - |
+
+---
+
+# Upgrade: Переработка системы приватности — Disguises (v9)
+
+## Описание
+Полная переработка режима приватности:
+- Переименование `games/` → `disguises/` (маскировочные приложения, не только игры)
+- Каждая маскировка имеет **уникальный метод разблокировки** (калькулятор — последовательность цифр, блокнот — секретная фраза и т.д.)
+- Универсальные методы разблокировки (`severalFingers`, `patternUnlock`) работают как fallback для всех маскировок
+- Все настройки доступны как через UI, так и через `config.ts`
+
+## Чек-лист задач
+
+### 1. Обновление upgrade.md
+- [x] Добавить раздел v9 с чек-листом задач
+
+### 2. Переименование games/ → disguises/
+- [ ] Переименовать папку `client/src/games/` → `client/src/disguises/`
+- [ ] `GameConfig` → `DisguiseConfig`
+- [ ] `GameProps` → `DisguiseProps`
+- [ ] `GameRegistry` → `DisguiseRegistry`
+- [ ] `gameRegistry` → `disguiseRegistry`
+- [ ] `selectedGame` → `selectedDisguise`
+- [ ] Обновить все импорты во всех файлах
+
+### 3. Расширение DisguiseConfig
+- [ ] Добавить `unlockMethod` в DisguiseConfig:
+  - `type`: 'sequence' | 'phrase' | 'swipePattern' | 'tapSequence'
+  - `defaultValue`: string (значение по умолчанию для разблокировки)
+  - `label`: string (название метода для UI)
+- [ ] Добавить `supportsUniversalUnlock: boolean` (поддержка severalFingers/patternUnlock)
+
+### 4. Обновление config.ts
+- [ ] Добавить `SELECTED_DISGUISE` — маскировка по умолчанию
+- [ ] Добавить `DISGUISE_UNLOCK_VALUES` — объект с настройками разблокировки для каждой маскировки:
+  ```typescript
+  DISGUISE_UNLOCK_VALUES: {
+    'calculator': '123456=',
+    'notepad': 'secret',
+    'game-2048': '0-4-8-5',
+  }
+  ```
+- [ ] Обновить комментарии с описанием настроек
+
+### 5. Создание маскировки "Калькулятор"
+- [ ] Создать `client/src/disguises/calculator/`
+- [ ] Реализовать функциональный калькулятор
+- [ ] Метод разблокировки: ввод секретной последовательности цифр (например: `123456=`)
+- [ ] Favicon и title для калькулятора
+- [ ] Поддержка универсальных методов разблокировки
+
+### 6. Создание маскировки "Блокнот"
+- [ ] Создать `client/src/disguises/notepad/`
+- [ ] Реализовать функциональный блокнот (простой текстовый редактор)
+- [ ] Метод разблокировки: набор секретной фразы
+- [ ] Favicon и title для блокнота
+- [ ] Поддержка универсальных методов разблокировки
+
+### 7. Обновление privacy-context.tsx
+- [ ] Обновить `PrivacySettings` — добавить `disguiseUnlockValues: Record<string, string>`
+- [ ] Загружать дефолтные значения из `config.ts`
+- [ ] Сохранять пользовательские настройки в localStorage
+
+### 8. Обновление PrivacySection (UI настроек)
+- [ ] Переименовать "Игра-прикрытие" → "Маскировка"
+- [ ] Показывать поле настройки уникального метода разблокировки для выбранной маскировки
+- [ ] Для калькулятора — поле ввода секретной последовательности
+- [ ] Для блокнота — поле ввода секретной фразы
+- [ ] Оставить настройки универсальных методов (severalFingers, patternUnlock)
+
+### 9. Обновление переводов
+- [ ] Добавить переводы для новых маскировок (ru.ts, en.ts)
+- [ ] Добавить переводы для методов разблокировки
+- [ ] Обновить существующие переводы (game → disguise)
+
+### 10. Обновление replit.md
+- [ ] Описать новую архитектуру disguises/
+- [ ] Добавить примеры создания новых маскировок
+
+---
+
+## Архитектура решения
+
+```
+client/src/disguises/
+├── types.ts              # DisguiseConfig, DisguiseProps, UnlockMethod
+├── registry.ts           # DisguiseRegistry: register/get disguises
+├── index.ts              # Export all disguises
+├── game-2048/            # Существующая игра 2048
+│   ├── index.tsx
+│   ├── config.ts         # unlockMethod: { type: 'swipePattern', ... }
+│   └── use-game.ts
+├── calculator/           # NEW: Калькулятор
+│   ├── index.tsx
+│   ├── config.ts         # unlockMethod: { type: 'sequence', ... }
+│   └── use-calculator.ts
+└── notepad/              # NEW: Блокнот
+    ├── index.tsx
+    ├── config.ts         # unlockMethod: { type: 'phrase', ... }
+    └── use-notepad.ts
+```
+
+### DisguiseConfig Interface
+```typescript
+interface UnlockMethod {
+  type: 'sequence' | 'phrase' | 'swipePattern' | 'tapSequence';
+  defaultValue: string;
+  label: string;        // Для UI: "Секретная последовательность"
+  placeholder?: string; // Для поля ввода
+}
+
+interface DisguiseConfig {
+  id: string;
+  title: string;
+  favicon: string;
+  icon: ComponentType;
+  component: LazyExoticComponent;
+  unlockMethod: UnlockMethod;
+  supportsUniversalUnlock: boolean; // Поддержка severalFingers/patternUnlock
+}
+```
+
+### Приоритет методов разблокировки
+1. **Уникальный метод** маскировки (sequence для калькулятора, phrase для блокнота)
+2. **Универсальные методы** (severalFingers, patternUnlock) — работают всегда как fallback
+
+---
+
+## Прогресс v9
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| Обновление upgrade.md | ✅ Готово | 10.12.2025 |
+| Переименование games → disguises | ⏳ В работе | - |
+| Расширение DisguiseConfig | ⏳ Ожидает | - |
+| Обновление config.ts | ⏳ Ожидает | - |
+| Маскировка "Калькулятор" | ⏳ Ожидает | - |
+| Маскировка "Блокнот" | ⏳ Ожидает | - |
+| Обновление privacy-context | ⏳ Ожидает | - |
+| Обновление PrivacySection | ⏳ Ожидает | - |
+| Переводы | ⏳ Ожидает | - |
+| Обновление replit.md | ⏳ Ожидает | - |

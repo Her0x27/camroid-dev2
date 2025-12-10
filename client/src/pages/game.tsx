@@ -1,25 +1,28 @@
 import { Suspense } from "react";
 import { usePrivacy } from "@/lib/privacy-context";
-import { gameRegistry } from "@/games";
+import { disguiseRegistry } from "@/disguises";
 
-export default function GamePage() {
+export default function DisguisePage() {
   const { settings, showCamera } = usePrivacy();
 
-  const gameConfig = gameRegistry.get(settings.selectedGame) || gameRegistry.getDefault();
+  const disguiseConfig = disguiseRegistry.get(settings.selectedDisguise) || disguiseRegistry.getDefault();
   
-  if (!gameConfig) {
-    return <div>No game configured</div>;
+  if (!disguiseConfig) {
+    return <div>No disguise configured</div>;
   }
 
-  const GameComponent = gameConfig.component;
+  const DisguiseComponent = disguiseConfig.component;
+  const disguiseUnlockValue = settings.disguiseUnlockValues[settings.selectedDisguise] || '';
 
   return (
     <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-      <GameComponent
+      <DisguiseComponent
         onSecretGesture={showCamera}
         gestureType={settings.gestureType}
         secretPattern={settings.secretPattern}
         unlockFingers={settings.unlockFingers}
+        disguiseUnlockValue={disguiseUnlockValue}
+        onDisguiseUnlock={showCamera}
       />
     </Suspense>
   );
