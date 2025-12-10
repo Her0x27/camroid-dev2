@@ -163,7 +163,7 @@ const GalleryButton = memo(function GalleryButton({
   return (
     <div className="absolute left-4 flex items-center">
       <button
-        className="text-emerald-400 relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+        className="text-primary relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
         onClick={onNavigate}
         data-testid="button-gallery"
       >
@@ -193,7 +193,7 @@ const GalleryButton = memo(function GalleryButton({
         )}
         {cloudCount > 0 && (
           <span 
-            className="absolute -bottom-1 -right-1 min-w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md"
+            className="absolute -bottom-1 -right-1 min-w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md"
             data-testid="badge-cloud-count"
           >
             <CloudUpload className="w-2.5 h-2.5" />
@@ -219,7 +219,7 @@ const RightControls = memo(function RightControls({
   return (
     <div className="absolute right-4 flex items-center gap-3">
       <button
-        className="text-emerald-400 relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+        className="text-primary relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
         onClick={onOpenNote}
         data-testid="button-note"
       >
@@ -230,7 +230,7 @@ const RightControls = memo(function RightControls({
       </button>
 
       <button
-        className="text-emerald-400 flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+        className="text-primary flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
         onClick={onNavigateSettings}
         data-testid="button-settings"
       >
