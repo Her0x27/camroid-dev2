@@ -212,10 +212,10 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
       
       if ('enabled' in updates) {
         if (updates.enabled) {
-          setIsLocked(true);
-          saveUnlockedState(false);
-          updateFavicon(true, newSettings.selectedModule);
-          updateTitle(true, newSettings.selectedModule);
+          setIsLocked(false);
+          saveUnlockedState(true);
+          updateFavicon(false);
+          updateTitle(false);
           
           if (backendAvailable) {
             updateRemoteConfig({ PRIVACY_MODE: true });

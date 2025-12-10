@@ -283,7 +283,6 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
   const [isExiting, setIsExiting] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const panelRef = useRef<HTMLDivElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const continueButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -291,8 +290,8 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
   }, []);
 
   useEffect(() => {
-    if (isVisible && closeButtonRef.current) {
-      closeButtonRef.current.focus();
+    if (isVisible && continueButtonRef.current) {
+      continueButtonRef.current.focus();
     }
   }, [isVisible, capabilities]);
 
@@ -313,17 +312,8 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
     initiateClose();
   }, [initiateClose]);
 
-  const handleCloseAlways = useCallback(() => {
-    initiateClose();
-  }, [initiateClose]);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isVisible && !isExiting) {
-        e.preventDefault();
-        handleCloseAlways();
-      }
-      
       if (e.key === 'Tab' && isVisible && panelRef.current) {
         const focusableElements = panelRef.current.querySelectorAll(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -345,7 +335,7 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
       document.addEventListener('keydown', handleKeyDown);
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  }, [isVisible, isExiting, handleCloseAlways]);
+  }, [isVisible, isExiting]);
 
   if (!capabilities) {
     return null;
@@ -361,7 +351,6 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
           {shouldReduceMotion ? (
             <div
               className="fixed inset-0 bg-black/40 z-50"
-              onClick={handleCloseAlways}
               aria-hidden="true"
             />
           ) : (
@@ -371,7 +360,6 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              onClick={handleCloseAlways}
               aria-hidden="true"
             />
           )}
@@ -391,27 +379,17 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
             <div className="relative bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-2xl shadow-black/20 overflow-hidden">
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
               
-              <div className="flex items-center justify-between p-4 border-b border-border/40">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                    <Bell className="h-4.5 w-4.5 text-primary" />
-                  </div>
-                  <div>
-                    <h2 id="capabilities-title" className="text-sm font-semibold">{t.capabilities.title}</h2>
-                    <p id="capabilities-description" className="text-[11px] text-muted-foreground">{t.capabilities.description}</p>
-                  </div>
+              <div className="flex items-center gap-3 p-4 border-b border-border/40">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Bell className="h-4.5 w-4.5 text-primary" />
                 </div>
-                <button
-                  ref={closeButtonRef}
-                  onClick={handleCloseAlways}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                  aria-label="Close"
-                >
-                  <X className="h-4 w-4 text-muted-foreground" />
-                </button>
+                <div>
+                  <h2 id="capabilities-title" className="text-sm font-semibold">{t.capabilities.title}</h2>
+                  <p id="capabilities-description" className="text-[11px] text-muted-foreground">{t.capabilities.description}</p>
+                </div>
               </div>
 
-              <ScrollArea className="max-h-[60vh] md:max-h-[70vh]">
+              <ScrollArea className="h-[50vh] md:h-[60vh]">
                 <div className="p-4 space-y-4">
                   <DeviceInfoDisplay device={capabilities.device} />
 
