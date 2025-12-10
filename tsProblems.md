@@ -4,14 +4,21 @@
 
 This document contains the results of a comprehensive TypeScript project audit covering code duplication, architecture, performance, typing, data handling, async patterns, imports, code smells, and **clean code analysis**.
 
-**Последний аудит:** 08.12.2025
+**Последний аудит:** 10.12.2025
 
 **Статус задач разделов 1-10:** ✅ ВСЕ ЗАДАЧИ ОБРАБОТАНЫ
 
 **Раздел 11 (10.12.2025):** ✅ ВСЕ ЗАДАЧИ ОБРАБОТАНЫ
+
+**Раздел 11 (ранее):**
 - Высокий приоритет: 5 задач ✅ (дублирование haptic, color utils)
 - Средний приоритет: 2 задачи ✅ (usePatternSetup, useApiKeyValidation), 1 задача ⏸️ (ARCH-9 не рекомендуется)
 - Низкий приоритет: 2 задачи ⏸️ (PERF-4, PERF-5 не рекомендуются)
+
+**Раздел 13 - Clean Code Audit (10.12.2025):** ⬜ В РАБОТЕ
+- Высокий приоритет: 2 задачи (TypeScript type errors)
+- Средний приоритет: 2 задачи (duplicate types, console.error)
+- Низкий приоритет: 2 задачи (empty catch blocks, type assertions)
 
 **Clean Code Audit (Раздел 9):** ✅ Все проблемы исправлены
 
@@ -1065,3 +1072,103 @@ rm client/src/components/ui/{accordion,aspect-ratio,avatar,breadcrumb,calendar,c
 ✅ createCanvas - используется в image-enhancement.ts
 ✅ ErrorBoundaryContent - используется внутри ErrorBoundary
 ```
+
+---
+
+## 13. Clean Code Audit (10.12.2025)
+
+**Дата аудита:** 10.12.2025
+
+### 13.1 TypeScript Type Errors (Critical)
+
+| Файл | Строка | Проблема | Статус |
+|------|--------|----------|--------|
+| `client/src/pages/gallery/index.tsx` | 266 | Type mismatch: `{ isValidated, apiKey, expiration, autoUpload }` несовместим с `Partial<UploadSettings>` | ⬜ TODO |
+| `client/src/pages/gallery/index.tsx` | 288 | Property `apiKey` does not exist in type `UploadSettings` | ⬜ TODO |
+
+### 13.2 Duplicate Type Definitions
+
+| Файл 1 | Файл 2 | Дублированные типы | Статус |
+|--------|--------|-------------------|--------|
+| `client/src/lib/imgbb-types.ts` | `client/src/cloud-providers/providers/imgbb/types.ts` | `ImgBBImageData`, `ImgBBResponseData`, `ImgBBSuccessResponse`, `ImgBBErrorResponse`, `ImgBBResponse`, `isImgBBSuccess()`, `isImgBBError()` | ⬜ TODO |
+
+**Решение:** Удалить `client/src/lib/imgbb-types.ts`, использовать типы из `client/src/cloud-providers/providers/imgbb/types.ts`
+
+### 13.3 Console.error вне logger
+
+| Файл | Строка | Код | Статус |
+|------|--------|-----|--------|
+| `client/src/lib/config-loader.ts` | 170 | `console.error("Failed to update config:", error)` | ⬜ TODO |
+
+**Решение:** Заменить на `logger.error("Failed to update config", error)`
+
+### 13.4 Empty Catch Blocks (Silent Error Swallowing)
+
+| Файл | Строки | Статус |
+|------|--------|--------|
+| `client/src/hooks/use-pwa-banner.ts` | 28-29 | ⬜ TODO |
+| `client/src/lib/i18n/context.tsx` | 40-41, 48-49 | ⬜ TODO |
+| `client/src/lib/app-capabilities.ts` | 201-202 | ⬜ TODO |
+| `client/src/lib/privacy-context.tsx` | 82-83, 94-95, 117-118 | ⬜ TODO |
+| `client/src/lib/config-loader.ts` | 71-72, 105-106, 127-128 | ⬜ TODO |
+| `client/src/privacy_modules/notepad/Notepad.tsx` | 28, 35, 53 | ⬜ TODO |
+
+**Решение:** Добавить логирование ошибок или комментарий с объяснением (например `// Expected: browser may not support this API`)
+
+### 13.5 Type Assertions (as) - Review Needed
+
+| Файл | Строка | Assertion | Необходимость |
+|------|--------|-----------|--------------|
+| `client/src/hooks/use-long-press.ts` | 48 | `data as T` | ⬜ Проверить |
+| `client/src/hooks/use-camera.ts` | 80 | `track.getCapabilities() as MediaTrackCapabilities & {...}` | ⚠️ Необходимо - расширение стандартного типа |
+| `client/src/hooks/use-orientation.ts` | 77 | `event as DeviceOrientationEventWithWebkit` | ⚠️ Необходимо - webkit-специфичный API |
+| `client/src/hooks/use-orientation.ts` | 124 | `DeviceOrientationEvent as unknown as DeviceOrientationEventStatic` | ⚠️ Необходимо - iOS-специфичный API |
+| `client/src/lib/db/folder-service.ts` | 35, 86 | `event.target as IDBRequest` | ⚠️ Необходимо - IndexedDB event typing |
+
+### 13.6 Clean Status
+
+| Критерий | Статус | Найдено |
+|----------|--------|---------|
+| Unused imports | ✅ Чисто | 0 (ESLint `unused-imports` активен) |
+| Unused variables | ✅ Чисто | 0 |
+| Debugger statements | ✅ Чисто | 0 |
+| Dead code after return/throw | ✅ Чисто | 0 |
+| Commented-out code blocks | ✅ Чисто | 0 |
+| Empty interfaces/types | ✅ Чисто | 0 |
+| @ts-ignore/@ts-nocheck | ✅ Чисто | 0 |
+
+---
+
+## Чек-лист задач Clean Code (10.12.2025)
+
+### Высокий приоритет (блокирует компиляцию)
+
+```
+⬜ [CLEAN-8] Исправить type error в gallery/index.tsx:266 - UploadSettings type mismatch
+⬜ [CLEAN-9] Исправить type error в gallery/index.tsx:288 - apiKey property error
+```
+
+### Средний приоритет (tech debt)
+
+```
+⬜ [CLEAN-10] Удалить client/src/lib/imgbb-types.ts, обновить импорты на cloud-providers/providers/imgbb/types.ts
+⬜ [CLEAN-11] Заменить console.error в config-loader.ts:170 на logger.error
+```
+
+### Низкий приоритет (улучшение надёжности)
+
+```
+⬜ [CLEAN-12] Добавить комментарии или логирование в пустые catch блоки (13 мест)
+⬜ [CLEAN-13] Рассмотреть type assertion в use-long-press.ts:48
+```
+
+### Summary
+
+| Категория | Количество | Приоритет |
+|-----------|------------|-----------|
+| TypeScript errors | 2 | 🔴 Высокий |
+| Duplicate types | 1 файл | 🟡 Средний |
+| Console outside logger | 1 | 🟡 Средний |
+| Empty catch blocks | 13 | 🟢 Низкий |
+| Type assertions to review | 6 | 🔵 Review |
+| **Всего** | **23** | - |
