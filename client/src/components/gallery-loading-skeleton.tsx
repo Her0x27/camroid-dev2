@@ -11,8 +11,8 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1,
+      staggerChildren: 0.06,
+      delayChildren: 0.08,
     },
   },
 };
@@ -20,15 +20,17 @@ const containerVariants = {
 const itemVariants = {
   hidden: { 
     opacity: 0, 
-    scale: 0.9,
+    scale: 0.85,
+    y: 10,
   },
   visible: { 
     opacity: 1, 
     scale: 1,
+    y: 0,
     transition: {
       type: "spring",
-      stiffness: 300,
-      damping: 24,
+      stiffness: 260,
+      damping: 20,
     },
   },
 };
@@ -60,9 +62,15 @@ export const GalleryLoadingSkeleton = memo(function GalleryLoadingSkeleton({
         <motion.div
           key={i}
           variants={shouldReduceMotion ? reducedMotionVariants : itemVariants}
-          className="aspect-square rounded-md overflow-hidden"
+          className="aspect-square rounded-lg overflow-hidden relative group"
         >
-          <div className="w-full h-full shimmer" />
+          <div className="w-full h-full shimmer-modern" />
+          <div 
+            className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{
+              background: "radial-gradient(circle at center, hsl(var(--primary) / 0.1) 0%, transparent 70%)",
+            }}
+          />
         </motion.div>
       ))}
     </motion.div>
@@ -79,7 +87,7 @@ const listContainerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.06,
+      staggerChildren: 0.05,
       delayChildren: 0.05,
     },
   },
@@ -88,14 +96,14 @@ const listContainerVariants = {
 const listItemVariants = {
   hidden: { 
     opacity: 0, 
-    x: -20,
+    x: -16,
   },
   visible: { 
     opacity: 1, 
     x: 0,
     transition: {
       type: "spring",
-      stiffness: 400,
+      stiffness: 350,
       damping: 25,
     },
   },
@@ -123,12 +131,12 @@ export const ListLoadingSkeleton = memo(function ListLoadingSkeleton({
         <motion.div
           key={i}
           variants={shouldReduceMotion ? reducedMotionVariants : listItemVariants}
-          className="flex items-center gap-3 p-3 rounded-md overflow-hidden"
+          className="flex items-center gap-3 p-3 rounded-lg overflow-hidden bg-card/30"
         >
-          <div className="w-16 h-16 rounded-md shimmer flex-shrink-0" />
-          <div className="flex-1 space-y-2">
-            <div className="h-4 w-3/4 rounded shimmer" />
-            <div className="h-3 w-1/2 rounded shimmer" />
+          <div className="w-16 h-16 rounded-lg shimmer-modern flex-shrink-0" />
+          <div className="flex-1 space-y-2.5">
+            <div className="h-4 w-3/4 rounded-md shimmer-modern" />
+            <div className="h-3 w-1/2 rounded-md shimmer-modern" />
           </div>
         </motion.div>
       ))}
@@ -163,12 +171,12 @@ export const FolderLoadingSkeleton = memo(function FolderLoadingSkeleton({
         <motion.div
           key={i}
           variants={shouldReduceMotion ? reducedMotionVariants : itemVariants}
-          className="rounded-lg overflow-hidden"
+          className="rounded-xl overflow-hidden bg-card/50 shadow-sm"
         >
-          <div className="aspect-square shimmer rounded-t-lg" />
-          <div className="p-3 bg-card space-y-2">
-            <div className="h-4 w-3/4 rounded shimmer" />
-            <div className="h-3 w-1/3 rounded shimmer" />
+          <div className="aspect-square shimmer-modern" />
+          <div className="p-3 space-y-2.5">
+            <div className="h-4 w-3/4 rounded-md shimmer-modern" />
+            <div className="h-3 w-1/3 rounded-md shimmer-modern" />
           </div>
         </motion.div>
       ))}

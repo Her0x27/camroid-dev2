@@ -328,6 +328,34 @@
     animation: shimmer 1.8s ease-in-out infinite;
   }
   
+  /* Modern shimmer with gradient glow */
+  @keyframes shimmer-modern {
+    0% { 
+      background-position: -200% 0;
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% { 
+      background-position: 200% 0;
+      opacity: 0.6;
+    }
+  }
+  
+  .shimmer-modern {
+    background: linear-gradient(
+      110deg,
+      hsl(var(--muted) / 0.4) 0%,
+      hsl(var(--muted) / 0.7) 20%,
+      hsl(var(--primary) / 0.15) 40%,
+      hsl(var(--muted) / 0.7) 60%,
+      hsl(var(--muted) / 0.4) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-modern 2s ease-in-out infinite;
+  }
+  
   /* Pulsing ring animation for branded loader */
   @keyframes pulse-ring {
     0% {
@@ -395,7 +423,8 @@
   
   /* Reduced motion preferences - disable animations for accessibility */
   @media (prefers-reduced-motion: reduce) {
-    .shimmer {
+    .shimmer,
+    .shimmer-modern {
       animation: none;
       background: hsl(var(--muted));
     }
