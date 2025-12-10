@@ -4,6 +4,7 @@ import { useSecretGesture } from "@/hooks/use-secret-gesture";
 import { PatternOverlay } from "@/components/pattern-overlay";
 import { usePWABanner } from "@/hooks/use-pwa-banner";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
+import { useI18n } from "@/lib/i18n";
 import { createPhraseChecker } from "./unlock-logic";
 import type { PrivacyModuleProps } from "../types";
 
@@ -59,10 +60,11 @@ interface NoteListItemProps {
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;
+  emptyNoteLabel: string;
 }
 
-const NoteListItem = memo(function NoteListItem({ note, isActive, onClick, onDelete }: NoteListItemProps) {
-  const preview = note.content.slice(0, 30) || 'Empty note';
+const NoteListItem = memo(function NoteListItem({ note, isActive, onClick, onDelete, emptyNoteLabel }: NoteListItemProps) {
+  const preview = note.content.slice(0, 30) || emptyNoteLabel;
   const date = new Date(note.updatedAt).toLocaleDateString();
 
   return (
@@ -101,6 +103,7 @@ export function Notepad({
   unlockValue = 'secret',
   onUnlock,
 }: PrivacyModuleProps) {
+  const { t } = useI18n();
   const [notes, setNotes] = useState<Note[]>(loadNotes);
   const [currentNoteId, setCurrentNoteId] = useState<string | null>(() => {
     const savedId = loadCurrentNoteId();
@@ -238,10 +241,10 @@ export function Notepad({
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
             <FileText className="w-6 h-6" />
-            Notepad
+            {t.notepad.title}
           </h1>
           {!isSaved && (
-            <span className="text-xs text-orange-500">Unsaved</span>
+            <span className="text-xs text-orange-500">{t.notepad.unsaved}</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -297,6 +300,7 @@ export function Notepad({
                 isActive={note.id === currentNoteId}
                 onClick={() => handleSelectNote(note.id)}
                 onDelete={() => handleDeleteNote(note.id)}
+                emptyNoteLabel={t.notepad.emptyNote}
               />
             ))}
           </div>
@@ -308,7 +312,7 @@ export function Notepad({
             value={content}
             onChange={(e) => handleContentChange(e.target.value)}
             onClick={(e) => e.stopPropagation()}
-            placeholder="Start typing your note..."
+            placeholder={t.notepad.placeholder}
             className="flex-1 w-full bg-transparent text-white text-base leading-relaxed resize-none outline-none placeholder:text-gray-600"
             data-testid="notepad-textarea"
           />

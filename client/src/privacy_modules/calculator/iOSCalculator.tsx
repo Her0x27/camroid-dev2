@@ -3,6 +3,7 @@ import { useSecretGesture } from "@/hooks/use-secret-gesture";
 import { PatternOverlay } from "@/components/pattern-overlay";
 import { usePWABanner } from "@/hooks/use-pwa-banner";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
+import { useI18n } from "@/lib/i18n";
 import { createSequenceChecker } from "./unlock-logic";
 import type { PrivacyModuleProps } from "../types";
 
@@ -79,6 +80,7 @@ export function IOSCalculator({
   unlockValue = '123456=',
   onUnlock,
 }: PrivacyModuleProps) {
+  const { t } = useI18n();
   const [state, setState] = useState<CalculatorState>({
     display: '0',
     previousValue: null,
@@ -129,7 +131,7 @@ export function IOSCalculator({
   }, []);
 
   const formatDisplay = useCallback((value: number): string => {
-    if (!isFinite(value)) return 'Error';
+    if (!isFinite(value)) return t.calculator.error;
     
     const absValue = Math.abs(value);
     if (absValue >= 1e9 || (absValue < 1e-8 && absValue !== 0)) {
@@ -151,7 +153,7 @@ export function IOSCalculator({
     }
     
     return str;
-  }, []);
+  }, [t.calculator.error]);
 
   const handleDigit = useCallback((digit: string) => {
     checkSecretSequence(digit);

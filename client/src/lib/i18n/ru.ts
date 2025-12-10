@@ -419,6 +419,18 @@ export const ru: Translations = {
     },
   },
   
+  calculator: {
+    title: "Калькулятор",
+    error: "Ошибка",
+  },
+
+  notepad: {
+    title: "Блокнот",
+    emptyNote: "Пустая заметка",
+    unsaved: "Не сохранено",
+    placeholder: "Начните вводить заметку...",
+  },
+
   game2048: {
     title: "2048",
     newGame: "Новая игра",

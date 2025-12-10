@@ -417,6 +417,18 @@ export const en = {
     },
   },
   
+  calculator: {
+    title: "Calculator",
+    error: "Error",
+  },
+
+  notepad: {
+    title: "Notepad",
+    emptyNote: "Empty note",
+    unsaved: "Unsaved",
+    placeholder: "Start typing your note...",
+  },
+
   game2048: {
     title: "2048",
     newGame: "New Game",
