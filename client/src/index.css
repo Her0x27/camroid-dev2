@@ -69,13 +69,14 @@
   --chart-4: 43 74% 55%;
   --chart-5: 27 87% 55%;
   
-  /* Gradient colors for buttons */
+  /* Gradient colors for buttons with transparency */
   --primary-dark: 142 70% 35%;
   --primary-light: 142 70% 50%;
-  --primary-gradient: linear-gradient(180deg, hsl(142 70% 50%) 0%, hsl(142 70% 40%) 100%);
-  --primary-gradient-hover: linear-gradient(180deg, hsl(142 70% 55%) 0%, hsl(142 70% 45%) 100%);
-  --chip-active-gradient: linear-gradient(180deg, hsl(142 70% 48%) 0%, hsl(142 70% 38%) 100%);
+  --primary-gradient: linear-gradient(135deg, hsla(142, 70%, 55%, 0.95) 0%, hsla(142, 70%, 40%, 0.85) 50%, hsla(142, 70%, 35%, 0.9) 100%);
+  --primary-gradient-hover: linear-gradient(135deg, hsla(142, 70%, 60%, 0.98) 0%, hsla(142, 70%, 45%, 0.9) 50%, hsla(142, 70%, 40%, 0.95) 100%);
+  --chip-active-gradient: linear-gradient(135deg, hsla(142, 70%, 52%, 0.9) 0%, hsla(142, 70%, 38%, 0.85) 50%, hsla(142, 70%, 32%, 0.88) 100%);
   --chip-inactive-bg: hsl(0 0% 15%);
+  --tab-active-gradient: linear-gradient(135deg, hsla(142, 70%, 50%, 0.9) 0%, hsla(142, 70%, 38%, 0.8) 50%, hsla(142, 70%, 32%, 0.85) 100%);
   
   /* Typography */
   --font-sans: 'Inter', system-ui, sans-serif;
@@ -143,10 +144,11 @@
   --primary-foreground: 0 0% 100%;
   --primary-dark: 142 70% 30%;
   --primary-light: 142 70% 48%;
-  --primary-gradient: linear-gradient(180deg, hsl(142 70% 48%) 0%, hsl(142 70% 35%) 100%);
-  --primary-gradient-hover: linear-gradient(180deg, hsl(142 70% 52%) 0%, hsl(142 70% 40%) 100%);
-  --chip-active-gradient: linear-gradient(180deg, hsl(142 70% 45%) 0%, hsl(142 70% 32%) 100%);
+  --primary-gradient: linear-gradient(135deg, hsla(142, 70%, 52%, 0.95) 0%, hsla(142, 70%, 38%, 0.85) 50%, hsla(142, 70%, 32%, 0.9) 100%);
+  --primary-gradient-hover: linear-gradient(135deg, hsla(142, 70%, 58%, 0.98) 0%, hsla(142, 70%, 42%, 0.9) 50%, hsla(142, 70%, 38%, 0.95) 100%);
+  --chip-active-gradient: linear-gradient(135deg, hsla(142, 70%, 48%, 0.9) 0%, hsla(142, 70%, 35%, 0.85) 50%, hsla(142, 70%, 28%, 0.88) 100%);
   --chip-inactive-bg: hsl(0 0% 92%);
+  --tab-active-gradient: linear-gradient(135deg, hsla(142, 70%, 45%, 0.9) 0%, hsla(142, 70%, 35%, 0.8) 50%, hsla(142, 70%, 28%, 0.85) 100%);
   --secondary: 0 0% 92%;
   --secondary-foreground: 0 0% 9%;
   --muted: 0 0% 90%;
@@ -472,5 +474,15 @@
   
   .light .chip-inactive:hover {
     background: hsl(0 0% 82%);
+  }
+  
+  /* Tab gradient styles */
+  .tab-gradient {
+    background: var(--tab-active-gradient);
+    transition: all 0.2s ease;
+  }
+  
+  .tab-gradient:hover:not(:disabled) {
+    background: var(--primary-gradient-hover);
   }
 }
