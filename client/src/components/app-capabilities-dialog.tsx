@@ -1,16 +1,9 @@
-import { useState, useEffect } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Camera,
   MapPin,
@@ -35,6 +28,7 @@ import {
   Palette,
   EyeClosed,
   Sparkles,
+  Bell,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -64,11 +58,11 @@ function DeviceInfoDisplay({ device }: { device: DeviceInfo }) {
   const Icon = device.isMobile ? Smartphone : Monitor;
   
   return (
-    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 p-3 bg-muted/50 rounded-lg">
-      <Icon className="h-4 w-4" />
+    <div className="flex items-center gap-2 text-xs text-muted-foreground p-2 bg-muted/30 rounded-md">
+      <Icon className="h-3.5 w-3.5" />
       <span>{device.os}</span>
       <span className="text-muted-foreground/50">•</span>
-      <Globe className="h-4 w-4" />
+      <Globe className="h-3.5 w-3.5" />
       <span>{device.browser}</span>
     </div>
   );
@@ -76,41 +70,41 @@ function DeviceInfoDisplay({ device }: { device: DeviceInfo }) {
 
 function PrivacySection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   return (
-    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
-      <h4 className="text-sm font-medium flex items-center gap-2">
-        <Shield className="h-4 w-4 text-primary" />
+    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-2">
+      <h4 className="text-xs font-medium flex items-center gap-2">
+        <Shield className="h-3.5 w-3.5 text-primary" />
         {t.capabilities.privacy.title}
       </h4>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-[11px] text-muted-foreground leading-relaxed">
         {t.capabilities.privacy.description}
       </p>
       
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="flex items-start gap-2">
-          <HardDrive className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+          <HardDrive className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
           <div>
-            <span className="text-sm font-medium">{t.capabilities.privacy.localStorageOnly}</span>
-            <p className="text-xs text-muted-foreground">
+            <span className="text-xs font-medium">{t.capabilities.privacy.localStorageOnly}</span>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
               {t.capabilities.privacy.localStorageOnlyDesc}
             </p>
           </div>
         </div>
         
         <div className="flex items-start gap-2">
-          <EyeOff className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+          <EyeOff className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
           <div>
-            <span className="text-sm font-medium">{t.capabilities.privacy.hiddenFromGallery}</span>
-            <p className="text-xs text-muted-foreground">
+            <span className="text-xs font-medium">{t.capabilities.privacy.hiddenFromGallery}</span>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
               {t.capabilities.privacy.hiddenFromGalleryDesc}
             </p>
           </div>
         </div>
         
         <div className="flex items-start gap-2">
-          <Lock className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+          <Lock className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
           <div>
-            <span className="text-sm font-medium">{t.capabilities.privacy.fullControl}</span>
-            <p className="text-xs text-muted-foreground">
+            <span className="text-xs font-medium">{t.capabilities.privacy.fullControl}</span>
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
               {t.capabilities.privacy.fullControlDesc}
             </p>
           </div>
@@ -125,14 +119,14 @@ function PlatformTip({ tipKey, t }: { tipKey: PlatformTipKey; t: ReturnType<type
   if (!tip) return null;
   
   return (
-    <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+    <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5">
       <div className="flex items-start gap-2">
-        <Lightbulb className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
+        <Lightbulb className="h-3.5 w-3.5 mt-0.5 text-amber-500 shrink-0" />
         <div>
-          <h4 className="text-sm font-medium text-amber-700 dark:text-amber-400">
+          <h4 className="text-xs font-medium text-amber-700 dark:text-amber-400">
             {t.capabilities.platformTips.title}
           </h4>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
             {tip}
           </p>
         </div>
@@ -155,21 +149,21 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.1,
+      staggerChildren: 0.06,
+      delayChildren: 0.05,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, x: -12 },
+  hidden: { opacity: 0, x: -8 },
   visible: { 
     opacity: 1, 
     x: 0,
     transition: {
       type: "spring",
-      stiffness: 300,
-      damping: 24,
+      stiffness: 400,
+      damping: 28,
     },
   },
 };
@@ -183,23 +177,23 @@ function FeatureItem({ feature, t }: {
   const descKey = `${feature.id}Desc` as keyof typeof t.capabilities.appFeatures;
   
   return (
-    <div className="group relative flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-200 cursor-default overflow-hidden">
-      <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${feature.color} opacity-60 group-hover:opacity-100 transition-opacity`} />
+    <div className="group relative flex items-center gap-2.5 p-2.5 rounded-md bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-200 cursor-default overflow-hidden">
+      <div className={`absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b ${feature.color} opacity-60 group-hover:opacity-100 transition-opacity`} />
       
-      <div className={`shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-sm`}>
-        <Icon className="h-4 w-4 text-white" />
+      <div className={`shrink-0 w-7 h-7 rounded-md bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-sm`}>
+        <Icon className="h-3.5 w-3.5 text-white" />
       </div>
       
       <div className="flex-1 min-w-0">
-        <span className="text-sm font-medium block truncate">
+        <span className="text-xs font-medium block truncate">
           {t.capabilities.appFeatures[titleKey]}
         </span>
-        <p className="text-xs text-muted-foreground line-clamp-1">
+        <p className="text-[11px] text-muted-foreground line-clamp-1">
           {t.capabilities.appFeatures[descKey]}
         </p>
       </div>
       
-      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+      <div className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
         style={{
           background: 'radial-gradient(circle at 20% 50%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
         }}
@@ -212,21 +206,21 @@ function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   const shouldReduceMotion = useReducedMotion();
   
   return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-        <Sparkles className="h-4 w-4 text-primary" />
+    <div className="space-y-2">
+      <h4 className="text-xs font-medium flex items-center gap-2 text-muted-foreground">
+        <Sparkles className="h-3.5 w-3.5 text-primary" />
         {t.capabilities.appFeaturesTitle}
       </h4>
       
       {shouldReduceMotion ? (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {appFeaturesList.map((feature) => (
             <FeatureItem key={feature.id} feature={feature} t={t} />
           ))}
         </div>
       ) : (
         <motion.div 
-          className="space-y-2"
+          className="space-y-1.5"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -242,35 +236,116 @@ function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   );
 }
 
+const panelVariants = {
+  hidden: { 
+    opacity: 0,
+    y: 20,
+    scale: 0.95,
+  },
+  visible: { 
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 25,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: 20,
+    scale: 0.95,
+    transition: {
+      duration: 0.2,
+      ease: "easeOut",
+    },
+  },
+};
+
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { duration: 0.2 },
+  },
+  exit: { 
+    opacity: 0,
+    transition: { duration: 0.15 },
+  },
+};
+
 export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
   const { t } = useI18n();
   const [capabilities, setCapabilities] = useState<AppCapabilities | null>(null);
   const [dontShowAgain, setDontShowAgain] = useState(true);
-  const [open, setOpen] = useState(true);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isExiting, setIsExiting] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const continueButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     checkAppCapabilities().then(setCapabilities);
   }, []);
 
-  const handleClose = () => {
+  useEffect(() => {
+    if (isVisible && closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+  }, [isVisible, capabilities]);
+
+  const handleExitComplete = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const initiateClose = useCallback(() => {
+    if (isExiting) return;
+    setIsExiting(true);
     if (dontShowAgain) {
       setDismissed(true);
     }
-    setOpen(false);
-    onClose();
-  };
+    setIsVisible(false);
+  }, [isExiting, dontShowAgain]);
 
-  const handleCloseAlways = () => {
-    setDismissed(true);
-    setOpen(false);
-    onClose();
-  };
+  const handleClose = useCallback(() => {
+    initiateClose();
+  }, [initiateClose]);
 
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      handleCloseAlways();
+  const handleCloseAlways = useCallback(() => {
+    initiateClose();
+  }, [initiateClose]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isVisible && !isExiting) {
+        e.preventDefault();
+        handleCloseAlways();
+      }
+      
+      if (e.key === 'Tab' && isVisible && panelRef.current) {
+        const focusableElements = panelRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0] as HTMLElement;
+        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+        
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement?.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    };
+    
+    if (isVisible) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
     }
-  };
+  }, [isVisible, isExiting, handleCloseAlways]);
 
   if (!capabilities) {
     return null;
@@ -280,127 +355,173 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
   const unsupportedCapabilities = capabilities.capabilities.filter(c => !c.supported);
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto" hideCloseButton>
-        <button
-          onClick={handleCloseAlways}
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
-        >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </button>
-        <DialogHeader>
-          <DialogTitle>{t.capabilities.title}</DialogTitle>
-          <DialogDescription>
-            {t.capabilities.description}
-          </DialogDescription>
-        </DialogHeader>
-
-        <DeviceInfoDisplay device={capabilities.device} />
-
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-            {t.capabilities.permissionsTitle}
-          </h3>
-          
-          {supportedCapabilities.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium text-green-600 dark:text-green-400 mb-2 flex items-center gap-1.5">
-                <Check className="h-4 w-4" />
-                {t.capabilities.supported}
-              </h4>
-              <ul className="space-y-3">
-                {supportedCapabilities.map((cap) => {
-                  const Icon = capabilityIcons[cap.id] || Check;
-                  const noteKey = cap.note as keyof typeof t.capabilities.notes | undefined;
-                  const descKey = cap.id as keyof typeof t.capabilities.descriptions;
-                  return (
-                    <li key={cap.id} className="flex items-start gap-2 text-sm">
-                      <Icon className="h-4 w-4 mt-0.5 text-green-600 dark:text-green-400 shrink-0" />
-                      <div>
-                        <span className="font-medium">{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
-                        {t.capabilities.descriptions[descKey] && (
-                          <span className="text-muted-foreground text-xs block">
-                            {t.capabilities.descriptions[descKey]}
-                          </span>
-                        )}
-                        {noteKey && t.capabilities.notes[noteKey] && (
-                          <span className="text-amber-600 dark:text-amber-400 text-xs block mt-0.5">
-                            {t.capabilities.notes[noteKey]}
-                          </span>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-
-          {unsupportedCapabilities.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium text-destructive mb-2 flex items-center gap-1.5">
-                <X className="h-4 w-4" />
-                {t.capabilities.notSupported}
-              </h4>
-              <ul className="space-y-3">
-                {unsupportedCapabilities.map((cap) => {
-                  const Icon = capabilityIcons[cap.id] || X;
-                  const noteKey = cap.note as keyof typeof t.capabilities.notes | undefined;
-                  const descKey = cap.id as keyof typeof t.capabilities.descriptions;
-                  return (
-                    <li key={cap.id} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Icon className="h-4 w-4 mt-0.5 shrink-0" />
-                      <div>
-                        <span>{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
-                        {t.capabilities.descriptions[descKey] && (
-                          <span className="text-xs block">
-                            {t.capabilities.descriptions[descKey]}
-                          </span>
-                        )}
-                        {noteKey && t.capabilities.notes[noteKey] && (
-                          <span className="text-xs block mt-0.5">
-                            {t.capabilities.notes[noteKey]}
-                          </span>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+    <AnimatePresence onExitComplete={handleExitComplete}>
+      {isVisible && (
+        <>
+          {shouldReduceMotion ? (
+            <div
+              className="fixed inset-0 bg-black/40 z-50"
+              onClick={handleCloseAlways}
+              aria-hidden="true"
+            />
+          ) : (
+            <motion.div
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+              variants={backdropVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={handleCloseAlways}
+              aria-hidden="true"
+            />
           )}
           
-          <AppFeaturesSection t={t} />
-          
-          <PrivacySection t={t} />
-          
-          {capabilities.platformTip && (
-            <PlatformTip tipKey={capabilities.platformTip} t={t} />
-          )}
-        </div>
-
-        <div className="flex items-center space-x-2 pt-2 border-t">
-          <Checkbox
-            id="dont-show-again"
-            checked={dontShowAgain}
-            onCheckedChange={(checked) => setDontShowAgain(checked === true)}
-          />
-          <Label
-            htmlFor="dont-show-again"
-            className="text-sm text-muted-foreground cursor-pointer"
+          <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="capabilities-title"
+            aria-describedby="capabilities-description"
+            className="fixed inset-x-4 bottom-4 md:inset-auto md:right-4 md:bottom-4 md:w-[420px] z-50"
+            variants={shouldReduceMotion ? {} : panelVariants}
+            initial={shouldReduceMotion ? { opacity: 1 } : "hidden"}
+            animate={shouldReduceMotion ? { opacity: 1 } : "visible"}
+            exit={shouldReduceMotion ? { opacity: 0 } : "exit"}
           >
-            {t.capabilities.dontShowAgain}
-          </Label>
-        </div>
+            <div className="relative bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-2xl shadow-black/20 overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+              
+              <div className="flex items-center justify-between p-4 border-b border-border/40">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                    <Bell className="h-4.5 w-4.5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 id="capabilities-title" className="text-sm font-semibold">{t.capabilities.title}</h2>
+                    <p id="capabilities-description" className="text-[11px] text-muted-foreground">{t.capabilities.description}</p>
+                  </div>
+                </div>
+                <button
+                  ref={closeButtonRef}
+                  onClick={handleCloseAlways}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted/80 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4 text-muted-foreground" />
+                </button>
+              </div>
 
-        <DialogFooter>
-          <Button onClick={handleClose} className="w-full">
-            {t.capabilities.continue}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+              <ScrollArea className="max-h-[60vh] md:max-h-[70vh]">
+                <div className="p-4 space-y-4">
+                  <DeviceInfoDisplay device={capabilities.device} />
+
+                  <div className="space-y-3">
+                    <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                      {t.capabilities.permissionsTitle}
+                    </h3>
+                    
+                    {supportedCapabilities.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium text-green-600 dark:text-green-400 mb-1.5 flex items-center gap-1.5">
+                          <Check className="h-3.5 w-3.5" />
+                          {t.capabilities.supported}
+                        </h4>
+                        <ul className="space-y-2">
+                          {supportedCapabilities.map((cap) => {
+                            const Icon = capabilityIcons[cap.id] || Check;
+                            const noteKey = cap.note as keyof typeof t.capabilities.notes | undefined;
+                            const descKey = cap.id as keyof typeof t.capabilities.descriptions;
+                            return (
+                              <li key={cap.id} className="flex items-start gap-2 text-xs">
+                                <Icon className="h-3.5 w-3.5 mt-0.5 text-green-600 dark:text-green-400 shrink-0" />
+                                <div>
+                                  <span className="font-medium">{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
+                                  {t.capabilities.descriptions[descKey] && (
+                                    <span className="text-muted-foreground text-[11px] block leading-relaxed">
+                                      {t.capabilities.descriptions[descKey]}
+                                    </span>
+                                  )}
+                                  {noteKey && t.capabilities.notes[noteKey] && (
+                                    <span className="text-amber-600 dark:text-amber-400 text-[11px] block mt-0.5">
+                                      {t.capabilities.notes[noteKey]}
+                                    </span>
+                                  )}
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
+
+                    {unsupportedCapabilities.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium text-destructive mb-1.5 flex items-center gap-1.5">
+                          <X className="h-3.5 w-3.5" />
+                          {t.capabilities.notSupported}
+                        </h4>
+                        <ul className="space-y-2">
+                          {unsupportedCapabilities.map((cap) => {
+                            const Icon = capabilityIcons[cap.id] || X;
+                            const noteKey = cap.note as keyof typeof t.capabilities.notes | undefined;
+                            const descKey = cap.id as keyof typeof t.capabilities.descriptions;
+                            return (
+                              <li key={cap.id} className="flex items-start gap-2 text-xs text-muted-foreground">
+                                <Icon className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                                <div>
+                                  <span>{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
+                                  {t.capabilities.descriptions[descKey] && (
+                                    <span className="text-[11px] block leading-relaxed">
+                                      {t.capabilities.descriptions[descKey]}
+                                    </span>
+                                  )}
+                                  {noteKey && t.capabilities.notes[noteKey] && (
+                                    <span className="text-[11px] block mt-0.5">
+                                      {t.capabilities.notes[noteKey]}
+                                    </span>
+                                  )}
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <AppFeaturesSection t={t} />
+                  
+                  <PrivacySection t={t} />
+                  
+                  {capabilities.platformTip && (
+                    <PlatformTip tipKey={capabilities.platformTip} t={t} />
+                  )}
+                </div>
+              </ScrollArea>
+
+              <div className="p-4 border-t border-border/40 bg-muted/20">
+                <div className="flex items-center space-x-2 mb-3">
+                  <Checkbox
+                    id="dont-show-again"
+                    checked={dontShowAgain}
+                    onCheckedChange={(checked) => setDontShowAgain(checked === true)}
+                  />
+                  <Label
+                    htmlFor="dont-show-again"
+                    className="text-xs text-muted-foreground cursor-pointer"
+                  >
+                    {t.capabilities.dontShowAgain}
+                  </Label>
+                </div>
+                <Button ref={continueButtonRef} onClick={handleClose} className="w-full h-9 text-sm">
+                  {t.capabilities.continue}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
 
