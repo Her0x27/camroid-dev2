@@ -34,7 +34,7 @@ export const CameraControls = memo(function CameraControls({
   cloudCount,
 }: CameraControlsProps) {
   return (
-    <div className="safe-bottom z-10">
+    <div className="safe-bottom absolute inset-x-0 bottom-0 z-20">
       <div className="relative flex items-center justify-center px-[5%] py-3 h-24">
         <CaptureButton
           onCapture={onCapture}
