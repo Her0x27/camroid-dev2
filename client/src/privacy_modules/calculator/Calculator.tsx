@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useRef, memo } from "react";
+import { useState, useCallback, useEffect, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useSecretGesture } from "@/hooks/use-secret-gesture";
 import { PatternOverlay } from "@/components/pattern-overlay";
 import { usePWABanner } from "@/hooks/use-pwa-banner";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
+import { createSequenceChecker } from "./unlock-logic";
 import type { PrivacyModuleProps } from "../types";
 
 type Operation = '+' | '-' | '*' | '/' | null;
@@ -72,8 +73,10 @@ export function Calculator({
     inputSequence: '',
   });
 
-  const inputSequenceRef = useRef<string>('');
-  const sequenceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sequenceChecker = useMemo(
+    () => createSequenceChecker(unlockValue || '', 3000),
+    [unlockValue]
+  );
 
   const {
     showPatternOverlay,
@@ -87,38 +90,18 @@ export function Calculator({
 
   const checkSecretSequence = useCallback((newChar: string) => {
     if (!unlockValue || !onUnlock) return;
-
-    if (sequenceTimeoutRef.current) {
-      clearTimeout(sequenceTimeoutRef.current);
-    }
-
-    inputSequenceRef.current += newChar;
-
-    if (inputSequenceRef.current === unlockValue) {
-      inputSequenceRef.current = '';
+    
+    const unlocked = sequenceChecker.check(newChar);
+    if (unlocked) {
       onUnlock();
-      return;
     }
-
-    if (!unlockValue.startsWith(inputSequenceRef.current)) {
-      inputSequenceRef.current = newChar;
-      if (!unlockValue.startsWith(inputSequenceRef.current)) {
-        inputSequenceRef.current = '';
-      }
-    }
-
-    sequenceTimeoutRef.current = setTimeout(() => {
-      inputSequenceRef.current = '';
-    }, 3000);
-  }, [unlockValue, onUnlock]);
+  }, [unlockValue, onUnlock, sequenceChecker]);
 
   useEffect(() => {
     return () => {
-      if (sequenceTimeoutRef.current) {
-        clearTimeout(sequenceTimeoutRef.current);
-      }
+      sequenceChecker.reset();
     };
-  }, []);
+  }, [sequenceChecker]);
 
   const calculate = useCallback((prev: number, current: number, op: Operation): number => {
     switch (op) {

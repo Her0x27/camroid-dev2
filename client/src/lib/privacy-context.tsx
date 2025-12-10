@@ -34,7 +34,7 @@ const UNLOCKED_KEY = "privacy-unlocked";
 const FAVICON_CAMERA = "/favicon.svg";
 const TITLE_CAMERA = "Camroid M";
 
-function configToSettings(config: DynamicConfig): PrivacySettings {
+export function configToSettings(config: DynamicConfig): PrivacySettings {
   return {
     enabled: config.PRIVACY_MODE,
     gestureType: config.UNLOCK_GESTURE,

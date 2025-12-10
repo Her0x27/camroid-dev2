@@ -1,3 +1,94 @@
+# Upgrade: Тесты Privacy Modules (v10)
+
+## Описание
+Создание unit-тестов для системы модулей приватности с использованием vitest:
+- Тесты PrivacyModuleRegistry (регистрация, получение модулей)
+- Тесты логики разблокировки Calculator (sequence unlock)
+- Тесты логики разблокировки Notepad (phrase unlock)
+- Тесты функций privacy-context
+
+## Чек-лист задач
+
+### 1. Настройка тестового окружения
+- [x] Создать `vitest.config.ts` — конфигурация vitest
+- [x] Создать `client/src/__tests__/setup.ts` — моки localStorage и config-loader
+- [x] Добавить скрипты `test`, `test:watch`, `test:coverage` в package.json
+
+### 2. Тесты PrivacyModuleRegistry (17 тестов)
+- [x] Тест `register()` — регистрация модуля
+- [x] Тест `get()` — получение модуля по id
+- [x] Тест `getDefault()` — получение дефолтного модуля
+- [x] Тест `getAll()` — получение всех модулей
+- [x] Тест `has()` — проверка наличия модуля
+- [x] Тест `setDefaultId()` — установка дефолтного модуля
+
+### 3. Тесты Calculator unlock logic (13 тестов)
+- [x] Тест `checkSecretSequence` — корректная последовательность
+- [x] Тест частичного совпадения последовательности
+- [x] Тест таймаута сброса последовательности (3 сек)
+- [x] Тесты edge cases (пустое значение, один символ)
+
+### 4. Тесты Notepad unlock logic (16 тестов)
+- [x] Тест `checkSecretPhrase` — обнаружение секретной фразы
+- [x] Тест debounce при вводе текста (500мс)
+- [x] Тест отмены предыдущего таймаута
+- [x] Тесты edge cases (unicode, спецсимволы, многословные фразы)
+
+### 5. Тесты privacy-context (13 тестов)
+- [x] Тест `loadPrivacySettings` — загрузка настроек
+- [x] Тест `configToSettings` — преобразование конфига
+- [x] Тест слияния настроек из localStorage
+- [x] Тест валидации настроек
+
+---
+
+## Прогресс v10
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| Настройка тестового окружения | ✅ Готово | 10.12.2025 |
+| Тесты PrivacyModuleRegistry | ✅ Готово | 10.12.2025 |
+| Тесты Calculator | ✅ Готово | 10.12.2025 |
+| Тесты Notepad | ✅ Готово | 10.12.2025 |
+| Тесты privacy-context | ✅ Готово | 10.12.2025 |
+
+## Результаты тестирования
+
+```
+ Test Files  5 passed (5)
+      Tests  90 passed (90)
+```
+
+### Команды для запуска тестов
+
+| Команда | Описание |
+|---------|----------|
+| `npm run test` | Однократный запуск всех тестов |
+| `npm run test:watch` | Запуск в watch-режиме |
+| `npm run test:coverage` | Запуск с отчётом о покрытии |
+
+---
+
+## Структура тестов
+
+```
+client/src/
+├── __tests__/
+│   ├── setup.ts                           # Настройка тестового окружения
+│   └── privacy_modules/
+│       ├── registry.test.ts               # Тесты PrivacyModuleRegistry
+│       ├── calculator-unlock.test.ts      # Тесты логики разблокировки калькулятора
+│       ├── notepad-unlock.test.ts         # Тесты логики разблокировки блокнота
+│       └── privacy-context.test.ts        # Тесты контекста приватности
+└── privacy_modules/
+    ├── calculator/
+    │   └── unlock-logic.ts                # Экспортируемая логика разблокировки
+    └── notepad/
+        └── unlock-logic.ts                # Экспортируемая логика разблокировки
+```
+
+---
+
 # Upgrade: Go Backend Integration (v8)
 
 ## Описание

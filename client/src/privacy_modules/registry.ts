@@ -29,6 +29,12 @@ class PrivacyModuleRegistry {
   has(id: string): boolean {
     return this.modules.has(id);
   }
+
+  clear(): void {
+    this.modules.clear();
+    this.defaultId = 'game-2048';
+  }
 }
 
 export const privacyModuleRegistry = new PrivacyModuleRegistry();
+export { PrivacyModuleRegistry };

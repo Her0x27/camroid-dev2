@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, memo } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import { useSecretGesture } from "@/hooks/use-secret-gesture";
 import { PatternOverlay } from "@/components/pattern-overlay";
 import { usePWABanner } from "@/hooks/use-pwa-banner";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
+import { createPhraseChecker } from "./unlock-logic";
 import type { PrivacyModuleProps } from "../types";
 
 interface Note {
@@ -122,7 +123,11 @@ export function Notepad({
   const [isSaved, setIsSaved] = useState(true);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const secretCheckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const phraseChecker = useMemo(
+    () => createPhraseChecker(unlockValue || '', onUnlock || (() => {}), 500),
+    [unlockValue, onUnlock]
+  );
 
   const {
     showPatternOverlay,
@@ -153,25 +158,14 @@ export function Notepad({
 
   const checkSecretPhrase = useCallback((text: string) => {
     if (!unlockValue || !onUnlock) return;
-
-    if (secretCheckTimeoutRef.current) {
-      clearTimeout(secretCheckTimeoutRef.current);
-    }
-
-    secretCheckTimeoutRef.current = setTimeout(() => {
-      if (text.includes(unlockValue)) {
-        onUnlock();
-      }
-    }, 500);
-  }, [unlockValue, onUnlock]);
+    phraseChecker.check(text);
+  }, [unlockValue, onUnlock, phraseChecker]);
 
   useEffect(() => {
     return () => {
-      if (secretCheckTimeoutRef.current) {
-        clearTimeout(secretCheckTimeoutRef.current);
-      }
+      phraseChecker.cleanup();
     };
-  }, []);
+  }, [phraseChecker]);
 
   const handleContentChange = useCallback((newContent: string) => {
     setContent(newContent);
