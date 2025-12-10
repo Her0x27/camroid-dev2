@@ -4,6 +4,15 @@ export interface DeviceInfo {
   isMobile: boolean;
 }
 
+export type PlatformTipKey = 
+  | 'iosSafari' 
+  | 'iosChrome' 
+  | 'androidChrome' 
+  | 'androidFirefox' 
+  | 'desktopChrome' 
+  | 'desktopFirefox' 
+  | 'desktopSafari';
+
 export interface AppCapability {
   id: string;
   supported: boolean;
@@ -13,6 +22,7 @@ export interface AppCapability {
 export interface AppCapabilities {
   device: DeviceInfo;
   capabilities: AppCapability[];
+  platformTip?: PlatformTipKey;
 }
 
 export function getDeviceInfo(): DeviceInfo {
@@ -73,10 +83,16 @@ export async function checkAppCapabilities(): Promise<AppCapabilities> {
   const hasOrientation = 'DeviceOrientationEvent' in window;
   const needsPermission = device.os === 'iOS' && 
     typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission === 'function';
+  let orientationNote: string | undefined;
+  if (needsPermission) {
+    orientationNote = 'iosOrientationPermission';
+  } else if (!device.isMobile) {
+    orientationNote = 'desktopNoOrientation';
+  }
   capabilities.push({
     id: 'orientation',
-    supported: hasOrientation,
-    note: needsPermission ? 'requiresPermission' : undefined,
+    supported: hasOrientation && device.isMobile,
+    note: orientationNote,
   });
   
   let hasStabilization = false;
@@ -89,10 +105,16 @@ export async function checkAppCapabilities(): Promise<AppCapabilities> {
       hasStabilization = false;
     }
   }
+  let stabNote: string | undefined;
+  if (device.os === 'iOS') {
+    stabNote = 'limitedOnIOS';
+  } else if (device.os === 'Android' && device.browser === 'Firefox') {
+    stabNote = 'androidFirefoxStab';
+  }
   capabilities.push({
     id: 'stabilization',
     supported: hasStabilization,
-    note: device.os === 'iOS' ? 'limitedOnIOS' : undefined,
+    note: stabNote,
   });
   
   const hasIndexedDB = 'indexedDB' in window;
@@ -130,7 +152,33 @@ export async function checkAppCapabilities(): Promise<AppCapabilities> {
     supported: hasCloudUpload,
   });
   
-  return { device, capabilities };
+  const platformTip = getPlatformTip(device);
+  
+  return { device, capabilities, platformTip };
+}
+
+function getPlatformTip(device: DeviceInfo): PlatformTipKey | undefined {
+  const { os, browser, isMobile } = device;
+  
+  if (os === 'iOS') {
+    if (browser === 'Safari') return 'iosSafari';
+    if (browser === 'Chrome') return 'iosChrome';
+    return 'iosSafari';
+  }
+  
+  if (os === 'Android') {
+    if (browser === 'Chrome' || browser === 'Samsung' || browser === 'Edge') return 'androidChrome';
+    if (browser === 'Firefox') return 'androidFirefox';
+    return 'androidChrome';
+  }
+  
+  if (!isMobile) {
+    if (browser === 'Safari') return 'desktopSafari';
+    if (browser === 'Firefox') return 'desktopFirefox';
+    return 'desktopChrome';
+  }
+  
+  return undefined;
 }
 
 const STORAGE_KEY = 'app-capabilities-dialog-dismissed';

@@ -23,6 +23,10 @@ import {
   Smartphone,
   Monitor,
   Globe,
+  Shield,
+  EyeOff,
+  Lock,
+  Lightbulb,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -31,6 +35,7 @@ import {
   setDismissed,
   type AppCapabilities,
   type DeviceInfo,
+  type PlatformTipKey,
 } from "@/lib/app-capabilities";
 
 interface AppCapabilitiesDialogProps {
@@ -61,6 +66,73 @@ function DeviceInfoDisplay({ device }: { device: DeviceInfo }) {
   );
 }
 
+function PrivacySection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
+  return (
+    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-3">
+      <h4 className="text-sm font-medium flex items-center gap-2">
+        <Shield className="h-4 w-4 text-primary" />
+        {t.capabilities.privacy.title}
+      </h4>
+      <p className="text-xs text-muted-foreground">
+        {t.capabilities.privacy.description}
+      </p>
+      
+      <div className="space-y-3">
+        <div className="flex items-start gap-2">
+          <HardDrive className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+          <div>
+            <span className="text-sm font-medium">{t.capabilities.privacy.localStorageOnly}</span>
+            <p className="text-xs text-muted-foreground">
+              {t.capabilities.privacy.localStorageOnlyDesc}
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-start gap-2">
+          <EyeOff className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+          <div>
+            <span className="text-sm font-medium">{t.capabilities.privacy.hiddenFromGallery}</span>
+            <p className="text-xs text-muted-foreground">
+              {t.capabilities.privacy.hiddenFromGalleryDesc}
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-start gap-2">
+          <Lock className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+          <div>
+            <span className="text-sm font-medium">{t.capabilities.privacy.fullControl}</span>
+            <p className="text-xs text-muted-foreground">
+              {t.capabilities.privacy.fullControlDesc}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlatformTip({ tipKey, t }: { tipKey: PlatformTipKey; t: ReturnType<typeof useI18n>['t'] }) {
+  const tip = t.capabilities.platformTips[tipKey];
+  if (!tip) return null;
+  
+  return (
+    <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+      <div className="flex items-start gap-2">
+        <Lightbulb className="h-4 w-4 mt-0.5 text-amber-500 shrink-0" />
+        <div>
+          <h4 className="text-sm font-medium text-amber-700 dark:text-amber-400">
+            {t.capabilities.platformTips.title}
+          </h4>
+          <p className="text-xs text-muted-foreground mt-1">
+            {tip}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
   const { t } = useI18n();
   const [capabilities, setCapabilities] = useState<AppCapabilities | null>(null);
@@ -79,9 +151,15 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
     onClose();
   };
 
+  const handleCloseAlways = () => {
+    setDismissed(true);
+    setOpen(false);
+    onClose();
+  };
+
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      handleClose();
+      handleCloseAlways();
     }
   };
 
@@ -111,17 +189,23 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
                 <Check className="h-4 w-4" />
                 {t.capabilities.supported}
               </h4>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {supportedCapabilities.map((cap) => {
                   const Icon = capabilityIcons[cap.id] || Check;
                   const noteKey = cap.note as keyof typeof t.capabilities.notes | undefined;
+                  const descKey = cap.id as keyof typeof t.capabilities.descriptions;
                   return (
                     <li key={cap.id} className="flex items-start gap-2 text-sm">
                       <Icon className="h-4 w-4 mt-0.5 text-green-600 dark:text-green-400 shrink-0" />
                       <div>
-                        <span>{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
-                        {noteKey && t.capabilities.notes[noteKey] && (
+                        <span className="font-medium">{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
+                        {t.capabilities.descriptions[descKey] && (
                           <span className="text-muted-foreground text-xs block">
+                            {t.capabilities.descriptions[descKey]}
+                          </span>
+                        )}
+                        {noteKey && t.capabilities.notes[noteKey] && (
+                          <span className="text-amber-600 dark:text-amber-400 text-xs block mt-0.5">
                             {t.capabilities.notes[noteKey]}
                           </span>
                         )}
@@ -139,18 +223,38 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
                 <X className="h-4 w-4" />
                 {t.capabilities.notSupported}
               </h4>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {unsupportedCapabilities.map((cap) => {
                   const Icon = capabilityIcons[cap.id] || X;
+                  const noteKey = cap.note as keyof typeof t.capabilities.notes | undefined;
+                  const descKey = cap.id as keyof typeof t.capabilities.descriptions;
                   return (
-                    <li key={cap.id} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span>{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
+                    <li key={cap.id} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Icon className="h-4 w-4 mt-0.5 shrink-0" />
+                      <div>
+                        <span>{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
+                        {t.capabilities.descriptions[descKey] && (
+                          <span className="text-xs block">
+                            {t.capabilities.descriptions[descKey]}
+                          </span>
+                        )}
+                        {noteKey && t.capabilities.notes[noteKey] && (
+                          <span className="text-xs block mt-0.5">
+                            {t.capabilities.notes[noteKey]}
+                          </span>
+                        )}
+                      </div>
                     </li>
                   );
                 })}
               </ul>
             </div>
+          )}
+          
+          <PrivacySection t={t} />
+          
+          {capabilities.platformTip && (
+            <PlatformTip tipKey={capabilities.platformTip} t={t} />
           )}
         </div>
 
