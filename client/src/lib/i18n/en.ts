@@ -438,6 +438,29 @@ export const en = {
     description: "The page you're looking for doesn't exist or has been moved.",
   },
   
+  capabilities: {
+    title: "App Capabilities",
+    description: "Here's what this app can do on your device and browser.",
+    supported: "Available",
+    notSupported: "Not Available",
+    dontShowAgain: "Don't show this again",
+    continue: "Continue",
+    features: {
+      camera: "Camera access",
+      geolocation: "GPS location",
+      orientation: "Compass & tilt sensor",
+      stabilization: "Image stabilization",
+      localStorage: "Local photo storage",
+      pwa: "Install as app",
+      cloudUpload: "Cloud upload",
+    },
+    notes: {
+      requiresPermission: "Requires permission on first use",
+      limitedOnIOS: "Limited support on iOS",
+      addToHomeScreen: "Use 'Add to Home Screen' in Safari",
+    },
+  },
+
   components: {
     badges: {
       note: "Note",

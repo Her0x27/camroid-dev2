@@ -23,6 +23,7 @@ import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { CameraControls, PhotoNoteDialog, CameraViewfinder } from "./components";
+import { AppCapabilitiesDialog, useAppCapabilitiesDialog } from "@/components/app-capabilities-dialog";
 import { CAMERA } from "@/lib/constants";
 import type { ReticlePosition } from "@shared/schema";
 
@@ -39,6 +40,7 @@ export default function CameraPage() {
   const [lastPhotoId, setLastPhotoId] = useState<string | null>(null);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
+  const { showDialog: showCapabilitiesDialog, closeDialog: closeCapabilitiesDialog } = useAppCapabilitiesDialog();
   
   const {
     isCapturing,
@@ -506,6 +508,10 @@ export default function CameraPage() {
         note={currentNote}
         onNoteChange={setCurrentNote}
       />
+
+      {showCapabilitiesDialog && (
+        <AppCapabilitiesDialog onClose={closeCapabilitiesDialog} />
+      )}
     </div>
   );
 }
