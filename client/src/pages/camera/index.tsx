@@ -140,8 +140,10 @@ export default function CameraPage() {
   }, []);
 
   useEffect(() => {
-    startCamera();
-  }, [startCamera]);
+    if (!showCapabilitiesDialog) {
+      startCamera();
+    }
+  }, [startCamera, showCapabilitiesDialog]);
 
   const handleRequestPermissions = useCallback(async () => {
     if (settings.orientationEnabled && orientationSupported) {
@@ -484,6 +486,7 @@ export default function CameraPage() {
         onAdjustmentPositionChange={updatePosition}
         onAdjustmentConfirm={handleAdjustmentConfirm}
         onAdjustmentCancel={cancelAdjustment}
+        showPlaceholder={showCapabilitiesDialog}
       />
 
       <CameraControls

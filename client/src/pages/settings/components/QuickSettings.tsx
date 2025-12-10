@@ -27,20 +27,20 @@ const QuickSettingButton = memo(function QuickSettingButton({
     <button
       onClick={handleClick}
       className={cn(
-        "flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-lg transition-all touch-manipulation",
+        "flex flex-col items-center justify-center gap-1 py-2 px-1.5 rounded-md transition-all touch-manipulation",
         "active:scale-95 select-none w-full border",
         active
-          ? "bg-primary/15 text-primary border-primary/50 shadow-[0_0_12px_hsl(var(--primary)/0.2)]"
+          ? "bg-primary/15 text-primary border-primary/50 shadow-[0_0_8px_hsl(var(--primary)/0.15)]"
           : "bg-card/50 text-muted-foreground border-border/50 hover:bg-muted/50 hover:border-border"
       )}
     >
       <div className={cn(
-        "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+        "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
         active ? "bg-primary/20" : "bg-muted/50"
       )}>
         {icon}
       </div>
-      <span className="text-[11px] font-medium truncate">{label}</span>
+      <span className="text-[10px] font-medium truncate max-w-full">{label}</span>
     </button>
   );
 });
@@ -67,37 +67,37 @@ export const QuickSettings = memo(function QuickSettings({
   return (
     <div className="grid grid-cols-3 gap-2">
       <QuickSettingButton
-        icon={<Target className="w-4 h-4" />}
+        icon={<Target className="w-3.5 h-3.5" />}
         label={t.settings.quickSettings.stabilization}
         active={settings.stabilization?.enabled ?? false}
         onClick={() => updateStabilization({ enabled: !settings.stabilization?.enabled })}
       />
       <QuickSettingButton
-        icon={<MapPin className="w-4 h-4" />}
+        icon={<MapPin className="w-3.5 h-3.5" />}
         label={t.settings.quickSettings.gps}
         active={settings.gpsEnabled}
         onClick={() => updateSettings({ gpsEnabled: !settings.gpsEnabled })}
       />
       <QuickSettingButton
-        icon={settings.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+        icon={settings.soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
         label={t.settings.quickSettings.sound}
         active={settings.soundEnabled}
         onClick={() => updateSettings({ soundEnabled: !settings.soundEnabled })}
       />
       <QuickSettingButton
-        icon={theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+        icon={theme === "dark" ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
         label={t.settings.quickSettings.theme}
         active={theme === "dark"}
         onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       />
       <QuickSettingButton
-        icon={<Palette className="w-4 h-4" />}
+        icon={<Palette className="w-3.5 h-3.5" />}
         label={t.settings.quickSettings.autoColor}
         active={settings.reticle?.autoColor ?? true}
         onClick={() => updateReticle({ autoColor: !settings.reticle?.autoColor })}
       />
       <QuickSettingButton
-        icon={<Move className="w-4 h-4" />}
+        icon={<Move className="w-3.5 h-3.5" />}
         label={t.settings.quickSettings.adjustment}
         active={settings.reticle?.manualAdjustment ?? false}
         onClick={() => updateReticle({ manualAdjustment: !settings.reticle?.manualAdjustment })}

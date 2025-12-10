@@ -258,9 +258,13 @@ function SettingsPageContent() {
     system: (
       <>
         <AnimatedItem>
-          <ThemeSection
-            isOpen={isSectionOpen("theme")}
-            onOpenChange={createSectionHandler("theme")}
+          <PrivacySection
+            privacySettings={privacySettings}
+            updatePrivacySettings={updatePrivacySettings}
+            onShowPatternSetup={patternSetup.openPatternSetup}
+            t={t}
+            isOpen={isSectionOpen("privacy")}
+            onOpenChange={createSectionHandler("privacy")}
           />
         </AnimatedItem>
         <AnimatedItem>
@@ -276,13 +280,9 @@ function SettingsPageContent() {
           />
         </AnimatedItem>
         <AnimatedItem>
-          <PrivacySection
-            privacySettings={privacySettings}
-            updatePrivacySettings={updatePrivacySettings}
-            onShowPatternSetup={patternSetup.openPatternSetup}
-            t={t}
-            isOpen={isSectionOpen("privacy")}
-            onOpenChange={createSectionHandler("privacy")}
+          <ThemeSection
+            isOpen={isSectionOpen("theme")}
+            onOpenChange={createSectionHandler("theme")}
           />
         </AnimatedItem>
         <AnimatedItem>

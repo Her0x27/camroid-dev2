@@ -490,8 +490,8 @@ export const ru: Translations = {
   },
   
   capabilities: {
-    title: "Возможности приложения",
-    description: "Вот что это приложение может делать на вашем устройстве и браузере.",
+    title: "Добро пожаловать",
+    description: "Это приложение для приватной съёмки с GPS и расширенными возможностями.",
     supported: "Доступно",
     notSupported: "Недоступно",
     dontShowAgain: "Не показывать это окно",

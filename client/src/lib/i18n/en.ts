@@ -488,8 +488,8 @@ export const en = {
   },
   
   capabilities: {
-    title: "App Capabilities",
-    description: "Here's what this app can do on your device and browser.",
+    title: "Welcome",
+    description: "A private camera app with GPS and advanced features.",
     supported: "Available",
     notSupported: "Not Available",
     dontShowAgain: "Don't show this again",

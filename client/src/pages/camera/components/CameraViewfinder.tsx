@@ -117,6 +117,7 @@ interface CameraViewfinderProps {
   onAdjustmentPositionChange?: (position: ReticlePosition) => void;
   onAdjustmentConfirm?: () => void;
   onAdjustmentCancel?: () => void;
+  showPlaceholder?: boolean;
 }
 
 export const CameraViewfinder = memo(function CameraViewfinder({
@@ -144,6 +145,7 @@ export const CameraViewfinder = memo(function CameraViewfinder({
   onAdjustmentPositionChange,
   onAdjustmentConfirm,
   onAdjustmentCancel,
+  showPlaceholder,
 }: CameraViewfinderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [tempPosition, setTempPosition] = useState<ReticlePosition | null>(null);
@@ -307,8 +309,9 @@ export const CameraViewfinder = memo(function CameraViewfinder({
         />
       )}
 
-      {isLoading && !adjustmentMode && <LoadingOverlay />}
-      {error && !adjustmentMode && <ErrorOverlay error={error} onRetry={onRetry} />}
+      {showPlaceholder && !adjustmentMode && <PlaceholderOverlay />}
+      {isLoading && !adjustmentMode && !showPlaceholder && <LoadingOverlay />}
+      {error && !adjustmentMode && !showPlaceholder && <ErrorOverlay error={error} onRetry={onRetry} />}
 
       <div className="absolute inset-0 viewfinder-overlay pointer-events-none" />
 
@@ -379,6 +382,18 @@ const AdjustmentControls = memo(function AdjustmentControls({ onConfirm, onCance
       >
         <Check className="w-7 h-7" />
       </button>
+    </div>
+  );
+});
+
+const PlaceholderOverlay = memo(function PlaceholderOverlay() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-black">
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative w-20 h-20 rounded-full bg-muted/20 border border-border/30 flex items-center justify-center">
+          <Camera className="w-10 h-10 text-muted-foreground/50" />
+        </div>
+      </div>
     </div>
   );
 });
