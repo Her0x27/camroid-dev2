@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import * as Sentry from "@sentry/react";
 import App from "./App";
 import { logger } from "@/lib/logger";
+import { initPWA } from "@/lib/pwa";
 import "./index.css";
 
 const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN;
@@ -81,40 +82,7 @@ if ('serviceWorker' in navigator) {
   }
 }
 
-let deferredInstallPrompt: BeforeInstallPromptEvent | null = null;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredInstallPrompt = e as BeforeInstallPromptEvent;
-  window.dispatchEvent(new CustomEvent('pwaInstallAvailable'));
-});
-
-window.addEventListener('appinstalled', () => {
-  deferredInstallPrompt = null;
-  window.dispatchEvent(new CustomEvent('pwaInstalled'));
-});
-
-export function canInstallPWA(): boolean {
-  return deferredInstallPrompt !== null;
-}
-
-export async function installPWA(): Promise<boolean> {
-  if (!deferredInstallPrompt) return false;
-  
-  await deferredInstallPrompt.prompt();
-  const { outcome } = await deferredInstallPrompt.userChoice;
-  
-  if (outcome === 'accepted') {
-    deferredInstallPrompt = null;
-    return true;
-  }
-  return false;
-}
-
-export function isStandalone(): boolean {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-}
+initPWA();
 
 const container = document.getElementById("root");
 if (container) {

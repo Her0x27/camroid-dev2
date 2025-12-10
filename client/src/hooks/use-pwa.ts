@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { canInstallPWA, installPWA, isStandalone } from "../main";
+import { canInstallPWA, installPWA, isStandalone } from "@/lib/pwa";
 
 export function usePWA() {
   const [canInstall, setCanInstall] = useState(false);
