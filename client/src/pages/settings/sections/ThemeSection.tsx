@@ -6,7 +6,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme-context";
 
-export const ThemeSection = memo(function ThemeSection() {
+interface ThemeSectionProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export const ThemeSection = memo(function ThemeSection({
+  isOpen,
+  onOpenChange,
+}: ThemeSectionProps) {
   const { t } = useI18n();
   const { themeId, setThemeById, availableThemes } = useTheme();
 
@@ -15,8 +23,10 @@ export const ThemeSection = memo(function ThemeSection() {
       icon={<Sun className="w-5 h-5" />}
       title={t.settings.theme.title}
       description={t.settings.theme.description}
+      sectionId="theme"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-theme"
-      defaultOpen={false}
     >
       <div className="space-y-2">
         <Label htmlFor="theme-select" className="flex items-center gap-2">

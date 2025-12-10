@@ -1,4 +1,4 @@
-import { useState, useRef, type ReactNode } from "react";
+import { useState, useRef, useEffect, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -10,6 +10,9 @@ interface CollapsibleCardProps {
   title: string;
   description: string;
   children: ReactNode;
+  sectionId?: string;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
   defaultOpen?: boolean;
   testId?: string;
 }
@@ -19,19 +22,38 @@ export function CollapsibleCard({
   title,
   description,
   children,
-  defaultOpen = true,
+  sectionId,
+  isOpen: controlledIsOpen,
+  onOpenChange,
+  defaultOpen = false,
   testId,
 }: CollapsibleCardProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  const hasBeenOpenedRef = useRef(defaultOpen);
+  const isControlled = controlledIsOpen !== undefined && onOpenChange !== undefined;
+  const [uncontrolledIsOpen, setUncontrolledIsOpen] = useState(defaultOpen);
   
-  if (isOpen && !hasBeenOpenedRef.current) {
-    hasBeenOpenedRef.current = true;
-  }
+  const isOpen = isControlled ? controlledIsOpen : uncontrolledIsOpen;
+  const hasBeenOpenedRef = useRef(isOpen);
+  
+  useEffect(() => {
+    if (isOpen && !hasBeenOpenedRef.current) {
+      hasBeenOpenedRef.current = true;
+    }
+  }, [isOpen]);
+
+  const handleOpenChange = (open: boolean) => {
+    if (isControlled) {
+      onOpenChange(open);
+    } else {
+      setUncontrolledIsOpen(open);
+    }
+    if (open) {
+      hasBeenOpenedRef.current = true;
+    }
+  };
 
   return (
-    <Card data-testid={testId} className="settings-card transition-all duration-200">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Card data-testid={testId} data-section-id={sectionId} className="settings-card transition-all duration-200">
+      <Collapsible open={isOpen} onOpenChange={handleOpenChange}>
         <CollapsibleTrigger asChild>
           <CardHeader 
             className="pb-3 cursor-pointer select-none hover-elevate rounded-t-lg bg-[hsl(var(--card-header))] min-h-[64px] touch-manipulation active:bg-muted/30"

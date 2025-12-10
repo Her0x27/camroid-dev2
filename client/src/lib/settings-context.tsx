@@ -13,6 +13,8 @@ interface SettingsContextType {
   updateStabilization: (updates: Partial<StabilizationSettings>) => void;
   updateEnhancement: (updates: Partial<EnhancementSettings>) => void;
   resetSettings: () => Promise<void>;
+  isSectionOpen: (sectionId: string) => boolean;
+  toggleSection: (sectionId: string) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
@@ -23,7 +25,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSettingsRef = useRef<Settings | null>(null);
 
-  // Debounced save to storage - updates UI immediately, saves after delay
   const debouncedSave = useCallback((newSettings: Settings) => {
     pendingSettingsRef.current = newSettings;
     
@@ -43,12 +44,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }, TIMING.DEBOUNCE_DELAY_MS);
   }, []);
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
-        // Save any pending settings on unmount
         if (pendingSettingsRef.current) {
           saveSettings(pendingSettingsRef.current).catch((e) => logger.error("Failed to save pending settings on unmount", e));
         }
@@ -56,16 +55,15 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Load settings on mount
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const stored = await getSettings();
-        // Merge with defaults to ensure all properties exist (especially cloud.providers)
         const merged: Settings = {
           ...defaultSettings,
           ...stored,
           reticle: { ...defaultSettings.reticle, ...stored.reticle },
+          expandedSections: { ...defaultSettings.expandedSections, ...stored.expandedSections },
           cloud: {
             ...defaultSettings.cloud,
             ...stored.cloud,
@@ -91,8 +89,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const updateSettings = useCallback((updates: Partial<Settings>) => {
     const newSettings = { ...settings, ...updates };
-    setSettings(newSettings);  // Update UI immediately
-    debouncedSave(newSettings); // Debounce storage save
+    setSettings(newSettings);
+    debouncedSave(newSettings);
   }, [settings, debouncedSave]);
 
   const updateReticle = useCallback((updates: Partial<ReticleConfig>) => {
@@ -119,6 +117,19 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const isSectionOpen = useCallback((sectionId: string): boolean => {
+    return settings.expandedSections?.[sectionId] ?? false;
+  }, [settings.expandedSections]);
+
+  const toggleSection = useCallback((sectionId: string) => {
+    const currentState = settings.expandedSections?.[sectionId] ?? false;
+    const newExpandedSections = {
+      ...settings.expandedSections,
+      [sectionId]: !currentState,
+    };
+    updateSettings({ expandedSections: newExpandedSections });
+  }, [settings.expandedSections, updateSettings]);
+
   return (
     <SettingsContext.Provider
       value={{
@@ -129,6 +140,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         updateStabilization,
         updateEnhancement,
         resetSettings,
+        isSectionOpen,
+        toggleSection,
       }}
     >
       {children}

@@ -11,11 +11,15 @@ import type { Settings } from "@shared/schema";
 interface CaptureLocationSectionProps {
   settings: Settings;
   updateSettings: (updates: Partial<Settings>) => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const CaptureLocationSection = memo(function CaptureLocationSection({
   settings,
   updateSettings,
+  isOpen,
+  onOpenChange,
 }: CaptureLocationSectionProps) {
   const { t } = useI18n();
   
@@ -24,6 +28,9 @@ export const CaptureLocationSection = memo(function CaptureLocationSection({
       icon={<Camera className="w-5 h-5" />}
       title={t.settings.capture.title}
       description={t.settings.capture.description}
+      sectionId="capture-location"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-capture-location"
     >
       <div className="flex items-center justify-between">

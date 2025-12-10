@@ -30,6 +30,8 @@ interface GeneralSettingsSectionProps {
   setLanguage: (lang: "en" | "ru") => void;
   availableLanguages: LanguageOption[];
   t: Translations;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const GeneralSettingsSection = memo(function GeneralSettingsSection({
@@ -39,12 +41,17 @@ export const GeneralSettingsSection = memo(function GeneralSettingsSection({
   setLanguage,
   availableLanguages,
   t,
+  isOpen,
+  onOpenChange,
 }: GeneralSettingsSectionProps) {
   return (
     <CollapsibleCard
       icon={<Settings2 className="w-5 h-5" />}
       title={t.settings.general.title}
       description={t.settings.general.description}
+      sectionId="general"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-general-settings"
     >
       <SettingRow

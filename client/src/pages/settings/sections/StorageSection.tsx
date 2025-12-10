@@ -15,11 +15,15 @@ interface StorageInfo {
 interface StorageSectionProps {
   storageInfo: StorageInfo | null;
   onShowClearDialog: () => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const StorageSection = memo(function StorageSection({
   storageInfo,
   onShowClearDialog,
+  isOpen,
+  onOpenChange,
 }: StorageSectionProps) {
   const { t } = useI18n();
   
@@ -28,8 +32,10 @@ export const StorageSection = memo(function StorageSection({
       icon={<Database className="w-5 h-5" />}
       title={t.settings.storage.title}
       description={t.settings.storage.description}
+      sectionId="storage"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-storage"
-      defaultOpen={false}
     >
       {storageInfo && (
         <div className="space-y-2">

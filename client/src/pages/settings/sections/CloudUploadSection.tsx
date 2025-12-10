@@ -20,6 +20,8 @@ interface CloudUploadSectionProps {
   onCloudUpdate?: (updates: Partial<CloudSettings>) => void;
   onProviderSettingsUpdate?: (providerId: string, updates: Partial<ProviderSettings>) => void;
   t: Translations;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const CloudUploadSection = memo(function CloudUploadSection({
@@ -33,6 +35,8 @@ export const CloudUploadSection = memo(function CloudUploadSection({
   onCloudUpdate,
   onProviderSettingsUpdate,
   t,
+  isOpen,
+  onOpenChange,
 }: CloudUploadSectionProps) {
   const selectedProviderId = settings.cloud?.selectedProvider || "imgbb";
   const provider = cloudProviderRegistry.get(selectedProviderId);
@@ -107,8 +111,10 @@ export const CloudUploadSection = memo(function CloudUploadSection({
       icon={<Cloud className="w-5 h-5" />}
       title={t.settings.cloud.title}
       description={t.settings.cloud.description}
+      sectionId="cloud-upload"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-cloud-upload"
-      defaultOpen={false}
     >
       <div className="space-y-3">
         <Label>{t.settings.cloud.provider || "Cloud Provider"}</Label>

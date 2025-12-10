@@ -13,11 +13,15 @@ import type { Settings, ReticleConfig, ColorScheme } from "@shared/schema";
 interface ReticleSectionProps {
   settings: Settings;
   updateReticle: (updates: Partial<ReticleConfig>) => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const ReticleSection = memo(function ReticleSection({
   settings,
   updateReticle,
+  isOpen,
+  onOpenChange,
 }: ReticleSectionProps) {
   const { t } = useI18n();
   const { activatePreview, deactivatePreview } = usePreview();
@@ -39,6 +43,9 @@ export const ReticleSection = memo(function ReticleSection({
       icon={<Crosshair className="w-5 h-5" />}
       title={t.settings.crosshair.title}
       description={t.settings.crosshair.description}
+      sectionId="reticle"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-reticle"
     >
       <SettingRow

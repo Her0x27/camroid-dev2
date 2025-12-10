@@ -21,6 +21,8 @@ interface PWASectionProps {
   install: () => void;
   showIOSInstructions: boolean;
   t: Translations;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const PWASection = memo(function PWASection({
@@ -30,14 +32,18 @@ export const PWASection = memo(function PWASection({
   install,
   showIOSInstructions,
   t,
+  isOpen,
+  onOpenChange,
 }: PWASectionProps) {
   return (
     <CollapsibleCard
       icon={<Smartphone className="w-5 h-5" />}
       title={t.settings.pwa.title}
       description={t.settings.pwa.description}
+      sectionId="pwa"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-pwa"
-      defaultOpen={false}
     >
       <div className="flex items-center justify-between">
         <Label className="flex items-center gap-2">

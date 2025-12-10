@@ -17,11 +17,15 @@ import type { Settings, CameraResolution } from "@shared/schema";
 interface CameraSettingsSectionProps {
   settings: Settings;
   updateSettings: (updates: Partial<Settings>) => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const CameraSettingsSection = memo(function CameraSettingsSection({
   settings,
   updateSettings,
+  isOpen,
+  onOpenChange,
 }: CameraSettingsSectionProps) {
   const { t } = useI18n();
 
@@ -38,6 +42,9 @@ export const CameraSettingsSection = memo(function CameraSettingsSection({
       icon={<MonitorPlay className="w-5 h-5" />}
       title={t.settings.camera.title}
       description={t.settings.camera.description}
+      sectionId="camera-settings"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-camera-settings"
     >
       <SettingRow

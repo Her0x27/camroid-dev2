@@ -12,12 +12,16 @@ interface WatermarkSectionProps {
   settings: Settings;
   updateSettings: (updates: Partial<Settings>) => void;
   updateReticle: (updates: Partial<ReticleConfig>) => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const WatermarkSection = memo(function WatermarkSection({
   settings,
   updateSettings,
   updateReticle,
+  isOpen,
+  onOpenChange,
 }: WatermarkSectionProps) {
   const { t } = useI18n();
   const { activatePreview, deactivatePreview } = usePreview();
@@ -31,6 +35,9 @@ export const WatermarkSection = memo(function WatermarkSection({
       icon={<ImageIcon className="w-5 h-5" />}
       title={t.settings.watermark.title}
       description={t.settings.watermark.description}
+      sectionId="watermark"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-watermark"
     >
       <SettingRow

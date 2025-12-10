@@ -11,12 +11,16 @@ interface ImageQualitySectionProps {
   settings: Settings;
   updateStabilization: (updates: Partial<StabilizationSettings>) => void;
   updateEnhancement: (updates: Partial<EnhancementSettings>) => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const ImageQualitySection = memo(function ImageQualitySection({
   settings,
   updateStabilization,
   updateEnhancement,
+  isOpen,
+  onOpenChange,
 }: ImageQualitySectionProps) {
   const { t } = useI18n();
   
@@ -25,6 +29,9 @@ export const ImageQualitySection = memo(function ImageQualitySection({
       icon={<Sparkles className="w-5 h-5" />}
       title={t.settings.imageQuality.title}
       description={t.settings.imageQuality.description}
+      sectionId="image-quality"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-image-quality"
     >
       <SettingRow

@@ -7,19 +7,25 @@ import type { Translations } from "@/lib/i18n";
 interface ResetSectionProps {
   onShowResetDialog: () => void;
   t: Translations;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const ResetSection = memo(function ResetSection({
   onShowResetDialog,
   t,
+  isOpen,
+  onOpenChange,
 }: ResetSectionProps) {
   return (
     <CollapsibleCard
       icon={<RotateCcw className="w-5 h-5" />}
       title={t.settings.reset.title}
       description={t.settings.reset.description}
+      sectionId="reset"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-reset"
-      defaultOpen={false}
     >
       <Button
         variant="outline"

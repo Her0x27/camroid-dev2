@@ -381,6 +381,34 @@ export const en = {
     preview: {
       demoNote: "Demo note for preview",
     },
+    
+    categoryTips: {
+      title: "Recommendations",
+      camera: {
+        tip1: "1080p resolution offers the best balance of quality and processing speed",
+        tip2: "Stabilization at 60-70% works well for handheld shooting",
+        tip3: "Sharpness at 20-40% enhances details without creating artifacts",
+        tip4: "Quality at 85-90% provides excellent photos with reasonable file size",
+      },
+      interface: {
+        tip1: "Crosshair helps precisely position your subject in frame",
+        tip2: "Watermark preserves important metadata directly on photos",
+        tip3: "Auto-color crosshair ensures visibility on any background",
+        tip4: "Enable level indicator to capture photos with a straight horizon",
+      },
+      data: {
+        tip1: "GPS coordinates are recorded with maximum device accuracy",
+        tip2: "Accuracy limit of 15-25m blocks capture when GPS signal is poor",
+        tip3: "Auto-upload to cloud allows quick photo sharing",
+        tip4: "Photos are stored locally and privately on your device",
+      },
+      system: {
+        tip1: "Dark theme saves battery life on OLED screens",
+        tip2: "Installing PWA provides quick access and offline functionality",
+        tip3: "Privacy mode hides camera behind a game for confidentiality",
+        tip4: "Resetting settings does not affect your saved photos",
+      },
+    },
   },
   
   game2048: {

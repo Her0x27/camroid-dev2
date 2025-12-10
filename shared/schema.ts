@@ -129,6 +129,10 @@ export type StabilizationSettings = z.infer<typeof stabilizationSettingsSchema>;
 // Camera resolution preset
 export type CameraResolution = "auto" | "4k" | "1080p" | "720p" | "480p";
 
+// Expanded sections state (which settings cards are open)
+export const expandedSectionsSchema = z.record(z.string(), z.boolean()).default({});
+export type ExpandedSections = z.infer<typeof expandedSectionsSchema>;
+
 // App settings stored in IndexedDB
 export const settingsSchema = z.object({
   reticle: reticleConfigSchema,
@@ -142,6 +146,7 @@ export const settingsSchema = z.object({
   showLevelIndicator: z.boolean().default(false),
   cameraResolution: z.enum(["auto", "4k", "1080p", "720p", "480p"]).default("auto"),
   photoQuality: z.number().min(50).max(100).default(90),
+  expandedSections: expandedSectionsSchema.default({}),
   cloud: cloudSettingsSchema.default({
     selectedProvider: "imgbb",
     providers: {},
@@ -189,6 +194,7 @@ export const defaultSettings: Settings = {
   showLevelIndicator: false,
   cameraResolution: "1080p",
   photoQuality: 90,
+  expandedSections: {},
   cloud: {
     selectedProvider: "imgbb",
     providers: {},

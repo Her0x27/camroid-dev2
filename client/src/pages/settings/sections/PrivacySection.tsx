@@ -32,6 +32,8 @@ interface PrivacySectionProps {
   updatePrivacySettings: (updates: Partial<PrivacySettings>) => void;
   onShowPatternSetup: () => void;
   t: Translations;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export const PrivacySection = memo(function PrivacySection({
@@ -39,6 +41,8 @@ export const PrivacySection = memo(function PrivacySection({
   updatePrivacySettings,
   onShowPatternSetup,
   t,
+  isOpen,
+  onOpenChange,
 }: PrivacySectionProps) {
   const currentModule = privacyModuleRegistry.get(privacySettings.selectedModule);
   const currentUnlockValue = privacySettings.moduleUnlockValues[privacySettings.selectedModule] || '';
@@ -57,8 +61,10 @@ export const PrivacySection = memo(function PrivacySection({
       icon={<Shield className="w-5 h-5" />}
       title={t.settings.privacy.title}
       description={t.settings.privacy.description}
+      sectionId="privacy"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
       testId="section-privacy"
-      defaultOpen={false}
     >
       <div className="flex items-center justify-between">
         <Label htmlFor="privacy-enabled" className="flex items-center gap-2 cursor-pointer">

@@ -43,14 +43,14 @@ import {
   PWASection,
   ResetSection,
 } from "./sections";
-import { QuickSettings, SettingsChips, SettingsSearch, SettingsPreview, type SettingsCategory } from "./components";
+import { QuickSettings, SettingsChips, SettingsSearch, SettingsPreview, CategoryTips, type SettingsCategory } from "./components";
 import { AnimatedContainer, AnimatedItem } from "@/components/animated-section";
 import { PreviewProvider, usePreview } from "./contexts/PreviewContext";
 
 function SettingsPageContent() {
   const [, navigate] = useLocation();
   const { isPreviewActive } = usePreview();
-  const { settings, updateSettings, updateReticle, updateStabilization, updateEnhancement, resetSettings } = useSettings();
+  const { settings, updateSettings, updateReticle, updateStabilization, updateEnhancement, resetSettings, isSectionOpen, toggleSection } = useSettings();
   const { language, setLanguage, availableLanguages, t } = useI18n();
   const { canInstall, isInstalled, isInstalling, install, showIOSInstructions } = usePWA();
   const { settings: privacySettings, updateSettings: updatePrivacySettings } = usePrivacy();
@@ -227,6 +227,14 @@ function SettingsPageContent() {
   const handleShowResetDialog = useCallback(() => setShowResetDialog(true), []);
   const handleShowPatternSetup = useCallback(() => setShowPatternSetup(true), []);
 
+  const createSectionHandler = useCallback((sectionId: string) => {
+    return (open: boolean) => {
+      if (open !== isSectionOpen(sectionId)) {
+        toggleSection(sectionId);
+      }
+    };
+  }, [isSectionOpen, toggleSection]);
+
   const categorySections = useMemo(() => ({
     camera: (
       <>
@@ -234,6 +242,8 @@ function SettingsPageContent() {
           <CameraSettingsSection
             settings={settings}
             updateSettings={updateSettings}
+            isOpen={isSectionOpen("camera-settings")}
+            onOpenChange={createSectionHandler("camera-settings")}
           />
         </AnimatedItem>
         <AnimatedItem>
@@ -241,7 +251,12 @@ function SettingsPageContent() {
             settings={settings}
             updateStabilization={updateStabilization}
             updateEnhancement={updateEnhancement}
+            isOpen={isSectionOpen("image-quality")}
+            onOpenChange={createSectionHandler("image-quality")}
           />
+        </AnimatedItem>
+        <AnimatedItem>
+          <CategoryTips category="camera" />
         </AnimatedItem>
       </>
     ),
@@ -255,12 +270,16 @@ function SettingsPageContent() {
             setLanguage={setLanguage}
             availableLanguages={availableLanguages}
             t={t}
+            isOpen={isSectionOpen("general")}
+            onOpenChange={createSectionHandler("general")}
           />
         </AnimatedItem>
         <AnimatedItem>
           <ReticleSection
             settings={settings}
             updateReticle={updateReticle}
+            isOpen={isSectionOpen("reticle")}
+            onOpenChange={createSectionHandler("reticle")}
           />
         </AnimatedItem>
         <AnimatedItem>
@@ -268,7 +287,12 @@ function SettingsPageContent() {
             settings={settings}
             updateSettings={updateSettings}
             updateReticle={updateReticle}
+            isOpen={isSectionOpen("watermark")}
+            onOpenChange={createSectionHandler("watermark")}
           />
+        </AnimatedItem>
+        <AnimatedItem>
+          <CategoryTips category="interface" />
         </AnimatedItem>
       </>
     ),
@@ -278,6 +302,8 @@ function SettingsPageContent() {
           <CaptureLocationSection
             settings={settings}
             updateSettings={updateSettings}
+            isOpen={isSectionOpen("capture-location")}
+            onOpenChange={createSectionHandler("capture-location")}
           />
         </AnimatedItem>
         <AnimatedItem>
@@ -292,20 +318,30 @@ function SettingsPageContent() {
             onCloudUpdate={handleCloudUpdate}
             onProviderSettingsUpdate={handleProviderSettingsUpdate}
             t={t}
+            isOpen={isSectionOpen("cloud-upload")}
+            onOpenChange={createSectionHandler("cloud-upload")}
           />
         </AnimatedItem>
         <AnimatedItem>
           <StorageSection
             storageInfo={storageInfo}
             onShowClearDialog={handleShowClearDialog}
+            isOpen={isSectionOpen("storage")}
+            onOpenChange={createSectionHandler("storage")}
           />
+        </AnimatedItem>
+        <AnimatedItem>
+          <CategoryTips category="data" />
         </AnimatedItem>
       </>
     ),
     system: (
       <>
         <AnimatedItem>
-          <ThemeSection />
+          <ThemeSection
+            isOpen={isSectionOpen("theme")}
+            onOpenChange={createSectionHandler("theme")}
+          />
         </AnimatedItem>
         <AnimatedItem>
           <PWASection
@@ -315,6 +351,8 @@ function SettingsPageContent() {
             install={install}
             showIOSInstructions={showIOSInstructions}
             t={t}
+            isOpen={isSectionOpen("pwa")}
+            onOpenChange={createSectionHandler("pwa")}
           />
         </AnimatedItem>
         <AnimatedItem>
@@ -323,13 +361,20 @@ function SettingsPageContent() {
             updatePrivacySettings={updatePrivacySettings}
             onShowPatternSetup={handleShowPatternSetup}
             t={t}
+            isOpen={isSectionOpen("privacy")}
+            onOpenChange={createSectionHandler("privacy")}
           />
         </AnimatedItem>
         <AnimatedItem>
           <ResetSection
             onShowResetDialog={handleShowResetDialog}
             t={t}
+            isOpen={isSectionOpen("reset")}
+            onOpenChange={createSectionHandler("reset")}
           />
+        </AnimatedItem>
+        <AnimatedItem>
+          <CategoryTips category="system" />
         </AnimatedItem>
       </>
     ),
@@ -340,7 +385,7 @@ function SettingsPageContent() {
     handleCloudUpdate, handleProviderSettingsUpdate,
     storageInfo, handleShowClearDialog, canInstall, isInstalled, isInstalling,
     install, showIOSInstructions, privacySettings, updatePrivacySettings,
-    handleShowPatternSetup, handleShowResetDialog
+    handleShowPatternSetup, handleShowResetDialog, isSectionOpen, createSectionHandler
   ]);
 
   const isSearching = searchQuery.length > 0;
