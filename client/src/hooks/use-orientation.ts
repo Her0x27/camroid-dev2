@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { SENSORS } from "@/lib/constants";
+import { usePageVisibility } from "./use-page-visibility";
 
 interface OrientationData {
   heading: number | null;
@@ -39,7 +40,15 @@ function hasSignificantChange(
   return false;
 }
 
-export function useOrientation(enabled: boolean = true): UseOrientationReturn {
+interface DeviceOrientationEventWithWebkit extends DeviceOrientationEvent {
+  webkitCompassHeading?: number;
+}
+
+interface DeviceOrientationEventStatic {
+  requestPermission?: () => Promise<"granted" | "denied">;
+}
+
+export function useOrientation(enabled: boolean = true, paused: boolean = false): UseOrientationReturn {
   const [data, setData] = useState<OrientationData>(defaultData);
   const [isSupported, setIsSupported] = useState(false);
   const [isPermissionGranted, setIsPermissionGranted] = useState(false);
@@ -49,6 +58,9 @@ export function useOrientation(enabled: boolean = true): UseOrientationReturn {
   const lastDataRef = useRef<OrientationData>(defaultData);
   const pendingDataRef = useRef<OrientationData | null>(null);
   const throttleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const { isVisible } = usePageVisibility();
+  const shouldListen = enabled && !paused && isVisible;
 
   useEffect(() => {
     const supported = "DeviceOrientationEvent" in window;
@@ -109,7 +121,6 @@ export function useOrientation(enabled: boolean = true): UseOrientationReturn {
     }
 
     try {
-      // iOS 13+ requires permission
       const DeviceOrientationEventWithPermission = DeviceOrientationEvent as unknown as DeviceOrientationEventStatic;
       if (typeof DeviceOrientationEventWithPermission.requestPermission === "function") {
         const permission = await DeviceOrientationEventWithPermission.requestPermission();
@@ -122,7 +133,6 @@ export function useOrientation(enabled: boolean = true): UseOrientationReturn {
           return false;
         }
       } else {
-        // Android and older iOS don't require permission
         setIsPermissionGranted(true);
         setError(null);
         return true;
@@ -133,13 +143,21 @@ export function useOrientation(enabled: boolean = true): UseOrientationReturn {
     }
   }, [isSupported]);
 
-  // Add/remove event listener
   useEffect(() => {
-    if (!enabled || !isSupported) return;
+    if (!shouldListen || !isSupported) {
+      if (listenerRef.current) {
+        window.removeEventListener("deviceorientation", listenerRef.current, true);
+        listenerRef.current = null;
+      }
+      if (throttleTimeoutRef.current) {
+        clearTimeout(throttleTimeoutRef.current);
+        throttleTimeoutRef.current = null;
+      }
+      pendingDataRef.current = null;
+      return;
+    }
 
-    // Try to add listener (will work on Android, may need permission on iOS)
     const listener = (event: DeviceOrientationEvent) => {
-      // If we get events, permission is granted
       if (!isPermissionGranted) {
         setIsPermissionGranted(true);
       }
@@ -152,6 +170,7 @@ export function useOrientation(enabled: boolean = true): UseOrientationReturn {
     return () => {
       if (listenerRef.current) {
         window.removeEventListener("deviceorientation", listenerRef.current, true);
+        listenerRef.current = null;
       }
       if (throttleTimeoutRef.current) {
         clearTimeout(throttleTimeoutRef.current);
@@ -159,7 +178,7 @@ export function useOrientation(enabled: boolean = true): UseOrientationReturn {
       }
       pendingDataRef.current = null;
     };
-  }, [enabled, isSupported, isPermissionGranted, handleOrientation]);
+  }, [shouldListen, isSupported, isPermissionGranted, handleOrientation]);
 
   return {
     data,
@@ -170,13 +189,11 @@ export function useOrientation(enabled: boolean = true): UseOrientationReturn {
   };
 }
 
-// Format heading for display
 export function formatHeading(heading: number | null): string {
   if (heading === null) return "---°";
   return `${heading.toString().padStart(3, "0")}°`;
 }
 
-// Get cardinal direction from heading
 export function getCardinalDirection(heading: number | null): string {
   if (heading === null) return "--";
   
@@ -185,7 +202,6 @@ export function getCardinalDirection(heading: number | null): string {
   return directions[index];
 }
 
-// Format tilt for display
 export function formatTilt(tilt: number | null): string {
   if (tilt === null) return "---°";
   const sign = tilt >= 0 ? "+" : "";

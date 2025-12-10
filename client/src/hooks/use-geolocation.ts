@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { SENSORS } from "@/lib/constants";
+import { usePageVisibility } from "./use-page-visibility";
 
 interface GeolocationData {
   latitude: number | null;
@@ -80,14 +81,16 @@ function hasSignificantPositionChange(
   return false;
 }
 
-export function useGeolocation(enabled: boolean = true): UseGeolocationReturn {
+export function useGeolocation(enabled: boolean = true, paused: boolean = false): UseGeolocationReturn {
   const [data, setData] = useState<GeolocationData>(defaultData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isWatching, setIsWatching] = useState(false);
   const watchIdRef = useRef<number | null>(null);
   const bestAccuracyRef = useRef<number>(Infinity);
   const lastDataRef = useRef<GeolocationData>(defaultData);
+
+  const { isVisible } = usePageVisibility();
+  const shouldWatch = enabled && !paused && isVisible;
 
   const positionOptions: PositionOptions = useMemo(() => ({
     enableHighAccuracy: true,
@@ -147,7 +150,7 @@ export function useGeolocation(enabled: boolean = true): UseGeolocationReturn {
   }, []);
 
   const startWatching = useCallback(() => {
-    if (!navigator.geolocation || !enabled) {
+    if (!navigator.geolocation) {
       setError("Geolocation not supported");
       return;
     }
@@ -155,7 +158,6 @@ export function useGeolocation(enabled: boolean = true): UseGeolocationReturn {
     if (watchIdRef.current !== null) return;
 
     setIsLoading(true);
-    setIsWatching(true);
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       handleSuccess,
@@ -164,14 +166,13 @@ export function useGeolocation(enabled: boolean = true): UseGeolocationReturn {
     );
     
     bestAccuracyRef.current = Infinity;
-  }, [enabled, handleSuccess, handleError, positionOptions]);
+  }, [handleSuccess, handleError, positionOptions]);
 
   const stopWatching = useCallback(() => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
-    setIsWatching(false);
   }, []);
 
   const getCurrentPosition = useCallback((): Promise<GeolocationData> => {
@@ -205,9 +206,8 @@ export function useGeolocation(enabled: boolean = true): UseGeolocationReturn {
     });
   }, [handleError, positionOptions]);
 
-  // Auto-start watching if enabled
   useEffect(() => {
-    if (enabled) {
+    if (shouldWatch) {
       startWatching();
     } else {
       stopWatching();
@@ -216,7 +216,9 @@ export function useGeolocation(enabled: boolean = true): UseGeolocationReturn {
     return () => {
       stopWatching();
     };
-  }, [enabled, startWatching, stopWatching]);
+  }, [shouldWatch, startWatching, stopWatching]);
+
+  const isWatching = watchIdRef.current !== null;
 
   return {
     data,
@@ -246,19 +248,16 @@ export function formatCoordinatesCompact(latitude: number | null, longitude: num
 }
 
 
-// Format altitude for display with precision
 export function formatAltitude(altitude: number | null): string {
   if (altitude === null) return "--- m";
   return `${altitude.toFixed(1)} m`;
 }
 
-// Format accuracy for display with meters
 export function formatAccuracy(accuracy: number | null): string {
   if (accuracy === null) return "--- m";
   return `±${Math.round(accuracy)} m`;
 }
 
-// Get accuracy quality level
 export function getAccuracyLevel(accuracy: number | null): "high" | "medium" | "low" | "none" {
   if (accuracy === null) return "none";
   if (accuracy < 10) return "high";

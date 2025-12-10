@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, RefObject } from "react";
 import { sampleColorFromSource } from "@/lib/canvas-utils";
 import { getDefaultColorForScheme } from "@/components/reticles";
 import { CAMERA } from "@/lib/constants";
+import { usePageVisibility } from "./use-page-visibility";
 import type { ColorScheme, ReticlePosition } from "@shared/schema";
 
 interface UseColorSamplingOptions {
@@ -26,9 +27,16 @@ export function useColorSampling({
   const previousColorRef = useRef<string>(defaultColor);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const animationIdRef = useRef<number | null>(null);
+
+  const { isVisible } = usePageVisibility();
 
   useEffect(() => {
-    if (!enabled || !autoColor) {
+    if (!enabled || !autoColor || !isVisible) {
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = null;
+      }
       return;
     }
     
@@ -40,12 +48,11 @@ export function useColorSampling({
       ctxRef.current = canvasRef.current.getContext("2d", { willReadFrequently: true });
     }
     
-    let animationId: number;
     let lastUpdate = 0;
     
     const sampleColor = (timestamp: number) => {
       if (timestamp - lastUpdate < CAMERA.COLOR_SAMPLE_INTERVAL_MS) {
-        animationId = requestAnimationFrame(sampleColor);
+        animationIdRef.current = requestAnimationFrame(sampleColor);
         return;
       }
       lastUpdate = timestamp;
@@ -65,15 +72,18 @@ export function useColorSampling({
         setSampledColor(result.color);
       }
       
-      animationId = requestAnimationFrame(sampleColor);
+      animationIdRef.current = requestAnimationFrame(sampleColor);
     };
     
-    animationId = requestAnimationFrame(sampleColor);
+    animationIdRef.current = requestAnimationFrame(sampleColor);
     
     return () => {
-      cancelAnimationFrame(animationId);
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = null;
+      }
     };
-  }, [videoRef, enabled, autoColor, reticleSize, colorScheme, reticlePosition]);
+  }, [videoRef, enabled, autoColor, reticleSize, colorScheme, reticlePosition, isVisible]);
 
   return autoColor ? sampledColor : defaultColor;
 }

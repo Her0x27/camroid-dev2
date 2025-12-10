@@ -1,4 +1,5 @@
 export { useAdjustmentMode } from "./use-adjustment-mode";
+export { usePageVisibility } from "./use-page-visibility";
 export { useCamera } from "./use-camera";
 export { useCaptureController } from "./use-capture-controller";
 export { useCaptureSound } from "./use-capture-sound";

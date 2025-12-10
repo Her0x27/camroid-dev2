@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { usePageVisibility } from "./use-page-visibility";
 
 interface StabilizationState {
   isStable: boolean;
-  stability: number; // 0-100, higher = more stable
+  stability: number;
   isAnalyzing: boolean;
 }
 
 interface UseStabilizationOptions {
   enabled: boolean;
-  threshold: number; // 0-100, stability threshold for "stable" state
+  threshold: number;
   videoRef: React.RefObject<HTMLVideoElement>;
 }
 
@@ -26,6 +27,8 @@ export function useStabilization({
     stability: 0,
     isAnalyzing: false,
   });
+
+  const { isVisible } = usePageVisibility();
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const prevFrameRef = useRef<ImageData | null>(null);
@@ -82,8 +85,14 @@ export function useStabilization({
   }, []);
 
   useEffect(() => {
-    if (!enabled || !videoRef.current) {
-      setState({ isStable: false, stability: 0, isAnalyzing: false });
+    if (!enabled || !videoRef.current || !isVisible) {
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = null;
+      }
+      if (!enabled) {
+        setState({ isStable: false, stability: 0, isAnalyzing: false });
+      }
       return;
     }
 
@@ -157,12 +166,13 @@ export function useStabilization({
     return () => {
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = null;
       }
       setState({ isStable: false, stability: 0, isAnalyzing: false });
       prevFrameRef.current = null;
       stabilityHistoryRef.current = [];
     };
-  }, [enabled, threshold, videoRef, calculateFrameDifference, calculateSharpness]);
+  }, [enabled, threshold, videoRef, isVisible, calculateFrameDifference, calculateSharpness]);
 
   const waitForStability = useCallback((): Promise<boolean> => {
     return new Promise((resolve) => {
