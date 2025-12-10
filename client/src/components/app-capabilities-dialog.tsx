@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -141,40 +142,102 @@ function PlatformTip({ tipKey, t }: { tipKey: PlatformTipKey; t: ReturnType<type
 }
 
 const appFeaturesList = [
-  { id: 'watermark', icon: Type },
-  { id: 'gpsProtection', icon: ShieldAlert },
-  { id: 'reticle', icon: Crosshair },
-  { id: 'reticleAdjustment', icon: Move },
-  { id: 'autoColor', icon: Palette },
-  { id: 'privacyMode', icon: EyeClosed },
+  { id: 'watermark', icon: Type, color: 'from-blue-500 to-cyan-500' },
+  { id: 'gpsProtection', icon: ShieldAlert, color: 'from-amber-500 to-orange-500' },
+  { id: 'reticle', icon: Crosshair, color: 'from-emerald-500 to-green-500' },
+  { id: 'reticleAdjustment', icon: Move, color: 'from-violet-500 to-purple-500' },
+  { id: 'autoColor', icon: Palette, color: 'from-pink-500 to-rose-500' },
+  { id: 'privacyMode', icon: EyeClosed, color: 'from-slate-500 to-zinc-500' },
 ] as const;
 
-function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -12 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: {
+      type: "spring",
+      stiffness: 300,
+      damping: 24,
+    },
+  },
+};
+
+function FeatureItem({ feature, t }: { 
+  feature: typeof appFeaturesList[number]; 
+  t: ReturnType<typeof useI18n>['t'];
+}) {
+  const Icon = feature.icon;
+  const titleKey = feature.id as keyof typeof t.capabilities.appFeatures;
+  const descKey = `${feature.id}Desc` as keyof typeof t.capabilities.appFeatures;
+  
   return (
-    <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 space-y-3">
-      <h4 className="text-sm font-medium flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-blue-500" />
+    <div className="group relative flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-200 cursor-default overflow-hidden">
+      <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${feature.color} opacity-60 group-hover:opacity-100 transition-opacity`} />
+      
+      <div className={`shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-sm`}>
+        <Icon className="h-4 w-4 text-white" />
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <span className="text-sm font-medium block truncate">
+          {t.capabilities.appFeatures[titleKey]}
+        </span>
+        <p className="text-xs text-muted-foreground line-clamp-1">
+          {t.capabilities.appFeatures[descKey]}
+        </p>
+      </div>
+      
+      <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at 20% 50%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
+        }}
+      />
+    </div>
+  );
+}
+
+function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
+  const shouldReduceMotion = useReducedMotion();
+  
+  return (
+    <div className="space-y-3">
+      <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+        <Sparkles className="h-4 w-4 text-primary" />
         {t.capabilities.appFeaturesTitle}
       </h4>
       
-      <div className="space-y-3">
-        {appFeaturesList.map((feature) => {
-          const Icon = feature.icon;
-          const titleKey = feature.id as keyof typeof t.capabilities.appFeatures;
-          const descKey = `${feature.id}Desc` as keyof typeof t.capabilities.appFeatures;
-          return (
-            <div key={feature.id} className="flex items-start gap-2">
-              <Icon className="h-4 w-4 mt-0.5 text-blue-500 shrink-0" />
-              <div>
-                <span className="text-sm font-medium">{t.capabilities.appFeatures[titleKey]}</span>
-                <p className="text-xs text-muted-foreground">
-                  {t.capabilities.appFeatures[descKey]}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {shouldReduceMotion ? (
+        <div className="space-y-2">
+          {appFeaturesList.map((feature) => (
+            <FeatureItem key={feature.id} feature={feature} t={t} />
+          ))}
+        </div>
+      ) : (
+        <motion.div 
+          className="space-y-2"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {appFeaturesList.map((feature) => (
+            <motion.div key={feature.id} variants={itemVariants}>
+              <FeatureItem feature={feature} t={t} />
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 }
