@@ -15,6 +15,7 @@ interface CalculatorState {
   waitingForOperand: boolean;
   lastOperation: Operation;
   lastOperand: number | null;
+  pendingOperand: number | null;
 }
 
 interface CalcButtonProps {
@@ -85,6 +86,7 @@ export function IOSCalculator({
     waitingForOperand: false,
     lastOperation: null,
     lastOperand: null,
+    pendingOperand: null,
   });
 
   const sequenceChecker = useMemo(
@@ -269,6 +271,7 @@ export function IOSCalculator({
       waitingForOperand: false,
       lastOperation: null,
       lastOperand: null,
+      pendingOperand: null,
     });
   }, [checkSecretSequence]);
 
@@ -293,7 +296,20 @@ export function IOSCalculator({
     });
   }, [formatDisplay, checkSecretSequence]);
 
+  const getLiveResult = useCallback((): string => {
+    if (state.previousValue === null || state.operation === null) {
+      return '';
+    }
+    if (state.waitingForOperand) {
+      return '';
+    }
+    const currentValue = parseFloat(state.display) || 0;
+    const result = calculate(state.previousValue, currentValue, state.operation);
+    return formatDisplay(result);
+  }, [state.previousValue, state.operation, state.display, state.waitingForOperand, calculate, formatDisplay]);
+
   const clearLabel = state.display === '0' && state.previousValue === null ? 'AC' : 'C';
+  const liveResult = getLiveResult();
 
   return (
     <div 
@@ -301,13 +317,18 @@ export function IOSCalculator({
       onClick={() => handleSecretTap(false)}
       data-testid="calculator-container"
     >
-      <div className="flex-1 flex items-end justify-end px-6 pb-4">
+      <div className="flex-1 flex flex-col items-end justify-end px-6 pb-4">
         <div 
           className="text-white text-[80px] font-thin tracking-tight truncate max-w-full"
           data-testid="calc-display"
         >
           {state.display}
         </div>
+        {liveResult && (
+          <div className="text-gray-400 text-2xl mt-1">
+            = {liveResult}
+          </div>
+        )}
       </div>
 
       <div className="px-4 pb-8 safe-bottom">
