@@ -281,6 +281,7 @@ export const en = {
         sequenceLabel: "Secret Sequence",
         sequencePlaceholder: "e.g., 123456=",
         sequenceDesc: "Enter this sequence in calculator to unlock",
+        sequenceValidationError: "Only calculator digits and symbols allowed (0-9, +, -, *, /, =, %, .)",
         phraseLabel: "Secret Phrase",
         phrasePlaceholder: "Enter secret word",
         phraseDesc: "Type this phrase in notepad to unlock",

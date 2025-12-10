@@ -283,6 +283,7 @@ export const ru: Translations = {
         sequenceLabel: "Секретная последовательность",
         sequencePlaceholder: "Например: 123456=",
         sequenceDesc: "Введите эту последовательность в калькуляторе для разблокировки",
+        sequenceValidationError: "Разрешены только цифры и знаки калькулятора (0-9, +, -, *, /, =, %, .)",
         phraseLabel: "Секретная фраза",
         phrasePlaceholder: "Введите секретное слово",
         phraseDesc: "Введите эту фразу в блокноте для разблокировки",

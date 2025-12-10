@@ -17,6 +17,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { privacyModuleRegistry } from "@/privacy_modules";
+import { validateSequence } from "@/privacy_modules/calculator/config";
 import { ModulePreview } from "../components";
 import type { Translations } from "@/lib/i18n";
 
@@ -88,17 +89,31 @@ export const PrivacySection = memo(function PrivacySection({
 }: PrivacySectionProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [showActivationDialog, setShowActivationDialog] = useState(false);
+  const [sequenceValidationError, setSequenceValidationError] = useState(false);
   const shouldReduceMotion = useReducedMotion();
   const currentModule = privacyModuleRegistry.get(privacySettings.selectedModule);
   const currentUnlockValue = privacySettings.moduleUnlockValues[privacySettings.selectedModule] || '';
 
   const handleModuleUnlockValueChange = (value: string) => {
-    updatePrivacySettings({
-      moduleUnlockValues: {
-        ...privacySettings.moduleUnlockValues,
-        [privacySettings.selectedModule]: value,
-      },
-    });
+    const isSequenceType = currentModule?.unlockMethod.type === 'sequence';
+    
+    if (isSequenceType) {
+      const { isValid, filtered } = validateSequence(value);
+      setSequenceValidationError(!isValid && value.length > 0);
+      updatePrivacySettings({
+        moduleUnlockValues: {
+          ...privacySettings.moduleUnlockValues,
+          [privacySettings.selectedModule]: filtered,
+        },
+      });
+    } else {
+      updatePrivacySettings({
+        moduleUnlockValues: {
+          ...privacySettings.moduleUnlockValues,
+          [privacySettings.selectedModule]: value,
+        },
+      });
+    }
   };
 
   const handleEnablePrivacy = (checked: boolean) => {
@@ -192,7 +207,10 @@ export const PrivacySection = memo(function PrivacySection({
             </Label>
             <Select
               value={privacySettings.selectedModule}
-              onValueChange={(value) => updatePrivacySettings({ selectedModule: value })}
+              onValueChange={(value) => {
+                setSequenceValidationError(false);
+                updatePrivacySettings({ selectedModule: value });
+              }}
             >
               <SelectTrigger data-testid="select-module">
                 <SelectValue />
@@ -250,8 +268,14 @@ export const PrivacySection = memo(function PrivacySection({
                   value={currentUnlockValue}
                   onChange={(e) => handleModuleUnlockValueChange(e.target.value)}
                   placeholder={(t.settings.privacy.moduleUnlock as Record<string, string>)[currentModule.unlockMethod.placeholderKey || ''] || currentModule.unlockMethod.defaultValue}
+                  className={sequenceValidationError && currentModule.unlockMethod.type === 'sequence' ? 'border-amber-500 focus-visible:ring-amber-500' : ''}
                   data-testid="input-module-unlock"
                 />
+                {sequenceValidationError && currentModule.unlockMethod.type === 'sequence' && (
+                  <p className="text-xs text-amber-500">
+                    {(t.settings.privacy.moduleUnlock as Record<string, string>).sequenceValidationError || 'Only digits and calculator symbols allowed'}
+                  </p>
+                )}
                 {currentModule.unlockMethod.descriptionKey && (
                   <p className="text-xs text-muted-foreground">
                     {(t.settings.privacy.moduleUnlock as Record<string, string>)[currentModule.unlockMethod.descriptionKey] || ''}
