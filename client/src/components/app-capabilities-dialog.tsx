@@ -29,6 +29,10 @@ import {
   EyeClosed,
   Sparkles,
   Bell,
+  AlertTriangle,
+  Calendar,
+  Info,
+  Ban,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -39,6 +43,11 @@ import {
   type DeviceInfo,
   type PlatformTipKey,
 } from "@/lib/app-capabilities";
+
+type IOSStorageWarningProps = {
+  device: DeviceInfo;
+  t: ReturnType<typeof useI18n>['t'];
+};
 
 interface AppCapabilitiesDialogProps {
   onClose: () => void;
@@ -129,6 +138,94 @@ function PlatformTip({ tipKey, t }: { tipKey: PlatformTipKey; t: ReturnType<type
           <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
             {tip}
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IOSStorageWarning({ device, t }: IOSStorageWarningProps) {
+  if (device.os !== 'iOS') return null;
+  
+  const isSafari = device.browser === 'Safari';
+  const pwaInstruction = isSafari 
+    ? t.capabilities.iosStorageWarning.installPwaSafari 
+    : t.capabilities.iosStorageWarning.installPwaChrome;
+  
+  return (
+    <div className="bg-muted/30 border border-border/60 rounded-lg p-3 space-y-3">
+      <div className="flex items-start gap-2">
+        <AlertTriangle className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+        <div>
+          <h4 className="text-xs font-medium">
+            {t.capabilities.iosStorageWarning.title}
+          </h4>
+          <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+            {t.capabilities.iosStorageWarning.description}
+          </p>
+        </div>
+      </div>
+      
+      <div className="flex items-start gap-2 bg-background/50 rounded-md p-2">
+        <Info className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+        <div>
+          <span className="text-[11px] font-medium text-muted-foreground">
+            {t.capabilities.iosStorageWarning.whyHappens}
+          </span>
+          <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
+            {t.capabilities.iosStorageWarning.whyHappensDesc}
+          </p>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <h5 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+          {t.capabilities.iosStorageWarning.recommendations}
+        </h5>
+        
+        <div className="space-y-2">
+          <div className="flex items-start gap-2">
+            <Download className="h-3.5 w-3.5 mt-0.5 text-foreground/70 shrink-0" />
+            <div>
+              <span className="text-xs font-medium">{t.capabilities.iosStorageWarning.installPwa}</span>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {t.capabilities.iosStorageWarning.installPwaDesc}
+              </p>
+              <p className="text-[11px] text-foreground/80 mt-0.5">
+                {pwaInstruction}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-2">
+            <Calendar className="h-3.5 w-3.5 mt-0.5 text-foreground/70 shrink-0" />
+            <div>
+              <span className="text-xs font-medium">{t.capabilities.iosStorageWarning.useRegularly}</span>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {t.capabilities.iosStorageWarning.useRegularlyDesc}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-2">
+            <Cloud className="h-3.5 w-3.5 mt-0.5 text-foreground/70 shrink-0" />
+            <div>
+              <span className="text-xs font-medium">{t.capabilities.iosStorageWarning.cloudBackup}</span>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {t.capabilities.iosStorageWarning.cloudBackupDesc}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-2">
+            <Ban className="h-3.5 w-3.5 mt-0.5 text-foreground/70 shrink-0" />
+            <div>
+              <span className="text-xs font-medium">{t.capabilities.iosStorageWarning.avoidPrivate}</span>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {t.capabilities.iosStorageWarning.avoidPrivateDesc}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -464,6 +561,8 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
                   <AppFeaturesSection t={t} />
                   
                   <PrivacySection t={t} />
+                  
+                  <IOSStorageWarning device={capabilities.device} t={t} />
                   
                   {capabilities.platformTip && (
                     <PlatformTip tipKey={capabilities.platformTip} t={t} />

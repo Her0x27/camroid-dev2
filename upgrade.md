@@ -10,10 +10,10 @@
 ## Чек-лист задач
 
 - [x] Обновить upgrade.md — добавить секцию v30
-- [ ] Добавить переводы iosStorageWarning в ru.ts и en.ts
-- [ ] Создать компонент IOSStorageWarning в app-capabilities-dialog.tsx
-- [ ] Интегрировать компонент (отображать только при device.os === 'iOS')
-- [ ] Финальное тестирование и обновление upgrade.md
+- [x] Добавить переводы iosStorageWarning в ru.ts и en.ts
+- [x] Создать компонент IOSStorageWarning в app-capabilities-dialog.tsx
+- [x] Интегрировать компонент (отображать только при device.os === 'iOS')
+- [x] Финальное тестирование и обновление upgrade.md
 
 ---
 
@@ -22,10 +22,10 @@
 | Задача | Статус | Дата |
 |--------|--------|------|
 | upgrade.md | ✅ Готово | 11.12.2025 |
-| Переводы ru.ts/en.ts | ⏳ В работе | 11.12.2025 |
-| IOSStorageWarning компонент | ⏳ Ожидает | - |
-| Интеграция | ⏳ Ожидает | - |
-| Тестирование | ⏳ Ожидает | - |
+| Переводы ru.ts/en.ts | ✅ Готово | 11.12.2025 |
+| IOSStorageWarning компонент | ✅ Готово | 11.12.2025 |
+| Интеграция | ✅ Готово | 11.12.2025 |
+| Тестирование | ✅ Готово | 11.12.2025 |
 
 ## Изменения v30
 
@@ -42,6 +42,27 @@
 2. Регулярно использовать приложение — сбрасывает счётчик
 3. Загружать фото в облако — надёжное сохранение
 4. Не использовать приватный режим Safari
+
+### i18n/en.ts и i18n/ru.ts
+- Добавлена секция `iosStorageWarning` с переводами:
+  - title, description, whyHappens, whyHappensDesc
+  - recommendations, installPwa, installPwaDesc
+  - installPwaSafari, installPwaChrome (разные инструкции для браузеров)
+  - useRegularly, useRegularlyDesc
+  - cloudBackup, cloudBackupDesc
+  - avoidPrivate, avoidPrivateDesc
+
+### app-capabilities-dialog.tsx
+- Добавлены импорты: AlertTriangle, Calendar, Info, Ban
+- Добавлен тип IOSStorageWarningProps
+- Добавлена функция IOSStorageWarning:
+  - Проверяет device.os === 'iOS' — если нет, возвращает null
+  - Определяет браузер (Safari/Chrome) для персонализированных инструкций PWA
+  - Использует muted стили без ярких цветов (bg-muted/30, border-border/60)
+  - Добавлена секция "Почему это происходит" с объяснением ITP
+  - 4 рекомендации: установка PWA, регулярное использование, облако, приватный режим
+  - Использует иконку Ban вместо EyeOff (избежание дублирования с privacy section)
+- Интегрирована в диалог после PrivacySection
 
 ---
 

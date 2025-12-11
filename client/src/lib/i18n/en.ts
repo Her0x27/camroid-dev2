@@ -561,6 +561,23 @@ export const en = {
       desktopFirefox: "Camera and storage work. PWA and orientation sensors not supported",
       desktopSafari: "Full support on macOS. Install via File → Add to Dock",
     },
+    iosStorageWarning: {
+      title: "Important for iOS",
+      description: "Safari automatically clears browser data (photos, settings) after 7 days of inactivity due to privacy protection (ITP).",
+      whyHappens: "Why this happens",
+      whyHappensDesc: "Apple's Intelligent Tracking Prevention removes site data to protect privacy. Unfortunately, this also affects web apps that store data locally.",
+      recommendations: "How to protect your data",
+      installPwa: "Install as app",
+      installPwaDesc: "Add to home screen — PWA apps have separate storage not subject to the 7-day rule.",
+      installPwaSafari: "Use Share → Add to Home Screen",
+      installPwaChrome: "Open in Safari, then Share → Add to Home Screen",
+      useRegularly: "Use regularly",
+      useRegularlyDesc: "Each visit resets the 7-day counter. Open the app at least once a week.",
+      cloudBackup: "Sync to cloud",
+      cloudBackupDesc: "The most reliable method. Set up cloud upload for important photos.",
+      avoidPrivate: "Avoid Private Mode",
+      avoidPrivateDesc: "In private mode all data is deleted when the tab is closed.",
+    },
   },
 
   components: {
