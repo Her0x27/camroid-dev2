@@ -491,13 +491,17 @@ export const ru: Translations = {
   
   capabilities: {
     title: "Добро пожаловать",
-    description: "Это приложение для приватной съёмки с GPS и расширенными возможностями.",
+    subtitle: "Camroid M",
+    description: "Тактическая камера с GPS-метаданными, прицельной сеткой и режимом конфиденциальности. Все данные хранятся локально на вашем устройстве.",
+    aboutTitle: "О приложении",
     supported: "Доступно",
     notSupported: "Недоступно",
     dontShowAgain: "Не показывать это окно",
     continue: "Продолжить",
+    capabilitiesTitle: "Возможности устройства",
     permissionsTitle: "Требуемые разрешения",
     appFeaturesTitle: "Функции приложения",
+    recommendationsTitle: "Рекомендации",
     features: {
       camera: "Доступ к камере",
       geolocation: "GPS-локация",

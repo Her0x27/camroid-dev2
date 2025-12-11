@@ -31,8 +31,8 @@ import {
   Bell,
   AlertTriangle,
   Calendar,
-  Info,
   Ban,
+  Settings,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -40,14 +40,10 @@ import {
   isDismissed,
   setDismissed,
   type AppCapabilities,
+  type AppCapability,
   type DeviceInfo,
   type PlatformTipKey,
 } from "@/lib/app-capabilities";
-
-type IOSStorageWarningProps = {
-  device: DeviceInfo;
-  t: ReturnType<typeof useI18n>['t'];
-};
 
 interface AppCapabilitiesDialogProps {
   onClose: () => void;
@@ -73,6 +69,24 @@ function DeviceInfoDisplay({ device }: { device: DeviceInfo }) {
       <span className="text-muted-foreground/50">•</span>
       <Globe className="h-3.5 w-3.5" />
       <span>{device.browser}</span>
+    </div>
+  );
+}
+
+function AboutSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
+  return (
+    <div className="bg-card/50 border border-border/50 rounded-lg p-3">
+      <div className="flex items-start gap-3">
+        <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Camera className="h-5 w-5 text-primary" />
+        </div>
+        <div>
+          <h4 className="text-xs font-semibold text-foreground">{t.capabilities.subtitle}</h4>
+          <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+            {t.capabilities.description}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -123,111 +137,97 @@ function PrivacySection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   );
 }
 
-function PlatformTip({ tipKey, t }: { tipKey: PlatformTipKey; t: ReturnType<typeof useI18n>['t'] }) {
-  const tip = t.capabilities.platformTips[tipKey];
-  if (!tip) return null;
-  
+function CapabilitiesSection({ capabilities, t }: { 
+  capabilities: AppCapability[];
+  t: ReturnType<typeof useI18n>['t'] 
+}) {
   return (
-    <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5">
-      <div className="flex items-start gap-2">
-        <Lightbulb className="h-3.5 w-3.5 mt-0.5 text-amber-500 shrink-0" />
-        <div>
-          <h4 className="text-xs font-medium text-amber-700 dark:text-amber-400">
-            {t.capabilities.platformTips.title}
-          </h4>
-          <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-            {tip}
-          </p>
-        </div>
+    <div className="space-y-2">
+      <h4 className="text-xs font-medium flex items-center gap-2 text-muted-foreground">
+        <Settings className="h-3.5 w-3.5 text-primary" />
+        {t.capabilities.capabilitiesTitle}
+      </h4>
+      
+      <div className="grid grid-cols-2 gap-1.5">
+        {capabilities.map((cap) => {
+          const Icon = capabilityIcons[cap.id] || Check;
+          return (
+            <div 
+              key={cap.id}
+              className="flex items-center gap-2 p-2 rounded-md bg-card/30 border border-border/30"
+            >
+              <Icon className={`h-3.5 w-3.5 shrink-0 ${cap.supported ? 'text-primary' : 'text-muted-foreground/50'}`} />
+              <span className={`text-[11px] truncate ${cap.supported ? 'text-foreground' : 'text-muted-foreground/70'}`}>
+                {t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}
+              </span>
+              {cap.supported ? (
+                <Check className="h-3 w-3 text-primary ml-auto shrink-0" />
+              ) : (
+                <X className="h-3 w-3 text-muted-foreground/50 ml-auto shrink-0" />
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
 
-function IOSStorageWarning({ device, t }: IOSStorageWarningProps) {
-  if (device.os !== 'iOS') return null;
-  
-  const isSafari = device.browser === 'Safari';
-  const pwaInstruction = isSafari 
-    ? t.capabilities.iosStorageWarning.installPwaSafari 
-    : t.capabilities.iosStorageWarning.installPwaChrome;
+function RecommendationsSection({ device, platformTip, t }: { 
+  device: DeviceInfo; 
+  platformTip?: PlatformTipKey;
+  t: ReturnType<typeof useI18n>['t'] 
+}) {
+  const hasRecommendations = device.os === 'iOS' || platformTip;
+  if (!hasRecommendations) return null;
   
   return (
-    <div className="bg-muted/30 border border-border/60 rounded-lg p-3 space-y-3">
-      <div className="flex items-start gap-2">
-        <AlertTriangle className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-        <div>
-          <h4 className="text-xs font-medium">
-            {t.capabilities.iosStorageWarning.title}
-          </h4>
-          <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-            {t.capabilities.iosStorageWarning.description}
+    <div className="space-y-2">
+      <h4 className="text-xs font-medium flex items-center gap-2 text-muted-foreground">
+        <Lightbulb className="h-3.5 w-3.5 text-primary" />
+        {t.capabilities.recommendationsTitle}
+      </h4>
+      
+      {platformTip && (
+        <div className="bg-muted/30 border border-border/50 rounded-lg p-2.5">
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            {t.capabilities.platformTips[platformTip]}
           </p>
         </div>
-      </div>
+      )}
       
-      <div className="flex items-start gap-2 bg-background/50 rounded-md p-2">
-        <Info className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
-        <div>
-          <span className="text-[11px] font-medium text-muted-foreground">
-            {t.capabilities.iosStorageWarning.whyHappens}
-          </span>
-          <p className="text-[11px] text-muted-foreground/80 leading-relaxed">
-            {t.capabilities.iosStorageWarning.whyHappensDesc}
-          </p>
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <h5 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-          {t.capabilities.iosStorageWarning.recommendations}
-        </h5>
-        
-        <div className="space-y-2">
+      {device.os === 'iOS' && (
+        <div className="bg-muted/30 border border-border/50 rounded-lg p-2.5 space-y-2">
           <div className="flex items-start gap-2">
-            <Download className="h-3.5 w-3.5 mt-0.5 text-foreground/70 shrink-0" />
+            <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
             <div>
-              <span className="text-xs font-medium">{t.capabilities.iosStorageWarning.installPwa}</span>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                {t.capabilities.iosStorageWarning.installPwaDesc}
-              </p>
-              <p className="text-[11px] text-foreground/80 mt-0.5">
-                {pwaInstruction}
+              <span className="text-xs font-medium">{t.capabilities.iosStorageWarning.title}</span>
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                {t.capabilities.iosStorageWarning.description}
               </p>
             </div>
           </div>
           
-          <div className="flex items-start gap-2">
-            <Calendar className="h-3.5 w-3.5 mt-0.5 text-foreground/70 shrink-0" />
-            <div>
-              <span className="text-xs font-medium">{t.capabilities.iosStorageWarning.useRegularly}</span>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                {t.capabilities.iosStorageWarning.useRegularlyDesc}
-              </p>
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className="flex items-center gap-1.5">
+              <Download className="h-3 w-3 text-primary shrink-0" />
+              <span className="text-[10px] text-muted-foreground truncate">{t.capabilities.iosStorageWarning.installPwa}</span>
             </div>
-          </div>
-          
-          <div className="flex items-start gap-2">
-            <Cloud className="h-3.5 w-3.5 mt-0.5 text-foreground/70 shrink-0" />
-            <div>
-              <span className="text-xs font-medium">{t.capabilities.iosStorageWarning.cloudBackup}</span>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                {t.capabilities.iosStorageWarning.cloudBackupDesc}
-              </p>
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3 w-3 text-primary shrink-0" />
+              <span className="text-[10px] text-muted-foreground truncate">{t.capabilities.iosStorageWarning.useRegularly}</span>
             </div>
-          </div>
-          
-          <div className="flex items-start gap-2">
-            <Ban className="h-3.5 w-3.5 mt-0.5 text-foreground/70 shrink-0" />
-            <div>
-              <span className="text-xs font-medium">{t.capabilities.iosStorageWarning.avoidPrivate}</span>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                {t.capabilities.iosStorageWarning.avoidPrivateDesc}
-              </p>
+            <div className="flex items-center gap-1.5">
+              <Cloud className="h-3 w-3 text-primary shrink-0" />
+              <span className="text-[10px] text-muted-foreground truncate">{t.capabilities.iosStorageWarning.cloudBackup}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Ban className="h-3 w-3 text-primary shrink-0" />
+              <span className="text-[10px] text-muted-foreground truncate">{t.capabilities.iosStorageWarning.avoidPrivate}</span>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -432,9 +432,6 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
     return null;
   }
 
-  const supportedCapabilities = capabilities.capabilities.filter(c => c.supported);
-  const unsupportedCapabilities = capabilities.capabilities.filter(c => !c.supported);
-
   return (
     <AnimatePresence onExitComplete={handleExitComplete}>
       {isVisible && (
@@ -483,90 +480,20 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
               <ScrollArea className="h-[50vh] md:h-[60vh]">
                 <div className="p-4 space-y-4">
                   <DeviceInfoDisplay device={capabilities.device} />
-
-                  <div className="space-y-3">
-                    <h3 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                      {t.capabilities.permissionsTitle}
-                    </h3>
-                    
-                    {supportedCapabilities.length > 0 && (
-                      <div>
-                        <h4 className="text-xs font-medium text-green-600 dark:text-green-400 mb-1.5 flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5" />
-                          {t.capabilities.supported}
-                        </h4>
-                        <ul className="space-y-2">
-                          {supportedCapabilities.map((cap) => {
-                            const Icon = capabilityIcons[cap.id] || Check;
-                            const noteKey = cap.note as keyof typeof t.capabilities.notes | undefined;
-                            const descKey = cap.id as keyof typeof t.capabilities.descriptions;
-                            return (
-                              <li key={cap.id} className="flex items-start gap-2 text-xs">
-                                <Icon className="h-3.5 w-3.5 mt-0.5 text-green-600 dark:text-green-400 shrink-0" />
-                                <div>
-                                  <span className="font-medium">{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
-                                  {t.capabilities.descriptions[descKey] && (
-                                    <span className="text-muted-foreground text-[11px] block leading-relaxed">
-                                      {t.capabilities.descriptions[descKey]}
-                                    </span>
-                                  )}
-                                  {noteKey && t.capabilities.notes[noteKey] && (
-                                    <span className="text-amber-600 dark:text-amber-400 text-[11px] block mt-0.5">
-                                      {t.capabilities.notes[noteKey]}
-                                    </span>
-                                  )}
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    )}
-
-                    {unsupportedCapabilities.length > 0 && (
-                      <div>
-                        <h4 className="text-xs font-medium text-destructive mb-1.5 flex items-center gap-1.5">
-                          <X className="h-3.5 w-3.5" />
-                          {t.capabilities.notSupported}
-                        </h4>
-                        <ul className="space-y-2">
-                          {unsupportedCapabilities.map((cap) => {
-                            const Icon = capabilityIcons[cap.id] || X;
-                            const noteKey = cap.note as keyof typeof t.capabilities.notes | undefined;
-                            const descKey = cap.id as keyof typeof t.capabilities.descriptions;
-                            return (
-                              <li key={cap.id} className="flex items-start gap-2 text-xs text-muted-foreground">
-                                <Icon className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-                                <div>
-                                  <span>{t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}</span>
-                                  {t.capabilities.descriptions[descKey] && (
-                                    <span className="text-[11px] block leading-relaxed">
-                                      {t.capabilities.descriptions[descKey]}
-                                    </span>
-                                  )}
-                                  {noteKey && t.capabilities.notes[noteKey] && (
-                                    <span className="text-[11px] block mt-0.5">
-                                      {t.capabilities.notes[noteKey]}
-                                    </span>
-                                  )}
-                                </div>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
+                  
+                  <AboutSection t={t} />
                   
                   <AppFeaturesSection t={t} />
                   
+                  <CapabilitiesSection capabilities={capabilities.capabilities} t={t} />
+                  
                   <PrivacySection t={t} />
                   
-                  <IOSStorageWarning device={capabilities.device} t={t} />
-                  
-                  {capabilities.platformTip && (
-                    <PlatformTip tipKey={capabilities.platformTip} t={t} />
-                  )}
+                  <RecommendationsSection 
+                    device={capabilities.device} 
+                    platformTip={capabilities.platformTip}
+                    t={t} 
+                  />
                 </div>
               </ScrollArea>
 

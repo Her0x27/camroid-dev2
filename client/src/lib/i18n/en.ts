@@ -489,13 +489,17 @@ export const en = {
   
   capabilities: {
     title: "Welcome",
-    description: "A private camera app with GPS and advanced features.",
+    subtitle: "Camroid M",
+    description: "Tactical camera with GPS metadata, reticle overlay, and privacy mode. All data is stored locally on your device.",
+    aboutTitle: "About",
     supported: "Available",
     notSupported: "Not Available",
     dontShowAgain: "Don't show this again",
     continue: "Continue",
+    capabilitiesTitle: "Device Capabilities",
     permissionsTitle: "Required Permissions",
     appFeaturesTitle: "App Features",
+    recommendationsTitle: "Recommendations",
     features: {
       camera: "Camera access",
       geolocation: "GPS location",
