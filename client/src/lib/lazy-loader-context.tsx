@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useMemo, lazy, ComponentType } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, lazy, ComponentType, useEffect, useRef } from "react";
 
 interface LoadingModule {
   name: string;
@@ -10,47 +10,93 @@ interface LazyLoaderState {
   currentModule: string | null;
   progress: number;
   allLoaded: boolean;
+  initialized: boolean;
 }
 
 interface LazyLoaderContextValue extends LazyLoaderState {
   registerModule: (name: string) => void;
   markModuleLoaded: (name: string) => void;
+  initializeModules: (names: string[]) => void;
 }
 
 const LazyLoaderContext = createContext<LazyLoaderContextValue | null>(null);
 
+const loadedModulesSet = new Set<string>();
+const registeredModulesSet = new Set<string>();
+
+interface ContextRef {
+  registerModule: (name: string) => void;
+  markModuleLoaded: (name: string) => void;
+}
+
+let contextRef: ContextRef | null = null;
+
 export function LazyLoaderProvider({ children }: { children: React.ReactNode }) {
   const [modules, setModules] = useState<LoadingModule[]>([]);
-
+  const [initialized, setInitialized] = useState(false);
+  const mountedRef = useRef(false);
+  
   const registerModule = useCallback((name: string) => {
+    registeredModulesSet.add(name);
     setModules((prev) => {
-      if (prev.some((m) => m.name === name)) return prev;
-      return [...prev, { name, loaded: false }];
+      if (prev.some((m) => m.name === name)) {
+        return prev;
+      }
+      return [...prev, { name, loaded: loadedModulesSet.has(name) }];
     });
   }, []);
 
   const markModuleLoaded = useCallback((name: string) => {
-    setModules((prev) =>
-      prev.map((m) => (m.name === name ? { ...m, loaded: true } : m))
-    );
+    loadedModulesSet.add(name);
+    setModules((prev) => {
+      const existing = prev.find((m) => m.name === name);
+      if (!existing) {
+        return [...prev, { name, loaded: true }];
+      }
+      if (existing.loaded) return prev;
+      return prev.map((m) => (m.name === name ? { ...m, loaded: true } : m));
+    });
   }, []);
+
+  const initializeModules = useCallback((names: string[]) => {
+    setModules(names.map(name => ({
+      name,
+      loaded: loadedModulesSet.has(name)
+    })));
+    setInitialized(true);
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    contextRef = { registerModule, markModuleLoaded };
+    
+    return () => {
+      mountedRef.current = false;
+      contextRef = null;
+    };
+  }, [registerModule, markModuleLoaded]);
 
   const state = useMemo((): LazyLoaderState => {
     const loadedCount = modules.filter((m) => m.loaded).length;
     const totalCount = modules.length;
     const currentLoading = modules.find((m) => !m.loaded);
     
+    const progress = totalCount > 0 
+      ? (loadedCount / totalCount) * 100 
+      : (initialized ? 100 : 0);
+    
     return {
       modules,
       currentModule: currentLoading?.name ?? null,
-      progress: totalCount > 0 ? (loadedCount / totalCount) * 100 : 0,
-      allLoaded: totalCount > 0 && loadedCount === totalCount,
+      progress,
+      allLoaded: initialized && (totalCount === 0 || loadedCount === totalCount),
+      initialized,
     };
-  }, [modules]);
+  }, [modules, initialized]);
 
   const value = useMemo(
-    () => ({ ...state, registerModule, markModuleLoaded }),
-    [state, registerModule, markModuleLoaded]
+    () => ({ ...state, registerModule, markModuleLoaded, initializeModules }),
+    [state, registerModule, markModuleLoaded, initializeModules]
   );
 
   return (
@@ -72,62 +118,39 @@ export function useLazyLoaderOptional() {
   return useContext(LazyLoaderContext);
 }
 
-type LazyComponentFactory = () => Promise<{ default: ComponentType<Record<string, unknown>> }>;
+type LazyComponentFactory<T extends ComponentType<any>> = () => Promise<{ default: T }>;
 
-interface TrackedLazyOptions {
-  preload?: boolean;
-}
-
-export function createTrackedLazy(
+export function createTrackedLazy<P extends object>(
   name: string,
-  factory: LazyComponentFactory,
-  _options?: TrackedLazyOptions
-) {
-  let moduleRegistered = false;
-  let moduleLoaded = false;
-  let registerFn: ((name: string) => void) | null = null;
-  let markLoadedFn: ((name: string) => void) | null = null;
+  factory: LazyComponentFactory<ComponentType<P>>
+): ComponentType<P> {
 
   const LazyComponent = lazy(() => {
-    if (registerFn && !moduleRegistered) {
-      registerFn(name);
-      moduleRegistered = true;
-    }
-
-    return factory().then((module) => {
-      if (markLoadedFn && !moduleLoaded) {
-        markLoadedFn(name);
-        moduleLoaded = true;
+    if (!registeredModulesSet.has(name)) {
+      registeredModulesSet.add(name);
+      if (contextRef) {
+        contextRef.registerModule(name);
       }
+    }
+    
+    return factory().then((module) => {
+      setTimeout(() => {
+        loadedModulesSet.add(name);
+        if (contextRef) {
+          contextRef.markModuleLoaded(name);
+        }
+      }, 100);
       return module;
     });
   });
 
-  function TrackedComponent(props: Record<string, unknown>) {
-    const context = useLazyLoaderOptional();
-    
-    if (context && !moduleRegistered) {
-      registerFn = context.registerModule;
-      markLoadedFn = context.markModuleLoaded;
-      context.registerModule(name);
-      moduleRegistered = true;
-    }
-
-    return <LazyComponent {...props} />;
+  function TrackedComponent(props: P) {
+    return <LazyComponent {...(props as any)} />;
   }
 
   TrackedComponent.displayName = `TrackedLazy(${name})`;
-  TrackedComponent.preload = () => {
-    factory().then((module) => {
-      moduleLoaded = true;
-      if (markLoadedFn) {
-        markLoadedFn(name);
-      }
-      return module;
-    });
-  };
 
-  return TrackedComponent;
+  return TrackedComponent as ComponentType<P>;
 }
 
 export const MODULE_NAMES = {
@@ -138,3 +161,7 @@ export const MODULE_NAMES = {
   game: "Игра",
   notFound: "404",
 } as const;
+
+export const INITIAL_MODULES = [
+  MODULE_NAMES.camera,
+];

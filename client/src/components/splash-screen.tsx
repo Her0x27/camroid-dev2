@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera } from "lucide-react";
-import { useLazyLoaderOptional } from "@/lib/lazy-loader-context";
+import { useLazyLoaderOptional, INITIAL_MODULES } from "@/lib/lazy-loader-context";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -12,10 +12,18 @@ export function SplashScreen({ onComplete, minDuration = 1500 }: SplashScreenPro
   const [phase, setPhase] = useState<"init" | "loading" | "complete">("init");
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const loaderContext = useLazyLoaderOptional();
+  const initializedRef = useRef(false);
   
   const progress = loaderContext?.progress ?? 0;
   const currentModule = loaderContext?.currentModule ?? null;
   const allLoaded = loaderContext?.allLoaded ?? false;
+
+  useEffect(() => {
+    if (loaderContext && !initializedRef.current) {
+      initializedRef.current = true;
+      loaderContext.initializeModules(INITIAL_MODULES);
+    }
+  }, [loaderContext]);
 
   useEffect(() => {
     const timer = setTimeout(() => setPhase("loading"), 100);
