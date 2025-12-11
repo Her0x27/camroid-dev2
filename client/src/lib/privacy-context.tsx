@@ -34,6 +34,7 @@ const STORAGE_KEY = "privacy-settings";
 const UNLOCKED_KEY = "privacy-unlocked";
 const FAVICON_CAMERA = "/favicon.svg";
 const TITLE_CAMERA = "Camroid M";
+const DESCRIPTION_CAMERA = "Tactical camera with GPS, compass and precision overlays. Capture geotagged photos for fieldwork and surveying.";
 
 export function configToSettings(config: DynamicConfig): PrivacySettings {
   return {
@@ -144,6 +145,46 @@ function updateTitle(isLocked: boolean, selectedModule?: string): void {
   }
 }
 
+function updateMetaTags(isLocked: boolean, selectedModule?: string): void {
+  const moduleConfig = isLocked && selectedModule ? privacyModuleRegistry.get(selectedModule) : null;
+  
+  const title = moduleConfig?.title || TITLE_CAMERA;
+  const description = moduleConfig?.description || DESCRIPTION_CAMERA;
+  const favicon = moduleConfig ? resolveFavicon(moduleConfig.favicon) : FAVICON_CAMERA;
+  
+  const metaUpdates: Record<string, string> = {
+    'description': description,
+    'og:title': title,
+    'og:description': description,
+    'og:image': favicon.replace('.svg', '.png'),
+    'og:site_name': title,
+    'twitter:title': title,
+    'twitter:description': description,
+    'twitter:image': favicon.replace('.svg', '.png'),
+    'apple-mobile-web-app-title': title,
+    'application-name': title,
+  };
+  
+  for (const [name, content] of Object.entries(metaUpdates)) {
+    let meta: HTMLMetaElement | null = null;
+    
+    if (name.startsWith('og:')) {
+      meta = document.querySelector(`meta[property="${name}"]`);
+    } else {
+      meta = document.querySelector(`meta[name="${name}"]`);
+    }
+    
+    if (meta) {
+      meta.setAttribute('content', content);
+    }
+  }
+  
+  const appleIcon = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
+  if (appleIcon) {
+    appleIcon.href = favicon.replace('.svg', '.png');
+  }
+}
+
 export function PrivacyProvider({ children }: { children: ReactNode }) {
   const [isConfigLoading, setIsConfigLoading] = useState(true);
   const [settings, setSettings] = useState<PrivacySettings>(getDefaultSettings);
@@ -165,6 +206,7 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
         setIsLocked(!wasUnlocked);
         updateFavicon(!wasUnlocked, loadedSettings.selectedModule);
         updateTitle(!wasUnlocked, loadedSettings.selectedModule);
+        updateMetaTags(!wasUnlocked, loadedSettings.selectedModule);
       }
       
       setIsConfigLoading(false);
@@ -182,6 +224,7 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     saveUnlockedState(true);
     updateFavicon(false);
     updateTitle(false);
+    updateMetaTags(false);
   }, []);
   
   const hideCamera = useCallback(() => {
@@ -190,6 +233,7 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     saveUnlockedState(false);
     updateFavicon(true, settings.selectedModule);
     updateTitle(true, settings.selectedModule);
+    updateMetaTags(true, settings.selectedModule);
   }, [settings.enabled, settings.selectedModule]);
   
   const toggleLock = useCallback(() => {
@@ -198,6 +242,7 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
       saveUnlockedState(!newValue);
       updateFavicon(newValue, settings.selectedModule);
       updateTitle(newValue, settings.selectedModule);
+      updateMetaTags(newValue, settings.selectedModule);
       return newValue;
     });
   }, [settings.selectedModule]);
@@ -217,6 +262,7 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
           saveUnlockedState(true);
           updateFavicon(false);
           updateTitle(false);
+          updateMetaTags(false);
           
           if (backendAvailable) {
             updateRemoteConfig({ PRIVACY_MODE: true });
@@ -226,6 +272,7 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
           saveUnlockedState(false);
           updateFavicon(false);
           updateTitle(false);
+          updateMetaTags(false);
           
           if (backendAvailable) {
             updateRemoteConfig({ PRIVACY_MODE: false });
@@ -253,9 +300,11 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     if (settings.enabled) {
       updateFavicon(isLocked, settings.selectedModule);
       updateTitle(isLocked, settings.selectedModule);
+      updateMetaTags(isLocked, settings.selectedModule);
     } else {
       updateFavicon(false);
       updateTitle(false);
+      updateMetaTags(false);
     }
   }, [settings.enabled, settings.selectedModule, isLocked]);
   

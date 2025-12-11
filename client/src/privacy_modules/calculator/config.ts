@@ -19,6 +19,7 @@ export function isValidSequenceChar(char: string): boolean {
 export const calculatorConfig: PrivacyModuleConfig = {
   id: 'calculator',
   title: 'Calculator',
+  description: 'Simple and elegant calculator for everyday calculations. Fast, accurate, and easy to use.',
   favicon: {
     ios: '/calculator-icon-ios.svg',
     android: '/calculator-icon-android.svg',

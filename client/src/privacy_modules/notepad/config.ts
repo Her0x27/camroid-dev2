@@ -5,6 +5,7 @@ import type { PrivacyModuleConfig } from "../types";
 export const notepadConfig: PrivacyModuleConfig = {
   id: 'notepad',
   title: 'Notepad',
+  description: 'Simple notepad for quick notes and reminders. Keep your thoughts organized and accessible.',
   favicon: {
     ios: '/notepad-icon-ios.svg',
     android: '/notepad-icon-android.svg',

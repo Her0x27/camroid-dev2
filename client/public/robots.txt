@@ -1,0 +1,23 @@
+# Camroid M - Private Application
+# Block all search engine crawlers and bots
+
+User-agent: *
+Disallow: /
+
+# Block specific crawlers
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Yandex
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+# No sitemap available

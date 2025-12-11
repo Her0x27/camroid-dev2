@@ -49,6 +49,7 @@ export function resolveFavicon(favicon: string | PlatformFavicon): string {
 export interface PrivacyModuleConfig {
   id: string;
   title: string;
+  description: string;
   favicon: string | PlatformFavicon;
   icon: ComponentType<{ className?: string }>;
   component: LazyExoticComponent<ComponentType<PrivacyModuleProps>>;
