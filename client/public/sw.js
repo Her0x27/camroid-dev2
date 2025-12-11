@@ -1,5 +1,5 @@
-// Camroid M Service Worker
-// This service worker is only active in production mode
+// App Service Worker
+// Production mode only
 
 const CACHE_VERSION = '1.0.0';
 const CACHE_NAME = `zeroday-cache-v${CACHE_VERSION}`;

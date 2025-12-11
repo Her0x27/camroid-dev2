@@ -1,4 +1,4 @@
-const DB_NAME = "camroid";
+const DB_NAME = "app-data";
 const DB_VERSION = 1;
 export const PHOTOS_STORE = "photos";
 export const SETTINGS_STORE = "settings";

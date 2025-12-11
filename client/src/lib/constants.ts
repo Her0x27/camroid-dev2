@@ -25,10 +25,10 @@ export const UPLOAD = {
 } as const;
 
 export const STORAGE_KEYS = {
-  SETTINGS: "tactical-camera-settings",
-  GAME_BEST_SCORE: "game2048-best",
-  PRIVACY_SETTINGS: "tactical-camera-privacy",
-  LANGUAGE: "tactical-camera-language",
+  SETTINGS: "app-settings",
+  GAME_BEST_SCORE: "game-best",
+  PRIVACY_SETTINGS: "app-privacy",
+  LANGUAGE: "app-language",
 } as const;
 
 export const PATTERN_LOCK = {

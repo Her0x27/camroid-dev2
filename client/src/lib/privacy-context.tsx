@@ -30,8 +30,8 @@ interface PrivacyContextType {
 
 const PrivacyContext = createContext<PrivacyContextType | null>(null);
 
-const STORAGE_KEY = "privacy-settings";
-const UNLOCKED_KEY = "privacy-unlocked";
+const STORAGE_KEY = "app-mode";
+const UNLOCKED_KEY = "app-unlocked";
 const FAVICON_CAMERA = "/favicon.svg";
 const TITLE_CAMERA = "Camroid M";
 const DESCRIPTION_CAMERA = "Tactical camera with GPS, compass and precision overlays. Capture geotagged photos for fieldwork and surveying.";

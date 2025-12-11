@@ -18,7 +18,7 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | null>(null);
 
-const STORAGE_KEY = "game-language";
+const STORAGE_KEY = "app-lang";
 
 const availableLanguages: { code: Language; name: string; nativeName: string }[] = [
   { code: "en", name: "English", nativeName: "English" },
