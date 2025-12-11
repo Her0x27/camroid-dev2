@@ -6,22 +6,56 @@
     <meta name="theme-color" content="#0a0a0a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Camroid M" />
-    <meta name="description" content="Camroid M - Tactical camera with GPS, compass and precision overlays. Capture geotagged photos for fieldwork and surveying." />
+    <meta name="apple-mobile-web-app-title" content="Camroid M" id="apple-title" />
+    <meta name="description" content="Camroid M - Tactical camera with GPS, compass and precision overlays. Capture geotagged photos for fieldwork and surveying." id="meta-desc" />
     
     <!-- Block search engine indexing - private application -->
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
     <meta name="googlebot" content="noindex, nofollow" />
     
     <!-- Additional PWA Meta Tags -->
-    <meta name="application-name" content="Camroid M" />
+    <meta name="application-name" content="Camroid M" id="app-name" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
     
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" id="favicon-svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" id="favicon-png" />
+    <link rel="apple-touch-icon" href="/favicon.png" id="apple-icon" />
     <link rel="manifest" href="/manifest.json" />
+    
+    <script>
+      (function(){
+        try {
+          var s = localStorage.getItem('app-mode');
+          if (!s) return;
+          var p = JSON.parse(s);
+          if (!p || !p.enabled) return;
+          var m = p.selectedModule || 'game-2048';
+          var modules = {
+            'game-2048': { t: '2048', f: '/game-icon.svg', d: 'Slide tiles to combine and reach 2048.' },
+            'calculator': { t: 'Calculator', f: '/calculator-icon.svg', d: 'Simple calculator for everyday use.' },
+            'notepad': { t: 'Notepad', f: '/notepad-icon.svg', d: 'Simple notepad for notes and reminders.' }
+          };
+          var c = modules[m] || modules['game-2048'];
+          document.title = c.t;
+          var ua = navigator.userAgent;
+          var suffix = /iPad|iPhone|iPod/.test(ua) ? '-ios' : /Android/.test(ua) ? '-android' : '';
+          var icon = c.f.replace('.svg', suffix + '.svg');
+          var fs = document.getElementById('favicon-svg');
+          var fp = document.getElementById('favicon-png');
+          var ai = document.getElementById('apple-icon');
+          var at = document.getElementById('apple-title');
+          var an = document.getElementById('app-name');
+          var md = document.getElementById('meta-desc');
+          if (fs) fs.href = icon;
+          if (fp) fp.href = icon.replace('.svg', '.png');
+          if (ai) ai.href = icon;
+          if (at) at.content = c.t;
+          if (an) an.content = c.t;
+          if (md) md.content = c.d;
+        } catch(e) {}
+      })();
+    </script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
