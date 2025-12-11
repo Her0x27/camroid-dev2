@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { Switch, Route } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
@@ -11,13 +11,14 @@ import { ThemeProvider } from "@/lib/theme-context";
 import { SplashScreen } from "@/components/splash-screen";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { PrivacyOverlay } from "@/components/privacy-overlay";
+import { LazyLoaderProvider, createTrackedLazy, MODULE_NAMES } from "@/lib/lazy-loader-context";
 
-const CameraPage = lazy(() => import("@/pages/camera"));
-const GalleryPage = lazy(() => import("@/pages/gallery"));
-const PhotoDetailPage = lazy(() => import("@/pages/photo-detail"));
-const SettingsPage = lazy(() => import("@/pages/settings"));
-const GamePage = lazy(() => import("@/pages/game"));
-const NotFound = lazy(() => import("@/pages/not-found"));
+const CameraPage = createTrackedLazy(MODULE_NAMES.camera, () => import("@/pages/camera"));
+const GalleryPage = createTrackedLazy(MODULE_NAMES.gallery, () => import("@/pages/gallery"));
+const PhotoDetailPage = createTrackedLazy(MODULE_NAMES.photoDetail, () => import("@/pages/photo-detail"));
+const SettingsPage = createTrackedLazy(MODULE_NAMES.settings, () => import("@/pages/settings"));
+const GamePage = createTrackedLazy(MODULE_NAMES.game, () => import("@/pages/game"));
+const NotFound = createTrackedLazy(MODULE_NAMES.notFound, () => import("@/pages/not-found"));
 
 function PageLoader() {
   return (
@@ -51,7 +52,6 @@ function Router() {
 
 function App() {
   const [showSplash, setShowSplash] = useState(() => {
-    // If privacy mode is enabled, skip camera splash screen
     const privacySettings = loadPrivacySettings();
     if (privacySettings.enabled) {
       return false;
@@ -73,12 +73,14 @@ function App() {
           <TooltipProvider>
             <SettingsProvider>
               <PrivacyProvider>
-                <ErrorBoundary>
-                  {showSplash && <SplashScreen onComplete={handleSplashComplete} duration={2800} />}
-                  <Router />
-                  <Toaster />
-                  <PrivacyOverlay />
-                </ErrorBoundary>
+                <LazyLoaderProvider>
+                  <ErrorBoundary>
+                    {showSplash && <SplashScreen onComplete={handleSplashComplete} minDuration={1500} />}
+                    <Router />
+                    <Toaster />
+                    <PrivacyOverlay />
+                  </ErrorBoundary>
+                </LazyLoaderProvider>
               </PrivacyProvider>
             </SettingsProvider>
           </TooltipProvider>

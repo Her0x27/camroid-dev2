@@ -1,26 +1,51 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera } from "lucide-react";
+import { useLazyLoaderOptional } from "@/lib/lazy-loader-context";
 
 interface SplashScreenProps {
   onComplete: () => void;
-  duration?: number;
+  minDuration?: number;
 }
 
-export function SplashScreen({ onComplete, duration = 2500 }: SplashScreenProps) {
+export function SplashScreen({ onComplete, minDuration = 1500 }: SplashScreenProps) {
   const [phase, setPhase] = useState<"init" | "loading" | "complete">("init");
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
+  const loaderContext = useLazyLoaderOptional();
+  
+  const progress = loaderContext?.progress ?? 0;
+  const currentModule = loaderContext?.currentModule ?? null;
+  const allLoaded = loaderContext?.allLoaded ?? false;
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setPhase("loading"), 100);
-    const timer2 = setTimeout(() => setPhase("complete"), duration - 400);
-    const timer3 = setTimeout(onComplete, duration);
+    const timer = setTimeout(() => setPhase("loading"), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
-    };
-  }, [onComplete, duration]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinTimeElapsed(true);
+    }, minDuration);
+    return () => clearTimeout(timer);
+  }, [minDuration]);
+
+  useEffect(() => {
+    if (minTimeElapsed && allLoaded) {
+      setPhase("complete");
+      const exitTimer = setTimeout(onComplete, 500);
+      return () => clearTimeout(exitTimer);
+    }
+  }, [minTimeElapsed, allLoaded, onComplete]);
+
+  const getLoadingText = () => {
+    if (currentModule) {
+      return `Загрузка: ${currentModule}...`;
+    }
+    if (allLoaded) {
+      return "Готово!";
+    }
+    return "Инициализация...";
+  };
 
   return (
     <AnimatePresence>
@@ -119,37 +144,47 @@ export function SplashScreen({ onComplete, duration = 2500 }: SplashScreenProps)
             </motion.div>
 
             <motion.div
-              className="relative w-56 h-1.5 bg-muted/30 rounded-full overflow-hidden"
+              className="flex flex-col items-center gap-2"
               initial={{ opacity: 0, scaleX: 0.5 }}
               animate={{ opacity: 1, scaleX: 1 }}
               transition={{ delay: 0.7, duration: 0.4 }}
             >
-              <motion.div
-                className="absolute inset-y-0 left-0 rounded-full"
-                style={{
-                  background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.8))",
-                }}
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ 
-                  duration: (duration - 1200) / 1000, 
-                  ease: [0.4, 0, 0.2, 1],
-                  delay: 0.8
-                }}
-              />
-              <motion.div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent)",
-                }}
-                animate={{ x: ["-100%", "200%"] }}
-                transition={{ 
-                  duration: 1.5, 
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.8
-                }}
-              />
+              <div className="relative w-56 h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                <motion.div
+                  className="absolute inset-y-0 left-0 rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--primary) / 0.8))",
+                  }}
+                  initial={{ width: "0%" }}
+                  animate={{ width: `${Math.max(progress, 5)}%` }}
+                  transition={{ 
+                    duration: 0.3, 
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.3), transparent)",
+                  }}
+                  animate={{ x: ["-100%", "200%"] }}
+                  transition={{ 
+                    duration: 1.5, 
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              </div>
+              
+              <motion.p
+                className="text-[11px] text-muted-foreground h-4"
+                key={currentModule || "init"}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {getLoadingText()}
+              </motion.p>
             </motion.div>
 
             <motion.div
