@@ -29,7 +29,8 @@
 ### camera/index.tsx
 - Консолидированы 4 useEffect (lines 130-174) в один useEffect
 - Уменьшено количество useEffect хуков: 9 → 6
-- Единая логика проверки готовности модулей (init, gps, sensors, ready)
+- Используется lookup table (LOADING_STEPS array) с декларативным описанием шагов
+- Единый for loop вместо 4 if блоков — лучшая расширяемость
 - Зависимости объединены в массив для читаемости
 
 ### lazy-loader-context.tsx
