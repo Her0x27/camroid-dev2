@@ -171,5 +171,7 @@ export const INITIAL_MODULES = [
   MODULE_NAMES.init,
   MODULE_NAMES.gps,
   MODULE_NAMES.sensors,
+  MODULE_NAMES.gallery,
+  MODULE_NAMES.settings,
   MODULE_NAMES.ready,
 ];

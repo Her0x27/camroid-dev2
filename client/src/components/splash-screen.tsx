@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera } from "lucide-react";
-import { useLazyLoaderOptional, INITIAL_MODULES } from "@/lib/lazy-loader-context";
+import { useLazyLoaderOptional, INITIAL_MODULES, MODULE_NAMES } from "@/lib/lazy-loader-context";
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -13,10 +13,12 @@ export function SplashScreen({ onComplete, minDuration = 1500 }: SplashScreenPro
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const loaderContext = useLazyLoaderOptional();
   const initializedRef = useRef(false);
+  const preloadStartedRef = useRef(false);
   
   const progress = loaderContext?.progress ?? 0;
   const currentModule = loaderContext?.currentModule ?? null;
   const allLoaded = loaderContext?.allLoaded ?? false;
+  const modules = loaderContext?.modules ?? [];
 
   useEffect(() => {
     if (loaderContext && !initializedRef.current) {
@@ -24,6 +26,18 @@ export function SplashScreen({ onComplete, minDuration = 1500 }: SplashScreenPro
       loaderContext.initializeModules(INITIAL_MODULES);
     }
   }, [loaderContext]);
+
+  useEffect(() => {
+    if (preloadStartedRef.current) return;
+    
+    const sensorsLoaded = modules.find(m => m.name === MODULE_NAMES.sensors)?.loaded;
+    
+    if (sensorsLoaded) {
+      preloadStartedRef.current = true;
+      import("@/pages/gallery");
+      import("@/pages/settings");
+    }
+  }, [modules]);
 
   useEffect(() => {
     const timer = setTimeout(() => setPhase("loading"), 100);

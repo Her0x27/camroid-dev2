@@ -164,12 +164,14 @@ export default function CameraPage() {
     
     const gpsReady = !settings.gpsEnabled || geoData.latitude !== null || geoError !== null || !geoLoading;
     const sensorsReady = !settings.orientationEnabled || !orientationSupported || orientationData.heading !== null || orientationError !== null;
+    const galleryLoaded = loaderContext.modules.find(m => m.name === MODULE_NAMES.gallery)?.loaded ?? false;
+    const settingsLoaded = loaderContext.modules.find(m => m.name === MODULE_NAMES.settings)?.loaded ?? false;
     
-    if (gpsReady && sensorsReady) {
+    if (gpsReady && sensorsReady && galleryLoaded && settingsLoaded) {
       loadingStepsRef.current.ready = true;
       loaderContext.markModuleLoaded(MODULE_NAMES.ready);
     }
-  }, [loaderContext, settings.gpsEnabled, settings.orientationEnabled, geoData.latitude, orientationData.heading, geoError, geoLoading, orientationSupported, orientationError]);
+  }, [loaderContext, loaderContext?.modules, settings.gpsEnabled, settings.orientationEnabled, geoData.latitude, orientationData.heading, geoError, geoLoading, orientationSupported, orientationError]);
 
   useEffect(() => {
     const loadPhotos = async () => {
