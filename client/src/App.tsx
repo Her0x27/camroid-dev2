@@ -75,7 +75,7 @@ function App() {
               <PrivacyProvider>
                 <LazyLoaderProvider>
                   <ErrorBoundary>
-                    {showSplash && <SplashScreen onComplete={handleSplashComplete} minDuration={1500} />}
+                    {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
                     <Router />
                     <Toaster />
                     <PrivacyOverlay />

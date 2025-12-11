@@ -120,12 +120,14 @@ export function useLazyLoaderOptional() {
 
 type LazyComponentFactory<T extends ComponentType<any>> = () => Promise<{ default: T }>;
 
+const preloaders = new Map<string, () => Promise<void>>();
+
 export function createTrackedLazy<P extends object>(
   name: string,
   factory: LazyComponentFactory<ComponentType<P>>
 ): ComponentType<P> {
 
-  const LazyComponent = lazy(() => {
+  const loadModule = () => {
     if (!registeredModulesSet.has(name)) {
       registeredModulesSet.add(name);
       if (contextRef) {
@@ -134,15 +136,17 @@ export function createTrackedLazy<P extends object>(
     }
     
     return factory().then((module) => {
-      setTimeout(() => {
-        loadedModulesSet.add(name);
-        if (contextRef) {
-          contextRef.markModuleLoaded(name);
-        }
-      }, 100);
+      loadedModulesSet.add(name);
+      if (contextRef) {
+        contextRef.markModuleLoaded(name);
+      }
       return module;
     });
-  });
+  };
+
+  preloaders.set(name, async () => { await loadModule(); });
+
+  const LazyComponent = lazy(loadModule);
 
   function TrackedComponent(props: P) {
     return <LazyComponent {...(props as any)} />;
@@ -151,6 +155,14 @@ export function createTrackedLazy<P extends object>(
   TrackedComponent.displayName = `TrackedLazy(${name})`;
 
   return TrackedComponent as ComponentType<P>;
+}
+
+export function preloadModule(name: string): Promise<void> {
+  const preloader = preloaders.get(name);
+  if (preloader) {
+    return preloader();
+  }
+  return Promise.resolve();
 }
 
 export const MODULE_NAMES = {

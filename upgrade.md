@@ -32,10 +32,17 @@
 ### lazy-loader-context.tsx
 - Расширен INITIAL_MODULES: cameraChunk, init, gps, sensors, **gallery, settings**, ready
 - Добавлены шаги загрузки для Gallery и Settings
+- Добавлена функция preloadModule() для предзагрузки lazy-модулей
+- Убран setTimeout из createTrackedLazy — мгновенная маркировка загрузки
 
 ### splash-screen.tsx
 - Добавлена параллельная предзагрузка Gallery и Settings через динамические импорты
 - Модули загружаются реально, без симуляций
+- Убраны все искусственные таймеры (minDuration, setTimeout)
+- Splash завершается сразу как только все модули загружены
+
+### App.tsx
+- Убран minDuration prop из SplashScreen
 
 ### camera/index.tsx
 - Изменено условие ready: проверяет реальную загрузку gallery и settings через loaderContext.modules

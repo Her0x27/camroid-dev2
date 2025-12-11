@@ -1,16 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Camera } from "lucide-react";
-import { useLazyLoaderOptional, INITIAL_MODULES, MODULE_NAMES } from "@/lib/lazy-loader-context";
+import { useLazyLoaderOptional, INITIAL_MODULES, preloadModule, MODULE_NAMES } from "@/lib/lazy-loader-context";
 
 interface SplashScreenProps {
   onComplete: () => void;
-  minDuration?: number;
 }
 
-export function SplashScreen({ onComplete, minDuration = 1500 }: SplashScreenProps) {
+export function SplashScreen({ onComplete }: SplashScreenProps) {
   const [phase, setPhase] = useState<"init" | "loading" | "complete">("init");
-  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const loaderContext = useLazyLoaderOptional();
   const initializedRef = useRef(false);
   const preloadStartedRef = useRef(false);
@@ -18,7 +16,6 @@ export function SplashScreen({ onComplete, minDuration = 1500 }: SplashScreenPro
   const progress = loaderContext?.progress ?? 0;
   const currentModule = loaderContext?.currentModule ?? null;
   const allLoaded = loaderContext?.allLoaded ?? false;
-  const modules = loaderContext?.modules ?? [];
 
   useEffect(() => {
     if (loaderContext && !initializedRef.current) {
@@ -29,35 +26,21 @@ export function SplashScreen({ onComplete, minDuration = 1500 }: SplashScreenPro
 
   useEffect(() => {
     if (preloadStartedRef.current) return;
-    
-    const sensorsLoaded = modules.find(m => m.name === MODULE_NAMES.sensors)?.loaded;
-    
-    if (sensorsLoaded) {
-      preloadStartedRef.current = true;
-      import("@/pages/gallery");
-      import("@/pages/settings");
-    }
-  }, [modules]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setPhase("loading"), 100);
-    return () => clearTimeout(timer);
+    preloadStartedRef.current = true;
+    preloadModule(MODULE_NAMES.gallery);
+    preloadModule(MODULE_NAMES.settings);
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMinTimeElapsed(true);
-    }, minDuration);
-    return () => clearTimeout(timer);
-  }, [minDuration]);
+    setPhase("loading");
+  }, []);
 
   useEffect(() => {
-    if (minTimeElapsed && allLoaded) {
+    if (allLoaded) {
       setPhase("complete");
-      const exitTimer = setTimeout(onComplete, 500);
-      return () => clearTimeout(exitTimer);
+      onComplete();
     }
-  }, [minTimeElapsed, allLoaded, onComplete]);
+  }, [allLoaded, onComplete]);
 
   const getLoadingText = () => {
     if (currentModule) {
