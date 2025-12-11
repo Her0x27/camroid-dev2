@@ -79,9 +79,9 @@
   --tab-active-gradient: linear-gradient(135deg, hsla(142, 70%, 50%, 0.9) 0%, hsla(142, 70%, 38%, 0.8) 50%, hsla(142, 70%, 32%, 0.85) 100%);
   
   /* Typography */
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-serif: Georgia, serif;
-  --font-mono: 'Roboto Mono', 'Menlo', monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Menlo', monospace;
   
   --radius: .375rem;
   
