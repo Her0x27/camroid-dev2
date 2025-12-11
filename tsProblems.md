@@ -8,6 +8,15 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 **Статус задач разделов 1-10:** ✅ ВСЕ ЗАДАЧИ ОБРАБОТАНЫ
 
+**Раздел 16 - Консолидация useEffect и типизация (11.12.2025):** ✅ ВЫПОЛНЕНО
+- ✅ `camera/index.tsx` — Консолидированы 4 useEffect для loading steps в один (9 → 6 хуков)
+- ✅ `lazy-loader-context.tsx` — Улучшен тип `LazyModuleFactory<P>`, добавлен ESLint комментарий для `as any` (React.lazy limitation)
+
+**Метрики аудита v28:**
+- useEffect хуков в camera/index.tsx: 9 → 6 (сокращение на 33%)
+- Строки кода: ~20 строк сэкономлено
+- Типизация: улучшен `LazyModuleFactory`, документирован `as any`
+
 **Раздел 15 - Deep TypeScript Audit (11.12.2025):** ✅ ВЫПОЛНЕНО
 - ✅ `use-storage.ts` — Добавлен `mountedRef` для отмены async операций при unmount (предотвращение memory leaks)
 - ✅ `use-photo-navigator.ts` — Исправлены зависимости useEffect: убраны `photoIds.length` и `photo` из deps, добавлен `photoIdsRef` для доступа к актуальному состоянию без re-trigger

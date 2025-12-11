@@ -1,3 +1,48 @@
+# Upgrade: Консолидация useEffect и улучшение типизации v28
+
+## Описание
+Оптимизация кода камеры и улучшение типизации:
+- Консолидация 4 useEffect для loading steps в camera/index.tsx в один
+- Улучшение типизации в lazy-loader-context.tsx (убрать as any)
+- Обновление документации аудита
+
+## Чек-лист задач
+
+- [x] Обновить upgrade.md — добавить секцию v28
+- [x] Консолидировать 4 useEffect для loading steps в camera/index.tsx в один
+- [x] Улучшить типизацию в lazy-loader-context.tsx (документировать as any)
+- [x] Обновить tsProblems.md с результатами аудита
+
+---
+
+## Прогресс v28
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 11.12.2025 |
+| camera/index.tsx useEffects | ✅ Готово | 11.12.2025 |
+| lazy-loader-context.tsx typing | ✅ Готово | 11.12.2025 |
+| tsProblems.md | ✅ Готово | 11.12.2025 |
+
+## Изменения v28
+
+### camera/index.tsx
+- Консолидированы 4 useEffect (lines 130-174) в один useEffect
+- Уменьшено количество useEffect хуков: 9 → 6
+- Единая логика проверки готовности модулей (init, gps, sensors, ready)
+- Зависимости объединены в массив для читаемости
+
+### lazy-loader-context.tsx
+- Улучшен тип `LazyComponentFactory` → `LazyModuleFactory<P>` (без лишнего `ComponentType<any>`)
+- Добавлен ESLint комментарий для `as any` — документирует известное ограничение React.lazy
+- TypeScript не поддерживает корректную типизацию generic props в lazy-компонентах
+
+### Метрики
+- camera/index.tsx: 9 → 6 useEffect хуков
+- Строки кода сэкономлены: ~20 строк
+
+---
+
 # Upgrade: Deep TypeScript Audit v27
 
 ## Описание

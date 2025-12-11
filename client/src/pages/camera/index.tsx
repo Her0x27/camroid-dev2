@@ -129,49 +129,43 @@ export default function CameraPage() {
 
   useEffect(() => {
     if (!loaderContext) return;
-    if (loadingStepsRef.current.init) return;
-    
-    loadingStepsRef.current.init = true;
-    loaderContext.markModuleLoaded(MODULE_NAMES.init);
-  }, [loaderContext]);
-
-
-  useEffect(() => {
-    if (!loaderContext) return;
-    if (loadingStepsRef.current.gps) return;
-    
-    const gpsReady = !settings.gpsEnabled || geoData.latitude !== null || geoError !== null || !geoLoading;
-    if (gpsReady) {
-      loadingStepsRef.current.gps = true;
-      loaderContext.markModuleLoaded(MODULE_NAMES.gps);
-    }
-  }, [loaderContext, settings.gpsEnabled, geoData.latitude, geoError, geoLoading]);
-
-  useEffect(() => {
-    if (!loaderContext) return;
-    if (loadingStepsRef.current.sensors) return;
-    
-    const sensorsReady = !settings.orientationEnabled || !orientationSupported || orientationData.heading !== null || orientationError !== null;
-    if (sensorsReady) {
-      loadingStepsRef.current.sensors = true;
-      loaderContext.markModuleLoaded(MODULE_NAMES.sensors);
-    }
-  }, [loaderContext, settings.orientationEnabled, orientationSupported, orientationData.heading, orientationError]);
-
-  useEffect(() => {
-    if (!loaderContext) return;
-    if (loadingStepsRef.current.ready) return;
     
     const gpsReady = !settings.gpsEnabled || geoData.latitude !== null || geoError !== null || !geoLoading;
     const sensorsReady = !settings.orientationEnabled || !orientationSupported || orientationData.heading !== null || orientationError !== null;
     const galleryLoaded = loaderContext.modules.find(m => m.name === MODULE_NAMES.gallery)?.loaded ?? false;
     const settingsLoaded = loaderContext.modules.find(m => m.name === MODULE_NAMES.settings)?.loaded ?? false;
     
-    if (gpsReady && sensorsReady && galleryLoaded && settingsLoaded) {
+    if (!loadingStepsRef.current.init) {
+      loadingStepsRef.current.init = true;
+      loaderContext.markModuleLoaded(MODULE_NAMES.init);
+    }
+    
+    if (!loadingStepsRef.current.gps && gpsReady) {
+      loadingStepsRef.current.gps = true;
+      loaderContext.markModuleLoaded(MODULE_NAMES.gps);
+    }
+    
+    if (!loadingStepsRef.current.sensors && sensorsReady) {
+      loadingStepsRef.current.sensors = true;
+      loaderContext.markModuleLoaded(MODULE_NAMES.sensors);
+    }
+    
+    if (!loadingStepsRef.current.ready && gpsReady && sensorsReady && galleryLoaded && settingsLoaded) {
       loadingStepsRef.current.ready = true;
       loaderContext.markModuleLoaded(MODULE_NAMES.ready);
     }
-  }, [loaderContext, loaderContext?.modules, settings.gpsEnabled, settings.orientationEnabled, geoData.latitude, orientationData.heading, geoError, geoLoading, orientationSupported, orientationError]);
+  }, [
+    loaderContext,
+    loaderContext?.modules,
+    settings.gpsEnabled,
+    settings.orientationEnabled,
+    geoData.latitude,
+    geoError,
+    geoLoading,
+    orientationData.heading,
+    orientationError,
+    orientationSupported,
+  ]);
 
   useEffect(() => {
     const loadPhotos = async () => {

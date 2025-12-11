@@ -118,13 +118,13 @@ export function useLazyLoaderOptional() {
   return useContext(LazyLoaderContext);
 }
 
-type LazyComponentFactory<T extends ComponentType<any>> = () => Promise<{ default: T }>;
+type LazyModuleFactory<P> = () => Promise<{ default: ComponentType<P> }>;
 
 const preloaders = new Map<string, () => Promise<void>>();
 
 export function createTrackedLazy<P extends object>(
   name: string,
-  factory: LazyComponentFactory<ComponentType<P>>
+  factory: LazyModuleFactory<P>
 ): ComponentType<P> {
 
   const loadModule = () => {
@@ -149,12 +149,13 @@ export function createTrackedLazy<P extends object>(
   const LazyComponent = lazy(loadModule);
 
   function TrackedComponent(props: P) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- React.lazy type inference limitation
     return <LazyComponent {...(props as any)} />;
   }
 
   TrackedComponent.displayName = `TrackedLazy(${name})`;
 
-  return TrackedComponent as ComponentType<P>;
+  return TrackedComponent;
 }
 
 export function preloadModule(name: string): Promise<void> {
