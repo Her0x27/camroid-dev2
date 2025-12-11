@@ -11,7 +11,6 @@ import { ThemeProvider } from "@/lib/theme-context";
 import { SplashScreen } from "@/components/splash-screen";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { PrivacyOverlay } from "@/components/privacy-overlay";
-import { Loader2 } from "lucide-react";
 
 const CameraPage = lazy(() => import("@/pages/camera"));
 const GalleryPage = lazy(() => import("@/pages/gallery"));
@@ -22,9 +21,7 @@ const NotFound = lazy(() => import("@/pages/not-found"));
 
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" data-testid="page-loader" />
-    </div>
+    <div className="min-h-screen bg-background" data-testid="page-loader" />
   );
 }
 
