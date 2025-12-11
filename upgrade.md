@@ -9,12 +9,12 @@
 ## Чек-лист задач
 
 - [x] Обновить upgrade.md — добавить секцию v29
-- [ ] Обновить index.html — дефолтные мета-теги Camroid M
-- [ ] Расширить PrivacyModuleConfig (types.ts) — добавить поле description
-- [ ] Добавить description в модули (game-2048, calculator, notepad)
-- [ ] Создать updateMetaTags() в privacy-context.tsx
-- [ ] Интегрировать updateMetaTags() во все места вызова updateTitle/updateFavicon
-- [ ] Тестирование
+- [x] Обновить index.html — дефолтные мета-теги Camroid M + noindex
+- [x] Расширить PrivacyModuleConfig (types.ts) — добавить поле description
+- [x] Добавить description в модули (game-2048, calculator, notepad)
+- [x] Создать updateMetaTags() в privacy-context.tsx
+- [x] Интегрировать updateMetaTags() во все места вызова updateTitle/updateFavicon
+- [x] Добавить robots.txt для блокировки ботов
 
 ---
 
@@ -23,12 +23,43 @@
 | Задача | Статус | Дата |
 |--------|--------|------|
 | upgrade.md | ✅ Готово | 11.12.2025 |
-| index.html | 🔄 В процессе | 11.12.2025 |
-| types.ts | 🔄 В процессе | 11.12.2025 |
-| Модули | 🔄 В процессе | 11.12.2025 |
-| updateMetaTags() | 🔄 В процессе | 11.12.2025 |
-| Интеграция | ⏳ Ожидает | - |
-| Тестирование | ⏳ Ожидает | - |
+| index.html | ✅ Готово | 11.12.2025 |
+| types.ts | ✅ Готово | 11.12.2025 |
+| Модули | ✅ Готово | 11.12.2025 |
+| updateMetaTags() | ✅ Готово | 11.12.2025 |
+| robots.txt | ✅ Готово | 11.12.2025 |
+| Интеграция | ✅ Готово | 11.12.2025 |
+
+## Изменения v29
+
+### index.html
+- Дефолтные мета-теги заменены на "Camroid M - Tactical Camera"
+- Добавлены noindex/nofollow мета-теги для блокировки индексации
+- Favicon по умолчанию: /favicon.svg
+
+### robots.txt (новый файл)
+- Блокировка всех поисковых ботов (Googlebot, Bingbot, Yandex, Baidu, DuckDuckBot)
+- Disallow: / для всего сайта
+
+### privacy_modules/types.ts
+- Добавлено поле `description: string` в интерфейс `PrivacyModuleConfig`
+
+### Модули приватности
+- **game-2048**: description = "A simple yet addictive sliding puzzle game..."
+- **calculator**: description = "Simple and elegant calculator for everyday calculations..."
+- **notepad**: description = "Simple notepad for quick notes and reminders..."
+
+### privacy-context.tsx
+- Добавлена константа `DESCRIPTION_CAMERA` для дефолтного описания
+- Новая функция `updateMetaTags()` — обновляет мета-теги:
+  - description, apple-mobile-web-app-title, application-name
+- Интегрирована во все места: showCamera, hideCamera, toggleLock, updateSettings, useEffect
+- **Без социальных превью** — приложение приватное, og:* и twitter:* удалены
+
+### Защита от индексации
+- robots.txt: Disallow: / для всех ботов
+- noindex, nofollow, noarchive, nosnippet, noimageindex мета-теги
+- Удалены Open Graph и Twitter Card мета-теги (приватное приложение)
 
 ---
 

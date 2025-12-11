@@ -150,38 +150,18 @@ function updateMetaTags(isLocked: boolean, selectedModule?: string): void {
   
   const title = moduleConfig?.title || TITLE_CAMERA;
   const description = moduleConfig?.description || DESCRIPTION_CAMERA;
-  const favicon = moduleConfig ? resolveFavicon(moduleConfig.favicon) : FAVICON_CAMERA;
   
   const metaUpdates: Record<string, string> = {
     'description': description,
-    'og:title': title,
-    'og:description': description,
-    'og:image': favicon.replace('.svg', '.png'),
-    'og:site_name': title,
-    'twitter:title': title,
-    'twitter:description': description,
-    'twitter:image': favicon.replace('.svg', '.png'),
     'apple-mobile-web-app-title': title,
     'application-name': title,
   };
   
   for (const [name, content] of Object.entries(metaUpdates)) {
-    let meta: HTMLMetaElement | null = null;
-    
-    if (name.startsWith('og:')) {
-      meta = document.querySelector(`meta[property="${name}"]`);
-    } else {
-      meta = document.querySelector(`meta[name="${name}"]`);
-    }
-    
+    const meta = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
     if (meta) {
       meta.setAttribute('content', content);
     }
-  }
-  
-  const appleIcon = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement;
-  if (appleIcon) {
-    appleIcon.href = favicon.replace('.svg', '.png');
   }
 }
 
