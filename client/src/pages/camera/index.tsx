@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useLocation } from "wouter";
 import { useCamera } from "@/hooks/use-camera";
 import { useGeolocation } from "@/hooks/use-geolocation";
@@ -25,6 +25,7 @@ import { useI18n } from "@/lib/i18n";
 import { CameraControls, PhotoNoteDialog, CameraViewfinder } from "./components";
 import { AppCapabilitiesDialog, useAppCapabilitiesDialog } from "@/components/app-capabilities-dialog";
 import { CAMERA } from "@/lib/constants";
+import { useLazyLoaderOptional, MODULE_NAMES } from "@/lib/lazy-loader-context";
 import type { ReticlePosition } from "@shared/schema";
 
 export default function CameraPage() {
@@ -33,6 +34,14 @@ export default function CameraPage() {
   const { settings } = useSettings();
   const { settings: privacySettings, hideCamera, resetInactivityTimer } = usePrivacy();
   const { toast } = useToast();
+  const loaderContext = useLazyLoaderOptional();
+  
+  const loadingStepsRef = useRef({
+    init: false,
+    gps: false,
+    sensors: false,
+    ready: false,
+  });
   
   const [photoCount, setPhotoCount] = useState(0);
   const [cloudCount, setCloudCount] = useState(0);
@@ -67,12 +76,13 @@ export default function CameraPage() {
     cameraResolution: settings.cameraResolution,
   });
 
-  const { data: geoData } = useGeolocation(settings.gpsEnabled);
+  const { data: geoData, error: geoError, isLoading: geoLoading } = useGeolocation(settings.gpsEnabled);
 
   const {
     data: orientationData,
     isSupported: orientationSupported,
     requestPermission: requestOrientationPermission,
+    error: orientationError,
   } = useOrientation(settings.orientationEnabled);
 
   const { playCapture } = useCaptureSound();
@@ -116,6 +126,50 @@ export default function CameraPage() {
   useEffect(() => {
     setAdjustmentActive(adjustmentMode.active);
   }, [adjustmentMode.active]);
+
+  useEffect(() => {
+    if (!loaderContext) return;
+    if (loadingStepsRef.current.init) return;
+    
+    loadingStepsRef.current.init = true;
+    loaderContext.markModuleLoaded(MODULE_NAMES.init);
+  }, [loaderContext]);
+
+
+  useEffect(() => {
+    if (!loaderContext) return;
+    if (loadingStepsRef.current.gps) return;
+    
+    const gpsReady = !settings.gpsEnabled || geoData.latitude !== null || geoError !== null || !geoLoading;
+    if (gpsReady) {
+      loadingStepsRef.current.gps = true;
+      loaderContext.markModuleLoaded(MODULE_NAMES.gps);
+    }
+  }, [loaderContext, settings.gpsEnabled, geoData.latitude, geoError, geoLoading]);
+
+  useEffect(() => {
+    if (!loaderContext) return;
+    if (loadingStepsRef.current.sensors) return;
+    
+    const sensorsReady = !settings.orientationEnabled || !orientationSupported || orientationData.heading !== null || orientationError !== null;
+    if (sensorsReady) {
+      loadingStepsRef.current.sensors = true;
+      loaderContext.markModuleLoaded(MODULE_NAMES.sensors);
+    }
+  }, [loaderContext, settings.orientationEnabled, orientationSupported, orientationData.heading, orientationError]);
+
+  useEffect(() => {
+    if (!loaderContext) return;
+    if (loadingStepsRef.current.ready) return;
+    
+    const gpsReady = !settings.gpsEnabled || geoData.latitude !== null || geoError !== null || !geoLoading;
+    const sensorsReady = !settings.orientationEnabled || !orientationSupported || orientationData.heading !== null || orientationError !== null;
+    
+    if (gpsReady && sensorsReady) {
+      loadingStepsRef.current.ready = true;
+      loaderContext.markModuleLoaded(MODULE_NAMES.ready);
+    }
+  }, [loaderContext, settings.gpsEnabled, settings.orientationEnabled, geoData.latitude, orientationData.heading, geoError, geoLoading, orientationSupported, orientationError]);
 
   useEffect(() => {
     const loadPhotos = async () => {

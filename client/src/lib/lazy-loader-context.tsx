@@ -154,21 +154,22 @@ export function createTrackedLazy<P extends object>(
 }
 
 export const MODULE_NAMES = {
-  system: "Система",
-  camera: "Камера",
+  cameraChunk: "Камера",
+  init: "Инициализация",
   gps: "GPS",
   sensors: "Датчики",
-  settings: "Настройки",
+  ready: "Готово",
   gallery: "Галерея", 
   photoDetail: "Просмотр фото",
+  settings: "Настройки",
   game: "Игра",
   notFound: "404",
 } as const;
 
 export const INITIAL_MODULES = [
-  MODULE_NAMES.system,
-  MODULE_NAMES.camera,
+  MODULE_NAMES.cameraChunk,
+  MODULE_NAMES.init,
   MODULE_NAMES.gps,
   MODULE_NAMES.sensors,
-  MODULE_NAMES.settings,
+  MODULE_NAMES.ready,
 ];

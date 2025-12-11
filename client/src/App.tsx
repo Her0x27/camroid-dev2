@@ -13,7 +13,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { PrivacyOverlay } from "@/components/privacy-overlay";
 import { LazyLoaderProvider, createTrackedLazy, MODULE_NAMES } from "@/lib/lazy-loader-context";
 
-const CameraPage = createTrackedLazy(MODULE_NAMES.camera, () => import("@/pages/camera"));
+const CameraPage = createTrackedLazy(MODULE_NAMES.cameraChunk, () => import("@/pages/camera"));
 const GalleryPage = createTrackedLazy(MODULE_NAMES.gallery, () => import("@/pages/gallery"));
 const PhotoDetailPage = createTrackedLazy(MODULE_NAMES.photoDetail, () => import("@/pages/photo-detail"));
 const SettingsPage = createTrackedLazy(MODULE_NAMES.settings, () => import("@/pages/settings"));
