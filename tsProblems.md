@@ -8,6 +8,20 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 **Статус задач разделов 1-10:** ✅ ВСЕ ЗАДАЧИ ОБРАБОТАНЫ
 
+**Раздел 15 - Deep TypeScript Audit (11.12.2025):** ✅ ВЫПОЛНЕНО
+- ✅ `use-storage.ts` — Добавлен `mountedRef` для отмены async операций при unmount (предотвращение memory leaks)
+- ✅ `use-photo-navigator.ts` — Исправлены зависимости useEffect: убраны `photoIds.length` и `photo` из deps, добавлен `photoIdsRef` для доступа к актуальному состоянию без re-trigger
+- ✅ `reticles.tsx` — Мемоизированы `svgStyle` и `containerStyle` через useMemo
+- ✅ `gallery-loading-skeleton.tsx` — Inline style объект вынесен в константу `HOVER_GRADIENT_STYLE`
+- ✅ `use-camera.ts` — switch/case заменён на lookup object `RESOLUTION_CONSTRAINTS`
+
+**Метрики аудита v27:**
+- Найдено проблем: 5 (высокий: 2, средний: 2, низкий: 1)
+- Исправлено: 5/5 (100%)
+- Мемоизация: 336+ использований useMemo/useCallback/React.memo
+- Promise.all: 8 корректных использований
+- Безопасность: нет проблем
+
 **Раздел 14 - Комплексный аудит (11.12.2025):** ✅ ВЫПОЛНЕНО
 - ✅ Типизация: Исправлены `any` типы в server/index.ts (`Record<string, any>` → `Record<string, unknown>`, `err: any` → `Error & { status?: number; statusCode?: number }`)
 - ✅ Неиспользуемый код: Проверено - нет неиспользуемых импортов (ESLint подтвердил 1 намеренное исключение в use-toast.ts)

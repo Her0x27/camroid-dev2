@@ -10,13 +10,13 @@
 
 ## Чек-лист задач
 
-- [ ] Обновить upgrade.md — добавить секцию v27
-- [ ] Добавить AbortController в useStorage для отмены async операций при unmount
-- [ ] Исправить зависимости useEffect в use-photo-navigator.ts
-- [ ] Мемоизировать svgStyle в reticles.tsx через useMemo
-- [ ] Вынести статичные style объекты в константы в gallery-loading-skeleton.tsx
-- [ ] Заменить switch на lookup object в getResolutionConstraints (use-camera.ts)
-- [ ] Обновить tsProblems.md с результатами аудита
+- [x] Обновить upgrade.md — добавить секцию v27
+- [x] Добавить mountedRef в useStorage для отмены async операций при unmount
+- [x] Исправить зависимости useEffect в use-photo-navigator.ts
+- [x] Мемоизировать svgStyle и containerStyle в reticles.tsx через useMemo
+- [x] Вынести статичные style объекты в константы в gallery-loading-skeleton.tsx
+- [x] Заменить switch на lookup object в getResolutionConstraints (use-camera.ts)
+- [x] Обновить tsProblems.md с результатами аудита
 
 ---
 
@@ -24,13 +24,13 @@
 
 | Задача | Статус | Дата |
 |--------|--------|------|
-| upgrade.md | ⏳ В процессе | 11.12.2025 |
-| useStorage AbortController | ⏳ Ожидает | - |
-| use-photo-navigator deps | ⏳ Ожидает | - |
-| reticles.tsx useMemo | ⏳ Ожидает | - |
-| gallery-loading-skeleton | ⏳ Ожидает | - |
-| use-camera.ts lookup | ⏳ Ожидает | - |
-| tsProblems.md | ⏳ Ожидает | - |
+| upgrade.md | ✅ Готово | 11.12.2025 |
+| useStorage mountedRef | ✅ Готово | 11.12.2025 |
+| use-photo-navigator deps | ✅ Готово | 11.12.2025 |
+| reticles.tsx useMemo | ✅ Готово | 11.12.2025 |
+| gallery-loading-skeleton | ✅ Готово | 11.12.2025 |
+| use-camera.ts lookup | ✅ Готово | 11.12.2025 |
+| tsProblems.md | ✅ Готово | 11.12.2025 |
 
 ## Изменения v27
 
