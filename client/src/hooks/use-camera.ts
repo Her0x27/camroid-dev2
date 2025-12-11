@@ -3,6 +3,29 @@ import { drawWatermark, type WatermarkMetadata } from "@/lib/watermark-renderer"
 import { logger } from "@/lib/logger";
 import type { CameraResolution } from "@shared/schema";
 
+const RESOLUTION_CONSTRAINTS: Record<CameraResolution, { width: MediaTrackConstraintSet["width"]; height: MediaTrackConstraintSet["height"] }> = {
+  "4k": {
+    width: { ideal: 3840, max: 3840 },
+    height: { ideal: 2160, max: 2160 },
+  },
+  "1080p": {
+    width: { ideal: 1920, max: 1920 },
+    height: { ideal: 1080, max: 1080 },
+  },
+  "720p": {
+    width: { ideal: 1280, max: 1280 },
+    height: { ideal: 720, max: 720 },
+  },
+  "480p": {
+    width: { ideal: 640, max: 640 },
+    height: { ideal: 480, max: 480 },
+  },
+  auto: {
+    width: { ideal: 4096 },
+    height: { ideal: 2160 },
+  },
+};
+
 interface UseCameraOptions {
   facingMode?: "user" | "environment";
   photoQuality?: number;
@@ -101,40 +124,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
       // Stop any existing stream
       stopCamera();
 
-      // Determine resolution constraints based on cameraResolution setting
-      const getResolutionConstraints = (): { width: MediaTrackConstraintSet["width"]; height: MediaTrackConstraintSet["height"] } => {
-        switch (cameraResolution) {
-          case "4k":
-            return {
-              width: { ideal: 3840, max: 3840 },
-              height: { ideal: 2160, max: 2160 },
-            };
-          case "1080p":
-            return {
-              width: { ideal: 1920, max: 1920 },
-              height: { ideal: 1080, max: 1080 },
-            };
-          case "720p":
-            return {
-              width: { ideal: 1280, max: 1280 },
-              height: { ideal: 720, max: 720 },
-            };
-          case "480p":
-            return {
-              width: { ideal: 640, max: 640 },
-              height: { ideal: 480, max: 480 },
-            };
-          case "auto":
-          default:
-            // Use device maximum capabilities
-            return {
-              width: { ideal: 4096 },
-              height: { ideal: 2160 },
-            };
-        }
-      };
-
-      const resolutionConstraints = getResolutionConstraints();
+      const resolutionConstraints = RESOLUTION_CONSTRAINTS[cameraResolution] || RESOLUTION_CONSTRAINTS.auto;
       const videoConstraints: MediaTrackConstraints & { zoom?: boolean } = {
         ...resolutionConstraints,
       };

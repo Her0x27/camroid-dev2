@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getStorageEstimate, getPhotoCount, clearAllPhotos } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
@@ -22,6 +22,8 @@ export function useStorage(): UseStorageResult {
   const [isLoading, setIsLoading] = useState(true);
   const [isSupported, setIsSupported] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  
+  const mountedRef = useRef(true);
 
   const loadStorageInfo = useCallback(async () => {
     setIsLoading(true);
@@ -32,6 +34,8 @@ export function useStorage(): UseStorageResult {
         getStorageEstimate(),
         getPhotoCount(),
       ]);
+
+      if (!mountedRef.current) return;
 
       if (estimate) {
         setStorageInfo({
@@ -49,20 +53,25 @@ export function useStorage(): UseStorageResult {
         setIsSupported(false);
       }
     } catch (err) {
+      if (!mountedRef.current) return;
       const error = err instanceof Error ? err : new Error("Failed to load storage info");
       setError(error);
       logger.error("Failed to load storage info", err);
     } finally {
-      setIsLoading(false);
+      if (mountedRef.current) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   const clearStorage = useCallback(async (): Promise<boolean> => {
     try {
       await clearAllPhotos();
+      if (!mountedRef.current) return false;
       setStorageInfo((prev) => prev ? { ...prev, photos: 0, used: 0 } : null);
       return true;
     } catch (err) {
+      if (!mountedRef.current) return false;
       const error = err instanceof Error ? err : new Error("Failed to clear storage");
       setError(error);
       return false;
@@ -70,7 +79,12 @@ export function useStorage(): UseStorageResult {
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     loadStorageInfo();
+    
+    return () => {
+      mountedRef.current = false;
+    };
   }, [loadStorageInfo]);
 
   return {

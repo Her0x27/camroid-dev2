@@ -1,6 +1,10 @@
 import { memo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
+const HOVER_GRADIENT_STYLE: React.CSSProperties = {
+  background: "radial-gradient(circle at center, hsl(var(--primary) / 0.1) 0%, transparent 70%)",
+};
+
 interface GalleryLoadingSkeletonProps {
   count?: number;
   className?: string;
@@ -67,9 +71,7 @@ export const GalleryLoadingSkeleton = memo(function GalleryLoadingSkeleton({
           <div className="w-full h-full shimmer-modern" />
           <div 
             className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            style={{
-              background: "radial-gradient(circle at center, hsl(var(--primary) / 0.1) 0%, transparent 70%)",
-            }}
+            style={HOVER_GRADIENT_STYLE}
           />
         </motion.div>
       ))}

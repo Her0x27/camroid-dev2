@@ -45,6 +45,9 @@ export function usePhotoNavigator(
     }
   }, [sortOrder]);
 
+  const photoIdsRef = useRef<string[]>([]);
+  photoIdsRef.current = photoIds;
+
   useEffect(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -59,7 +62,7 @@ export function usePhotoNavigator(
         return;
       }
 
-      if (loadedPhotoIdRef.current === photoId && photo) {
+      if (loadedPhotoIdRef.current === photoId) {
         setIsLoading(false);
         return;
       }
@@ -68,9 +71,10 @@ export function usePhotoNavigator(
       setError(null);
 
       try {
+        const currentIds = photoIdsRef.current;
         const [loadedPhoto, ids] = await Promise.all([
           getPhoto(photoId),
-          photoIds.length === 0 ? getPhotoIds(sortOrder) : Promise.resolve(photoIds),
+          currentIds.length === 0 ? getPhotoIds(sortOrder) : Promise.resolve(currentIds),
         ]);
 
         if (signal.aborted) return;
@@ -84,7 +88,7 @@ export function usePhotoNavigator(
           setError("Photo not found");
         }
 
-        if (photoIds.length === 0) {
+        if (currentIds.length === 0) {
           setPhotoIds(ids);
         }
       } catch (err) {
@@ -105,7 +109,7 @@ export function usePhotoNavigator(
     return () => {
       abortControllerRef.current?.abort();
     };
-  }, [photoId, sortOrder, photoIds.length, photo]);
+  }, [photoId, sortOrder]);
 
   const currentIndex = photoId ? photoIds.indexOf(photoId) : -1;
   const hasPrevious = currentIndex > 0;

@@ -1,3 +1,61 @@
+# Upgrade: Deep TypeScript Audit v27
+
+## Описание
+Глубокий аудит TypeScript кода для выявления и устранения потенциальных проблем:
+- Исправление async операций без AbortController (memory leaks)
+- Оптимизация зависимостей useEffect (предотвращение re-render loops)
+- Мемоизация inline объектов в props (производительность)
+- Рефакторинг switch statements в lookup objects
+- Обновление документации аудита
+
+## Чек-лист задач
+
+- [ ] Обновить upgrade.md — добавить секцию v27
+- [ ] Добавить AbortController в useStorage для отмены async операций при unmount
+- [ ] Исправить зависимости useEffect в use-photo-navigator.ts
+- [ ] Мемоизировать svgStyle в reticles.tsx через useMemo
+- [ ] Вынести статичные style объекты в константы в gallery-loading-skeleton.tsx
+- [ ] Заменить switch на lookup object в getResolutionConstraints (use-camera.ts)
+- [ ] Обновить tsProblems.md с результатами аудита
+
+---
+
+## Прогресс v27
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ⏳ В процессе | 11.12.2025 |
+| useStorage AbortController | ⏳ Ожидает | - |
+| use-photo-navigator deps | ⏳ Ожидает | - |
+| reticles.tsx useMemo | ⏳ Ожидает | - |
+| gallery-loading-skeleton | ⏳ Ожидает | - |
+| use-camera.ts lookup | ⏳ Ожидает | - |
+| tsProblems.md | ⏳ Ожидает | - |
+
+## Изменения v27
+
+### Найденные проблемы (Deep Audit)
+
+**Высокий приоритет:**
+1. `use-storage.ts:72-74` — useEffect без AbortController, возможны state updates после unmount
+2. `use-photo-navigator.ts:48-108` — photoIds обновляется внутри effect, риск re-render loop
+
+**Средний приоритет:**
+3. `reticles.tsx:23-27` — svgStyle создаётся на каждом рендере
+4. `gallery-loading-skeleton.tsx:70-72` — inline style объекты
+
+**Низкий приоритет:**
+5. `use-camera.ts:105-135` — switch можно заменить на lookup object
+
+### Подтверждённые хорошие практики
+- 336 использований useMemo/useCallback/React.memo
+- CSP headers настроены, нет XSS уязвимостей
+- Нет @ts-ignore, минимум any
+- Сервисный слой, хуки извлечены
+- AbortController в критичных хуках
+
+---
+
 # Upgrade: Расширение Splash Screen — Галерея и Настройки v26
 
 ## Описание

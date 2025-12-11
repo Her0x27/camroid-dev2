@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import type { ReticleConfig, ColorScheme, ReticlePosition } from "@shared/schema";
 import { getOutlineColorForReticle } from "@/lib/color-utils";
 
@@ -20,18 +20,18 @@ export const Reticle = memo(function Reticle({ config, dynamicColor, className =
   
   const outlineColor = getOutlineColorForReticle(color);
 
-  const svgStyle: React.CSSProperties = {
+  const svgStyle = useMemo((): React.CSSProperties => ({
     opacity: config.opacity / 100,
     width: `${sizePercent}vmin`,
     height: `${sizePercent}vmin`,
-  };
+  }), [config.opacity, sizePercent]);
 
   const svgStrokeWidth = strokeWidthPercent;
   const outlineStrokeWidth = strokeWidthPercent + 2;
 
   const hasCustomPosition = position && (position.x !== 50 || position.y !== 50);
 
-  const containerStyle: React.CSSProperties = hasCustomPosition
+  const containerStyle = useMemo((): React.CSSProperties => hasCustomPosition
     ? {
         position: "absolute" as const,
         left: `${position!.x}%`,
@@ -48,7 +48,7 @@ export const Reticle = memo(function Reticle({ config, dynamicColor, className =
         justifyContent: "center",
         zIndex: 1,
         pointerEvents: "none" as const,
-      };
+      }, [hasCustomPosition, position?.x, position?.y]);
 
   return (
     <div 
