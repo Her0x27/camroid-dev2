@@ -135,24 +135,18 @@ export default function CameraPage() {
     const galleryLoaded = loaderContext.modules.find(m => m.name === MODULE_NAMES.gallery)?.loaded ?? false;
     const settingsLoaded = loaderContext.modules.find(m => m.name === MODULE_NAMES.settings)?.loaded ?? false;
     
-    if (!loadingStepsRef.current.init) {
-      loadingStepsRef.current.init = true;
-      loaderContext.markModuleLoaded(MODULE_NAMES.init);
-    }
+    const LOADING_STEPS = [
+      { key: "init" as const, moduleName: MODULE_NAMES.init, isReady: true },
+      { key: "gps" as const, moduleName: MODULE_NAMES.gps, isReady: gpsReady },
+      { key: "sensors" as const, moduleName: MODULE_NAMES.sensors, isReady: sensorsReady },
+      { key: "ready" as const, moduleName: MODULE_NAMES.ready, isReady: gpsReady && sensorsReady && galleryLoaded && settingsLoaded },
+    ];
     
-    if (!loadingStepsRef.current.gps && gpsReady) {
-      loadingStepsRef.current.gps = true;
-      loaderContext.markModuleLoaded(MODULE_NAMES.gps);
-    }
-    
-    if (!loadingStepsRef.current.sensors && sensorsReady) {
-      loadingStepsRef.current.sensors = true;
-      loaderContext.markModuleLoaded(MODULE_NAMES.sensors);
-    }
-    
-    if (!loadingStepsRef.current.ready && gpsReady && sensorsReady && galleryLoaded && settingsLoaded) {
-      loadingStepsRef.current.ready = true;
-      loaderContext.markModuleLoaded(MODULE_NAMES.ready);
+    for (const step of LOADING_STEPS) {
+      if (!loadingStepsRef.current[step.key] && step.isReady) {
+        loadingStepsRef.current[step.key] = true;
+        loaderContext.markModuleLoaded(step.moduleName);
+      }
     }
   }, [
     loaderContext,
