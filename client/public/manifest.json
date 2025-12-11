@@ -1,8 +1,8 @@
 {
-  "name": "2048 Game",
-  "short_name": "2048",
+  "name": "Camroid M",
+  "short_name": "Camroid M",
   "version": "1.0.0",
-  "description": "A simple yet addictive 2048 sliding puzzle game.",
+  "description": "Tactical camera with GPS, compass and precision overlays. Capture geotagged photos for fieldwork and surveying.",
   "start_url": "/",
   "display": "fullscreen",
   "orientation": "portrait",
@@ -10,7 +10,7 @@
   "theme_color": "#0a0a0a",
   "icons": [
     {
-      "src": "/game-icon.svg",
+      "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
@@ -22,7 +22,7 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["games", "puzzle"],
+  "categories": ["photography", "utilities"],
   "lang": "en",
   "dir": "ltr"
 }
