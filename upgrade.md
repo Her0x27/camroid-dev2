@@ -52,6 +52,9 @@
 - **CSS units:** left, top, width, minHeight теперь в процентах (%)
 - **calculateNewPosition:** пересчёт delta из px в проценты для корректного drag
 
+### client/src/lib/settings-context.tsx
+- **Clamping:** width обновлён с 100-500 на 10-100, height обновлён с 40-300 на 5-50
+
 ---
 
 # Upgrade: Фиксированные шапки окон редактирования v38
