@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { drawWatermark, type WatermarkMetadata } from "@/lib/watermark-renderer";
 import { logger } from "@/lib/logger";
+import { usePageVisibility } from "@/hooks/use-page-visibility";
 import type { CameraResolution } from "@shared/schema";
 
 const RESOLUTION_CONSTRAINTS: Record<CameraResolution, { width: MediaTrackConstraintSet["width"]; height: MediaTrackConstraintSet["height"] }> = {
@@ -71,10 +72,13 @@ interface UseCameraReturn {
 export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
   const { facingMode: initialFacing = "environment", photoQuality = 90, cameraResolution = "auto" } = options;
   
+  const { isVisible } = usePageVisibility();
+  
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const videoTrackRef = useRef<MediaStreamTrack | null>(null);
+  const wasActiveBeforeHiddenRef = useRef(false);
   
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -332,6 +336,27 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
       img.src = imageSource;
     });
   }, [photoQuality]);
+
+  // Handle visibility change - stop camera when tab/window is hidden
+  useEffect(() => {
+    if (!isVisible) {
+      // Page became hidden - save state and stop camera
+      if (isReady || streamRef.current) {
+        wasActiveBeforeHiddenRef.current = true;
+        stopCamera();
+        logger.info("Camera stopped due to visibility change");
+      }
+    } else {
+      // Page became visible - restart camera if it was active before
+      if (wasActiveBeforeHiddenRef.current) {
+        wasActiveBeforeHiddenRef.current = false;
+        startCamera().catch((err) => {
+          logger.error("Failed to restart camera after visibility change", err);
+        });
+        logger.info("Camera restarted after visibility change");
+      }
+    }
+  }, [isVisible, isReady, stopCamera, startCamera]);
 
   // Cleanup on unmount
   useEffect(() => {
