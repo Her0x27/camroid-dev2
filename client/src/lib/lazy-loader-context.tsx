@@ -177,6 +177,7 @@ export const MODULE_NAMES = {
   settings: "Настройки",
   game: "Игра",
   notFound: "404",
+  watermarkEditor: "Редактор",
 } as const;
 
 export const INITIAL_MODULES = [

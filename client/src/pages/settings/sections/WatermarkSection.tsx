@@ -1,6 +1,8 @@
 import { memo, useCallback } from "react";
-import { ImageIcon, Eye, Type } from "lucide-react";
+import { useLocation } from "wouter";
+import { ImageIcon, Eye, Type, Pencil } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { SettingRow } from "@/components/ui/setting-row";
 import { SettingSlider } from "@/components/ui/setting-slider";
@@ -24,11 +26,16 @@ export const WatermarkSection = memo(function WatermarkSection({
   onOpenChange,
 }: WatermarkSectionProps) {
   const { t } = useI18n();
+  const [, navigate] = useLocation();
   const { activatePreview, deactivatePreview } = usePreview();
   
   const handleScaleStart = useCallback(() => {
     activatePreview({ type: "watermark-scale", label: t.settings.watermark.watermarkSize });
   }, [activatePreview, t]);
+
+  const handleOpenEditor = useCallback(() => {
+    navigate("/watermark-editor");
+  }, [navigate]);
   
   return (
     <CollapsibleCard
@@ -66,6 +73,23 @@ export const WatermarkSection = memo(function WatermarkSection({
             onInteractionStart={handleScaleStart}
             onInteractionEnd={deactivatePreview}
           />
+          <Separator />
+          <div className="flex items-center justify-between py-3 px-1">
+            <div className="flex items-center gap-3">
+              <Pencil className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm font-medium">Редактор водяных знаков</p>
+                <p className="text-xs text-muted-foreground">Визуальное редактирование</p>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleOpenEditor}
+            >
+              Открыть
+            </Button>
+          </div>
         </>
       )}
     </CollapsibleCard>

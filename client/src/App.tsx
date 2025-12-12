@@ -18,6 +18,7 @@ const GalleryPage = createTrackedLazy(MODULE_NAMES.gallery, () => import("@/page
 const PhotoDetailPage = createTrackedLazy(MODULE_NAMES.photoDetail, () => import("@/pages/photo-detail"));
 const SettingsPage = createTrackedLazy(MODULE_NAMES.settings, () => import("@/pages/settings"));
 const GamePage = createTrackedLazy(MODULE_NAMES.game, () => import("@/pages/game"));
+const WatermarkEditorPage = createTrackedLazy(MODULE_NAMES.watermarkEditor, () => import("@/pages/watermark-editor"));
 const NotFound = createTrackedLazy(MODULE_NAMES.notFound, () => import("@/pages/not-found"));
 
 function PageLoader() {
@@ -44,6 +45,7 @@ function Router() {
         <Route path="/gallery" component={GalleryPage} />
         <Route path="/photo/:id" component={PhotoDetailPage} />
         <Route path="/settings" component={SettingsPage} />
+        <Route path="/watermark-editor" component={WatermarkEditorPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
