@@ -60,6 +60,251 @@ function calculateLayout(width: number, height: number, watermarkScale: number):
   };
 }
 
+function drawCrosshairReticle(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  reticleSize: number,
+  colorValue: string,
+  outlineColor: string,
+  scaledStrokeWidth: number,
+  outlineStrokeWidth: number
+): void {
+  ctx.strokeStyle = outlineColor;
+  ctx.lineWidth = outlineStrokeWidth;
+
+  ctx.beginPath();
+  ctx.moveTo(centerX - reticleSize, centerY);
+  ctx.lineTo(centerX + reticleSize, centerY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY - reticleSize);
+  ctx.lineTo(centerX, centerY + reticleSize);
+  ctx.stroke();
+
+  ctx.strokeStyle = colorValue;
+  ctx.lineWidth = scaledStrokeWidth;
+
+  ctx.beginPath();
+  ctx.moveTo(centerX - reticleSize, centerY);
+  ctx.lineTo(centerX + reticleSize, centerY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY - reticleSize);
+  ctx.lineTo(centerX, centerY + reticleSize);
+  ctx.stroke();
+}
+
+function drawCircleReticle(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  reticleSize: number,
+  colorValue: string,
+  outlineColor: string,
+  scaledStrokeWidth: number,
+  outlineStrokeWidth: number
+): void {
+  const radius = reticleSize * 0.8;
+  const centerDotRadius = reticleSize * 0.08;
+
+  ctx.strokeStyle = outlineColor;
+  ctx.lineWidth = outlineStrokeWidth;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.strokeStyle = colorValue;
+  ctx.lineWidth = scaledStrokeWidth;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = outlineColor;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, centerDotRadius + scaledStrokeWidth * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = colorValue;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, centerDotRadius, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawSquareReticle(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  reticleSize: number,
+  colorValue: string,
+  outlineColor: string,
+  scaledStrokeWidth: number,
+  outlineStrokeWidth: number
+): void {
+  const halfSize = reticleSize * 0.8;
+  const innerCrossSize = reticleSize * 0.6;
+
+  ctx.strokeStyle = outlineColor;
+  ctx.lineWidth = outlineStrokeWidth;
+  ctx.strokeRect(centerX - halfSize, centerY - halfSize, halfSize * 2, halfSize * 2);
+
+  ctx.beginPath();
+  ctx.moveTo(centerX - innerCrossSize, centerY);
+  ctx.lineTo(centerX + innerCrossSize, centerY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY - innerCrossSize);
+  ctx.lineTo(centerX, centerY + innerCrossSize);
+  ctx.stroke();
+
+  ctx.strokeStyle = colorValue;
+  ctx.lineWidth = scaledStrokeWidth;
+  ctx.strokeRect(centerX - halfSize, centerY - halfSize, halfSize * 2, halfSize * 2);
+
+  ctx.beginPath();
+  ctx.moveTo(centerX - innerCrossSize, centerY);
+  ctx.lineTo(centerX + innerCrossSize, centerY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(centerX, centerY - innerCrossSize);
+  ctx.lineTo(centerX, centerY + innerCrossSize);
+  ctx.stroke();
+}
+
+function drawArrowReticle(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  reticleSize: number,
+  colorValue: string,
+  outlineColor: string,
+  scaledStrokeWidth: number,
+  outlineStrokeWidth: number
+): void {
+  const arrowHeight = reticleSize * 1.0;
+  const arrowWidth = reticleSize * 0.6;
+
+  const tipY = centerY + arrowHeight * 0.35;
+  const topLeftX = centerX - arrowWidth;
+  const topLeftY = centerY - arrowHeight * 0.65;
+  const midX = centerX;
+  const midY = centerY - arrowHeight * 0.15;
+  const topRightX = centerX + arrowWidth;
+  const topRightY = centerY - arrowHeight * 0.65;
+
+  ctx.strokeStyle = outlineColor;
+  ctx.lineWidth = outlineStrokeWidth;
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(midX, tipY);
+  ctx.lineTo(topLeftX, topLeftY);
+  ctx.lineTo(midX, midY);
+  ctx.lineTo(topRightX, topRightY);
+  ctx.closePath();
+  ctx.stroke();
+
+  ctx.fillStyle = colorValue;
+  ctx.strokeStyle = colorValue;
+  ctx.lineWidth = scaledStrokeWidth;
+  ctx.beginPath();
+  ctx.moveTo(midX, tipY);
+  ctx.lineTo(topLeftX, topLeftY);
+  ctx.lineTo(midX, midY);
+  ctx.lineTo(topRightX, topRightY);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawSpeechBubbleReticle(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  reticleSize: number,
+  colorValue: string,
+  outlineColor: string,
+  scaledStrokeWidth: number,
+  outlineStrokeWidth: number
+): void {
+  const bubbleWidth = reticleSize * 1.4;
+  const bubbleHeight = reticleSize;
+  const tailHeight = reticleSize * 0.3;
+  const cornerRadius = reticleSize * 0.1;
+
+  const bubbleLeft = centerX - bubbleWidth / 2;
+  const bubbleTop = centerY - bubbleHeight / 2 - tailHeight / 2;
+  const bubbleRight = centerX + bubbleWidth / 2;
+  const bubbleBottom = centerY + bubbleHeight / 2 - tailHeight / 2;
+
+  const drawBubblePath = () => {
+    ctx.beginPath();
+    ctx.moveTo(bubbleLeft + cornerRadius, bubbleTop);
+    ctx.lineTo(bubbleRight - cornerRadius, bubbleTop);
+    ctx.quadraticCurveTo(bubbleRight, bubbleTop, bubbleRight, bubbleTop + cornerRadius);
+    ctx.lineTo(bubbleRight, bubbleBottom - cornerRadius);
+    ctx.quadraticCurveTo(bubbleRight, bubbleBottom, bubbleRight - cornerRadius, bubbleBottom);
+    ctx.lineTo(centerX + reticleSize * 0.1, bubbleBottom);
+    ctx.lineTo(centerX, bubbleBottom + tailHeight);
+    ctx.lineTo(centerX - reticleSize * 0.1, bubbleBottom);
+    ctx.lineTo(bubbleLeft + cornerRadius, bubbleBottom);
+    ctx.quadraticCurveTo(bubbleLeft, bubbleBottom, bubbleLeft, bubbleBottom - cornerRadius);
+    ctx.lineTo(bubbleLeft, bubbleTop + cornerRadius);
+    ctx.quadraticCurveTo(bubbleLeft, bubbleTop, bubbleLeft + cornerRadius, bubbleTop);
+    ctx.closePath();
+  };
+
+  ctx.strokeStyle = outlineColor;
+  ctx.lineWidth = outlineStrokeWidth;
+  ctx.lineJoin = "round";
+  drawBubblePath();
+  ctx.stroke();
+
+  ctx.strokeStyle = colorValue;
+  ctx.lineWidth = scaledStrokeWidth;
+  drawBubblePath();
+  ctx.stroke();
+}
+
+function drawCustomReticle(
+  ctx: CanvasRenderingContext2D,
+  centerX: number,
+  centerY: number,
+  reticleSize: number,
+  colorValue: string,
+  outlineColor: string,
+  scaledStrokeWidth: number,
+  outlineStrokeWidth: number
+): void {
+  const halfSize = reticleSize * 0.6;
+  const cornerRadius = reticleSize * 0.08;
+
+  ctx.strokeStyle = outlineColor;
+  ctx.lineWidth = outlineStrokeWidth;
+  ctx.setLineDash([reticleSize * 0.16, reticleSize * 0.08]);
+  ctx.beginPath();
+  drawRoundedRectPath(ctx, centerX - halfSize, centerY - halfSize, halfSize * 2, halfSize * 2, cornerRadius);
+  ctx.stroke();
+
+  ctx.strokeStyle = colorValue;
+  ctx.lineWidth = scaledStrokeWidth;
+  ctx.beginPath();
+  drawRoundedRectPath(ctx, centerX - halfSize, centerY - halfSize, halfSize * 2, halfSize * 2, cornerRadius);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.font = `bold ${reticleSize * 0.5}px sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = outlineColor;
+  ctx.fillText("?", centerX + 1, centerY + 1);
+  ctx.fillStyle = colorValue;
+  ctx.fillText("?", centerX, centerY);
+}
+
 function drawReticle(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -91,31 +336,29 @@ function drawReticle(
 
   ctx.lineCap = "round";
 
-  ctx.strokeStyle = outlineColor;
-  ctx.lineWidth = outlineStrokeWidth;
+  const shape = reticleConfig?.shape || "crosshair";
 
-  ctx.beginPath();
-  ctx.moveTo(centerX - reticleSize, centerY);
-  ctx.lineTo(centerX + reticleSize, centerY);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(centerX, centerY - reticleSize);
-  ctx.lineTo(centerX, centerY + reticleSize);
-  ctx.stroke();
-
-  ctx.strokeStyle = colorValue;
-  ctx.lineWidth = scaledStrokeWidth;
-
-  ctx.beginPath();
-  ctx.moveTo(centerX - reticleSize, centerY);
-  ctx.lineTo(centerX + reticleSize, centerY);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(centerX, centerY - reticleSize);
-  ctx.lineTo(centerX, centerY + reticleSize);
-  ctx.stroke();
+  switch (shape) {
+    case "circle":
+      drawCircleReticle(ctx, centerX, centerY, reticleSize, colorValue, outlineColor, scaledStrokeWidth, outlineStrokeWidth);
+      break;
+    case "square":
+      drawSquareReticle(ctx, centerX, centerY, reticleSize, colorValue, outlineColor, scaledStrokeWidth, outlineStrokeWidth);
+      break;
+    case "arrow":
+      drawArrowReticle(ctx, centerX, centerY, reticleSize, colorValue, outlineColor, scaledStrokeWidth, outlineStrokeWidth);
+      break;
+    case "speech-bubble":
+      drawSpeechBubbleReticle(ctx, centerX, centerY, reticleSize, colorValue, outlineColor, scaledStrokeWidth, outlineStrokeWidth);
+      break;
+    case "custom":
+      drawCustomReticle(ctx, centerX, centerY, reticleSize, colorValue, outlineColor, scaledStrokeWidth, outlineStrokeWidth);
+      break;
+    case "crosshair":
+    default:
+      drawCrosshairReticle(ctx, centerX, centerY, reticleSize, colorValue, outlineColor, scaledStrokeWidth, outlineStrokeWidth);
+      break;
+  }
 }
 
 function drawMetadataPanel(

@@ -11,17 +11,17 @@
 
 ## Чек-лист задач
 
-- [ ] Обновить upgrade.md — добавить секцию v32
-- [ ] Создать типы данных — WatermarkObject, WatermarkLayer, ReticleShape
-- [ ] Создать компоненты прицелов — CrosshairReticle, CircleReticle, SquareReticle, ArrowReticle, SpeechBubbleReticle
-- [ ] Создать панель инструментов — ToolbarPanel
-- [ ] Создать холст редактора — WatermarkCanvas с drag-n-drop
-- [ ] Создать панель свойств объекта — PropertyPanel
-- [ ] Создать панель слоёв — LayersPanel
-- [ ] Создать главную страницу редактора — WatermarkEditorPage
-- [ ] Обновить watermark-renderer.ts — поддержка новых форм прицелов
-- [ ] Интегрировать редактор в приложение
-- [ ] Тестирование и финальное обновление upgrade.md
+- [x] Обновить upgrade.md — добавить секцию v32
+- [x] Создать типы данных — WatermarkObject, WatermarkLayer, ReticleShape
+- [x] Создать компоненты прицелов — CrosshairReticle, CircleReticle, SquareReticle, ArrowReticle, SpeechBubbleReticle
+- [x] Создать панель инструментов — ToolbarPanel
+- [x] Создать холст редактора — WatermarkCanvas с drag-n-drop
+- [x] Создать панель свойств объекта — PropertyPanel
+- [x] Создать панель слоёв — LayersPanel
+- [x] Создать главную страницу редактора — WatermarkEditorPage
+- [x] Обновить watermark-renderer.ts — поддержка новых форм прицелов
+- [x] Интегрировать редактор в приложение
+- [x] Тестирование и финальное обновление upgrade.md
 
 ---
 
@@ -29,17 +29,43 @@
 
 | Задача | Статус | Дата |
 |--------|--------|------|
-| upgrade.md | ⏳ В работе | 12.12.2025 |
-| Типы данных | ⏳ В работе | 12.12.2025 |
-| Компоненты прицелов | ⏳ В работе | 12.12.2025 |
-| Панель инструментов | ⏳ В работе | 12.12.2025 |
-| Холст редактора | ⏳ В работе | 12.12.2025 |
-| Панель свойств | ⏳ В работе | 12.12.2025 |
-| Панель слоёв | ⏳ В работе | 12.12.2025 |
-| Страница редактора | ⏳ В работе | 12.12.2025 |
-| watermark-renderer.ts | ⏳ В работе | 12.12.2025 |
-| Интеграция | ⏳ В работе | 12.12.2025 |
-| Тестирование | ⏳ В работе | 12.12.2025 |
+| upgrade.md | ✅ Готово | 12.12.2025 |
+| Типы данных | ✅ Готово | 12.12.2025 |
+| Компоненты прицелов | ✅ Готово | 12.12.2025 |
+| Панель инструментов | ✅ Готово | 12.12.2025 |
+| Холст редактора | ✅ Готово | 12.12.2025 |
+| Панель свойств | ✅ Готово | 12.12.2025 |
+| Панель слоёв | ✅ Готово | 12.12.2025 |
+| Страница редактора | ✅ Готово | 12.12.2025 |
+| watermark-renderer.ts | ✅ Готово | 12.12.2025 |
+| Интеграция | ✅ Готово | 12.12.2025 |
+| Тестирование | ✅ Готово | 12.12.2025 |
+
+## Изменения v32
+
+### shared/schema.ts
+- Добавлен новый тип `ReticleShape` с 6 вариантами: crosshair, circle, square, arrow, speech-bubble, custom
+- Расширен `reticleConfigSchema` — добавлено поле `shape` с дефолтным значением "crosshair"
+- Обновлён `defaultSettings.reticle` — добавлено `shape: "crosshair"`
+
+### client/src/lib/watermark-renderer.ts
+- Рефакторинг: функция `drawReticle` разбита на отдельные функции для каждой формы
+- Добавлены функции рендеринга: `drawCrosshairReticle`, `drawCircleReticle`, `drawSquareReticle`, `drawArrowReticle`, `drawSpeechBubbleReticle`, `drawCustomReticle`
+- Все формы поддерживают outline + заливку для видимости на любом фоне
+
+### client/src/pages/watermark-editor/
+- **types/index.ts** — типы WatermarkObject, WatermarkLayer, WatermarkEditorState, actions
+- **components/ReticleShapes.tsx** — SVG компоненты для 6 форм прицелов
+- **components/ToolbarPanel.tsx** — панель инструментов с кнопками добавления объектов
+- **components/WatermarkCanvas.tsx** — холст с drag-n-drop, resize, rotate объектов
+- **components/PropertyPanel.tsx** — панель свойств выбранного объекта
+- **components/LayersPanel.tsx** — панель слоёв с переупорядочиванием
+- **hooks/useWatermarkEditor.ts** — reducer для управления состоянием редактора
+- **index.tsx** — главная страница редактора
+
+### Интеграция
+- Добавлен роут `/watermark-editor` в App.tsx
+- Добавлена кнопка перехода в редактор в WatermarkSection настроек
 
 ## Архитектура v32
 

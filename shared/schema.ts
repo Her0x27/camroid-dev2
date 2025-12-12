@@ -58,9 +58,13 @@ export type InsertPhoto = z.infer<typeof insertPhotoSchema>;
 // Color scheme for auto-color reticle
 export type ColorScheme = "contrast" | "tactical" | "neon" | "monochrome" | "warm";
 
+// Reticle shape types
+export type ReticleShape = "crosshair" | "circle" | "square" | "arrow" | "speech-bubble" | "custom";
+
 // Reticle configuration (all values are percentages for consistency)
 export const reticleConfigSchema = z.object({
   enabled: z.boolean().default(true),
+  shape: z.enum(["crosshair", "circle", "square", "arrow", "speech-bubble", "custom"]).default("crosshair"), // reticle shape type
   size: z.number().min(1).max(50).default(5), // size as % of viewport min dimension
   opacity: z.number().min(10).max(100).default(100), // opacity %
   strokeWidth: z.number().min(1).max(30).default(10), // line thickness as % of reticle size
@@ -174,6 +178,7 @@ export type Settings = z.infer<typeof settingsSchema>;
 export const defaultSettings: Settings = {
   reticle: {
     enabled: true,
+    shape: "crosshair",
     size: 5,
     opacity: 100,
     strokeWidth: 10,
