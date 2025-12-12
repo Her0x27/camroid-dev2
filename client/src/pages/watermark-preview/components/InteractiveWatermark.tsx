@@ -14,6 +14,8 @@ export interface WatermarkSeparator {
 
 export type CoordinateFormat = "decimal" | "dms" | "ddm" | "simple";
 
+export type LogoPosition = "left" | "right";
+
 function formatCoordinates(lat: number, lng: number, format: CoordinateFormat): string {
   switch (format) {
     case "dms": {
@@ -68,6 +70,9 @@ export interface WatermarkStyle {
   notePlacement: "start" | "end";
   separators: WatermarkSeparator[];
   coordinateFormat: CoordinateFormat;
+  logoUrl: string | null;
+  logoPosition: LogoPosition;
+  logoSize: number;
 }
 
 interface InteractiveWatermarkProps {
@@ -192,6 +197,64 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
     textDecoration: style.underline ? "underline" : "none",
   };
 
+  const renderLogo = () => {
+    if (!style.logoUrl) return null;
+    return (
+      <img
+        src={style.logoUrl}
+        alt="Logo"
+        className="object-contain flex-shrink-0"
+        style={{
+          width: style.logoSize,
+          height: style.logoSize,
+        }}
+      />
+    );
+  };
+
+  const renderTextContent = () => (
+    <div
+      className="font-mono text-center whitespace-pre-wrap break-words flex-1"
+      style={{
+        color: style.fontColor,
+        opacity: style.fontOpacity / 100,
+        fontSize: style.fontSize,
+        ...fontStyles,
+      }}
+    >
+      {style.notePlacement === "start" && style.note && (
+        <>
+          <div>{style.note}</div>
+          {(style.separators || []).filter(s => s.position === "before-coords").map(s => (
+            <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+          ))}
+        </>
+      )}
+      {style.notePlacement === "end" && (style.separators || []).filter(s => s.position === "before-coords").map(s => (
+        <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+      ))}
+      <div>{formatCoordinates(55.7558, 37.6173, style.coordinateFormat)}</div>
+      {(style.separators || []).filter(s => s.position === "after-coords").map(s => (
+        <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+      ))}
+      <div>±5m · 180° S</div>
+      {style.notePlacement === "start" && (style.separators || []).filter(s => s.position === "after-note").map(s => (
+        <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+      ))}
+      {style.notePlacement === "end" && style.note && (
+        <>
+          {(style.separators || []).filter(s => s.position === "before-note").map(s => (
+            <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+          ))}
+          <div>{style.note}</div>
+          {(style.separators || []).filter(s => s.position === "after-note").map(s => (
+            <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+          ))}
+        </>
+      )}
+    </div>
+  );
+
   return (
     <div
       className={`absolute select-none touch-none cursor-pointer transition-shadow ${
@@ -202,11 +265,8 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         top: position.y,
         width: style.width,
         minHeight: style.height,
-        backgroundColor: style.backgroundColor,
-        opacity: style.backgroundOpacity / 100,
         transform: `rotate(${style.rotation}deg)`,
         borderRadius: 8,
-        padding: "8px 12px",
       }}
       onTouchStart={handleStart}
       onTouchMove={handleMove}
@@ -223,44 +283,16 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
       }}
     >
       <div
-        className="font-mono text-center whitespace-pre-wrap break-words"
+        className="absolute inset-0 rounded-lg"
         style={{
-          color: style.fontColor,
-          opacity: style.fontOpacity / 100,
-          fontSize: style.fontSize,
-          ...fontStyles,
+          backgroundColor: style.backgroundColor,
+          opacity: style.backgroundOpacity / 100,
         }}
-      >
-        {style.notePlacement === "start" && style.note && (
-          <>
-            <div>{style.note}</div>
-            {(style.separators || []).filter(s => s.position === "before-coords").map(s => (
-              <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
-            ))}
-          </>
-        )}
-        {style.notePlacement === "end" && (style.separators || []).filter(s => s.position === "before-coords").map(s => (
-          <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
-        ))}
-        <div>{formatCoordinates(55.7558, 37.6173, style.coordinateFormat)}</div>
-        {(style.separators || []).filter(s => s.position === "after-coords").map(s => (
-          <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
-        ))}
-        <div>±5m · 180° S</div>
-        {style.notePlacement === "start" && (style.separators || []).filter(s => s.position === "after-note").map(s => (
-          <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
-        ))}
-        {style.notePlacement === "end" && style.note && (
-          <>
-            {(style.separators || []).filter(s => s.position === "before-note").map(s => (
-              <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
-            ))}
-            <div>{style.note}</div>
-            {(style.separators || []).filter(s => s.position === "after-note").map(s => (
-              <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
-            ))}
-          </>
-        )}
+      />
+      <div className="relative flex items-center gap-2 p-2">
+        {style.logoUrl && style.logoPosition === "left" && renderLogo()}
+        {renderTextContent()}
+        {style.logoUrl && style.logoPosition === "right" && renderLogo()}
       </div>
     </div>
   );

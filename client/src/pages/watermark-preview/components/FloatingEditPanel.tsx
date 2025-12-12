@@ -5,7 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat } from "./InteractiveWatermark";
+import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat, LogoPosition } from "./InteractiveWatermark";
 
 interface FloatingEditPanelProps {
   isOpen: boolean;
@@ -14,7 +14,6 @@ interface FloatingEditPanelProps {
   position: WatermarkPosition;
   onStyleChange: (updates: Partial<WatermarkStyle>) => void;
   onPositionChange: (updates: Partial<WatermarkPosition>) => void;
-  onAddLogo: () => void;
   anchorPosition: { x: number; y: number };
 }
 
@@ -39,7 +38,6 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
   position,
   onStyleChange,
   onPositionChange,
-  onAddLogo,
   anchorPosition,
 }: FloatingEditPanelProps) {
   const [showSeparatorMenu, setShowSeparatorMenu] = useState(false);
@@ -47,6 +45,7 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const panelRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -94,12 +93,32 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
     }
   }, [isDragging, handleDragMove, handleDragEnd]);
 
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageUrl = event.target?.result as string;
+      onStyleChange({ logoUrl: imageUrl });
+    };
+    reader.readAsDataURL(file);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }, [onStyleChange]);
+
+  const handleRemoveLogo = useCallback(() => {
+    onStyleChange({ logoUrl: null });
+  }, [onStyleChange]);
+
   if (!isOpen) return null;
 
-  const handleAddSeparator = (position: SeparatorPosition) => {
+  const handleAddSeparator = (sepPosition: SeparatorPosition) => {
     const newSeparator = {
       id: `sep-${Date.now()}`,
-      position,
+      position: sepPosition,
     };
     onStyleChange({ separators: [...style.separators, newSeparator] });
     setShowSeparatorMenu(false);
@@ -122,6 +141,13 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
       style={panelStyle}
       className="w-80 max-h-[80vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl p-4 space-y-4"
     >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
       <div 
         className="flex items-center justify-between cursor-move select-none"
         onMouseDown={handleDragStart}
@@ -243,6 +269,77 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
             <Underline className="h-4 w-4" />
           </Button>
         </div>
+      </div>
+
+      <div className="border-t pt-3 space-y-3">
+        <h4 className="text-xs font-medium text-muted-foreground uppercase">Логотип</h4>
+        
+        {style.logoUrl ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <img 
+                src={style.logoUrl} 
+                alt="Logo preview" 
+                className="w-12 h-12 object-contain rounded border"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRemoveLogo}
+                className="h-8 text-xs text-destructive hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Удалить
+              </Button>
+            </div>
+
+            <div>
+              <Label className="text-xs">Позиция</Label>
+              <div className="flex gap-1 mt-1">
+                <Button
+                  variant={style.logoPosition === "left" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onStyleChange({ logoPosition: "left" as LogoPosition })}
+                  className="h-8 text-xs flex-1"
+                >
+                  Слева
+                </Button>
+                <Button
+                  variant={style.logoPosition === "right" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onStyleChange({ logoPosition: "right" as LogoPosition })}
+                  className="h-8 text-xs flex-1"
+                >
+                  Справа
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-xs">Размер</Label>
+                <span className="text-xs text-muted-foreground">{style.logoSize}px</span>
+              </div>
+              <Slider
+                value={[style.logoSize]}
+                onValueChange={([v]) => onStyleChange({ logoSize: v })}
+                min={16}
+                max={96}
+                step={4}
+              />
+            </div>
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            className="h-8 text-xs w-full"
+          >
+            <Image className="h-4 w-4 mr-1" />
+            Загрузить логотип
+          </Button>
+        )}
       </div>
 
       <div className="border-t pt-3 space-y-3">
@@ -389,22 +486,6 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
             })}
           </div>
         )}
-      </div>
-
-      <div className="border-t pt-3 space-y-3">
-        <h4 className="text-xs font-medium text-muted-foreground uppercase">Другие элементы</h4>
-        
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onAddLogo}
-            className="h-8 text-xs"
-          >
-            <Image className="h-4 w-4 mr-1" />
-            Логотип
-          </Button>
-        </div>
       </div>
     </div>
   );

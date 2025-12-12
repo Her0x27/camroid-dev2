@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Image } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import previewBackground from "@/assets/preview-background.jpg";
 import { ReticleShapeRenderer } from "./components/ReticleShapes";
@@ -16,17 +16,8 @@ import {
 
 type ActivePanel = null | "watermark" | "reticle";
 
-type ElementType = "horizontal-separator" | "vertical-separator" | "logo";
-
-interface PreviewElement {
-  id: string;
-  type: ElementType;
-  position: { x: number; y: number };
-  imageUrl?: string;
-}
-
 const DEFAULT_WATERMARK_STYLE: WatermarkStyle = {
-  backgroundColor: "rgba(0, 0, 0, 0.7)",
+  backgroundColor: "#000000",
   backgroundOpacity: 70,
   fontColor: "#22c55e",
   fontOpacity: 100,
@@ -41,6 +32,9 @@ const DEFAULT_WATERMARK_STYLE: WatermarkStyle = {
   notePlacement: "end",
   separators: [],
   coordinateFormat: "decimal",
+  logoUrl: null,
+  logoPosition: "left",
+  logoSize: 40,
 };
 
 const DEFAULT_RETICLE_SETTINGS: ReticleSettings = {
@@ -55,7 +49,6 @@ const DEFAULT_RETICLE_SETTINGS: ReticleSettings = {
 export default function WatermarkPreviewPage() {
   const [, navigate] = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [watermarkPosition, setWatermarkPosition] = useState<WatermarkPosition>({
     x: 20,
@@ -68,7 +61,6 @@ export default function WatermarkPreviewPage() {
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [panelAnchor, setPanelAnchor] = useState({ x: 0, y: 0 });
-  const [elements, setElements] = useState<PreviewElement[]>([]);
 
   const handleWatermarkTap = useCallback(() => {
     if (containerRef.current) {
@@ -123,32 +115,6 @@ export default function WatermarkPreviewPage() {
     []
   );
 
-  const handleAddLogo = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const imageUrl = event.target?.result as string;
-      const newElement: PreviewElement = {
-        id: `logo-${Date.now()}`,
-        type: "logo",
-        position: { x: 150, y: 150 + elements.length * 30 },
-        imageUrl,
-      };
-      setElements((prev) => [...prev, newElement]);
-    };
-    reader.readAsDataURL(file);
-    
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }, [elements.length]);
-
   const handleBackgroundClick = useCallback(() => {
     if (activePanel) {
       setActivePanel(null);
@@ -157,13 +123,6 @@ export default function WatermarkPreviewPage() {
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-black">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
-      />
       <img
         src={previewBackground}
         alt="Preview background"
@@ -209,36 +168,6 @@ export default function WatermarkPreviewPage() {
             />
           </div>
         </div>
-
-        {elements.map((element) => (
-          <div
-            key={element.id}
-            className="absolute"
-            style={{
-              left: element.position.x,
-              top: element.position.y,
-            }}
-          >
-            {element.type === "horizontal-separator" && (
-              <div className="w-32 h-0.5 bg-white/70 rounded-full" />
-            )}
-            {element.type === "vertical-separator" && (
-              <div className="w-0.5 h-16 bg-white/70 rounded-full" />
-            )}
-            {element.type === "logo" && element.imageUrl && (
-              <img 
-                src={element.imageUrl} 
-                alt="Logo" 
-                className="max-w-24 max-h-24 object-contain rounded shadow-lg"
-              />
-            )}
-            {element.type === "logo" && !element.imageUrl && (
-              <div className="w-12 h-12 bg-white/20 border border-white/50 rounded flex items-center justify-center">
-                <Image className="w-6 h-6 text-white/70" />
-              </div>
-            )}
-          </div>
-        ))}
       </div>
 
       <Button
@@ -257,7 +186,6 @@ export default function WatermarkPreviewPage() {
         position={watermarkPosition}
         onStyleChange={handleStyleChange}
         onPositionChange={handlePositionChange}
-        onAddLogo={handleAddLogo}
         anchorPosition={panelAnchor}
       />
 
