@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Upload, Download, Grid3X3, RotateCcw, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { ArrowLeft, Grid3X3, RotateCcw, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
@@ -8,10 +8,10 @@ import { Label } from "@/components/ui/label";
 import { ToolbarPanel, LayersPanel, PropertyPanel, WatermarkCanvas } from "./components";
 import { useWatermarkEditor } from "./hooks";
 import type { WatermarkObjectType } from "./types";
+import previewBackground from "@/assets/preview-background.jpg";
 
 export default function WatermarkEditorPage() {
   const [, navigate] = useLocation();
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   
@@ -44,17 +44,6 @@ export default function WatermarkEditorPage() {
   const handleBack = useCallback(() => {
     navigate("/");
   }, [navigate]);
-
-  const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setBackgroundImage(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  }, []);
 
   const handleToolSelect = useCallback((toolId: string) => {
     setActiveTool(toolId);
@@ -113,14 +102,9 @@ export default function WatermarkEditorPage() {
     }
   }, [state.layers, updateLayer]);
 
-  const handleExport = useCallback(() => {
-    console.log("Export watermark config:", state);
-  }, [state]);
-
   const handleReset = useCallback(() => {
     if (confirm("Сбросить все изменения?")) {
       resetState();
-      setBackgroundImage(null);
     }
   }, [resetState]);
 
@@ -137,11 +121,11 @@ export default function WatermarkEditorPage() {
               </TooltipTrigger>
               <TooltipContent>Назад</TooltipContent>
             </Tooltip>
-            <h1 className="text-lg font-semibold">Редактор водяных знаков</h1>
+            <h1 className="text-base sm:text-lg font-semibold truncate">Редактор водяных знаков</h1>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 mr-4">
+            <div className="flex items-center gap-2">
               <Switch
                 id="grid-toggle"
                 checked={state.gridEnabled}
@@ -152,34 +136,6 @@ export default function WatermarkEditorPage() {
                 Сетка
               </Label>
             </div>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" asChild>
-                  <label className="cursor-pointer">
-                    <Upload className="w-4 h-4 mr-1" />
-                    Фото
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                  </label>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Загрузить фото для превью</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" onClick={handleExport}>
-                  <Download className="w-4 h-4 mr-1" />
-                  Экспорт
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Сохранить конфигурацию</TooltipContent>
-            </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>
@@ -222,7 +178,7 @@ export default function WatermarkEditorPage() {
 
           <div className="flex-1 relative">
             <WatermarkCanvas
-              backgroundImage={backgroundImage}
+              backgroundImage={previewBackground}
               layers={state.layers}
               selectedObjectIds={state.selectedObjectIds}
               activeTool={state.activeToolId}
