@@ -37,7 +37,9 @@
 
 ### client/src/pages/watermark-preview/index.tsx
 - **Обновлён DEFAULT_WATERMARK_STYLE:** добавлены поля логотипа
+- **backgroundColor теперь hex:** изменено с RGBA на hex для совместимости с color picker
 - **Удалены отдельные элементы логотипа:** логотип теперь внутри водяного знака
+- **Упрощён код:** убраны fileInputRef, handleAddLogo, elements state — вся логика перенесена в FloatingEditPanel
 
 ---
 
