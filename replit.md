@@ -27,7 +27,7 @@ The application employs a utility-first, tactical UI inspired by military HUDs. 
 - Custom hooks for camera, geolocation, and device orientation.
 - Reusable UI components from shadcn/ui.
 - Context API for settings management.
-- Six main views: Camera, Gallery, Photo Detail, Settings, Watermark Editor, Watermark Preview.
+- Five main views: Camera, Gallery, Photo Detail, Settings, Watermark Preview.
 
 ### Watermark Preview (/watermark-preview)
 
