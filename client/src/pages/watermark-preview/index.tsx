@@ -39,6 +39,7 @@ const DEFAULT_WATERMARK_STYLE: WatermarkStyle = {
   note: "",
   notePlacement: "end",
   separators: [],
+  coordinateFormat: "decimal",
 };
 
 const DEFAULT_RETICLE_SETTINGS: ReticleSettings = {

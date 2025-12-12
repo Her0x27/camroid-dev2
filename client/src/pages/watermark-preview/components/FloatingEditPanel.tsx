@@ -1,10 +1,11 @@
-import { memo, useState } from "react";
-import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown } from "lucide-react";
+import { memo, useState, useRef, useCallback, useEffect } from "react";
+import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown, GripHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { WatermarkStyle, WatermarkPosition, SeparatorPosition } from "./InteractiveWatermark";
+import { Separator } from "@/components/ui/separator";
+import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat } from "./InteractiveWatermark";
 
 interface FloatingEditPanelProps {
   isOpen: boolean;
@@ -24,6 +25,12 @@ const SEPARATOR_POSITIONS: { value: SeparatorPosition; label: string }[] = [
   { value: "after-note", label: "После заметки" },
 ];
 
+const COORDINATE_FORMATS: { value: CoordinateFormat; label: string; example: string }[] = [
+  { value: "decimal", label: "Десятичные", example: "55.7558°N 37.6173°E" },
+  { value: "dms", label: "Градусы, минуты, секунды", example: "55°45'21\"N 37°37'2\"E" },
+  { value: "ddm", label: "Градусы, десятичные минуты", example: "55°45.35'N 37°37.04'E" },
+];
+
 export const FloatingEditPanel = memo(function FloatingEditPanel({
   isOpen,
   onClose,
@@ -35,6 +42,56 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
   anchorPosition,
 }: FloatingEditPanelProps) {
   const [showSeparatorMenu, setShowSeparatorMenu] = useState(false);
+  const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPanelPosition({
+        x: Math.min(anchorPosition.x, window.innerWidth - 320),
+        y: Math.min(anchorPosition.y + 10, window.innerHeight - 500),
+      });
+    }
+  }, [isOpen, anchorPosition]);
+
+  const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    dragStartRef.current = { x: clientX - panelPosition.x, y: clientY - panelPosition.y };
+    setIsDragging(true);
+  }, [panelPosition]);
+
+  const handleDragMove = useCallback((e: MouseEvent | TouchEvent) => {
+    if (!isDragging) return;
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    setPanelPosition({
+      x: Math.max(0, Math.min(clientX - dragStartRef.current.x, window.innerWidth - 320)),
+      y: Math.max(0, Math.min(clientY - dragStartRef.current.y, window.innerHeight - 100)),
+    });
+  }, [isDragging]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener("mousemove", handleDragMove);
+      window.addEventListener("mouseup", handleDragEnd);
+      window.addEventListener("touchmove", handleDragMove);
+      window.addEventListener("touchend", handleDragEnd);
+      return () => {
+        window.removeEventListener("mousemove", handleDragMove);
+        window.removeEventListener("mouseup", handleDragEnd);
+        window.removeEventListener("touchmove", handleDragMove);
+        window.removeEventListener("touchend", handleDragEnd);
+      };
+    }
+  }, [isDragging, handleDragMove, handleDragEnd]);
 
   if (!isOpen) return null;
 
@@ -53,22 +110,32 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
 
   const panelStyle: React.CSSProperties = {
     position: "fixed",
-    left: Math.min(anchorPosition.x, window.innerWidth - 320),
-    top: Math.min(anchorPosition.y + 10, window.innerHeight - 500),
+    left: panelPosition.x,
+    top: panelPosition.y,
     zIndex: 100,
   };
 
   return (
     <div
+      ref={panelRef}
       style={panelStyle}
-      className="w-80 max-h-[80vh] overflow-y-auto bg-background border rounded-lg shadow-xl p-4 space-y-4"
+      className="w-80 max-h-[80vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl p-4 space-y-4"
     >
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-sm">Редактирование водяного знака</h3>
+      <div 
+        className="flex items-center justify-between cursor-move select-none"
+        onMouseDown={handleDragStart}
+        onTouchStart={handleDragStart}
+      >
+        <div className="flex items-center gap-2">
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          <h3 className="font-semibold text-sm">Редактирование водяного знака</h3>
+        </div>
         <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6">
           <X className="h-4 w-4" />
         </Button>
       </div>
+      
+      <Separator />
 
       <div className="space-y-3">
         <h4 className="text-xs font-medium text-muted-foreground uppercase">Фон</h4>
@@ -174,6 +241,27 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
           >
             <Underline className="h-4 w-4" />
           </Button>
+        </div>
+      </div>
+
+      <div className="border-t pt-3 space-y-3">
+        <h4 className="text-xs font-medium text-muted-foreground uppercase">Формат координат</h4>
+        
+        <div className="space-y-2">
+          {COORDINATE_FORMATS.map((format) => (
+            <button
+              key={format.value}
+              onClick={() => onStyleChange({ coordinateFormat: format.value })}
+              className={`w-full text-left p-2 rounded-lg border transition-all ${
+                style.coordinateFormat === format.value
+                  ? "border-primary bg-primary/10"
+                  : "border-muted hover:border-muted-foreground/50"
+              }`}
+            >
+              <div className="text-xs font-medium">{format.label}</div>
+              <div className="text-[10px] text-muted-foreground">{format.example}</div>
+            </button>
+          ))}
         </div>
       </div>
 

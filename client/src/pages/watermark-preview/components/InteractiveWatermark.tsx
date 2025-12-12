@@ -12,6 +12,43 @@ export interface WatermarkSeparator {
   position: SeparatorPosition;
 }
 
+export type CoordinateFormat = "decimal" | "dms" | "ddm";
+
+function formatCoordinates(lat: number, lng: number, format: CoordinateFormat): string {
+  switch (format) {
+    case "dms": {
+      const latDir = lat >= 0 ? "N" : "S";
+      const lngDir = lng >= 0 ? "E" : "W";
+      const absLat = Math.abs(lat);
+      const absLng = Math.abs(lng);
+      const latDeg = Math.floor(absLat);
+      const latMin = Math.floor((absLat - latDeg) * 60);
+      const latSec = ((absLat - latDeg - latMin / 60) * 3600).toFixed(1);
+      const lngDeg = Math.floor(absLng);
+      const lngMin = Math.floor((absLng - lngDeg) * 60);
+      const lngSec = ((absLng - lngDeg - lngMin / 60) * 3600).toFixed(1);
+      return `${latDeg}°${latMin}'${latSec}"${latDir} ${lngDeg}°${lngMin}'${lngSec}"${lngDir}`;
+    }
+    case "ddm": {
+      const latDir = lat >= 0 ? "N" : "S";
+      const lngDir = lng >= 0 ? "E" : "W";
+      const absLat = Math.abs(lat);
+      const absLng = Math.abs(lng);
+      const latDeg = Math.floor(absLat);
+      const latMin = ((absLat - latDeg) * 60).toFixed(4);
+      const lngDeg = Math.floor(absLng);
+      const lngMin = ((absLng - lngDeg) * 60).toFixed(4);
+      return `${latDeg}°${latMin}'${latDir} ${lngDeg}°${lngMin}'${lngDir}`;
+    }
+    case "decimal":
+    default: {
+      const latDir = lat >= 0 ? "N" : "S";
+      const lngDir = lng >= 0 ? "E" : "W";
+      return `${Math.abs(lat).toFixed(4)}°${latDir} ${Math.abs(lng).toFixed(4)}°${lngDir}`;
+    }
+  }
+}
+
 export interface WatermarkStyle {
   backgroundColor: string;
   backgroundOpacity: number;
@@ -27,6 +64,7 @@ export interface WatermarkStyle {
   note: string;
   notePlacement: "start" | "end";
   separators: WatermarkSeparator[];
+  coordinateFormat: CoordinateFormat;
 }
 
 interface InteractiveWatermarkProps {
@@ -201,7 +239,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         {style.notePlacement === "end" && (style.separators || []).filter(s => s.position === "before-coords").map(s => (
           <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
         ))}
-        <div>55.7558°N 37.6173°E</div>
+        <div>{formatCoordinates(55.7558, 37.6173, style.coordinateFormat)}</div>
         {(style.separators || []).filter(s => s.position === "after-coords").map(s => (
           <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
         ))}

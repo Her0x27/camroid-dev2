@@ -1,8 +1,9 @@
-import { memo } from "react";
-import { X } from "lucide-react";
+import { memo, useState, useRef, useCallback, useEffect } from "react";
+import { X, GripHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { ReticleShapeRenderer } from "./ReticleShapes";
 import type { ReticleShape } from "../types";
 
@@ -39,26 +40,87 @@ export const ReticleSelector = memo(function ReticleSelector({
   onSettingsChange,
   anchorPosition,
 }: ReticleSelectorProps) {
+  const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPanelPosition({
+        x: Math.min(anchorPosition.x, window.innerWidth - 280),
+        y: Math.min(anchorPosition.y + 10, window.innerHeight - 400),
+      });
+    }
+  }, [isOpen, anchorPosition]);
+
+  const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    dragStartRef.current = { x: clientX - panelPosition.x, y: clientY - panelPosition.y };
+    setIsDragging(true);
+  }, [panelPosition]);
+
+  const handleDragMove = useCallback((e: MouseEvent | TouchEvent) => {
+    if (!isDragging) return;
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    setPanelPosition({
+      x: Math.max(0, Math.min(clientX - dragStartRef.current.x, window.innerWidth - 280)),
+      y: Math.max(0, Math.min(clientY - dragStartRef.current.y, window.innerHeight - 100)),
+    });
+  }, [isDragging]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener("mousemove", handleDragMove);
+      window.addEventListener("mouseup", handleDragEnd);
+      window.addEventListener("touchmove", handleDragMove);
+      window.addEventListener("touchend", handleDragEnd);
+      return () => {
+        window.removeEventListener("mousemove", handleDragMove);
+        window.removeEventListener("mouseup", handleDragEnd);
+        window.removeEventListener("touchmove", handleDragMove);
+        window.removeEventListener("touchend", handleDragEnd);
+      };
+    }
+  }, [isDragging, handleDragMove, handleDragEnd]);
+
   if (!isOpen) return null;
 
   const panelStyle: React.CSSProperties = {
     position: "fixed",
-    left: Math.min(anchorPosition.x, window.innerWidth - 280),
-    top: Math.min(anchorPosition.y + 10, window.innerHeight - 400),
+    left: panelPosition.x,
+    top: panelPosition.y,
     zIndex: 100,
   };
 
   return (
     <div
+      ref={panelRef}
       style={panelStyle}
-      className="w-72 max-h-[70vh] overflow-y-auto bg-background border rounded-lg shadow-xl p-4 space-y-4"
+      className="w-72 max-h-[70vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl p-4 space-y-4"
     >
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-sm">Выбор прицела</h3>
+      <div 
+        className="flex items-center justify-between cursor-move select-none"
+        onMouseDown={handleDragStart}
+        onTouchStart={handleDragStart}
+      >
+        <div className="flex items-center gap-2">
+          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          <h3 className="font-semibold text-sm">Выбор прицела</h3>
+        </div>
         <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6">
           <X className="h-4 w-4" />
         </Button>
       </div>
+      
+      <Separator />
 
       <div className="grid grid-cols-3 gap-2">
         {RETICLE_OPTIONS.map((option) => (
