@@ -12,7 +12,7 @@ export interface WatermarkSeparator {
   position: SeparatorPosition;
 }
 
-export type CoordinateFormat = "decimal" | "dms" | "ddm";
+export type CoordinateFormat = "decimal" | "dms" | "ddm" | "simple";
 
 function formatCoordinates(lat: number, lng: number, format: CoordinateFormat): string {
   switch (format) {
@@ -39,6 +39,9 @@ function formatCoordinates(lat: number, lng: number, format: CoordinateFormat): 
       const lngDeg = Math.floor(absLng);
       const lngMin = ((absLng - lngDeg) * 60).toFixed(4);
       return `${latDeg}°${latMin}'${latDir} ${lngDeg}°${lngMin}'${lngDir}`;
+    }
+    case "simple": {
+      return `${lat.toFixed(5)} ${lng.toFixed(5)}`;
     }
     case "decimal":
     default: {

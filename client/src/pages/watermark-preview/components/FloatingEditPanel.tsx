@@ -29,6 +29,7 @@ const COORDINATE_FORMATS: { value: CoordinateFormat; label: string; example: str
   { value: "decimal", label: "Десятичные", example: "55.7558°N 37.6173°E" },
   { value: "dms", label: "Градусы, минуты, секунды", example: "55°45'21\"N 37°37'2\"E" },
   { value: "ddm", label: "Градусы, десятичные минуты", example: "55°45.35'N 37°37.04'E" },
+  { value: "simple", label: "Простые числа", example: "55.75581 37.61738" },
 ];
 
 export const FloatingEditPanel = memo(function FloatingEditPanel({
