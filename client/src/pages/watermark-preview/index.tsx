@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { ArrowLeft, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import previewBackground from "@/assets/preview-background.jpg";
-import { ReticleShapeRenderer } from "@/pages/watermark-editor/components/ReticleShapes";
-import type { ReticleShape } from "@/pages/watermark-editor/types";
+import { ReticleShapeRenderer } from "./components/ReticleShapes";
+import type { ReticleShape } from "./types";
 import {
   InteractiveWatermark,
   FloatingEditPanel,

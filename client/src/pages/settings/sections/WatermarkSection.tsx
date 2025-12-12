@@ -34,7 +34,7 @@ export const WatermarkSection = memo(function WatermarkSection({
   }, [activatePreview, t]);
 
   const handleOpenEditor = useCallback(() => {
-    navigate("/watermark-editor");
+    navigate("/watermark-preview");
   }, [navigate]);
   
   return (
@@ -78,8 +78,8 @@ export const WatermarkSection = memo(function WatermarkSection({
             <div className="flex items-center gap-3">
               <Pencil className="w-4 h-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Редактор водяных знаков</p>
-                <p className="text-xs text-muted-foreground">Визуальное редактирование</p>
+                <p className="text-sm font-medium">Предпросмотр водяных знаков</p>
+                <p className="text-xs text-muted-foreground">Просмотр и настройка</p>
               </div>
             </div>
             <Button 

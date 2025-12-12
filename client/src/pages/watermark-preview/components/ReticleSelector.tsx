@@ -3,8 +3,8 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { ReticleShapeRenderer } from "@/pages/watermark-editor/components/ReticleShapes";
-import type { ReticleShape } from "@/pages/watermark-editor/types";
+import { ReticleShapeRenderer } from "./ReticleShapes";
+import type { ReticleShape } from "../types";
 
 export interface ReticleSettings {
   shape: ReticleShape;
