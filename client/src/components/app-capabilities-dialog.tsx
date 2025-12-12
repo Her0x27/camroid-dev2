@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Camera,
   MapPin,
@@ -271,15 +272,21 @@ function FeatureItem({ feature, t }: {
 }) {
   const Icon = feature.icon;
   const titleKey = feature.id as keyof typeof t.capabilities.appFeatures;
+  const descKey = `${feature.id}Desc` as keyof typeof t.capabilities.appFeatures;
   
   return (
-    <div className="group flex items-center gap-2 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors cursor-default">
-      <div className="shrink-0 w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
-        <Icon className="h-3 w-3 text-primary" />
+    <div className="group flex items-start gap-3 p-2.5 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors cursor-default">
+      <div className="shrink-0 w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center mt-0.5">
+        <Icon className="h-3.5 w-3.5 text-primary" />
       </div>
-      <span className="text-[11px] font-medium text-foreground/90 truncate">
-        {t.capabilities.appFeatures[titleKey]}
-      </span>
+      <div className="flex-1 min-w-0">
+        <div className="text-xs font-medium text-foreground/90">
+          {t.capabilities.appFeatures[titleKey]}
+        </div>
+        <div className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">
+          {t.capabilities.appFeatures[descKey]}
+        </div>
+      </div>
     </div>
   );
 }
@@ -287,12 +294,9 @@ function FeatureItem({ feature, t }: {
 function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   const shouldReduceMotion = useReducedMotion();
   
-  const leftColumn = appFeaturesList.slice(0, 3) as unknown as typeof appFeaturesList;
-  const rightColumn = appFeaturesList.slice(3) as unknown as typeof appFeaturesList;
-  
-  const renderColumn = (features: typeof appFeaturesList) => (
-    <div className="space-y-1.5">
-      {features.map((feature) => (
+  const renderFeatures = () => (
+    <div className="space-y-2">
+      {appFeaturesList.map((feature) => (
         shouldReduceMotion ? (
           <FeatureItem key={feature.id} feature={feature} t={t} />
         ) : (
@@ -312,19 +316,14 @@ function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
       </h4>
       
       {shouldReduceMotion ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-          {renderColumn(leftColumn)}
-          {renderColumn(rightColumn)}
-        </div>
+        renderFeatures()
       ) : (
         <motion.div 
-          className="grid grid-cols-1 sm:grid-cols-2 gap-1.5"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {renderColumn(leftColumn)}
-          {renderColumn(rightColumn)}
+          {renderFeatures()}
         </motion.div>
       )}
     </div>
@@ -486,13 +485,23 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
                 <div className="p-4 space-y-4">
                   <DeviceInfoDisplay device={capabilities.device} />
                   
+                  <Separator className="my-3" />
+                  
                   <AboutSection t={t} />
+                  
+                  <Separator className="my-3" />
                   
                   <AppFeaturesSection t={t} />
                   
+                  <Separator className="my-3" />
+                  
                   <CapabilitiesSection capabilities={capabilities.capabilities} t={t} />
                   
+                  <Separator className="my-3" />
+                  
                   <PrivacySection t={t} />
+                  
+                  <Separator className="my-3" />
                   
                   <RecommendationsSection 
                     device={capabilities.device} 
