@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat, LogoPosition } from "./InteractiveWatermark";
 
 interface FloatingEditPanelProps {
@@ -149,20 +148,18 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
         className="hidden"
       />
       <div 
-        className="flex items-center justify-between cursor-move select-none"
+        className="flex items-center justify-between cursor-move select-none -mx-4 -mt-4 px-3 py-2 bg-muted/50 rounded-t-lg border-b"
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
       >
-        <div className="flex items-center gap-2">
-          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-semibold text-sm">Редактирование водяного знака</h3>
+        <div className="flex items-center gap-1.5">
+          <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+          <h3 className="font-medium text-xs">Редактирование водяного знака</h3>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6">
-          <X className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={onClose} className="h-5 w-5 -mr-1">
+          <X className="h-3.5 w-3.5" />
         </Button>
       </div>
-      
-      <Separator />
 
       <div className="space-y-3">
         <h4 className="text-xs font-medium text-muted-foreground uppercase">Фон</h4>

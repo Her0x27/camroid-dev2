@@ -3,7 +3,6 @@ import { X, GripHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { ReticleShapeRenderer } from "./ReticleShapes";
 import type { ReticleShape } from "../types";
 
@@ -107,20 +106,18 @@ export const ReticleSelector = memo(function ReticleSelector({
       className="w-72 max-h-[70vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl p-4 space-y-4"
     >
       <div 
-        className="flex items-center justify-between cursor-move select-none"
+        className="flex items-center justify-between cursor-move select-none -mx-4 -mt-4 px-3 py-2 bg-muted/50 rounded-t-lg border-b"
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
       >
-        <div className="flex items-center gap-2">
-          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-          <h3 className="font-semibold text-sm">Выбор прицела</h3>
+        <div className="flex items-center gap-1.5">
+          <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
+          <h3 className="font-medium text-xs">Выбор прицела</h3>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6">
-          <X className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={onClose} className="h-5 w-5 -mr-1">
+          <X className="h-3.5 w-3.5" />
         </Button>
       </div>
-      
-      <Separator />
 
       <div className="grid grid-cols-3 gap-2">
         {RETICLE_OPTIONS.map((option) => (
