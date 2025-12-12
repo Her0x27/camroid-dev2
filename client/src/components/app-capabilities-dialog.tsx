@@ -271,30 +271,38 @@ function FeatureItem({ feature, t }: {
 }) {
   const Icon = feature.icon;
   const titleKey = feature.id as keyof typeof t.capabilities.appFeatures;
-  const descKey = `${feature.id}Desc` as keyof typeof t.capabilities.appFeatures;
   
   return (
-    <div className="group relative flex items-center gap-2.5 p-2.5 rounded-md bg-card/50 border border-border/50 hover:border-primary/30 hover:bg-card/80 transition-all duration-200 cursor-default overflow-hidden">
-      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary/40 group-hover:bg-primary/70 transition-colors" />
-      
-      <div className="shrink-0 w-7 h-7 rounded-md bg-muted/80 flex items-center justify-center">
-        <Icon className="h-3.5 w-3.5 text-foreground/70" />
+    <div className="group flex items-center gap-2 p-2 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors cursor-default">
+      <div className="shrink-0 w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+        <Icon className="h-3 w-3 text-primary" />
       </div>
-      
-      <div className="flex-1 min-w-0">
-        <span className="text-xs font-medium block truncate">
-          {t.capabilities.appFeatures[titleKey]}
-        </span>
-        <p className="text-[11px] text-muted-foreground line-clamp-1">
-          {t.capabilities.appFeatures[descKey]}
-        </p>
-      </div>
+      <span className="text-[11px] font-medium text-foreground/90 truncate">
+        {t.capabilities.appFeatures[titleKey]}
+      </span>
     </div>
   );
 }
 
 function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   const shouldReduceMotion = useReducedMotion();
+  
+  const leftColumn = appFeaturesList.slice(0, 3) as unknown as typeof appFeaturesList;
+  const rightColumn = appFeaturesList.slice(3) as unknown as typeof appFeaturesList;
+  
+  const renderColumn = (features: typeof appFeaturesList) => (
+    <div className="space-y-1.5">
+      {features.map((feature) => (
+        shouldReduceMotion ? (
+          <FeatureItem key={feature.id} feature={feature} t={t} />
+        ) : (
+          <motion.div key={feature.id} variants={itemVariants}>
+            <FeatureItem feature={feature} t={t} />
+          </motion.div>
+        )
+      ))}
+    </div>
+  );
   
   return (
     <div className="space-y-2">
@@ -304,23 +312,19 @@ function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
       </h4>
       
       {shouldReduceMotion ? (
-        <div className="space-y-1.5">
-          {appFeaturesList.map((feature) => (
-            <FeatureItem key={feature.id} feature={feature} t={t} />
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+          {renderColumn(leftColumn)}
+          {renderColumn(rightColumn)}
         </div>
       ) : (
         <motion.div 
-          className="space-y-1.5"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-1.5"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          {appFeaturesList.map((feature) => (
-            <motion.div key={feature.id} variants={itemVariants}>
-              <FeatureItem feature={feature} t={t} />
-            </motion.div>
-          ))}
+          {renderColumn(leftColumn)}
+          {renderColumn(rightColumn)}
         </motion.div>
       )}
     </div>
@@ -464,8 +468,9 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
             animate={shouldReduceMotion ? { opacity: 1 } : "visible"}
             exit={shouldReduceMotion ? { opacity: 0 } : "exit"}
           >
-            <div className="relative bg-background/95 backdrop-blur-xl border border-border/60 rounded-2xl shadow-2xl shadow-black/20 overflow-hidden">
-              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+            <div className="relative bg-background/98 backdrop-blur-xl border-2 border-border rounded-2xl shadow-2xl shadow-black/40 overflow-hidden ring-1 ring-white/10">
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+              <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5 pointer-events-none" />
               
               <div className="flex items-center gap-3 p-4 border-b border-border/40">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
@@ -524,16 +529,11 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
 }
 
 export function useAppCapabilitiesDialog() {
-  const [showDialog, setShowDialog] = useState(false);
-  const [checked, setChecked] = useState(false);
-
-  useEffect(() => {
-    if (!checked) {
-      const dismissed = isDismissed();
-      setShowDialog(!dismissed);
-      setChecked(true);
-    }
-  }, [checked]);
+  const [showDialog, setShowDialog] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const dismissed = isDismissed();
+    return !dismissed;
+  });
 
   const closeDialog = () => setShowDialog(false);
 

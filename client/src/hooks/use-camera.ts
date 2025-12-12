@@ -341,14 +341,14 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
   useEffect(() => {
     if (!isVisible) {
       // Page became hidden - save state and stop camera
-      if (isReady || streamRef.current) {
+      if (isReady && streamRef.current) {
         wasActiveBeforeHiddenRef.current = true;
         stopCamera();
         logger.info("Camera stopped due to visibility change");
       }
     } else {
       // Page became visible - restart camera if it was active before
-      if (wasActiveBeforeHiddenRef.current) {
+      if (wasActiveBeforeHiddenRef.current && !isLoading) {
         wasActiveBeforeHiddenRef.current = false;
         startCamera().catch((err) => {
           logger.error("Failed to restart camera after visibility change", err);
@@ -356,7 +356,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
         logger.info("Camera restarted after visibility change");
       }
     }
-  }, [isVisible, isReady, stopCamera, startCamera]);
+  }, [isVisible, isReady, isLoading, stopCamera, startCamera]);
 
   // Cleanup on unmount
   useEffect(() => {
