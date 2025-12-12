@@ -63,6 +63,17 @@
 - **Новые методы:** `updateWatermarkPreview`, `updateReticlePreview`
 - **Обновлён merge logic:** добавлена обработка новых полей при загрузке
 - **Обновлён Provider:** добавлены новые методы в value
+- **Валидация (clamping):** все числовые значения ограничиваются в пределах схемы:
+  - backgroundOpacity: 0-100
+  - width: 100-500
+  - height: 40-300
+  - fontOpacity: 0-100
+  - fontSize: 8-48
+  - rotation: -180 to 180
+  - logoSize: 16-96
+  - reticle size: 20-200
+  - reticle strokeWidth: 1-10
+  - reticle opacity: 10-100
 
 ### client/src/pages/watermark-preview/index.tsx
 - **Интеграция с useSettings:** загрузка настроек из контекста

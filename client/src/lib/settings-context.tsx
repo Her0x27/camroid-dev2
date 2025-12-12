@@ -113,12 +113,44 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, [settings.enhancement, updateSettings]);
 
   const updateWatermarkPreview = useCallback((updates: Partial<WatermarkPreviewConfig>) => {
-    const newWatermarkPreview = { ...settings.watermarkPreview, ...updates };
+    const clampedUpdates = { ...updates };
+    if (clampedUpdates.backgroundOpacity !== undefined) {
+      clampedUpdates.backgroundOpacity = Math.max(0, Math.min(100, clampedUpdates.backgroundOpacity));
+    }
+    if (clampedUpdates.width !== undefined) {
+      clampedUpdates.width = Math.max(100, Math.min(500, clampedUpdates.width));
+    }
+    if (clampedUpdates.height !== undefined) {
+      clampedUpdates.height = Math.max(40, Math.min(300, clampedUpdates.height));
+    }
+    if (clampedUpdates.fontOpacity !== undefined) {
+      clampedUpdates.fontOpacity = Math.max(0, Math.min(100, clampedUpdates.fontOpacity));
+    }
+    if (clampedUpdates.fontSize !== undefined) {
+      clampedUpdates.fontSize = Math.max(8, Math.min(48, clampedUpdates.fontSize));
+    }
+    if (clampedUpdates.rotation !== undefined) {
+      clampedUpdates.rotation = Math.max(-180, Math.min(180, clampedUpdates.rotation));
+    }
+    if (clampedUpdates.logoSize !== undefined) {
+      clampedUpdates.logoSize = Math.max(16, Math.min(96, clampedUpdates.logoSize));
+    }
+    const newWatermarkPreview = { ...settings.watermarkPreview, ...clampedUpdates };
     updateSettings({ watermarkPreview: newWatermarkPreview });
   }, [settings.watermarkPreview, updateSettings]);
 
   const updateReticlePreview = useCallback((updates: Partial<ReticlePreviewConfig>) => {
-    const newReticlePreview = { ...settings.reticlePreview, ...updates };
+    const clampedUpdates = { ...updates };
+    if (clampedUpdates.size !== undefined) {
+      clampedUpdates.size = Math.max(20, Math.min(200, clampedUpdates.size));
+    }
+    if (clampedUpdates.strokeWidth !== undefined) {
+      clampedUpdates.strokeWidth = Math.max(1, Math.min(10, clampedUpdates.strokeWidth));
+    }
+    if (clampedUpdates.opacity !== undefined) {
+      clampedUpdates.opacity = Math.max(10, Math.min(100, clampedUpdates.opacity));
+    }
+    const newReticlePreview = { ...settings.reticlePreview, ...clampedUpdates };
     updateSettings({ reticlePreview: newReticlePreview });
   }, [settings.reticlePreview, updateSettings]);
 
