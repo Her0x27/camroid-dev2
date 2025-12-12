@@ -1,10 +1,11 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import previewBackground from "@/assets/preview-background.jpg";
 import { ReticleShapeRenderer } from "./components/ReticleShapes";
 import type { ReticleShape } from "./types";
+import { useSettings } from "@/lib/settings-context";
 import {
   InteractiveWatermark,
   FloatingEditPanel,
@@ -16,51 +17,89 @@ import {
 
 type ActivePanel = null | "watermark" | "reticle";
 
-const DEFAULT_WATERMARK_STYLE: WatermarkStyle = {
-  backgroundColor: "#000000",
-  backgroundOpacity: 70,
-  fontColor: "#22c55e",
-  fontOpacity: 100,
-  fontSize: 14,
-  bold: false,
-  italic: false,
-  underline: false,
-  width: 200,
-  height: 60,
-  rotation: 0,
-  note: "",
-  notePlacement: "end",
-  separators: [],
-  coordinateFormat: "decimal",
-  logoUrl: null,
-  logoPosition: "left",
-  logoSize: 40,
-};
-
-const DEFAULT_RETICLE_SETTINGS: ReticleSettings = {
-  shape: "crosshair" as ReticleShape,
-  color: "#22c55e",
-  size: 80,
-  strokeWidth: 2,
-  opacity: 80,
-  position: { x: 0, y: 0 },
-};
-
 export default function WatermarkPreviewPage() {
   const [, navigate] = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
+  const { settings, isLoading, updateWatermarkPreview, updateReticlePreview } = useSettings();
+
+  const watermarkConfig = useMemo(() => settings.watermarkPreview, [settings.watermarkPreview]);
+  const reticleConfig = useMemo(() => settings.reticlePreview, [settings.reticlePreview]);
 
   const [watermarkPosition, setWatermarkPosition] = useState<WatermarkPosition>({
-    x: 20,
-    y: 20,
+    x: watermarkConfig.positionX,
+    y: watermarkConfig.positionY,
   });
-  const [watermarkStyle, setWatermarkStyle] =
-    useState<WatermarkStyle>(DEFAULT_WATERMARK_STYLE);
-  const [reticleSettings, setReticleSettings] =
-    useState<ReticleSettings>(DEFAULT_RETICLE_SETTINGS);
+
+  const [watermarkStyle, setWatermarkStyle] = useState<WatermarkStyle>({
+    backgroundColor: watermarkConfig.backgroundColor,
+    backgroundOpacity: watermarkConfig.backgroundOpacity,
+    fontColor: watermarkConfig.fontColor,
+    fontOpacity: watermarkConfig.fontOpacity,
+    fontSize: watermarkConfig.fontSize,
+    bold: watermarkConfig.bold,
+    italic: watermarkConfig.italic,
+    underline: watermarkConfig.underline,
+    width: watermarkConfig.width,
+    height: watermarkConfig.height,
+    rotation: watermarkConfig.rotation,
+    note: watermarkConfig.note,
+    notePlacement: watermarkConfig.notePlacement,
+    separators: watermarkConfig.separators,
+    coordinateFormat: watermarkConfig.coordinateFormat,
+    logoUrl: watermarkConfig.logoUrl,
+    logoPosition: watermarkConfig.logoPosition,
+    logoSize: watermarkConfig.logoSize,
+  });
+
+  const [reticleSettings, setReticleSettings] = useState<ReticleSettings>({
+    shape: reticleConfig.shape as ReticleShape,
+    color: reticleConfig.color,
+    size: reticleConfig.size,
+    strokeWidth: reticleConfig.strokeWidth,
+    opacity: reticleConfig.opacity,
+    position: { x: reticleConfig.positionX, y: reticleConfig.positionY },
+  });
+
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [panelAnchor, setPanelAnchor] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (!isLoading) {
+      setWatermarkPosition({
+        x: watermarkConfig.positionX,
+        y: watermarkConfig.positionY,
+      });
+      setWatermarkStyle({
+        backgroundColor: watermarkConfig.backgroundColor,
+        backgroundOpacity: watermarkConfig.backgroundOpacity,
+        fontColor: watermarkConfig.fontColor,
+        fontOpacity: watermarkConfig.fontOpacity,
+        fontSize: watermarkConfig.fontSize,
+        bold: watermarkConfig.bold,
+        italic: watermarkConfig.italic,
+        underline: watermarkConfig.underline,
+        width: watermarkConfig.width,
+        height: watermarkConfig.height,
+        rotation: watermarkConfig.rotation,
+        note: watermarkConfig.note,
+        notePlacement: watermarkConfig.notePlacement,
+        separators: watermarkConfig.separators,
+        coordinateFormat: watermarkConfig.coordinateFormat,
+        logoUrl: watermarkConfig.logoUrl,
+        logoPosition: watermarkConfig.logoPosition,
+        logoSize: watermarkConfig.logoSize,
+      });
+      setReticleSettings({
+        shape: reticleConfig.shape as ReticleShape,
+        color: reticleConfig.color,
+        size: reticleConfig.size,
+        strokeWidth: reticleConfig.strokeWidth,
+        opacity: reticleConfig.opacity,
+        position: { x: reticleConfig.positionX, y: reticleConfig.positionY },
+      });
+    }
+  }, [isLoading, watermarkConfig, reticleConfig]);
 
   const handleWatermarkTap = useCallback(() => {
     if (containerRef.current) {
@@ -95,24 +134,70 @@ export default function WatermarkPreviewPage() {
 
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
-  }, []);
+    updateWatermarkPreview({
+      positionX: watermarkPosition.x,
+      positionY: watermarkPosition.y,
+    });
+  }, [watermarkPosition, updateWatermarkPreview]);
 
   const handleStyleChange = useCallback((updates: Partial<WatermarkStyle>) => {
-    setWatermarkStyle((prev) => ({ ...prev, ...updates }));
-  }, []);
+    setWatermarkStyle((prev) => {
+      const newStyle = { ...prev, ...updates };
+      updateWatermarkPreview({
+        backgroundColor: newStyle.backgroundColor,
+        backgroundOpacity: newStyle.backgroundOpacity,
+        fontColor: newStyle.fontColor,
+        fontOpacity: newStyle.fontOpacity,
+        fontSize: newStyle.fontSize,
+        bold: newStyle.bold,
+        italic: newStyle.italic,
+        underline: newStyle.underline,
+        width: newStyle.width,
+        height: newStyle.height,
+        rotation: newStyle.rotation,
+        note: newStyle.note,
+        notePlacement: newStyle.notePlacement,
+        separators: newStyle.separators,
+        coordinateFormat: newStyle.coordinateFormat,
+        logoUrl: newStyle.logoUrl,
+        logoPosition: newStyle.logoPosition,
+        logoSize: newStyle.logoSize,
+      });
+      return newStyle;
+    });
+  }, [updateWatermarkPreview]);
 
   const handlePositionChange = useCallback(
     (updates: Partial<WatermarkPosition>) => {
-      setWatermarkPosition((prev) => ({ ...prev, ...updates }));
+      setWatermarkPosition((prev) => {
+        const newPos = { ...prev, ...updates };
+        updateWatermarkPreview({
+          positionX: newPos.x,
+          positionY: newPos.y,
+        });
+        return newPos;
+      });
     },
-    []
+    [updateWatermarkPreview]
   );
 
   const handleReticleSettingsChange = useCallback(
     (updates: Partial<ReticleSettings>) => {
-      setReticleSettings((prev) => ({ ...prev, ...updates }));
+      setReticleSettings((prev) => {
+        const newSettings = { ...prev, ...updates };
+        updateReticlePreview({
+          shape: newSettings.shape,
+          color: newSettings.color,
+          size: newSettings.size,
+          strokeWidth: newSettings.strokeWidth,
+          opacity: newSettings.opacity,
+          positionX: newSettings.position.x,
+          positionY: newSettings.position.y,
+        });
+        return newSettings;
+      });
     },
-    []
+    [updateReticlePreview]
   );
 
   const handleBackgroundClick = useCallback(() => {
@@ -120,6 +205,14 @@ export default function WatermarkPreviewPage() {
       setActivePanel(null);
     }
   }, [activePanel]);
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-black flex items-center justify-center">
+        <div className="text-white">Загрузка...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-black">

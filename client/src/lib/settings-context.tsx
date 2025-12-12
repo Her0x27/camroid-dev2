@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from "react";
-import type { Settings, ReticleConfig, StabilizationSettings, EnhancementSettings } from "@shared/schema";
+import type { Settings, ReticleConfig, StabilizationSettings, EnhancementSettings, WatermarkPreviewConfig, ReticlePreviewConfig } from "@shared/schema";
 import { defaultSettings } from "@shared/schema";
 import { getSettings, saveSettings } from "./db";
 import { TIMING } from "./constants";
@@ -12,6 +12,8 @@ interface SettingsContextType {
   updateReticle: (updates: Partial<ReticleConfig>) => void;
   updateStabilization: (updates: Partial<StabilizationSettings>) => void;
   updateEnhancement: (updates: Partial<EnhancementSettings>) => void;
+  updateWatermarkPreview: (updates: Partial<WatermarkPreviewConfig>) => void;
+  updateReticlePreview: (updates: Partial<ReticlePreviewConfig>) => void;
   resetSettings: () => Promise<void>;
   isSectionOpen: (sectionId: string) => boolean;
   toggleSection: (sectionId: string) => void;
@@ -75,6 +77,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
           imgbb: { ...defaultSettings.imgbb, ...stored.imgbb },
           stabilization: { ...defaultSettings.stabilization, ...stored.stabilization },
           enhancement: { ...defaultSettings.enhancement, ...stored.enhancement },
+          watermarkPreview: { ...defaultSettings.watermarkPreview, ...stored.watermarkPreview },
+          reticlePreview: { ...defaultSettings.reticlePreview, ...stored.reticlePreview },
         };
         setSettings(merged);
       } catch (error) {
@@ -108,6 +112,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     updateSettings({ enhancement: newEnhancement });
   }, [settings.enhancement, updateSettings]);
 
+  const updateWatermarkPreview = useCallback((updates: Partial<WatermarkPreviewConfig>) => {
+    const newWatermarkPreview = { ...settings.watermarkPreview, ...updates };
+    updateSettings({ watermarkPreview: newWatermarkPreview });
+  }, [settings.watermarkPreview, updateSettings]);
+
+  const updateReticlePreview = useCallback((updates: Partial<ReticlePreviewConfig>) => {
+    const newReticlePreview = { ...settings.reticlePreview, ...updates };
+    updateSettings({ reticlePreview: newReticlePreview });
+  }, [settings.reticlePreview, updateSettings]);
+
   const resetSettings = useCallback(async () => {
     setSettings(defaultSettings);
     try {
@@ -139,6 +153,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         updateReticle,
         updateStabilization,
         updateEnhancement,
+        updateWatermarkPreview,
+        updateReticlePreview,
         resetSettings,
         isSectionOpen,
         toggleSection,

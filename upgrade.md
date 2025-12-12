@@ -1,3 +1,81 @@
+# Upgrade: Загрузка параметров водяного знака из конфигурации v37
+
+## Описание
+Страница /watermark-preview должна загружать все параметры из конфигурации по умолчанию или пользовательских настроек:
+- Создать схему watermarkPreviewConfigSchema в shared/schema.ts
+- Создать схему reticlePreviewConfigSchema для настроек прицела в превью
+- Интегрировать в settingsSchema и defaultSettings
+- Обновить settings-context.tsx для работы с новой конфигурацией
+- Обновить страницу watermark-preview для загрузки из useSettings()
+- Синхронизация изменений при редактировании с сохранением в настройки
+
+## Чек-лист задач v37
+
+- [x] Обновить upgrade.md — добавить секцию v37
+- [x] Создать watermarkPreviewConfigSchema в shared/schema.ts
+- [x] Создать reticlePreviewConfigSchema в shared/schema.ts
+- [x] Добавить watermarkPreview и reticlePreview в settingsSchema
+- [x] Обновить settings-context.tsx — добавить updateWatermarkPreview
+- [x] Обновить watermark-preview page — загрузка из useSettings()
+- [x] Синхронизация изменений с useSettings при редактировании
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v37
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 12.12.2025 |
+| watermarkPreviewConfigSchema | ✅ Готово | 12.12.2025 |
+| reticlePreviewConfigSchema | ✅ Готово | 12.12.2025 |
+| settingsSchema | ✅ Готово | 12.12.2025 |
+| settings-context.tsx | ✅ Готово | 12.12.2025 |
+| watermark-preview page | ✅ Готово | 12.12.2025 |
+| Синхронизация | ✅ Готово | 12.12.2025 |
+
+## Изменения v37
+
+### shared/schema.ts
+- **Новые типы:** `CoordinateFormat`, `LogoPosition`, `NotePlacement`, `SeparatorPosition`
+- **Новая схема:** `watermarkSeparatorSchema` — разделители водяного знака
+- **Новая схема:** `watermarkPreviewConfigSchema` — полная конфигурация водяного знака:
+  - Позиция (positionX, positionY)
+  - Фон (backgroundColor, backgroundOpacity, width, height)
+  - Шрифт (fontColor, fontOpacity, fontSize, bold, italic, underline)
+  - Поворот (rotation)
+  - Заметка (note, notePlacement)
+  - Формат координат (coordinateFormat)
+  - Логотип (logoUrl, logoPosition, logoSize)
+  - Разделители (separators)
+- **Новая схема:** `reticlePreviewConfigSchema` — конфигурация прицела в превью:
+  - Форма (shape)
+  - Цвет (color)
+  - Размер (size)
+  - Толщина линии (strokeWidth)
+  - Прозрачность (opacity)
+  - Позиция (positionX, positionY)
+- **Обновлён settingsSchema:** добавлены поля `watermarkPreview` и `reticlePreview`
+- **Обновлён defaultSettings:** добавлены дефолтные значения для обоих конфигов
+
+### client/src/lib/settings-context.tsx
+- **Новые импорты:** `WatermarkPreviewConfig`, `ReticlePreviewConfig`
+- **Новые методы:** `updateWatermarkPreview`, `updateReticlePreview`
+- **Обновлён merge logic:** добавлена обработка новых полей при загрузке
+- **Обновлён Provider:** добавлены новые методы в value
+
+### client/src/pages/watermark-preview/index.tsx
+- **Интеграция с useSettings:** загрузка настроек из контекста
+- **Синхронизация:** все изменения сохраняются в useSettings
+- **Loading state:** показ индикатора загрузки при isLoading
+- **useEffect:** синхронизация локального state с настройками при загрузке
+- **handleStyleChange:** обновляет watermarkPreview при изменении стилей
+- **handlePositionChange:** обновляет watermarkPreview при изменении позиции
+- **handleReticleSettingsChange:** обновляет reticlePreview при изменении прицела
+- **handleDragEnd:** сохраняет позицию после перетаскивания
+
+---
+
 # Upgrade: Исправления камеры и окна Welcome v36
 
 ## Описание

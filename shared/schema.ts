@@ -122,6 +122,73 @@ export const enhancementSettingsSchema = z.object({
 
 export type EnhancementSettings = z.infer<typeof enhancementSettingsSchema>;
 
+// Coordinate format for watermark display
+export type CoordinateFormat = "decimal" | "dms" | "ddm" | "simple";
+
+// Logo position in watermark
+export type LogoPosition = "left" | "right";
+
+// Note placement in watermark
+export type NotePlacement = "start" | "end";
+
+// Separator position in watermark
+export type SeparatorPosition = "before-coords" | "after-coords" | "before-note" | "after-note";
+
+// Watermark separator
+export const watermarkSeparatorSchema = z.object({
+  id: z.string(),
+  position: z.enum(["before-coords", "after-coords", "before-note", "after-note"]),
+});
+
+export type WatermarkSeparator = z.infer<typeof watermarkSeparatorSchema>;
+
+// Watermark preview configuration (for /watermark-preview page)
+export const watermarkPreviewConfigSchema = z.object({
+  // Position
+  positionX: z.number().default(20),
+  positionY: z.number().default(20),
+  // Background
+  backgroundColor: z.string().default("#000000"),
+  backgroundOpacity: z.number().min(0).max(100).default(70),
+  width: z.number().min(100).max(500).default(200),
+  height: z.number().min(40).max(300).default(60),
+  // Font
+  fontColor: z.string().default("#22c55e"),
+  fontOpacity: z.number().min(0).max(100).default(100),
+  fontSize: z.number().min(8).max(48).default(14),
+  bold: z.boolean().default(false),
+  italic: z.boolean().default(false),
+  underline: z.boolean().default(false),
+  // Position and rotation
+  rotation: z.number().min(-180).max(180).default(0),
+  // Note
+  note: z.string().default(""),
+  notePlacement: z.enum(["start", "end"]).default("end"),
+  // Coordinate format
+  coordinateFormat: z.enum(["decimal", "dms", "ddm", "simple"]).default("decimal"),
+  // Logo
+  logoUrl: z.string().nullable().default(null),
+  logoPosition: z.enum(["left", "right"]).default("left"),
+  logoSize: z.number().min(16).max(96).default(40),
+  // Separators
+  separators: z.array(watermarkSeparatorSchema).default([]),
+});
+
+export type WatermarkPreviewConfig = z.infer<typeof watermarkPreviewConfigSchema>;
+
+// Reticle preview configuration (for /watermark-preview page)
+export const reticlePreviewConfigSchema = z.object({
+  shape: z.enum(["crosshair", "circle", "square", "arrow", "speech-bubble", "custom"]).default("crosshair"),
+  color: z.string().default("#22c55e"),
+  size: z.number().min(20).max(200).default(80),
+  strokeWidth: z.number().min(1).max(10).default(2),
+  opacity: z.number().min(10).max(100).default(80),
+  positionX: z.number().default(0),
+  positionY: z.number().default(0),
+});
+
+export type ReticlePreviewConfig = z.infer<typeof reticlePreviewConfigSchema>;
+
 // Stabilization settings
 export const stabilizationSettingsSchema = z.object({
   enabled: z.boolean().default(true),
@@ -171,6 +238,8 @@ export const settingsSchema = z.object({
     denoise: 20,
     contrast: 10,
   }),
+  watermarkPreview: watermarkPreviewConfigSchema,
+  reticlePreview: reticlePreviewConfigSchema,
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
@@ -219,6 +288,37 @@ export const defaultSettings: Settings = {
     sharpness: 30,
     denoise: 20,
     contrast: 10,
+  },
+  watermarkPreview: {
+    positionX: 20,
+    positionY: 20,
+    backgroundColor: "#000000",
+    backgroundOpacity: 70,
+    width: 200,
+    height: 60,
+    fontColor: "#22c55e",
+    fontOpacity: 100,
+    fontSize: 14,
+    bold: false,
+    italic: false,
+    underline: false,
+    rotation: 0,
+    note: "",
+    notePlacement: "end",
+    coordinateFormat: "decimal",
+    logoUrl: null,
+    logoPosition: "left",
+    logoSize: 40,
+    separators: [],
+  },
+  reticlePreview: {
+    shape: "crosshair",
+    color: "#22c55e",
+    size: 80,
+    strokeWidth: 2,
+    opacity: 80,
+    positionX: 0,
+    positionY: 0,
   },
 };
 
