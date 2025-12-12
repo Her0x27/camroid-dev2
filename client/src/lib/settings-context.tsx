@@ -118,10 +118,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       clampedUpdates.backgroundOpacity = Math.max(0, Math.min(100, clampedUpdates.backgroundOpacity));
     }
     if (clampedUpdates.width !== undefined) {
-      clampedUpdates.width = Math.max(100, Math.min(500, clampedUpdates.width));
+      clampedUpdates.width = Math.max(10, Math.min(100, clampedUpdates.width));
     }
     if (clampedUpdates.height !== undefined) {
-      clampedUpdates.height = Math.max(40, Math.min(300, clampedUpdates.height));
+      clampedUpdates.height = Math.max(5, Math.min(50, clampedUpdates.height));
     }
     if (clampedUpdates.fontOpacity !== undefined) {
       clampedUpdates.fontOpacity = Math.max(0, Math.min(100, clampedUpdates.fontOpacity));

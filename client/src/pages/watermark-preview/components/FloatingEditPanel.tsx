@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ColorPicker } from "@/components/ui/color-picker";
 import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat, LogoPosition } from "./InteractiveWatermark";
 
 interface FloatingEditPanelProps {
@@ -166,11 +167,9 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
         
         <div className="flex items-center gap-3">
           <Label className="text-xs w-16">Цвет</Label>
-          <input
-            type="color"
+          <ColorPicker
             value={style.backgroundColor}
-            onChange={(e) => onStyleChange({ backgroundColor: e.target.value })}
-            className="h-8 w-12 rounded cursor-pointer border"
+            onChange={(color) => onStyleChange({ backgroundColor: color })}
           />
         </div>
 
@@ -188,13 +187,17 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
           />
         </div>
 
-        <div>
-          <Label className="text-xs">Ширина</Label>
-          <Input
-            type="number"
-            value={style.width}
-            onChange={(e) => onStyleChange({ width: Number(e.target.value) })}
-            className="h-8 text-xs"
+        <div className="space-y-1">
+          <div className="flex justify-between">
+            <Label className="text-xs">Ширина</Label>
+            <span className="text-xs text-muted-foreground">{style.width}%</span>
+          </div>
+          <Slider
+            value={[style.width]}
+            onValueChange={([v]) => onStyleChange({ width: v })}
+            min={10}
+            max={100}
+            step={5}
           />
         </div>
       </div>
@@ -204,11 +207,9 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
         
         <div className="flex items-center gap-3">
           <Label className="text-xs w-16">Цвет</Label>
-          <input
-            type="color"
+          <ColorPicker
             value={style.fontColor}
-            onChange={(e) => onStyleChange({ fontColor: e.target.value })}
-            className="h-8 w-12 rounded cursor-pointer border"
+            onChange={(color) => onStyleChange({ fontColor: color })}
           />
         </div>
 

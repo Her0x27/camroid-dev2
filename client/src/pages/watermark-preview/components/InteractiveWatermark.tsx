@@ -131,13 +131,18 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
       const deltaX = clientX - startPosRef.current.x;
       const deltaY = clientY - startPosRef.current.y;
 
+      // Convert pixel delta to percentage delta
+      const deltaXPercent = (deltaX / rect.width) * 100;
+      const deltaYPercent = (deltaY / rect.height) * 100;
+
+      // Calculate new position in percentages, clamped to valid range
       const newX = Math.max(
         0,
-        Math.min(rect.width - style.width, elementPosRef.current.x + deltaX)
+        Math.min(100 - style.width, elementPosRef.current.x + deltaXPercent)
       );
       const newY = Math.max(
         0,
-        Math.min(rect.height - style.height, elementPosRef.current.y + deltaY)
+        Math.min(100 - style.height, elementPosRef.current.y + deltaYPercent)
       );
 
       return { x: newX, y: newY };
@@ -261,10 +266,10 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         isDragging ? "cursor-grabbing shadow-lg" : ""
       } ${isSelected ? "ring-2 ring-primary ring-offset-2" : ""}`}
       style={{
-        left: position.x,
-        top: position.y,
-        width: style.width,
-        minHeight: style.height,
+        left: `${position.x}%`,
+        top: `${position.y}%`,
+        width: `${style.width}%`,
+        minHeight: `${style.height}%`,
         transform: `rotate(${style.rotation}deg)`,
         borderRadius: 8,
       }}

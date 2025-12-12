@@ -24,3 +24,4 @@ export { Alert, AlertTitle, AlertDescription } from "./alert";
 export { Textarea } from "./textarea";
 export { ProviderSelector } from "./provider-selector";
 export { ProviderSettingsForm } from "./provider-settings-form";
+export { ColorPicker } from "./color-picker";

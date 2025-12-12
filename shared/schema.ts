@@ -144,14 +144,14 @@ export type WatermarkSeparator = z.infer<typeof watermarkSeparatorSchema>;
 
 // Watermark preview configuration (for /watermark-preview page)
 export const watermarkPreviewConfigSchema = z.object({
-  // Position
-  positionX: z.number().default(20),
-  positionY: z.number().default(20),
+  // Position (percentages)
+  positionX: z.number().default(5),
+  positionY: z.number().default(5),
   // Background
   backgroundColor: z.string().default("#000000"),
   backgroundOpacity: z.number().min(0).max(100).default(70),
-  width: z.number().min(100).max(500).default(200),
-  height: z.number().min(40).max(300).default(60),
+  width: z.number().min(10).max(100).default(40), // width as % of viewport
+  height: z.number().min(5).max(50).default(15), // height as % of viewport
   // Font
   fontColor: z.string().default("#22c55e"),
   fontOpacity: z.number().min(0).max(100).default(100),

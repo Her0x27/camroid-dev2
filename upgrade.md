@@ -1,3 +1,59 @@
+# Upgrade: Улучшения редактора водяного знака v39
+
+## Описание
+Улучшения окна "Редактирование водяного знака":
+- Ширина в процентах (10-100%) вместо пикселей (100-500px)
+- Слайдер вместо поля ввода для плавного изменения ширины
+- Полноценный color picker с палитрой, градиентом и hex-вводом
+
+## Чек-лист задач v39
+
+- [x] Обновить upgrade.md — добавить секцию v39
+- [x] Изменить схему — ширина в процентах (10-100%)
+- [x] Заменить Input на Slider для ширины
+- [x] Создать компонент ColorPicker
+- [x] Интегрировать ColorPicker в FloatingEditPanel
+- [x] Обновить InteractiveWatermark для процентных значений
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v39
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 12.12.2025 |
+| Схема (width %) | ✅ Готово | 12.12.2025 |
+| Slider для ширины | ✅ Готово | 12.12.2025 |
+| ColorPicker | ✅ Готово | 12.12.2025 |
+| FloatingEditPanel | ✅ Готово | 12.12.2025 |
+| InteractiveWatermark | ✅ Готово | 12.12.2025 |
+
+## Изменения v39
+
+### shared/schema.ts
+- **watermarkPreviewConfigSchema:** width изменён с 100-500px на 10-100%, height изменён с 40-300px на 5-50%
+- **Дефолты:** positionX=5%, positionY=5%, width=40%, height=15%
+
+### client/src/components/ui/color-picker.tsx (новый)
+- **ColorPicker компонент:** полноценный выбор цвета с градиентом и палитрой
+- **Hue slider:** выбор оттенка (0-360°)
+- **Saturation/Brightness gradient:** интерактивный 2D градиент
+- **Hex input:** ввод цвета в формате #RRGGBB
+- **Preset colors:** 8 тактических цветов в палитре
+- **Optional opacity:** слайдер прозрачности
+
+### client/src/pages/watermark-preview/components/FloatingEditPanel.tsx
+- **ColorPicker:** заменены native input[type=color] на ColorPicker
+- **Width Slider:** заменён Input на Slider (10-100%, step=5)
+- **Отображение:** значение показывается как "XX%"
+
+### client/src/pages/watermark-preview/components/InteractiveWatermark.tsx
+- **CSS units:** left, top, width, minHeight теперь в процентах (%)
+- **calculateNewPosition:** пересчёт delta из px в проценты для корректного drag
+
+---
+
 # Upgrade: Фиксированные шапки окон редактирования v38
 
 ## Описание
