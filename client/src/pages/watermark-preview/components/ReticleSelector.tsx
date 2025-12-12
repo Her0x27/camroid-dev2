@@ -106,7 +106,7 @@ export const ReticleSelector = memo(function ReticleSelector({
       className="w-72 max-h-[70vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl p-4 space-y-4"
     >
       <div 
-        className="flex items-center justify-between cursor-move select-none -mx-4 -mt-4 px-3 py-2 bg-muted/50 rounded-t-lg border-b"
+        className="flex items-center justify-between cursor-move select-none -mx-4 -mt-4 px-3 py-1.5 bg-muted/50 rounded-t-lg border-b"
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
       >

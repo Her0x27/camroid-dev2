@@ -148,7 +148,7 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
         className="hidden"
       />
       <div 
-        className="flex items-center justify-between cursor-move select-none -mx-4 -mt-4 px-3 py-2 bg-muted/50 rounded-t-lg border-b"
+        className="flex items-center justify-between cursor-move select-none -mx-4 -mt-4 px-3 py-1.5 bg-muted/50 rounded-t-lg border-b"
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
       >

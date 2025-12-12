@@ -26,13 +26,13 @@
 ## Изменения v38
 
 ### client/src/pages/watermark-preview/components/FloatingEditPanel.tsx
-- **Компактная шапка:** уменьшены padding (py-2 px-3), иконки (h-3.5 w-3.5), шрифт (text-xs)
+- **Компактная шапка:** уменьшены padding (py-1.5 px-3), иконки (h-3.5 w-3.5), шрифт (text-xs)
 - **Удалён Separator:** заменён на border-b у шапки
 - **Фон шапки:** bg-muted/50 для визуального разделения
 - **Negative margin:** -mx-4 -mt-4 для полноширинной шапки внутри панели
 
 ### client/src/pages/watermark-preview/components/ReticleSelector.tsx
-- **Компактная шапка:** уменьшены padding (py-2 px-3), иконки (h-3.5 w-3.5), шрифт (text-xs)
+- **Компактная шапка:** уменьшены padding (py-1.5 px-3), иконки (h-3.5 w-3.5), шрифт (text-xs)
 - **Удалён Separator:** заменён на border-b у шапки
 - **Фон шапки:** bg-muted/50 для визуального разделения
 - **Negative margin:** -mx-4 -mt-4 для полноширинной шапки внутри панели
