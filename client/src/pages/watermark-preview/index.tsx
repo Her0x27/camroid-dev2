@@ -37,6 +37,8 @@ const DEFAULT_WATERMARK_STYLE: WatermarkStyle = {
   height: 60,
   rotation: 0,
   note: "",
+  notePlacement: "end",
+  separators: [],
 };
 
 const DEFAULT_RETICLE_SETTINGS: ReticleSettings = {
@@ -117,24 +119,6 @@ export default function WatermarkPreviewPage() {
     },
     []
   );
-
-  const handleAddHorizontalSeparator = useCallback(() => {
-    const newElement: PreviewElement = {
-      id: `h-sep-${Date.now()}`,
-      type: "horizontal-separator",
-      position: { x: 50, y: 50 + elements.length * 30 },
-    };
-    setElements((prev) => [...prev, newElement]);
-  }, [elements.length]);
-
-  const handleAddVerticalSeparator = useCallback(() => {
-    const newElement: PreviewElement = {
-      id: `v-sep-${Date.now()}`,
-      type: "vertical-separator",
-      position: { x: 100 + elements.length * 30, y: 50 },
-    };
-    setElements((prev) => [...prev, newElement]);
-  }, [elements.length]);
 
   const handleAddLogo = useCallback(() => {
     const newElement: PreviewElement = {
@@ -239,8 +223,6 @@ export default function WatermarkPreviewPage() {
         position={watermarkPosition}
         onStyleChange={handleStyleChange}
         onPositionChange={handlePositionChange}
-        onAddHorizontalSeparator={handleAddHorizontalSeparator}
-        onAddVerticalSeparator={handleAddVerticalSeparator}
         onAddLogo={handleAddLogo}
         anchorPosition={panelAnchor}
       />

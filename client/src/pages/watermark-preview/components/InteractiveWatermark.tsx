@@ -5,6 +5,13 @@ export interface WatermarkPosition {
   y: number;
 }
 
+export type SeparatorPosition = "before-coords" | "after-coords" | "before-note" | "after-note";
+
+export interface WatermarkSeparator {
+  id: string;
+  position: SeparatorPosition;
+}
+
 export interface WatermarkStyle {
   backgroundColor: string;
   backgroundOpacity: number;
@@ -18,6 +25,8 @@ export interface WatermarkStyle {
   height: number;
   rotation: number;
   note: string;
+  notePlacement: "start" | "end";
+  separators: WatermarkSeparator[];
 }
 
 interface InteractiveWatermarkProps {
@@ -181,7 +190,36 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
           ...fontStyles,
         }}
       >
-        {style.note || "55.7558°N 37.6173°E\n±5m · 180° S"}
+        {style.notePlacement === "start" && style.note && (
+          <>
+            <div>{style.note}</div>
+            {(style.separators || []).filter(s => s.position === "before-coords").map(s => (
+              <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+            ))}
+          </>
+        )}
+        {style.notePlacement === "end" && (style.separators || []).filter(s => s.position === "before-coords").map(s => (
+          <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+        ))}
+        <div>55.7558°N 37.6173°E</div>
+        {(style.separators || []).filter(s => s.position === "after-coords").map(s => (
+          <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+        ))}
+        <div>±5m · 180° S</div>
+        {style.notePlacement === "start" && (style.separators || []).filter(s => s.position === "after-note").map(s => (
+          <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+        ))}
+        {style.notePlacement === "end" && style.note && (
+          <>
+            {(style.separators || []).filter(s => s.position === "before-note").map(s => (
+              <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+            ))}
+            <div>{style.note}</div>
+            {(style.separators || []).filter(s => s.position === "after-note").map(s => (
+              <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+            ))}
+          </>
+        )}
       </div>
     </div>
   );

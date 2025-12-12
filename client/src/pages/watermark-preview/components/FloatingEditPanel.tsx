@@ -1,10 +1,10 @@
-import { memo } from "react";
-import { X, Bold, Italic, Underline, SeparatorHorizontal, SeparatorVertical, Image } from "lucide-react";
+import { memo, useState } from "react";
+import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { WatermarkStyle, WatermarkPosition } from "./InteractiveWatermark";
+import type { WatermarkStyle, WatermarkPosition, SeparatorPosition } from "./InteractiveWatermark";
 
 interface FloatingEditPanelProps {
   isOpen: boolean;
@@ -13,11 +13,16 @@ interface FloatingEditPanelProps {
   position: WatermarkPosition;
   onStyleChange: (updates: Partial<WatermarkStyle>) => void;
   onPositionChange: (updates: Partial<WatermarkPosition>) => void;
-  onAddHorizontalSeparator: () => void;
-  onAddVerticalSeparator: () => void;
   onAddLogo: () => void;
   anchorPosition: { x: number; y: number };
 }
+
+const SEPARATOR_POSITIONS: { value: SeparatorPosition; label: string }[] = [
+  { value: "before-coords", label: "Перед координатами" },
+  { value: "after-coords", label: "После координат" },
+  { value: "before-note", label: "Перед заметкой" },
+  { value: "after-note", label: "После заметки" },
+];
 
 export const FloatingEditPanel = memo(function FloatingEditPanel({
   isOpen,
@@ -26,12 +31,25 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
   position,
   onStyleChange,
   onPositionChange,
-  onAddHorizontalSeparator,
-  onAddVerticalSeparator,
   onAddLogo,
   anchorPosition,
 }: FloatingEditPanelProps) {
+  const [showSeparatorMenu, setShowSeparatorMenu] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleAddSeparator = (position: SeparatorPosition) => {
+    const newSeparator = {
+      id: `sep-${Date.now()}`,
+      position,
+    };
+    onStyleChange({ separators: [...style.separators, newSeparator] });
+    setShowSeparatorMenu(false);
+  };
+
+  const handleRemoveSeparator = (id: string) => {
+    onStyleChange({ separators: style.separators.filter(s => s.id !== id) });
+  };
 
   const panelStyle: React.CSSProperties = {
     position: "fixed",
@@ -79,25 +97,14 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label className="text-xs">Ширина</Label>
-            <Input
-              type="number"
-              value={style.width}
-              onChange={(e) => onStyleChange({ width: Number(e.target.value) })}
-              className="h-8 text-xs"
-            />
-          </div>
-          <div>
-            <Label className="text-xs">Высота</Label>
-            <Input
-              type="number"
-              value={style.height}
-              onChange={(e) => onStyleChange({ height: Number(e.target.value) })}
-              className="h-8 text-xs"
-            />
-          </div>
+        <div>
+          <Label className="text-xs">Ширина</Label>
+          <Input
+            type="number"
+            value={style.width}
+            onChange={(e) => onStyleChange({ width: Number(e.target.value) })}
+            className="h-8 text-xs"
+          />
         </div>
       </div>
 
@@ -217,30 +224,88 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
             className="h-8 text-xs mt-1"
           />
         </div>
+
+        <div>
+          <Label className="text-xs">Позиция заметки</Label>
+          <div className="flex gap-1 mt-1">
+            <Button
+              variant={style.notePlacement === "start" ? "default" : "outline"}
+              size="sm"
+              onClick={() => onStyleChange({ notePlacement: "start" })}
+              className="h-8 text-xs flex-1"
+            >
+              В начале
+            </Button>
+            <Button
+              variant={style.notePlacement === "end" ? "default" : "outline"}
+              size="sm"
+              onClick={() => onStyleChange({ notePlacement: "end" })}
+              className="h-8 text-xs flex-1"
+            >
+              В конце
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="border-t pt-3 space-y-3">
-        <h4 className="text-xs font-medium text-muted-foreground uppercase">Добавить элементы</h4>
+        <h4 className="text-xs font-medium text-muted-foreground uppercase">Разделители</h4>
+        
+        <div className="relative">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSeparatorMenu(!showSeparatorMenu)}
+            className="h-8 text-xs w-full justify-between"
+          >
+            <span className="flex items-center">
+              <Plus className="h-4 w-4 mr-1" />
+              Вставить разделитель
+            </span>
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+          
+          {showSeparatorMenu && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-10">
+              {SEPARATOR_POSITIONS.map((pos) => (
+                <button
+                  key={pos.value}
+                  onClick={() => handleAddSeparator(pos.value)}
+                  className="w-full px-3 py-2 text-xs text-left hover:bg-accent transition-colors"
+                >
+                  {pos.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {style.separators.length > 0 && (
+          <div className="space-y-1">
+            {style.separators.map((sep) => {
+              const label = SEPARATOR_POSITIONS.find(p => p.value === sep.position)?.label || sep.position;
+              return (
+                <div key={sep.id} className="flex items-center justify-between bg-muted/50 rounded px-2 py-1">
+                  <span className="text-xs">{label}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveSeparator(sep.id)}
+                    className="h-6 w-6"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <div className="border-t pt-3 space-y-3">
+        <h4 className="text-xs font-medium text-muted-foreground uppercase">Другие элементы</h4>
         
         <div className="flex gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onAddHorizontalSeparator}
-            className="h-8 text-xs"
-          >
-            <SeparatorHorizontal className="h-4 w-4 mr-1" />
-            Разделитель Г
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onAddVerticalSeparator}
-            className="h-8 text-xs"
-          >
-            <SeparatorVertical className="h-4 w-4 mr-1" />
-            Разделитель В
-          </Button>
           <Button
             variant="outline"
             size="sm"
