@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Upload, Download, Grid3X3, RotateCcw } from "lucide-react";
+import { ArrowLeft, Upload, Download, Grid3X3, RotateCcw, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
@@ -12,6 +12,8 @@ import type { WatermarkObjectType } from "./types";
 export default function WatermarkEditorPage() {
   const [, navigate] = useLocation();
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
   
   const {
     state,
@@ -191,15 +193,32 @@ export default function WatermarkEditorPage() {
         </header>
 
         <div className="flex-1 flex overflow-hidden">
-          <ToolbarPanel
-            activeTool={state.activeToolId}
-            onToolSelect={handleToolSelect}
-            onAddObject={handleAddObject}
-            onAddLayer={addLayer}
-            onGroupSelected={groupSelected}
-            onUngroupSelected={ungroupSelected}
-            hasSelection={state.selectedObjectIds.length > 0}
-          />
+          <div className="relative flex items-stretch">
+            {leftPanelOpen && (
+              <ToolbarPanel
+                activeTool={state.activeToolId}
+                onToolSelect={handleToolSelect}
+                onAddObject={handleAddObject}
+                onAddLayer={addLayer}
+                onGroupSelected={groupSelected}
+                onUngroupSelected={ungroupSelected}
+                hasSelection={state.selectedObjectIds.length > 0}
+              />
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-full w-6 rounded-none bg-background/80 border-y border-r border-border/60 hover:bg-muted flex-shrink-0"
+              onClick={() => setLeftPanelOpen(!leftPanelOpen)}
+              aria-label={leftPanelOpen ? "Свернуть панель инструментов" : "Развернуть панель инструментов"}
+            >
+              {leftPanelOpen ? (
+                <PanelLeftClose className="h-4 w-4" />
+              ) : (
+                <PanelLeftOpen className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
 
           <div className="flex-1 relative">
             <WatermarkCanvas
@@ -221,43 +240,60 @@ export default function WatermarkEditorPage() {
             />
           </div>
 
-          <div className="flex flex-col border-l border-border/60 bg-background/95 backdrop-blur-sm overflow-hidden">
-            <div className="flex-1 overflow-y-auto">
-              <LayersPanel
-                layers={state.layers}
-                selectedLayerId={state.selectedLayerId}
-                selectedObjectIds={state.selectedObjectIds}
-                onLayerSelect={selectLayer}
-                onObjectSelect={selectObject}
-                onLayerVisibilityToggle={handleLayerVisibilityToggle}
-                onLayerLockToggle={handleLayerLockToggle}
-                onObjectVisibilityToggle={handleObjectVisibilityToggle}
-                onObjectLockToggle={handleObjectLockToggle}
-                onLayerRename={handleLayerRename}
-                onLayerCollapse={handleLayerCollapse}
-                onAddLayer={addLayer}
-                onDeleteLayer={deleteLayer}
-                onReorderLayers={reorderLayers}
-                onReorderObjects={handleReorderObjects}
-              />
-            </div>
+          <div className="relative flex items-stretch">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-full w-6 rounded-none bg-background/80 border-y border-l border-border/60 hover:bg-muted flex-shrink-0"
+              onClick={() => setRightPanelOpen(!rightPanelOpen)}
+              aria-label={rightPanelOpen ? "Свернуть панель слоёв" : "Развернуть панель слоёв"}
+            >
+              {rightPanelOpen ? (
+                <PanelRightClose className="h-4 w-4" />
+              ) : (
+                <PanelRightOpen className="h-4 w-4" />
+              )}
+            </Button>
+            {rightPanelOpen && (
+              <div className="flex flex-col border-l border-border/60 bg-background/95 backdrop-blur-sm overflow-hidden w-56">
+                <div className="flex-1 overflow-y-auto">
+                  <LayersPanel
+                    layers={state.layers}
+                    selectedLayerId={state.selectedLayerId}
+                    selectedObjectIds={state.selectedObjectIds}
+                    onLayerSelect={selectLayer}
+                    onObjectSelect={selectObject}
+                    onLayerVisibilityToggle={handleLayerVisibilityToggle}
+                    onLayerLockToggle={handleLayerLockToggle}
+                    onObjectVisibilityToggle={handleObjectVisibilityToggle}
+                    onObjectLockToggle={handleObjectLockToggle}
+                    onLayerRename={handleLayerRename}
+                    onLayerCollapse={handleLayerCollapse}
+                    onAddLayer={addLayer}
+                    onDeleteLayer={deleteLayer}
+                    onReorderLayers={reorderLayers}
+                    onReorderObjects={handleReorderObjects}
+                  />
+                </div>
 
-            <div className="border-t border-border/60">
-              <PropertyPanel
-                selectedObject={selectedObject}
-                onUpdateObject={(updates) => {
-                  if (selectedObject) {
-                    updateObject(selectedObject.id, updates);
-                  }
-                }}
-                onDuplicateObject={duplicateSelected}
-                onDeleteObject={() => {
-                  if (selectedObject) {
-                    deleteObject(selectedObject.id);
-                  }
-                }}
-              />
-            </div>
+                <div className="border-t border-border/60">
+                  <PropertyPanel
+                    selectedObject={selectedObject}
+                    onUpdateObject={(updates) => {
+                      if (selectedObject) {
+                        updateObject(selectedObject.id, updates);
+                      }
+                    }}
+                    onDuplicateObject={duplicateSelected}
+                    onDeleteObject={() => {
+                      if (selectedObject) {
+                        deleteObject(selectedObject.id);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

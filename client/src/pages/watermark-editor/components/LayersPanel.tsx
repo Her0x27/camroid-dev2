@@ -355,7 +355,7 @@ export function LayersPanel({
   };
 
   return (
-    <div className="flex flex-col w-48 sm:w-56 bg-background/95 backdrop-blur-sm border border-border/60 rounded-lg shadow-lg overflow-hidden">
+    <div className="flex flex-col bg-transparent overflow-hidden min-w-0 w-full">
       <div className="flex items-center justify-between px-2 py-1.5 border-b border-border/60">
         <span className="text-xs font-medium text-muted-foreground">Слои</span>
         <div className="flex items-center gap-0.5">

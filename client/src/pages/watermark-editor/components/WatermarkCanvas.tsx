@@ -44,8 +44,8 @@ interface DragState {
   centerY?: number;
 }
 
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
+const CANVAS_WIDTH = 960;
+const CANVAS_HEIGHT = 540;
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.1;

@@ -88,7 +88,7 @@ export function PropertyPanel({
 }: PropertyPanelProps) {
   if (!selectedObject) {
     return (
-      <div className="flex flex-col w-56 sm:w-64 bg-background/95 backdrop-blur-sm border border-border/60 rounded-lg shadow-lg overflow-hidden">
+      <div className="flex flex-col bg-transparent overflow-hidden min-w-0 w-full">
         <div className="flex items-center justify-center py-8 text-center text-muted-foreground">
           <span className="text-xs">Выберите объект</span>
         </div>
@@ -125,7 +125,7 @@ export function PropertyPanel({
   };
 
   return (
-    <div className="flex flex-col w-56 sm:w-64 bg-background/95 backdrop-blur-sm border border-border/60 rounded-lg shadow-lg overflow-hidden">
+    <div className="flex flex-col bg-transparent overflow-hidden min-w-0 w-full">
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
         {IconComponent && <IconComponent className="h-4 w-4 text-primary" />}
         <span className="text-sm font-medium truncate">{selectedObject.name}</span>
