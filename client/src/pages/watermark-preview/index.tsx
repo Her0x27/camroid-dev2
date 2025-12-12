@@ -22,6 +22,7 @@ interface PreviewElement {
   id: string;
   type: ElementType;
   position: { x: number; y: number };
+  imageUrl?: string;
 }
 
 const DEFAULT_WATERMARK_STYLE: WatermarkStyle = {
@@ -54,6 +55,7 @@ const DEFAULT_RETICLE_SETTINGS: ReticleSettings = {
 export default function WatermarkPreviewPage() {
   const [, navigate] = useLocation();
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [watermarkPosition, setWatermarkPosition] = useState<WatermarkPosition>({
     x: 20,
@@ -122,12 +124,29 @@ export default function WatermarkPreviewPage() {
   );
 
   const handleAddLogo = useCallback(() => {
-    const newElement: PreviewElement = {
-      id: `logo-${Date.now()}`,
-      type: "logo",
-      position: { x: 150, y: 150 + elements.length * 30 },
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imageUrl = event.target?.result as string;
+      const newElement: PreviewElement = {
+        id: `logo-${Date.now()}`,
+        type: "logo",
+        position: { x: 150, y: 150 + elements.length * 30 },
+        imageUrl,
+      };
+      setElements((prev) => [...prev, newElement]);
     };
-    setElements((prev) => [...prev, newElement]);
+    reader.readAsDataURL(file);
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }, [elements.length]);
 
   const handleBackgroundClick = useCallback(() => {
@@ -138,6 +157,13 @@ export default function WatermarkPreviewPage() {
 
   return (
     <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-black">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
       <img
         src={previewBackground}
         alt="Preview background"
@@ -199,7 +225,14 @@ export default function WatermarkPreviewPage() {
             {element.type === "vertical-separator" && (
               <div className="w-0.5 h-16 bg-white/70 rounded-full" />
             )}
-            {element.type === "logo" && (
+            {element.type === "logo" && element.imageUrl && (
+              <img 
+                src={element.imageUrl} 
+                alt="Logo" 
+                className="max-w-24 max-h-24 object-contain rounded shadow-lg"
+              />
+            )}
+            {element.type === "logo" && !element.imageUrl && (
               <div className="w-12 h-12 bg-white/20 border border-white/50 rounded flex items-center justify-center">
                 <Image className="w-6 h-6 text-white/70" />
               </div>
