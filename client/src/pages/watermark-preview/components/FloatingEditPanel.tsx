@@ -140,13 +140,6 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
       style={panelStyle}
       className="w-80 max-h-[80vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl p-4 space-y-4"
     >
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
-      />
       <div 
         className="flex items-center justify-between cursor-move select-none -mx-4 -mt-4 px-3 py-1.5 bg-muted/50 rounded-t-lg border-b"
         onMouseDown={handleDragStart}
@@ -160,6 +153,13 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
           <X className="h-3.5 w-3.5" />
         </Button>
       </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
 
       <div className="space-y-3">
         <h4 className="text-xs font-medium text-muted-foreground uppercase">Фон</h4>
