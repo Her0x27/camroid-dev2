@@ -213,21 +213,21 @@ export const ConfigExportImport = memo(function ConfigExportImport({
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
-          size="sm"
+          size="icon"
           className="bg-background/80 backdrop-blur-sm"
           onClick={() => setShowImportDialog(true)}
+          title="Импорт"
         >
-          <Upload className="h-4 w-4 mr-1" />
-          Импорт
+          <Upload className="h-5 w-5" />
         </Button>
         <Button
           variant="outline"
-          size="sm"
+          size="icon"
           className="bg-background/80 backdrop-blur-sm"
           onClick={() => setShowExportDialog(true)}
+          title="Экспорт"
         >
-          <Download className="h-4 w-4 mr-1" />
-          Экспорт
+          <Download className="h-5 w-5" />
         </Button>
       </div>
 

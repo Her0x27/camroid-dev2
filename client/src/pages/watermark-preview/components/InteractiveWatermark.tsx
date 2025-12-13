@@ -1,4 +1,4 @@
-import { memo, useRef, useCallback } from "react";
+import { memo, useRef, useCallback, useEffect } from "react";
 
 export interface WatermarkPosition {
   x: number;
@@ -88,6 +88,15 @@ const FONT_FAMILY_MAP: Record<FontFamily, string> = {
   playfair: "var(--font-playfair)",
 };
 
+export interface WatermarkBounds {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  centerX: number;
+  centerY: number;
+}
+
 interface InteractiveWatermarkProps {
   position: WatermarkPosition;
   style: WatermarkStyle;
@@ -98,6 +107,7 @@ interface InteractiveWatermarkProps {
   onDrag: (position: WatermarkPosition) => void;
   onDragEnd: () => void;
   containerRef: React.RefObject<HTMLDivElement>;
+  onBoundsChange?: (bounds: WatermarkBounds) => void;
 }
 
 const LONG_PRESS_DURATION = 500;
@@ -112,12 +122,52 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
   onDrag,
   onDragEnd,
   containerRef,
+  onBoundsChange,
 }: InteractiveWatermarkProps) {
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isDraggingRef = useRef(false);
   const startPosRef = useRef({ x: 0, y: 0 });
   const elementPosRef = useRef({ x: 0, y: 0 });
   const hasMoved = useRef(false);
+  const watermarkRef = useRef<HTMLDivElement>(null);
+
+  const calculateBounds = useCallback(() => {
+    if (!watermarkRef.current || !containerRef.current) return;
+    
+    const watermarkRect = watermarkRef.current.getBoundingClientRect();
+    const containerRect = containerRef.current.getBoundingClientRect();
+    
+    const left = ((watermarkRect.left - containerRect.left) / containerRect.width) * 100;
+    const right = ((watermarkRect.right - containerRect.left) / containerRect.width) * 100;
+    const top = ((watermarkRect.top - containerRect.top) / containerRect.height) * 100;
+    const bottom = ((watermarkRect.bottom - containerRect.top) / containerRect.height) * 100;
+    
+    onBoundsChange?.({
+      left,
+      right,
+      top,
+      bottom,
+      centerX: (left + right) / 2,
+      centerY: (top + bottom) / 2,
+    });
+  }, [containerRef, onBoundsChange]);
+
+  useEffect(() => {
+    if (!watermarkRef.current) return;
+    
+    const observer = new ResizeObserver(() => {
+      calculateBounds();
+    });
+    
+    observer.observe(watermarkRef.current);
+    calculateBounds();
+    
+    return () => observer.disconnect();
+  }, [calculateBounds]);
+
+  useEffect(() => {
+    calculateBounds();
+  }, [position, style, calculateBounds]);
 
   const clearLongPressTimer = useCallback(() => {
     if (longPressTimerRef.current) {
@@ -281,6 +331,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
 
   return (
     <div
+      ref={watermarkRef}
       className={`absolute select-none touch-none cursor-pointer transition-shadow ${
         isDragging ? "cursor-grabbing shadow-lg" : ""
       } ${isSelected ? "ring-2 ring-primary ring-offset-2" : ""}`}

@@ -14,6 +14,7 @@ import {
   type WatermarkPosition,
   type WatermarkStyle,
   type ReticleSettings,
+  type WatermarkBounds,
 } from "./components";
 
 type ActivePanel = null | "watermark" | "reticle";
@@ -67,6 +68,16 @@ export default function WatermarkPreviewPage() {
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [panelAnchor, setPanelAnchor] = useState({ x: 0, y: 0 });
+  const [watermarkBounds, setWatermarkBounds] = useState<WatermarkBounds | null>(null);
+
+  const handleWatermarkBoundsChange = useCallback((bounds: WatermarkBounds) => {
+    setWatermarkBounds(bounds);
+  }, []);
+
+  const controlsOnLeft = useMemo(() => {
+    if (!watermarkBounds) return false;
+    return (watermarkBounds.top <= 20 && watermarkBounds.right >= 70) || watermarkBounds.centerX >= 60;
+  }, [watermarkBounds]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -284,6 +295,7 @@ export default function WatermarkPreviewPage() {
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
           containerRef={containerRef as React.RefObject<HTMLDivElement>}
+          onBoundsChange={handleWatermarkBoundsChange}
         />
 
         <div
@@ -312,16 +324,21 @@ export default function WatermarkPreviewPage() {
         </div>
       </div>
 
-      <Button
-        variant="outline"
-        size="icon"
-        className="absolute top-4 left-4 z-50 bg-background/80 backdrop-blur-sm"
-        onClick={() => navigate("/settings")}
+      <div 
+        className="absolute top-4 left-4 z-50 flex items-center gap-2 transition-transform duration-300 ease-out"
+        style={{
+          transform: controlsOnLeft ? 'translateX(0)' : `translateX(calc(100vw - 100% - 2rem))`,
+        }}
       >
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
-
-      <div className="absolute top-4 right-4 z-50">
+        <Button
+          variant="outline"
+          size="icon"
+          className="bg-background/80 backdrop-blur-sm"
+          onClick={() => navigate("/settings")}
+          title="Назад"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <ConfigExportImport
           watermarkConfig={watermarkConfig}
           reticleConfig={reticleConfig}
