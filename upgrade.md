@@ -29,6 +29,10 @@
 - **Структура:** каждый раздел обёрнут в Collapsible с defaultOpen={false}
 - **Trigger:** заголовок с иконкой и ChevronRight (поворачивается при открытии)
 - **Разделы:** Фон, Шрифт, Логотип, Формат координат, Позиция, Разделители
+- **Шрифт:** добавлен fontFamily Montserrat для всего окна
+
+### client/src/pages/watermark-preview/components/ReticleSelector.tsx
+- **Шрифт:** добавлен fontFamily Montserrat для всего окна
 
 ---
 

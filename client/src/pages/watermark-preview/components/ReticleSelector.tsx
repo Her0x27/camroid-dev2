@@ -103,7 +103,7 @@ export const ReticleSelector = memo(function ReticleSelector({
   return (
     <div
       ref={panelRef}
-      style={panelStyle}
+      style={{ ...panelStyle, fontFamily: 'var(--font-montserrat), system-ui, sans-serif' }}
       className="w-72 max-h-[70vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl"
     >
       <div 
