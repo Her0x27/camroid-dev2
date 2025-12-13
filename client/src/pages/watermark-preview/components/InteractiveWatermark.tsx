@@ -301,7 +301,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         ...fontStyles,
       }}
     >
-      {style.notePlacement === "start" && style.note && (
+      {style.showNote !== false && style.notePlacement === "start" && style.note && (
         <>
           <div>{style.note}</div>
           {(style.separators || []).filter(s => s.position === "before-coords").map(s => (
@@ -309,18 +309,25 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
           ))}
         </>
       )}
-      {style.notePlacement === "end" && (style.separators || []).filter(s => s.position === "before-coords").map(s => (
+      {style.showNote !== false && style.notePlacement === "end" && (style.separators || []).filter(s => s.position === "before-coords").map(s => (
         <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
       ))}
-      <div>{formatCoordinates(55.7558, 37.6173, style.coordinateFormat)}</div>
-      {(style.separators || []).filter(s => s.position === "after-coords").map(s => (
+      {style.showCoordinates !== false && (
+        <div>{formatCoordinates(55.7558, 37.6173, style.coordinateFormat)}</div>
+      )}
+      {style.showCoordinates !== false && (style.separators || []).filter(s => s.position === "after-coords").map(s => (
         <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
       ))}
-      <div>±5m · 180° S</div>
-      {style.notePlacement === "start" && (style.separators || []).filter(s => s.position === "after-note").map(s => (
+      {style.showGyroscope !== false && (
+        <div>±5m · 180° S</div>
+      )}
+      {style.showTimestamp && (
+        <div>{new Date().toLocaleTimeString()}</div>
+      )}
+      {style.showNote !== false && style.notePlacement === "start" && (style.separators || []).filter(s => s.position === "after-note").map(s => (
         <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
       ))}
-      {style.notePlacement === "end" && style.note && (
+      {style.showNote !== false && style.notePlacement === "end" && style.note && (
         <>
           {(style.separators || []).filter(s => s.position === "before-note").map(s => (
             <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
