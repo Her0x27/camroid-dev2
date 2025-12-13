@@ -171,6 +171,9 @@ export const watermarkPreviewConfigSchema = z.object({
   logoUrl: z.string().nullable().default(null),
   logoPosition: z.enum(["left", "right"]).default("left"),
   logoSize: z.number().min(16).max(96).default(40),
+  logoOpacity: z.number().min(0).max(100).default(100),
+  // Font family
+  fontFamily: z.enum(["system", "roboto", "montserrat", "oswald", "playfair"]).default("system"),
   // Separators
   separators: z.array(watermarkSeparatorSchema).default([]),
 });

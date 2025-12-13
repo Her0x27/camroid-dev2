@@ -11,6 +11,7 @@ interface ColorPickerProps {
   opacity?: number;
   onOpacityChange?: (opacity: number) => void;
   className?: string;
+  showHexInput?: boolean;
 }
 
 const PRESET_COLORS = [
@@ -104,16 +105,36 @@ export function ColorPicker({
   opacity,
   onOpacityChange,
   className,
+  showHexInput = false,
 }: ColorPickerProps) {
   const [open, setOpen] = React.useState(false);
   const [hexInput, setHexInput] = React.useState(value);
+  const [externalHexInput, setExternalHexInput] = React.useState(value);
   const hsv = React.useMemo(() => hexToHsv(value), [value]);
   const gradientRef = React.useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
 
   React.useEffect(() => {
     setHexInput(value);
+    setExternalHexInput(value);
   }, [value]);
+
+  const handleExternalHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    setExternalHexInput(val);
+
+    if (!val.startsWith("#")) {
+      val = "#" + val;
+    }
+
+    if (/^#[a-fA-F0-9]{6}$/.test(val)) {
+      onChange(val.toLowerCase());
+    }
+  };
+
+  const handleExternalHexBlur = () => {
+    setExternalHexInput(value);
+  };
 
   const handleGradientInteraction = React.useCallback(
     (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
@@ -205,21 +226,22 @@ export function ColorPicker({
   const cursorY = 100 - (hsv.v / 100) * 100;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className={cn("w-10 h-10 p-1 rounded-lg", className)}
-        >
-          <div
-            className="w-full h-full rounded-md border border-border"
-            style={{
-              backgroundColor: value,
-              opacity: opacity !== undefined ? opacity : 1,
-            }}
-          />
-        </Button>
-      </PopoverTrigger>
+    <div className={cn("flex items-center gap-2", showHexInput && "flex-1")}>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={cn("w-10 h-10 p-1 rounded-lg shrink-0", className)}
+          >
+            <div
+              className="w-full h-full rounded-md border border-border"
+              style={{
+                backgroundColor: value,
+                opacity: opacity !== undefined ? opacity : 1,
+              }}
+            />
+          </Button>
+        </PopoverTrigger>
       <PopoverContent className="w-64 p-3" align="start">
         <div className="space-y-3">
           <div
@@ -305,6 +327,17 @@ export function ColorPicker({
           </div>
         </div>
       </PopoverContent>
-    </Popover>
+      </Popover>
+      {showHexInput && (
+        <Input
+          value={externalHexInput}
+          onChange={handleExternalHexChange}
+          onBlur={handleExternalHexBlur}
+          className="h-8 text-xs font-mono flex-1 min-w-0"
+          maxLength={7}
+          placeholder="#000000"
+        />
+      )}
+    </div>
   );
 }
