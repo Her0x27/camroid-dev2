@@ -9,15 +9,15 @@
 
 ## Чек-лист задач v41
 
-- [ ] Обновить upgrade.md — добавить секцию v41
-- [ ] Обновить ColorPicker — добавить prop showHexInput для отображения hex рядом с кнопкой
-- [ ] Обновить shared/schema.ts — добавить logoOpacity и fontFamily
-- [ ] Загрузить локальные шрифты (woff2) и настроить в CSS
-- [ ] Обновить FloatingEditPanel — hex поля для цветов + прозрачность логотипа
-- [ ] Обновить ReticleSelector — hex поле для цвета + выбор шрифта
-- [ ] Обновить InteractiveWatermark — добавить logoOpacity и fontFamily
-- [ ] Обновить settings-context.tsx — добавить clamping для новых полей
-- [ ] Финальное обновление upgrade.md
+- [x] Обновить upgrade.md — добавить секцию v41
+- [x] Обновить ColorPicker — добавить prop showHexInput для отображения hex рядом с кнопкой
+- [x] Обновить shared/schema.ts — добавить logoOpacity и fontFamily
+- [x] Загрузить локальные шрифты (woff2) и настроить в CSS
+- [x] Обновить FloatingEditPanel — hex поля для цветов + прозрачность логотипа + выбор шрифта
+- [x] Обновить ReticleSelector — hex поле для цвета
+- [x] Обновить InteractiveWatermark — добавить logoOpacity и fontFamily
+- [x] Обновить settings-context.tsx — добавить clamping для новых полей
+- [x] Финальное обновление upgrade.md
 
 ---
 
@@ -25,14 +25,44 @@
 
 | Задача | Статус | Дата |
 |--------|--------|------|
-| upgrade.md | 🔄 В процессе | 13.12.2025 |
-| ColorPicker showHexInput | ⏳ Ожидание | - |
-| Schema logoOpacity/fontFamily | ⏳ Ожидание | - |
-| Локальные шрифты | ⏳ Ожидание | - |
-| FloatingEditPanel | ⏳ Ожидание | - |
-| ReticleSelector | ⏳ Ожидание | - |
-| InteractiveWatermark | ⏳ Ожидание | - |
-| settings-context.tsx | ⏳ Ожидание | - |
+| upgrade.md | ✅ Готово | 13.12.2025 |
+| ColorPicker showHexInput | ✅ Готово | 13.12.2025 |
+| Schema logoOpacity/fontFamily | ✅ Готово | 13.12.2025 |
+| Локальные шрифты | ✅ Готово | 13.12.2025 |
+| FloatingEditPanel | ✅ Готово | 13.12.2025 |
+| ReticleSelector | ✅ Готово | 13.12.2025 |
+| InteractiveWatermark | ✅ Готово | 13.12.2025 |
+| settings-context.tsx | ✅ Готово | 13.12.2025 |
+
+## Изменения v41
+
+### client/public/fonts/
+- **Загружены локальные шрифты:** roboto.woff2, montserrat.woff2, oswald.woff2, playfair-display.woff2
+
+### client/src/index.css
+- **@font-face:** добавлены объявления для Roboto, Montserrat, Oswald, Playfair Display
+- **CSS переменные:** --font-roboto, --font-montserrat, --font-oswald, --font-playfair
+
+### client/src/pages/watermark-preview/components/FloatingEditPanel.tsx
+- **showHexInput={true}:** добавлено к обоим ColorPicker (фон и шрифт)
+- **Прозрачность логотипа:** добавлен слайдер logoOpacity (0-100%)
+- **Выбор шрифта:** добавлен селектор fontFamily в секцию "Шрифт"
+
+### client/src/pages/watermark-preview/components/ReticleSelector.tsx
+- **showHexInput={true}:** добавлено к ColorPicker
+
+### client/src/pages/watermark-preview/components/InteractiveWatermark.tsx
+- **FontFamily тип:** добавлен тип FontFamily
+- **FONT_FAMILY_MAP:** маппинг шрифтов на CSS font-family
+- **WatermarkStyle:** добавлены поля logoOpacity и fontFamily
+- **renderLogo:** применяется logoOpacity к opacity
+- **renderTextContent:** применяется fontFamily через FONT_FAMILY_MAP
+
+### shared/schema.ts
+- **defaultSettings.watermarkPreview:** добавлены logoOpacity: 100, fontFamily: "system"
+
+### client/src/lib/settings-context.tsx
+- **updateWatermarkPreview:** добавлен clamping для logoOpacity (0-100)
 
 ---
 

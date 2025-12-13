@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ColorPicker } from "@/components/ui/color-picker";
-import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat, LogoPosition } from "./InteractiveWatermark";
+import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat, LogoPosition, FontFamily } from "./InteractiveWatermark";
 
 interface FloatingEditPanelProps {
   isOpen: boolean;
@@ -30,6 +30,14 @@ const COORDINATE_FORMATS: { value: CoordinateFormat; label: string; example: str
   { value: "dms", label: "Градусы, минуты, секунды", example: "55°45'21\"N 37°37'2\"E" },
   { value: "ddm", label: "Градусы, десятичные минуты", example: "55°45.35'N 37°37.04'E" },
   { value: "simple", label: "Простые числа", example: "55.75581 37.61738" },
+];
+
+const FONT_FAMILIES: { value: FontFamily; label: string }[] = [
+  { value: "system", label: "Системный" },
+  { value: "roboto", label: "Roboto" },
+  { value: "montserrat", label: "Montserrat" },
+  { value: "oswald", label: "Oswald" },
+  { value: "playfair", label: "Playfair Display" },
 ];
 
 export const FloatingEditPanel = memo(function FloatingEditPanel({
@@ -171,6 +179,7 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
           <ColorPicker
             value={style.backgroundColor}
             onChange={(color) => onStyleChange({ backgroundColor: color })}
+            showHexInput={true}
           />
         </div>
 
@@ -235,6 +244,7 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
           <ColorPicker
             value={style.fontColor}
             onChange={(color) => onStyleChange({ fontColor: color })}
+            showHexInput={true}
           />
         </div>
 
@@ -291,6 +301,25 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
           >
             <Underline className="h-4 w-4" />
           </Button>
+        </div>
+
+        <div>
+          <Label className="text-xs">Шрифт</Label>
+          <div className="grid grid-cols-2 gap-1 mt-1">
+            {FONT_FAMILIES.map((font) => (
+              <button
+                key={font.value}
+                onClick={() => onStyleChange({ fontFamily: font.value })}
+                className={`px-2 py-1.5 rounded text-xs transition-all ${
+                  style.fontFamily === font.value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80"
+                }`}
+              >
+                {font.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -349,6 +378,20 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
                 min={16}
                 max={96}
                 step={4}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-xs">Прозрачность</Label>
+                <span className="text-xs text-muted-foreground">{style.logoOpacity}%</span>
+              </div>
+              <Slider
+                value={[style.logoOpacity]}
+                onValueChange={([v]) => onStyleChange({ logoOpacity: v })}
+                min={0}
+                max={100}
+                step={5}
               />
             </div>
           </div>

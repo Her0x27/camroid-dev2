@@ -16,6 +16,8 @@ export type CoordinateFormat = "decimal" | "dms" | "ddm" | "simple";
 
 export type LogoPosition = "left" | "right";
 
+export type FontFamily = "system" | "roboto" | "montserrat" | "oswald" | "playfair";
+
 function formatCoordinates(lat: number, lng: number, format: CoordinateFormat): string {
   switch (format) {
     case "dms": {
@@ -74,7 +76,17 @@ export interface WatermarkStyle {
   logoUrl: string | null;
   logoPosition: LogoPosition;
   logoSize: number;
+  logoOpacity: number;
+  fontFamily: FontFamily;
 }
+
+const FONT_FAMILY_MAP: Record<FontFamily, string> = {
+  system: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+  roboto: "var(--font-roboto)",
+  montserrat: "var(--font-montserrat)",
+  oswald: "var(--font-oswald)",
+  playfair: "var(--font-playfair)",
+};
 
 interface InteractiveWatermarkProps {
   position: WatermarkPosition;
@@ -217,6 +229,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         style={{
           width: style.logoSize,
           height: style.logoSize,
+          opacity: (style.logoOpacity ?? 100) / 100,
         }}
       />
     );
@@ -224,11 +237,12 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
 
   const renderTextContent = () => (
     <div
-      className="font-mono text-center whitespace-pre-wrap break-words flex-1"
+      className="text-center whitespace-pre-wrap break-words flex-1"
       style={{
         color: style.fontColor,
         opacity: style.fontOpacity / 100,
         fontSize: style.fontSize,
+        fontFamily: FONT_FAMILY_MAP[style.fontFamily ?? "system"],
         ...fontStyles,
       }}
     >

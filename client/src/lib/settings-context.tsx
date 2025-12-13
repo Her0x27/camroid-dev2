@@ -135,6 +135,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (clampedUpdates.logoSize !== undefined) {
       clampedUpdates.logoSize = Math.max(16, Math.min(96, clampedUpdates.logoSize));
     }
+    if (clampedUpdates.logoOpacity !== undefined) {
+      clampedUpdates.logoOpacity = Math.max(0, Math.min(100, clampedUpdates.logoOpacity));
+    }
     const newWatermarkPreview = { ...settings.watermarkPreview, ...clampedUpdates };
     updateSettings({ watermarkPreview: newWatermarkPreview });
   }, [settings.watermarkPreview, updateSettings]);

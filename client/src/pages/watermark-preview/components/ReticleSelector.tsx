@@ -151,6 +151,7 @@ export const ReticleSelector = memo(function ReticleSelector({
           <ColorPicker
             value={settings.color}
             onChange={(color) => onSettingsChange({ color })}
+            showHexInput={true}
           />
         </div>
 

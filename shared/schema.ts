@@ -179,6 +179,7 @@ export const watermarkPreviewConfigSchema = z.object({
 });
 
 export type WatermarkPreviewConfig = z.infer<typeof watermarkPreviewConfigSchema>;
+export type FontFamily = "system" | "roboto" | "montserrat" | "oswald" | "playfair";
 
 // Reticle preview configuration (for /watermark-preview page)
 export const reticlePreviewConfigSchema = z.object({
@@ -313,6 +314,8 @@ export const defaultSettings: Settings = {
     logoUrl: null,
     logoPosition: "left",
     logoSize: 40,
+    logoOpacity: 100,
+    fontFamily: "system",
     separators: [],
   },
   reticlePreview: {
