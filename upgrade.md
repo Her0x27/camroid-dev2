@@ -1,3 +1,64 @@
+# Upgrade: Toggle-кнопки видимости и Авто-цвет прицела v46
+
+## Описание
+1. Добавить toggle-кнопки (только иконки) внизу экрана на /watermark-preview:
+   - Координаты (±погрешность)
+   - Гироскоп
+   - Прицел
+   - Заметка
+   - Таймштамп
+   - Кнопки на противоположной стороне от водяного знака
+2. В окне "Выбор прицела" добавить:
+   - Авто цвет (toggle) — автоматическая настройка цвета для контраста
+   - Цветовая схема (select) — палитра для режима авто-цвета
+   - Взаимоисключение: если Авто цвет вкл — ColorPicker недоступен
+
+## Чек-лист задач v46
+
+- [x] Обновить upgrade.md — добавить секцию v46
+- [x] Добавить toggle-кнопки внизу экрана на /watermark-preview
+- [x] Расширить ReticleSettings и ReticleSelector — добавить autoColor и colorScheme
+- [x] Реализовать взаимоисключение: если autoColor вкл — ColorPicker недоступен
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v46
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 13.12.2025 |
+| Toggle-кнопки | ✅ Готово | 13.12.2025 |
+| ReticleSelector autoColor/colorScheme | ✅ Готово | 13.12.2025 |
+| Взаимоисключение | ✅ Готово | 13.12.2025 |
+
+## Изменения v46
+
+### shared/schema.ts
+- **watermarkPreviewConfigSchema:** добавлены showCoordinates, showGyroscope, showReticle, showNote, showTimestamp
+- **reticlePreviewConfigSchema:** добавлены autoColor, colorScheme
+- **defaultSettings:** обновлены дефолты для новых полей
+
+### client/src/pages/watermark-preview/index.tsx
+- **Импорты:** добавлены иконки MapPin, Compass, Crosshair, MessageSquare, Clock и Tooltip
+- **watermarkStyle:** добавлены visibility toggles (showCoordinates, showGyroscope, showReticle, showNote, showTimestamp)
+- **reticleSettings:** добавлены autoColor, colorScheme
+- **toggleButtons:** массив кнопок с иконками и состояниями
+- **handleToggle:** обработчик переключения видимости
+- **Прицел:** отображается условно по showReticle
+- **UI:** кнопки внизу экрана, противоположно водяному знаку (controlsOnLeft)
+
+### client/src/pages/watermark-preview/components/ReticleSelector.tsx
+- **Импорты:** добавлены Switch, Select, Palette иконка, ColorScheme тип
+- **ReticleSettings:** добавлены autoColor, colorScheme
+- **UI:** переключатель "Авто цвет", селектор "Цветовая схема"
+- **Взаимоисключение:** если autoColor — показывается селектор схемы, иначе ColorPicker
+
+### client/src/pages/watermark-preview/components/InteractiveWatermark.tsx
+- **WatermarkStyle:** добавлены showCoordinates, showGyroscope, showReticle, showNote, showTimestamp
+
+---
+
 # Upgrade: Спойлеры по разделам в окне редактирования водяного знака v45
 
 ## Описание

@@ -176,6 +176,12 @@ export const watermarkPreviewConfigSchema = z.object({
   fontFamily: z.enum(["system", "roboto", "montserrat", "oswald", "playfair"]).default("montserrat"),
   // Separators
   separators: z.array(watermarkSeparatorSchema).default([]),
+  // Visibility toggles
+  showCoordinates: z.boolean().default(true),
+  showGyroscope: z.boolean().default(true),
+  showReticle: z.boolean().default(true),
+  showNote: z.boolean().default(true),
+  showTimestamp: z.boolean().default(true),
 });
 
 export type WatermarkPreviewConfig = z.infer<typeof watermarkPreviewConfigSchema>;
@@ -190,6 +196,8 @@ export const reticlePreviewConfigSchema = z.object({
   opacity: z.number().min(10).max(100).default(80),
   positionX: z.number().default(0),
   positionY: z.number().default(0),
+  autoColor: z.boolean().default(false), // auto-adjust color based on background
+  colorScheme: z.enum(["contrast", "tactical", "neon", "monochrome", "warm"]).default("tactical"), // color palette for auto-color
 });
 
 export type ReticlePreviewConfig = z.infer<typeof reticlePreviewConfigSchema>;
@@ -318,6 +326,11 @@ export const defaultSettings: Settings = {
     logoOpacity: 100,
     fontFamily: "montserrat",
     separators: [],
+    showCoordinates: true,
+    showGyroscope: true,
+    showReticle: true,
+    showNote: true,
+    showTimestamp: true,
   },
   reticlePreview: {
     shape: "crosshair",
@@ -327,6 +340,8 @@ export const defaultSettings: Settings = {
     opacity: 80,
     positionX: 0,
     positionY: 0,
+    autoColor: false,
+    colorScheme: "tactical",
   },
 };
 

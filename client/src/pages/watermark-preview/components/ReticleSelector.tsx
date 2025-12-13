@@ -1,11 +1,14 @@
 import { memo, useState, useRef, useCallback, useEffect } from "react";
-import { X, GripHorizontal } from "lucide-react";
+import { X, GripHorizontal, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { ReticleShapeRenderer } from "./ReticleShapes";
 import type { ReticleShape } from "../types";
+import type { ColorScheme } from "@shared/schema";
 
 export interface ReticleSettings {
   shape: ReticleShape;
@@ -14,6 +17,8 @@ export interface ReticleSettings {
   strokeWidth: number;
   opacity: number;
   position: { x: number; y: number };
+  autoColor: boolean;
+  colorScheme: ColorScheme;
 }
 
 interface ReticleSelectorProps {
@@ -146,14 +151,46 @@ export const ReticleSelector = memo(function ReticleSelector({
       </div>
 
       <div className="border-t pt-3 space-y-3">
-        <div className="flex items-center gap-3">
-          <Label className="text-xs w-12">Цвет</Label>
-          <ColorPicker
-            value={settings.color}
-            onChange={(color) => onSettingsChange({ color })}
-            showHexInput={true}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Palette className="h-3.5 w-3.5 text-muted-foreground" />
+            <Label className="text-xs">Авто цвет</Label>
+          </div>
+          <Switch
+            checked={settings.autoColor}
+            onCheckedChange={(checked) => onSettingsChange({ autoColor: checked })}
           />
         </div>
+
+        {settings.autoColor ? (
+          <div className="space-y-1">
+            <Label className="text-xs">Цветовая схема</Label>
+            <Select
+              value={settings.colorScheme}
+              onValueChange={(value) => onSettingsChange({ colorScheme: value as ColorScheme })}
+            >
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="contrast">Контраст</SelectItem>
+                <SelectItem value="tactical">Тактический</SelectItem>
+                <SelectItem value="neon">Неон</SelectItem>
+                <SelectItem value="monochrome">Монохром</SelectItem>
+                <SelectItem value="warm">Тёплый</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Label className="text-xs w-12">Цвет</Label>
+            <ColorPicker
+              value={settings.color}
+              onChange={(color) => onSettingsChange({ color })}
+              showHexInput={true}
+            />
+          </div>
+        )}
 
         <div className="space-y-1">
           <div className="flex justify-between">

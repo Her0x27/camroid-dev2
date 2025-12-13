@@ -1,10 +1,12 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin, Compass, Crosshair, MessageSquare, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import previewBackground from "@/assets/preview-background.jpg";
 import { ReticleShapeRenderer } from "./components/ReticleShapes";
 import type { ReticleShape } from "./types";
+import type { ColorScheme } from "@shared/schema";
 import { useSettings } from "@/lib/settings-context";
 import {
   InteractiveWatermark,
@@ -54,6 +56,11 @@ export default function WatermarkPreviewPage() {
     logoSize: watermarkConfig.logoSize,
     logoOpacity: watermarkConfig.logoOpacity ?? 100,
     fontFamily: watermarkConfig.fontFamily ?? "system",
+    showCoordinates: watermarkConfig.showCoordinates ?? true,
+    showGyroscope: watermarkConfig.showGyroscope ?? true,
+    showReticle: watermarkConfig.showReticle ?? true,
+    showNote: watermarkConfig.showNote ?? true,
+    showTimestamp: watermarkConfig.showTimestamp ?? true,
   });
 
   const [reticleSettings, setReticleSettings] = useState<ReticleSettings>({
@@ -63,6 +70,8 @@ export default function WatermarkPreviewPage() {
     strokeWidth: reticleConfig.strokeWidth,
     opacity: reticleConfig.opacity,
     position: { x: reticleConfig.positionX, y: reticleConfig.positionY },
+    autoColor: reticleConfig.autoColor ?? false,
+    colorScheme: (reticleConfig.colorScheme as ColorScheme) ?? "tactical",
   });
 
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
@@ -107,6 +116,11 @@ export default function WatermarkPreviewPage() {
         logoSize: watermarkConfig.logoSize,
         logoOpacity: watermarkConfig.logoOpacity ?? 100,
         fontFamily: watermarkConfig.fontFamily ?? "system",
+        showCoordinates: watermarkConfig.showCoordinates ?? true,
+        showGyroscope: watermarkConfig.showGyroscope ?? true,
+        showReticle: watermarkConfig.showReticle ?? true,
+        showNote: watermarkConfig.showNote ?? true,
+        showTimestamp: watermarkConfig.showTimestamp ?? true,
       });
       setReticleSettings({
         shape: reticleConfig.shape as ReticleShape,
@@ -115,6 +129,8 @@ export default function WatermarkPreviewPage() {
         strokeWidth: reticleConfig.strokeWidth,
         opacity: reticleConfig.opacity,
         position: { x: reticleConfig.positionX, y: reticleConfig.positionY },
+        autoColor: reticleConfig.autoColor ?? false,
+        colorScheme: (reticleConfig.colorScheme as ColorScheme) ?? "tactical",
       });
     }
   }, [isLoading, watermarkConfig, reticleConfig]);
@@ -183,6 +199,11 @@ export default function WatermarkPreviewPage() {
         logoSize: newStyle.logoSize,
         logoOpacity: newStyle.logoOpacity,
         fontFamily: newStyle.fontFamily,
+        showCoordinates: newStyle.showCoordinates,
+        showGyroscope: newStyle.showGyroscope,
+        showReticle: newStyle.showReticle,
+        showNote: newStyle.showNote,
+        showTimestamp: newStyle.showTimestamp,
       });
       return newStyle;
     });
@@ -214,6 +235,8 @@ export default function WatermarkPreviewPage() {
           opacity: newSettings.opacity,
           positionX: newSettings.position.x,
           positionY: newSettings.position.y,
+          autoColor: newSettings.autoColor,
+          colorScheme: newSettings.colorScheme,
         });
         return newSettings;
       });
@@ -251,6 +274,11 @@ export default function WatermarkPreviewPage() {
       logoSize: watermark.logoSize,
       logoOpacity: watermark.logoOpacity ?? 100,
       fontFamily: watermark.fontFamily ?? "system",
+      showCoordinates: watermark.showCoordinates ?? true,
+      showGyroscope: watermark.showGyroscope ?? true,
+      showReticle: watermark.showReticle ?? true,
+      showNote: watermark.showNote ?? true,
+      showTimestamp: watermark.showTimestamp ?? true,
     });
     setReticleSettings({
       shape: reticle.shape as ReticleShape,
@@ -259,10 +287,24 @@ export default function WatermarkPreviewPage() {
       strokeWidth: reticle.strokeWidth,
       opacity: reticle.opacity,
       position: { x: reticle.positionX, y: reticle.positionY },
+      autoColor: reticle.autoColor ?? false,
+      colorScheme: (reticle.colorScheme as ColorScheme) ?? "tactical",
     });
     updateWatermarkPreview(watermark);
     updateReticlePreview(reticle);
   }, [updateWatermarkPreview, updateReticlePreview]);
+
+  const toggleButtons = useMemo(() => [
+    { key: "showCoordinates", icon: MapPin, title: "Координаты (±погрешность)", active: watermarkStyle.showCoordinates },
+    { key: "showGyroscope", icon: Compass, title: "Гироскоп", active: watermarkStyle.showGyroscope },
+    { key: "showReticle", icon: Crosshair, title: "Прицел", active: watermarkStyle.showReticle },
+    { key: "showNote", icon: MessageSquare, title: "Заметка", active: watermarkStyle.showNote },
+    { key: "showTimestamp", icon: Clock, title: "Таймштамп", active: watermarkStyle.showTimestamp },
+  ], [watermarkStyle.showCoordinates, watermarkStyle.showGyroscope, watermarkStyle.showReticle, watermarkStyle.showNote, watermarkStyle.showTimestamp]);
+
+  const handleToggle = useCallback((key: string) => {
+    handleStyleChange({ [key]: !watermarkStyle[key as keyof WatermarkStyle] } as Partial<WatermarkStyle>);
+  }, [handleStyleChange, watermarkStyle]);
 
   if (isLoading) {
     return (
@@ -298,30 +340,32 @@ export default function WatermarkPreviewPage() {
           onBoundsChange={handleWatermarkBoundsChange}
         />
 
-        <div
-          className="absolute left-1/2 top-1/2 cursor-pointer"
-          style={{
-            transform: `translate(calc(-50% + ${reticleSettings.position.x}px), calc(-50% + ${reticleSettings.position.y}px))`,
-            width: `${reticleSettings.size}vmin`,
-            height: `${reticleSettings.size}vmin`,
-          }}
-          onClick={handleReticleTap}
-          onTouchStart={handleReticleTap}
-        >
+        {watermarkStyle.showReticle && (
           <div
-            className={`w-full h-full transition-all ${
-              activePanel === "reticle" ? "ring-2 ring-primary ring-offset-2 rounded-full" : ""
-            }`}
+            className="absolute left-1/2 top-1/2 cursor-pointer"
+            style={{
+              transform: `translate(calc(-50% + ${reticleSettings.position.x}px), calc(-50% + ${reticleSettings.position.y}px))`,
+              width: `${reticleSettings.size}vmin`,
+              height: `${reticleSettings.size}vmin`,
+            }}
+            onClick={handleReticleTap}
+            onTouchStart={handleReticleTap}
           >
-            <ReticleShapeRenderer
-              shape={reticleSettings.shape}
-              size="100%"
-              color={reticleSettings.color}
-              strokeWidth={reticleSettings.strokeWidth}
-              opacity={reticleSettings.opacity}
-            />
+            <div
+              className={`w-full h-full transition-all ${
+                activePanel === "reticle" ? "ring-2 ring-primary ring-offset-2 rounded-full" : ""
+              }`}
+            >
+              <ReticleShapeRenderer
+                shape={reticleSettings.shape}
+                size="100%"
+                color={reticleSettings.color}
+                strokeWidth={reticleSettings.strokeWidth}
+                opacity={reticleSettings.opacity}
+              />
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div 
@@ -364,8 +408,36 @@ export default function WatermarkPreviewPage() {
         anchorPosition={panelAnchor}
       />
 
+      <TooltipProvider delayDuration={300}>
+        <div 
+          className="absolute bottom-4 z-50 flex items-center gap-1 transition-all duration-300 ease-out"
+          style={{
+            left: controlsOnLeft ? '1rem' : 'auto',
+            right: controlsOnLeft ? 'auto' : '1rem',
+          }}
+        >
+          {toggleButtons.map((btn) => (
+            <Tooltip key={btn.key}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={btn.active ? "default" : "outline"}
+                  size="icon"
+                  className={`h-10 w-10 backdrop-blur-sm ${btn.active ? "" : "bg-background/80"}`}
+                  onClick={() => handleToggle(btn.key)}
+                >
+                  <btn.icon className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>{btn.title}</p>
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+      </TooltipProvider>
+
       {isDragging && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium shadow-lg z-50">
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium shadow-lg z-50">
           Перетаскивание...
         </div>
       )}

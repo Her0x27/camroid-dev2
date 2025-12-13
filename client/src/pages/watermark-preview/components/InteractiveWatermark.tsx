@@ -78,6 +78,11 @@ export interface WatermarkStyle {
   logoSize: number;
   logoOpacity: number;
   fontFamily: FontFamily;
+  showCoordinates: boolean;
+  showGyroscope: boolean;
+  showReticle: boolean;
+  showNote: boolean;
+  showTimestamp: boolean;
 }
 
 const FONT_FAMILY_MAP: Record<FontFamily, string> = {
