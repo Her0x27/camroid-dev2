@@ -10,6 +10,7 @@ import {
   InteractiveWatermark,
   FloatingEditPanel,
   ReticleSelector,
+  ConfigExportImport,
   type WatermarkPosition,
   type WatermarkStyle,
   type ReticleSettings,
@@ -208,6 +209,41 @@ export default function WatermarkPreviewPage() {
     }
   }, [activePanel]);
 
+  const handleImportConfig = useCallback((watermark: typeof watermarkConfig, reticle: typeof reticleConfig) => {
+    setWatermarkPosition({ x: watermark.positionX, y: watermark.positionY });
+    setWatermarkStyle({
+      backgroundColor: watermark.backgroundColor,
+      backgroundOpacity: watermark.backgroundOpacity,
+      fontColor: watermark.fontColor,
+      fontOpacity: watermark.fontOpacity,
+      fontSize: watermark.fontSize,
+      bold: watermark.bold,
+      italic: watermark.italic,
+      underline: watermark.underline,
+      width: watermark.width,
+      height: watermark.height,
+      autoSize: watermark.autoSize ?? false,
+      rotation: watermark.rotation,
+      note: watermark.note,
+      notePlacement: watermark.notePlacement,
+      separators: watermark.separators,
+      coordinateFormat: watermark.coordinateFormat,
+      logoUrl: watermark.logoUrl,
+      logoPosition: watermark.logoPosition,
+      logoSize: watermark.logoSize,
+    });
+    setReticleSettings({
+      shape: reticle.shape as ReticleShape,
+      color: reticle.color,
+      size: reticle.size,
+      strokeWidth: reticle.strokeWidth,
+      opacity: reticle.opacity,
+      position: { x: reticle.positionX, y: reticle.positionY },
+    });
+    updateWatermarkPreview(watermark);
+    updateReticlePreview(reticle);
+  }, [updateWatermarkPreview, updateReticlePreview]);
+
   if (isLoading) {
     return (
       <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-black flex items-center justify-center">
@@ -273,6 +309,14 @@ export default function WatermarkPreviewPage() {
       >
         <ArrowLeft className="h-5 w-5" />
       </Button>
+
+      <div className="absolute top-4 right-4 z-50">
+        <ConfigExportImport
+          watermarkConfig={watermarkConfig}
+          reticleConfig={reticleConfig}
+          onImport={handleImportConfig}
+        />
+      </div>
 
       <FloatingEditPanel
         isOpen={activePanel === "watermark"}
