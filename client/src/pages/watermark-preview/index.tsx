@@ -290,18 +290,20 @@ export default function WatermarkPreviewPage() {
           className="absolute left-1/2 top-1/2 cursor-pointer"
           style={{
             transform: `translate(calc(-50% + ${reticleSettings.position.x}px), calc(-50% + ${reticleSettings.position.y}px))`,
+            width: `${reticleSettings.size}vmin`,
+            height: `${reticleSettings.size}vmin`,
           }}
           onClick={handleReticleTap}
           onTouchStart={handleReticleTap}
         >
           <div
-            className={`transition-all ${
+            className={`w-full h-full transition-all ${
               activePanel === "reticle" ? "ring-2 ring-primary ring-offset-2 rounded-full" : ""
             }`}
           >
             <ReticleShapeRenderer
               shape={reticleSettings.shape}
-              size={reticleSettings.size}
+              size="100%"
               color={reticleSettings.color}
               strokeWidth={reticleSettings.strokeWidth}
               opacity={reticleSettings.opacity}

@@ -2,7 +2,7 @@ import { memo } from "react";
 import type { ReticleShape } from "../types";
 
 export interface ReticleShapeProps {
-  size: number;
+  size: number | string;
   color: string;
   strokeWidth: number;
   opacity: number;

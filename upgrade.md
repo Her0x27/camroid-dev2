@@ -1,3 +1,59 @@
+# Upgrade: Описания возможностей и относительные единицы v43
+
+## Описание
+Улучшения интерфейса по запросу пользователя:
+1. Окно "Добро пожаловать" — добавить описания к каждому пункту "Возможности устройства"
+2. Окно "Редактирование водяного знака" — высота 5% по умолчанию, ширина 35% по умолчанию
+3. Окно "Редактирование водяного знака" — размер шрифта в относительных величинах (% от viewport)
+4. Окно "Выбор прицела" — размер и толщина линии в относительных величинах (%)
+
+## Чек-лист задач v43
+
+- [x] Обновить upgrade.md — добавить секцию v43
+- [x] Добавить описания к пунктам "Возможности устройства" в окне Welcome
+- [x] Изменить дефолты watermark: высота 5%, ширина 35%
+- [x] Перевести fontSize в относительные единицы (% от viewport)
+- [x] Перевести size и strokeWidth прицела в относительные величины (%)
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v43
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 13.12.2025 |
+| Описания возможностей | ✅ Готово | 13.12.2025 |
+| Дефолты watermark | ✅ Готово | 13.12.2025 |
+| fontSize relative | ✅ Готово | 13.12.2025 |
+| Reticle relative | ✅ Готово | 13.12.2025 |
+
+## Изменения v43
+
+### client/src/components/app-capabilities-dialog.tsx
+- **CapabilitiesSection:** изменён layout для показа описаний
+- **Описания:** используются переводы из t.capabilities.descriptions
+
+### shared/schema.ts
+- **watermarkPreviewConfigSchema:** width default 40→35, height default 15→5
+- **fontSize:** изменён с px (8-48) на % от viewport (1-10), default 3
+- **reticlePreviewConfigSchema:** size и strokeWidth теперь в % от viewport
+
+### client/src/pages/watermark-preview/components/FloatingEditPanel.tsx
+- **fontSize slider:** отображается как "%", min=1, max=10
+
+### client/src/pages/watermark-preview/components/ReticleSelector.tsx
+- **size slider:** отображается как "%", относительные величины
+- **strokeWidth slider:** отображается как "%"
+
+### client/src/pages/watermark-preview/components/InteractiveWatermark.tsx
+- **fontSize:** рендерится как vmin для относительного размера
+
+### client/src/lib/settings-context.tsx
+- **clamping:** обновлены диапазоны для fontSize (1-10), size (1-30), strokeWidth (5-50)
+
+---
+
 # Upgrade: Импорт/Экспорт конфигурации водяного знака и прицела v42
 
 ## Описание

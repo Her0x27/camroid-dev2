@@ -149,23 +149,31 @@ function CapabilitiesSection({ capabilities, t }: {
         {t.capabilities.capabilitiesTitle}
       </h4>
       
-      <div className="grid grid-cols-2 gap-2">
+      <div className="space-y-2">
         {capabilities.map((cap) => {
           const Icon = capabilityIcons[cap.id] || Check;
+          const descKey = cap.id as keyof typeof t.capabilities.descriptions;
           return (
             <div 
               key={cap.id}
-              className="flex items-center gap-2 p-2.5 rounded-md bg-card/30 border border-border/30"
+              className="flex items-start gap-2.5 p-2.5 rounded-md bg-card/30 border border-border/30"
             >
-              <Icon className={`h-4 w-4 shrink-0 ${cap.supported ? 'text-primary' : 'text-muted-foreground/50'}`} />
-              <span className={`text-xs truncate ${cap.supported ? 'text-foreground' : 'text-muted-foreground/70'}`}>
-                {t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}
-              </span>
-              {cap.supported ? (
-                <Check className="h-3.5 w-3.5 text-primary ml-auto shrink-0" />
-              ) : (
-                <X className="h-3.5 w-3.5 text-muted-foreground/50 ml-auto shrink-0" />
-              )}
+              <Icon className={`h-4 w-4 shrink-0 mt-0.5 ${cap.supported ? 'text-primary' : 'text-muted-foreground/50'}`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-medium ${cap.supported ? 'text-foreground' : 'text-muted-foreground/70'}`}>
+                    {t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}
+                  </span>
+                  {cap.supported ? (
+                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                  ) : (
+                    <X className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+                  )}
+                </div>
+                <p className={`text-[11px] leading-relaxed mt-0.5 ${cap.supported ? 'text-muted-foreground' : 'text-muted-foreground/50'}`}>
+                  {t.capabilities.descriptions[descKey]}
+                </p>
+              </div>
             </div>
           );
         })}

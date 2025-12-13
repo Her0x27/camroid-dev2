@@ -158,28 +158,28 @@ export const ReticleSelector = memo(function ReticleSelector({
         <div className="space-y-1">
           <div className="flex justify-between">
             <Label className="text-xs">Размер</Label>
-            <span className="text-xs text-muted-foreground">{settings.size}px</span>
+            <span className="text-xs text-muted-foreground">{settings.size}%</span>
           </div>
           <Slider
             value={[settings.size]}
             onValueChange={([v]) => onSettingsChange({ size: v })}
-            min={20}
-            max={150}
-            step={5}
+            min={1}
+            max={30}
+            step={1}
           />
         </div>
 
         <div className="space-y-1">
           <div className="flex justify-between">
             <Label className="text-xs">Толщина линии</Label>
-            <span className="text-xs text-muted-foreground">{settings.strokeWidth}px</span>
+            <span className="text-xs text-muted-foreground">{settings.strokeWidth}%</span>
           </div>
           <Slider
             value={[settings.strokeWidth]}
             onValueChange={([v]) => onSettingsChange({ strokeWidth: v })}
-            min={1}
-            max={8}
-            step={1}
+            min={5}
+            max={50}
+            step={5}
           />
         </div>
 

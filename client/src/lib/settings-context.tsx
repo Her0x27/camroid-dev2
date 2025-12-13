@@ -127,7 +127,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       clampedUpdates.fontOpacity = Math.max(0, Math.min(100, clampedUpdates.fontOpacity));
     }
     if (clampedUpdates.fontSize !== undefined) {
-      clampedUpdates.fontSize = Math.max(8, Math.min(48, clampedUpdates.fontSize));
+      clampedUpdates.fontSize = Math.max(1, Math.min(10, clampedUpdates.fontSize));
     }
     if (clampedUpdates.rotation !== undefined) {
       clampedUpdates.rotation = Math.max(-180, Math.min(180, clampedUpdates.rotation));
@@ -145,10 +145,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const updateReticlePreview = useCallback((updates: Partial<ReticlePreviewConfig>) => {
     const clampedUpdates = { ...updates };
     if (clampedUpdates.size !== undefined) {
-      clampedUpdates.size = Math.max(20, Math.min(200, clampedUpdates.size));
+      clampedUpdates.size = Math.max(1, Math.min(30, clampedUpdates.size));
     }
     if (clampedUpdates.strokeWidth !== undefined) {
-      clampedUpdates.strokeWidth = Math.max(1, Math.min(10, clampedUpdates.strokeWidth));
+      clampedUpdates.strokeWidth = Math.max(5, Math.min(50, clampedUpdates.strokeWidth));
     }
     if (clampedUpdates.opacity !== undefined) {
       clampedUpdates.opacity = Math.max(10, Math.min(100, clampedUpdates.opacity));

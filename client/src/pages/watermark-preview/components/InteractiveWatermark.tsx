@@ -241,7 +241,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
       style={{
         color: style.fontColor,
         opacity: style.fontOpacity / 100,
-        fontSize: style.fontSize,
+        fontSize: `${style.fontSize}vmin`,
         fontFamily: FONT_FAMILY_MAP[style.fontFamily ?? "system"],
         ...fontStyles,
       }}

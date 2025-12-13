@@ -150,13 +150,13 @@ export const watermarkPreviewConfigSchema = z.object({
   // Background
   backgroundColor: z.string().default("#000000"),
   backgroundOpacity: z.number().min(0).max(100).default(70),
-  width: z.number().min(10).max(100).default(40), // width as % of viewport
-  height: z.number().min(5).max(50).default(15), // height as % of viewport
+  width: z.number().min(10).max(100).default(35), // width as % of viewport
+  height: z.number().min(5).max(50).default(5), // height as % of viewport
   autoSize: z.boolean().default(false), // auto-size based on content
   // Font
   fontColor: z.string().default("#22c55e"),
   fontOpacity: z.number().min(0).max(100).default(100),
-  fontSize: z.number().min(8).max(48).default(14),
+  fontSize: z.number().min(1).max(10).default(3), // fontSize as % of viewport min dimension (vmin)
   bold: z.boolean().default(false),
   italic: z.boolean().default(false),
   underline: z.boolean().default(false),
@@ -185,8 +185,8 @@ export type FontFamily = "system" | "roboto" | "montserrat" | "oswald" | "playfa
 export const reticlePreviewConfigSchema = z.object({
   shape: z.enum(["crosshair", "circle", "square", "arrow", "speech-bubble", "custom"]).default("crosshair"),
   color: z.string().default("#22c55e"),
-  size: z.number().min(20).max(200).default(80),
-  strokeWidth: z.number().min(1).max(10).default(2),
+  size: z.number().min(1).max(30).default(10), // size as % of viewport min dimension
+  strokeWidth: z.number().min(5).max(50).default(15), // strokeWidth as % of reticle size
   opacity: z.number().min(10).max(100).default(80),
   positionX: z.number().default(0),
   positionY: z.number().default(0),
@@ -299,12 +299,12 @@ export const defaultSettings: Settings = {
     positionY: 20,
     backgroundColor: "#000000",
     backgroundOpacity: 70,
-    width: 200,
-    height: 60,
+    width: 35,
+    height: 5,
     autoSize: false,
     fontColor: "#22c55e",
     fontOpacity: 100,
-    fontSize: 14,
+    fontSize: 3,
     bold: false,
     italic: false,
     underline: false,
@@ -322,8 +322,8 @@ export const defaultSettings: Settings = {
   reticlePreview: {
     shape: "crosshair",
     color: "#22c55e",
-    size: 80,
-    strokeWidth: 2,
+    size: 10,
+    strokeWidth: 15,
     opacity: 80,
     positionX: 0,
     positionY: 0,

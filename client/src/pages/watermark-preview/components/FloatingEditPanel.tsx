@@ -265,14 +265,14 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
         <div className="space-y-1">
           <div className="flex justify-between">
             <Label className="text-xs">Размер шрифта</Label>
-            <span className="text-xs text-muted-foreground">{style.fontSize}px</span>
+            <span className="text-xs text-muted-foreground">{style.fontSize}%</span>
           </div>
           <Slider
             value={[style.fontSize]}
             onValueChange={([v]) => onStyleChange({ fontSize: v })}
-            min={8}
-            max={48}
-            step={1}
+            min={1}
+            max={10}
+            step={0.5}
           />
         </div>
 
