@@ -193,7 +193,7 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
           <X className="h-3.5 w-3.5" />
         </Button>
       </div>
-      <div className="p-4 space-y-2">
+      <div className="px-4 pt-1 pb-4 space-y-0">
       <input
         ref={fileInputRef}
         type="file"
