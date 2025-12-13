@@ -21,12 +21,23 @@ export interface ReticleSettings {
   colorScheme: ColorScheme;
 }
 
+interface WatermarkBounds {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  centerX: number;
+  centerY: number;
+}
+
 interface ReticleSelectorProps {
   isOpen: boolean;
   onClose: () => void;
   settings: ReticleSettings;
   onSettingsChange: (updates: Partial<ReticleSettings>) => void;
   anchorPosition: { x: number; y: number };
+  watermarkBounds?: WatermarkBounds | null;
+  reticlePosition?: { x: number; y: number };
 }
 
 const RETICLE_OPTIONS: { value: ReticleShape; label: string }[] = [
@@ -43,21 +54,86 @@ export const ReticleSelector = memo(function ReticleSelector({
   onClose,
   settings,
   onSettingsChange,
-  anchorPosition,
+  anchorPosition: _anchorPosition,
+  watermarkBounds,
+  reticlePosition,
 }: ReticleSelectorProps) {
   const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const panelRef = useRef<HTMLDivElement>(null);
+  const wasOpenRef = useRef(false);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !wasOpenRef.current) {
+      wasOpenRef.current = true;
+      
+      const panelWidth = 288;
+      const panelHeight = Math.min(window.innerHeight * 0.5, 400);
+      const margin = 20;
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
+      
+      const watermarkLeft = watermarkBounds ? (watermarkBounds.left / 100) * screenWidth : 0;
+      const watermarkRight = watermarkBounds ? (watermarkBounds.right / 100) * screenWidth : 0;
+      const watermarkTop = watermarkBounds ? (watermarkBounds.top / 100) * screenHeight : 0;
+      const watermarkBottom = watermarkBounds ? (watermarkBounds.bottom / 100) * screenHeight : 0;
+      
+      const reticleX = reticlePosition ? (reticlePosition.x / 100) * screenWidth : screenWidth / 2;
+      const reticleY = reticlePosition ? (reticlePosition.y / 100) * screenHeight : screenHeight / 2;
+      const currentReticleSize = (settings.size / 100) * Math.min(screenWidth, screenHeight);
+      
+      const reticleLeft = reticleX - currentReticleSize / 2;
+      const reticleRight = reticleX + currentReticleSize / 2;
+      const reticleTop = reticleY - currentReticleSize / 2;
+      const reticleBottom = reticleY + currentReticleSize / 2;
+      
+      const positions = [
+        { x: screenWidth - panelWidth - margin, y: margin },
+        { x: margin, y: margin },
+        { x: screenWidth - panelWidth - margin, y: screenHeight - panelHeight - margin },
+        { x: margin, y: screenHeight - panelHeight - margin },
+      ];
+      
+      const doesOverlap = (pos: { x: number; y: number }) => {
+        const panelLeft = pos.x;
+        const panelRight = pos.x + panelWidth;
+        const panelTop = pos.y;
+        const panelBottom = pos.y + panelHeight;
+        
+        const overlapsWatermark = watermarkBounds && !(
+          panelRight < watermarkLeft - margin ||
+          panelLeft > watermarkRight + margin ||
+          panelBottom < watermarkTop - margin ||
+          panelTop > watermarkBottom + margin
+        );
+        
+        const overlapsReticle = !(
+          panelRight < reticleLeft - margin ||
+          panelLeft > reticleRight + margin ||
+          panelBottom < reticleTop - margin ||
+          panelTop > reticleBottom + margin
+        );
+        
+        return overlapsWatermark || overlapsReticle;
+      };
+      
+      let smartPos = positions[0];
+      for (const pos of positions) {
+        if (!doesOverlap(pos)) {
+          smartPos = pos;
+          break;
+        }
+      }
+      
       setPanelPosition({
-        x: Math.min(anchorPosition.x, window.innerWidth - 280),
-        y: Math.min(anchorPosition.y + 10, window.innerHeight - 400),
+        x: Math.max(0, Math.min(smartPos.x, screenWidth - panelWidth)),
+        y: Math.max(0, Math.min(smartPos.y, screenHeight - panelHeight)),
       });
+    } else if (!isOpen) {
+      wasOpenRef.current = false;
     }
-  }, [isOpen, anchorPosition]);
+  }, [isOpen, watermarkBounds, reticlePosition, settings.size]);
 
   const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
@@ -109,7 +185,7 @@ export const ReticleSelector = memo(function ReticleSelector({
     <div
       ref={panelRef}
       style={{ ...panelStyle, fontFamily: 'var(--font-montserrat), system-ui, sans-serif' }}
-      className="w-72 max-h-[70vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl"
+      className="w-72 max-h-[50vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl"
     >
       <div 
         className="flex items-center justify-between cursor-move select-none px-3 py-1.5 bg-muted/50 rounded-t-lg border-b sticky top-0 z-10 backdrop-blur-sm"

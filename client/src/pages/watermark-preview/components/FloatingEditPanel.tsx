@@ -178,7 +178,7 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
     <div
       ref={panelRef}
       style={{ ...panelStyle, fontFamily: 'var(--font-montserrat), system-ui, sans-serif' }}
-      className="w-80 max-h-[80vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl"
+      className="w-80 max-h-[50vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl"
     >
       <div 
         className="flex items-center justify-between cursor-move select-none px-3 py-1.5 bg-muted/50 rounded-t-lg border-b sticky top-0 z-10 backdrop-blur-sm"

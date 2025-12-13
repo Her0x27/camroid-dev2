@@ -406,6 +406,8 @@ export default function WatermarkPreviewPage() {
         settings={reticleSettings}
         onSettingsChange={handleReticleSettingsChange}
         anchorPosition={panelAnchor}
+        watermarkBounds={watermarkBounds}
+        reticlePosition={reticleSettings.position}
       />
 
       <TooltipProvider delayDuration={300}>

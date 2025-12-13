@@ -1,3 +1,49 @@
+# Upgrade: Уменьшение высоты окон и умное позиционирование v47
+
+## Описание
+Улучшения UI окон редактирования:
+1. Окно "Выбор прицела" — уменьшить высоту до разделителя
+2. Окно "Редактирование водяного знака" — уменьшить высоту аналогично
+3. Окно "Выбор прицела" — позиционировать в часть экрана без водяного знака/прицела
+
+## Чек-лист задач v47
+
+- [x] Обновить upgrade.md — добавить секцию v47
+- [x] Уменьшить высоту окна ReticleSelector (max-h-[70vh] → max-h-[50vh])
+- [x] Уменьшить высоту окна FloatingEditPanel (max-h-[80vh] → max-h-[50vh])
+- [x] Добавить умное позиционирование ReticleSelector — избегать перекрытия с watermarkBounds и прицелом
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v47
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 13.12.2025 |
+| ReticleSelector height | ✅ Готово | 13.12.2025 |
+| FloatingEditPanel height | ✅ Готово | 13.12.2025 |
+| Smart positioning | ✅ Готово | 13.12.2025 |
+
+## Изменения v47
+
+### client/src/pages/watermark-preview/components/ReticleSelector.tsx
+- **Высота:** уменьшена с max-h-[70vh] до max-h-[50vh]
+- **WatermarkBounds interface:** добавлен интерфейс для границ водяного знака
+- **Props:** добавлены watermarkBounds и reticlePosition
+- **Smart positioning:** умный расчёт позиции окна:
+  - Проверяет 4 угла экрана (правый верхний, левый верхний, правый нижний, левый нижний)
+  - Выбирает первый угол, который не перекрывает водяной знак и прицел
+  - Учитывает margin=20px между элементами
+
+### client/src/pages/watermark-preview/components/FloatingEditPanel.tsx
+- **Высота:** уменьшена с max-h-[80vh] до max-h-[50vh]
+
+### client/src/pages/watermark-preview/index.tsx
+- **ReticleSelector props:** добавлены watermarkBounds и reticlePosition
+
+---
+
 # Upgrade: Toggle-кнопки видимости и Авто-цвет прицела v46
 
 ## Описание
