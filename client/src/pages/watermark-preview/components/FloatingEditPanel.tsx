@@ -1,11 +1,12 @@
 import { memo, useState, useRef, useCallback, useEffect } from "react";
-import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown, GripHorizontal } from "lucide-react";
+import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown, ChevronRight, GripHorizontal, Palette, Type, MapPin, Move, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat, LogoPosition, FontFamily } from "./InteractiveWatermark";
 
 interface FloatingEditPanelProps {
@@ -40,6 +41,22 @@ const FONT_FAMILIES: { value: FontFamily; label: string }[] = [
   { value: "playfair", label: "Playfair Display" },
 ];
 
+interface SectionHeaderProps {
+  icon: React.ReactNode;
+  title: string;
+  isOpen: boolean;
+}
+
+function SectionHeader({ icon, title, isOpen }: SectionHeaderProps) {
+  return (
+    <div className="flex items-center gap-2 py-2 cursor-pointer hover:bg-muted/50 rounded transition-colors -mx-1 px-1">
+      <div className="text-muted-foreground">{icon}</div>
+      <span className="text-xs font-medium text-muted-foreground uppercase flex-1">{title}</span>
+      <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`} />
+    </div>
+  );
+}
+
 export const FloatingEditPanel = memo(function FloatingEditPanel({
   isOpen,
   onClose,
@@ -55,6 +72,19 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
   const dragStartRef = useRef({ x: 0, y: 0 });
   const panelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [openSections, setOpenSections] = useState({
+    background: false,
+    font: false,
+    logo: false,
+    coordinates: false,
+    position: false,
+    separators: false,
+  });
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -163,7 +193,7 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
           <X className="h-3.5 w-3.5" />
         </Button>
       </div>
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-2">
       <input
         ref={fileInputRef}
         type="file"
@@ -172,388 +202,452 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
         className="hidden"
       />
 
-      <div className="space-y-3">
-        <h4 className="text-xs font-medium text-muted-foreground uppercase">Фон</h4>
-        
-        <div className="flex items-center gap-3">
-          <Label className="text-xs w-16">Цвет</Label>
-          <ColorPicker
-            value={style.backgroundColor}
-            onChange={(color) => onStyleChange({ backgroundColor: color })}
-            showHexInput={true}
-          />
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex justify-between">
-            <Label className="text-xs">Прозрачность</Label>
-            <span className="text-xs text-muted-foreground">{style.backgroundOpacity}%</span>
+      <Collapsible open={openSections.background} onOpenChange={() => toggleSection('background')}>
+        <CollapsibleTrigger asChild>
+          <div>
+            <SectionHeader 
+              icon={<Palette className="h-4 w-4" />} 
+              title="Фон" 
+              isOpen={openSections.background}
+            />
           </div>
-          <Slider
-            value={[style.backgroundOpacity]}
-            onValueChange={([v]) => onStyleChange({ backgroundOpacity: v })}
-            min={0}
-            max={100}
-            step={1}
-          />
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex justify-between">
-            <Label className="text-xs">Ширина</Label>
-            <span className="text-xs text-muted-foreground">{style.width}%</span>
-          </div>
-          <Slider
-            value={[style.width]}
-            onValueChange={([v]) => onStyleChange({ width: v })}
-            min={10}
-            max={100}
-            step={5}
-            disabled={style.autoSize}
-          />
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex justify-between">
-            <Label className="text-xs">Высота</Label>
-            <span className="text-xs text-muted-foreground">{style.height}%</span>
-          </div>
-          <Slider
-            value={[style.height]}
-            onValueChange={([v]) => onStyleChange({ height: v })}
-            min={5}
-            max={50}
-            step={5}
-            disabled={style.autoSize}
-          />
-        </div>
-
-        <div className="flex items-center justify-between pt-1">
-          <Label className="text-xs">Авто-размер</Label>
-          <Switch
-            checked={style.autoSize}
-            onCheckedChange={(checked) => onStyleChange({ autoSize: checked })}
-          />
-        </div>
-      </div>
-
-      <div className="border-t pt-3 space-y-3">
-        <h4 className="text-xs font-medium text-muted-foreground uppercase">Шрифт</h4>
-        
-        <div className="flex items-center gap-3">
-          <Label className="text-xs w-16">Цвет</Label>
-          <ColorPicker
-            value={style.fontColor}
-            onChange={(color) => onStyleChange({ fontColor: color })}
-            showHexInput={true}
-          />
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex justify-between">
-            <Label className="text-xs">Прозрачность</Label>
-            <span className="text-xs text-muted-foreground">{style.fontOpacity}%</span>
-          </div>
-          <Slider
-            value={[style.fontOpacity]}
-            onValueChange={([v]) => onStyleChange({ fontOpacity: v })}
-            min={0}
-            max={100}
-            step={1}
-          />
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex justify-between">
-            <Label className="text-xs">Размер шрифта</Label>
-            <span className="text-xs text-muted-foreground">{style.fontSize}%</span>
-          </div>
-          <Slider
-            value={[style.fontSize]}
-            onValueChange={([v]) => onStyleChange({ fontSize: v })}
-            min={1}
-            max={10}
-            step={0.5}
-          />
-        </div>
-
-        <div className="flex gap-1">
-          <Button
-            variant={style.bold ? "default" : "outline"}
-            size="icon"
-            onClick={() => onStyleChange({ bold: !style.bold })}
-            className="h-8 w-8"
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={style.italic ? "default" : "outline"}
-            size="icon"
-            onClick={() => onStyleChange({ italic: !style.italic })}
-            className="h-8 w-8"
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={style.underline ? "default" : "outline"}
-            size="icon"
-            onClick={() => onStyleChange({ underline: !style.underline })}
-            className="h-8 w-8"
-          >
-            <Underline className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div>
-          <Label className="text-xs">Шрифт</Label>
-          <div className="grid grid-cols-2 gap-1 mt-1">
-            {FONT_FAMILIES.map((font) => (
-              <button
-                key={font.value}
-                onClick={() => onStyleChange({ fontFamily: font.value })}
-                className={`px-2 py-1.5 rounded text-xs transition-all ${
-                  style.fontFamily === font.value
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted hover:bg-muted/80"
-                }`}
-              >
-                {font.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t pt-3 space-y-3">
-        <h4 className="text-xs font-medium text-muted-foreground uppercase">Логотип</h4>
-        
-        {style.logoUrl ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <img 
-                src={style.logoUrl} 
-                alt="Logo preview" 
-                className="w-12 h-12 object-contain rounded border"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleRemoveLogo}
-                className="h-8 text-xs text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Удалить
-              </Button>
-            </div>
-
-            <div>
-              <Label className="text-xs">Позиция</Label>
-              <div className="flex gap-1 mt-1">
-                <Button
-                  variant={style.logoPosition === "left" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => onStyleChange({ logoPosition: "left" as LogoPosition })}
-                  className="h-8 text-xs flex-1"
-                >
-                  Слева
-                </Button>
-                <Button
-                  variant={style.logoPosition === "right" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => onStyleChange({ logoPosition: "right" as LogoPosition })}
-                  className="h-8 text-xs flex-1"
-                >
-                  Справа
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex justify-between">
-                <Label className="text-xs">Размер</Label>
-                <span className="text-xs text-muted-foreground">{style.logoSize}px</span>
-              </div>
-              <Slider
-                value={[style.logoSize]}
-                onValueChange={([v]) => onStyleChange({ logoSize: v })}
-                min={16}
-                max={96}
-                step={4}
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-3 pl-6 pb-3">
+            <div className="flex items-center gap-3">
+              <Label className="text-xs w-16">Цвет</Label>
+              <ColorPicker
+                value={style.backgroundColor}
+                onChange={(color) => onStyleChange({ backgroundColor: color })}
+                showHexInput={true}
               />
             </div>
 
             <div className="space-y-1">
               <div className="flex justify-between">
                 <Label className="text-xs">Прозрачность</Label>
-                <span className="text-xs text-muted-foreground">{style.logoOpacity}%</span>
+                <span className="text-xs text-muted-foreground">{style.backgroundOpacity}%</span>
               </div>
               <Slider
-                value={[style.logoOpacity]}
-                onValueChange={([v]) => onStyleChange({ logoOpacity: v })}
+                value={[style.backgroundOpacity]}
+                onValueChange={([v]) => onStyleChange({ backgroundOpacity: v })}
                 min={0}
                 max={100}
+                step={1}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-xs">Ширина</Label>
+                <span className="text-xs text-muted-foreground">{style.width}%</span>
+              </div>
+              <Slider
+                value={[style.width]}
+                onValueChange={([v]) => onStyleChange({ width: v })}
+                min={10}
+                max={100}
                 step={5}
+                disabled={style.autoSize}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-xs">Высота</Label>
+                <span className="text-xs text-muted-foreground">{style.height}%</span>
+              </div>
+              <Slider
+                value={[style.height]}
+                onValueChange={([v]) => onStyleChange({ height: v })}
+                min={5}
+                max={50}
+                step={5}
+                disabled={style.autoSize}
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <Label className="text-xs">Авто-размер</Label>
+              <Switch
+                checked={style.autoSize}
+                onCheckedChange={(checked) => onStyleChange({ autoSize: checked })}
               />
             </div>
           </div>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-            className="h-8 text-xs w-full"
-          >
-            <Image className="h-4 w-4 mr-1" />
-            Загрузить логотип
-          </Button>
-        )}
-      </div>
+        </CollapsibleContent>
+      </Collapsible>
 
-      <div className="border-t pt-3 space-y-3">
-        <h4 className="text-xs font-medium text-muted-foreground uppercase">Формат координат</h4>
-        
-        <div className="space-y-2">
-          {COORDINATE_FORMATS.map((format) => (
-            <button
-              key={format.value}
-              onClick={() => onStyleChange({ coordinateFormat: format.value })}
-              className={`w-full text-left p-2 rounded-lg border transition-all ${
-                style.coordinateFormat === format.value
-                  ? "border-primary bg-primary/10"
-                  : "border-muted hover:border-muted-foreground/50"
-              }`}
-            >
-              <div className="text-xs font-medium">{format.label}</div>
-              <div className="text-[10px] text-muted-foreground">{format.example}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="border-t pt-3 space-y-3">
-        <h4 className="text-xs font-medium text-muted-foreground uppercase">Позиция</h4>
-        
-        <div className="grid grid-cols-2 gap-2">
+      <Collapsible open={openSections.font} onOpenChange={() => toggleSection('font')}>
+        <CollapsibleTrigger asChild>
           <div>
-            <Label className="text-xs">X</Label>
-            <Input
-              type="number"
-              value={Math.round(position.x)}
-              onChange={(e) => onPositionChange({ x: Number(e.target.value) })}
-              className="h-8 text-xs"
+            <SectionHeader 
+              icon={<Type className="h-4 w-4" />} 
+              title="Шрифт" 
+              isOpen={openSections.font}
             />
           </div>
-          <div>
-            <Label className="text-xs">Y</Label>
-            <Input
-              type="number"
-              value={Math.round(position.y)}
-              onChange={(e) => onPositionChange({ y: Number(e.target.value) })}
-              className="h-8 text-xs"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex justify-between">
-            <Label className="text-xs">Поворот</Label>
-            <span className="text-xs text-muted-foreground">{style.rotation}°</span>
-          </div>
-          <Slider
-            value={[style.rotation]}
-            onValueChange={([v]) => onStyleChange({ rotation: v })}
-            min={-180}
-            max={180}
-            step={1}
-          />
-        </div>
-
-        <div>
-          <Label className="text-xs">Заметка / Комментарий</Label>
-          <Input
-            value={style.note}
-            onChange={(e) => onStyleChange({ note: e.target.value })}
-            placeholder="Введите текст..."
-            className="h-8 text-xs mt-1"
-          />
-        </div>
-
-        <div>
-          <Label className="text-xs">Позиция заметки</Label>
-          <div className="flex gap-1 mt-1">
-            <Button
-              variant={style.notePlacement === "start" ? "default" : "outline"}
-              size="sm"
-              onClick={() => onStyleChange({ notePlacement: "start" })}
-              className="h-8 text-xs flex-1"
-            >
-              В начале
-            </Button>
-            <Button
-              variant={style.notePlacement === "end" ? "default" : "outline"}
-              size="sm"
-              onClick={() => onStyleChange({ notePlacement: "end" })}
-              className="h-8 text-xs flex-1"
-            >
-              В конце
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t pt-3 space-y-3">
-        <h4 className="text-xs font-medium text-muted-foreground uppercase">Разделители</h4>
-        
-        <div className="relative">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowSeparatorMenu(!showSeparatorMenu)}
-            className="h-8 text-xs w-full justify-between"
-          >
-            <span className="flex items-center">
-              <Plus className="h-4 w-4 mr-1" />
-              Вставить разделитель
-            </span>
-            <ChevronDown className="h-4 w-4" />
-          </Button>
-          
-          {showSeparatorMenu && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-10">
-              {SEPARATOR_POSITIONS.map((pos) => (
-                <button
-                  key={pos.value}
-                  onClick={() => handleAddSeparator(pos.value)}
-                  className="w-full px-3 py-2 text-xs text-left hover:bg-accent transition-colors"
-                >
-                  {pos.label}
-                </button>
-              ))}
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-3 pl-6 pb-3">
+            <div className="flex items-center gap-3">
+              <Label className="text-xs w-16">Цвет</Label>
+              <ColorPicker
+                value={style.fontColor}
+                onChange={(color) => onStyleChange({ fontColor: color })}
+                showHexInput={true}
+              />
             </div>
-          )}
-        </div>
 
-        {style.separators.length > 0 && (
-          <div className="space-y-1">
-            {style.separators.map((sep) => {
-              const label = SEPARATOR_POSITIONS.find(p => p.value === sep.position)?.label || sep.position;
-              return (
-                <div key={sep.id} className="flex items-center justify-between bg-muted/50 rounded px-2 py-1">
-                  <span className="text-xs">{label}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveSeparator(sep.id)}
-                    className="h-6 w-6"
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-xs">Прозрачность</Label>
+                <span className="text-xs text-muted-foreground">{style.fontOpacity}%</span>
+              </div>
+              <Slider
+                value={[style.fontOpacity]}
+                onValueChange={([v]) => onStyleChange({ fontOpacity: v })}
+                min={0}
+                max={100}
+                step={1}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-xs">Размер шрифта</Label>
+                <span className="text-xs text-muted-foreground">{style.fontSize}%</span>
+              </div>
+              <Slider
+                value={[style.fontSize]}
+                onValueChange={([v]) => onStyleChange({ fontSize: v })}
+                min={1}
+                max={10}
+                step={0.5}
+              />
+            </div>
+
+            <div className="flex gap-1">
+              <Button
+                variant={style.bold ? "default" : "outline"}
+                size="icon"
+                onClick={() => onStyleChange({ bold: !style.bold })}
+                className="h-8 w-8"
+              >
+                <Bold className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={style.italic ? "default" : "outline"}
+                size="icon"
+                onClick={() => onStyleChange({ italic: !style.italic })}
+                className="h-8 w-8"
+              >
+                <Italic className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={style.underline ? "default" : "outline"}
+                size="icon"
+                onClick={() => onStyleChange({ underline: !style.underline })}
+                className="h-8 w-8"
+              >
+                <Underline className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div>
+              <Label className="text-xs">Шрифт</Label>
+              <div className="grid grid-cols-2 gap-1 mt-1">
+                {FONT_FAMILIES.map((font) => (
+                  <button
+                    key={font.value}
+                    onClick={() => onStyleChange({ fontFamily: font.value })}
+                    className={`px-2 py-1.5 rounded text-xs transition-all ${
+                      style.fontFamily === font.value
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted hover:bg-muted/80"
+                    }`}
                   >
-                    <Trash2 className="h-3 w-3" />
+                    {font.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible open={openSections.logo} onOpenChange={() => toggleSection('logo')}>
+        <CollapsibleTrigger asChild>
+          <div>
+            <SectionHeader 
+              icon={<Image className="h-4 w-4" />} 
+              title="Логотип" 
+              isOpen={openSections.logo}
+            />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-3 pl-6 pb-3">
+            {style.logoUrl ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={style.logoUrl} 
+                    alt="Logo preview" 
+                    className="w-12 h-12 object-contain rounded border"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRemoveLogo}
+                    className="h-8 text-xs text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Удалить
                   </Button>
                 </div>
-              );
-            })}
+
+                <div>
+                  <Label className="text-xs">Позиция</Label>
+                  <div className="flex gap-1 mt-1">
+                    <Button
+                      variant={style.logoPosition === "left" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => onStyleChange({ logoPosition: "left" as LogoPosition })}
+                      className="h-8 text-xs flex-1"
+                    >
+                      Слева
+                    </Button>
+                    <Button
+                      variant={style.logoPosition === "right" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => onStyleChange({ logoPosition: "right" as LogoPosition })}
+                      className="h-8 text-xs flex-1"
+                    >
+                      Справа
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <Label className="text-xs">Размер</Label>
+                    <span className="text-xs text-muted-foreground">{style.logoSize}px</span>
+                  </div>
+                  <Slider
+                    value={[style.logoSize]}
+                    onValueChange={([v]) => onStyleChange({ logoSize: v })}
+                    min={16}
+                    max={96}
+                    step={4}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <Label className="text-xs">Прозрачность</Label>
+                    <span className="text-xs text-muted-foreground">{style.logoOpacity}%</span>
+                  </div>
+                  <Slider
+                    value={[style.logoOpacity]}
+                    onValueChange={([v]) => onStyleChange({ logoOpacity: v })}
+                    min={0}
+                    max={100}
+                    step={5}
+                  />
+                </div>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-8 text-xs w-full"
+              >
+                <Image className="h-4 w-4 mr-1" />
+                Загрузить логотип
+              </Button>
+            )}
           </div>
-        )}
-      </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible open={openSections.coordinates} onOpenChange={() => toggleSection('coordinates')}>
+        <CollapsibleTrigger asChild>
+          <div>
+            <SectionHeader 
+              icon={<MapPin className="h-4 w-4" />} 
+              title="Формат координат" 
+              isOpen={openSections.coordinates}
+            />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-2 pl-6 pb-3">
+            {COORDINATE_FORMATS.map((format) => (
+              <button
+                key={format.value}
+                onClick={() => onStyleChange({ coordinateFormat: format.value })}
+                className={`w-full text-left p-2 rounded-lg border transition-all ${
+                  style.coordinateFormat === format.value
+                    ? "border-primary bg-primary/10"
+                    : "border-muted hover:border-muted-foreground/50"
+                }`}
+              >
+                <div className="text-xs font-medium">{format.label}</div>
+                <div className="text-[10px] text-muted-foreground">{format.example}</div>
+              </button>
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible open={openSections.position} onOpenChange={() => toggleSection('position')}>
+        <CollapsibleTrigger asChild>
+          <div>
+            <SectionHeader 
+              icon={<Move className="h-4 w-4" />} 
+              title="Позиция" 
+              isOpen={openSections.position}
+            />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-3 pl-6 pb-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">X</Label>
+                <Input
+                  type="number"
+                  value={Math.round(position.x)}
+                  onChange={(e) => onPositionChange({ x: Number(e.target.value) })}
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Y</Label>
+                <Input
+                  type="number"
+                  value={Math.round(position.y)}
+                  onChange={(e) => onPositionChange({ y: Number(e.target.value) })}
+                  className="h-8 text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <Label className="text-xs">Поворот</Label>
+                <span className="text-xs text-muted-foreground">{style.rotation}°</span>
+              </div>
+              <Slider
+                value={[style.rotation]}
+                onValueChange={([v]) => onStyleChange({ rotation: v })}
+                min={-180}
+                max={180}
+                step={1}
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs">Заметка / Комментарий</Label>
+              <Input
+                value={style.note}
+                onChange={(e) => onStyleChange({ note: e.target.value })}
+                placeholder="Введите текст..."
+                className="h-8 text-xs mt-1"
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs">Позиция заметки</Label>
+              <div className="flex gap-1 mt-1">
+                <Button
+                  variant={style.notePlacement === "start" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onStyleChange({ notePlacement: "start" })}
+                  className="h-8 text-xs flex-1"
+                >
+                  В начале
+                </Button>
+                <Button
+                  variant={style.notePlacement === "end" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => onStyleChange({ notePlacement: "end" })}
+                  className="h-8 text-xs flex-1"
+                >
+                  В конце
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+
+      <Collapsible open={openSections.separators} onOpenChange={() => toggleSection('separators')}>
+        <CollapsibleTrigger asChild>
+          <div>
+            <SectionHeader 
+              icon={<Minus className="h-4 w-4" />} 
+              title="Разделители" 
+              isOpen={openSections.separators}
+            />
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="space-y-3 pl-6 pb-3">
+            <div className="relative">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSeparatorMenu(!showSeparatorMenu)}
+                className="h-8 text-xs w-full justify-between"
+              >
+                <span className="flex items-center">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Вставить разделитель
+                </span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+              
+              {showSeparatorMenu && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-10">
+                  {SEPARATOR_POSITIONS.map((pos) => (
+                    <button
+                      key={pos.value}
+                      onClick={() => handleAddSeparator(pos.value)}
+                      className="w-full px-3 py-2 text-xs text-left hover:bg-accent transition-colors"
+                    >
+                      {pos.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {style.separators.length > 0 && (
+              <div className="space-y-1">
+                {style.separators.map((sep) => {
+                  const label = SEPARATOR_POSITIONS.find(p => p.value === sep.position)?.label || sep.position;
+                  return (
+                    <div key={sep.id} className="flex items-center justify-between bg-muted/50 rounded px-2 py-1">
+                      <span className="text-xs">{label}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveSeparator(sep.id)}
+                        className="h-6 w-6"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
       </div>
     </div>
   );
