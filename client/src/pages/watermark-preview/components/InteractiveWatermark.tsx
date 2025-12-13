@@ -65,6 +65,7 @@ export interface WatermarkStyle {
   underline: boolean;
   width: number;
   height: number;
+  autoSize: boolean;
   rotation: number;
   note: string;
   notePlacement: "start" | "end";
@@ -135,19 +136,23 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
       const deltaXPercent = (deltaX / rect.width) * 100;
       const deltaYPercent = (deltaY / rect.height) * 100;
 
+      // Calculate max bounds - when autoSize, use smaller constraint (20% for auto-sized content)
+      const maxXOffset = style.autoSize ? 20 : style.width;
+      const maxYOffset = style.autoSize ? 10 : style.height;
+
       // Calculate new position in percentages, clamped to valid range
       const newX = Math.max(
         0,
-        Math.min(100 - style.width, elementPosRef.current.x + deltaXPercent)
+        Math.min(100 - maxXOffset, elementPosRef.current.x + deltaXPercent)
       );
       const newY = Math.max(
         0,
-        Math.min(100 - style.height, elementPosRef.current.y + deltaYPercent)
+        Math.min(100 - maxYOffset, elementPosRef.current.y + deltaYPercent)
       );
 
       return { x: newX, y: newY };
     },
-    [containerRef, position, style.width, style.height]
+    [containerRef, position, style.width, style.height, style.autoSize]
   );
 
   const handleStart = useCallback(
@@ -268,8 +273,9 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
       style={{
         left: `${position.x}%`,
         top: `${position.y}%`,
-        width: `${style.width}%`,
-        minHeight: `${style.height}%`,
+        width: style.autoSize ? 'auto' : `${style.width}%`,
+        minHeight: style.autoSize ? 'auto' : `${style.height}%`,
+        maxWidth: style.autoSize ? '90%' : undefined,
         transform: `rotate(${style.rotation}deg)`,
         borderRadius: 8,
       }}

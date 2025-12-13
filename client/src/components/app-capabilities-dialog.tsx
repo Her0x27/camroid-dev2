@@ -76,14 +76,14 @@ function DeviceInfoDisplay({ device }: { device: DeviceInfo }) {
 
 function AboutSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   return (
-    <div className="bg-card/50 border border-border/50 rounded-lg p-3">
+    <div className="bg-card/50 border border-border/50 rounded-lg p-3.5">
       <div className="flex items-start gap-3">
-        <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-          <Camera className="h-5 w-5 text-primary" />
+        <div className="shrink-0 w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Camera className="h-5.5 w-5.5 text-primary" />
         </div>
         <div>
-          <h4 className="text-xs font-semibold text-foreground">{t.capabilities.subtitle}</h4>
-          <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
+          <h4 className="text-sm font-semibold text-foreground" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>{t.capabilities.subtitle}</h4>
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
             {t.capabilities.description}
           </p>
         </div>
@@ -94,12 +94,12 @@ function AboutSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
 
 function PrivacySection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   return (
-    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-2">
-      <h4 className="text-xs font-medium flex items-center gap-2">
-        <Shield className="h-3.5 w-3.5 text-primary" />
+    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3.5 space-y-2.5">
+      <h4 className="text-sm font-medium flex items-center gap-2" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <Shield className="h-4 w-4 text-primary" />
         {t.capabilities.privacy.title}
       </h4>
-      <p className="text-[11px] text-muted-foreground leading-relaxed">
+      <p className="text-xs text-muted-foreground leading-relaxed">
         {t.capabilities.privacy.description}
       </p>
       
@@ -143,28 +143,28 @@ function CapabilitiesSection({ capabilities, t }: {
   t: ReturnType<typeof useI18n>['t'] 
 }) {
   return (
-    <div className="space-y-2">
-      <h4 className="text-xs font-medium flex items-center gap-2 text-muted-foreground">
-        <Settings className="h-3.5 w-3.5 text-primary" />
+    <div className="space-y-2.5">
+      <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <Settings className="h-4 w-4 text-primary" />
         {t.capabilities.capabilitiesTitle}
       </h4>
       
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-2">
         {capabilities.map((cap) => {
           const Icon = capabilityIcons[cap.id] || Check;
           return (
             <div 
               key={cap.id}
-              className="flex items-center gap-2 p-2 rounded-md bg-card/30 border border-border/30"
+              className="flex items-center gap-2 p-2.5 rounded-md bg-card/30 border border-border/30"
             >
-              <Icon className={`h-3.5 w-3.5 shrink-0 ${cap.supported ? 'text-primary' : 'text-muted-foreground/50'}`} />
-              <span className={`text-[11px] truncate ${cap.supported ? 'text-foreground' : 'text-muted-foreground/70'}`}>
+              <Icon className={`h-4 w-4 shrink-0 ${cap.supported ? 'text-primary' : 'text-muted-foreground/50'}`} />
+              <span className={`text-xs truncate ${cap.supported ? 'text-foreground' : 'text-muted-foreground/70'}`}>
                 {t.capabilities.features[cap.id as keyof typeof t.capabilities.features]}
               </span>
               {cap.supported ? (
-                <Check className="h-3 w-3 text-primary ml-auto shrink-0" />
+                <Check className="h-3.5 w-3.5 text-primary ml-auto shrink-0" />
               ) : (
-                <X className="h-3 w-3 text-muted-foreground/50 ml-auto shrink-0" />
+                <X className="h-3.5 w-3.5 text-muted-foreground/50 ml-auto shrink-0" />
               )}
             </div>
           );
@@ -275,15 +275,15 @@ function FeatureItem({ feature, t }: {
   const descKey = `${feature.id}Desc` as keyof typeof t.capabilities.appFeatures;
   
   return (
-    <div className="group flex items-start gap-3 p-2.5 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors cursor-default">
-      <div className="shrink-0 w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center mt-0.5">
-        <Icon className="h-3.5 w-3.5 text-primary" />
+    <div className="group flex items-start gap-3 p-3 rounded-lg bg-muted/40 hover:bg-muted/60 transition-colors cursor-default">
+      <div className="shrink-0 w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center mt-0.5">
+        <Icon className="h-4 w-4 text-primary" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="text-xs font-medium text-foreground/90">
+        <div className="text-sm font-medium text-foreground/90" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
           {t.capabilities.appFeatures[titleKey]}
         </div>
-        <div className="text-[10px] text-muted-foreground leading-relaxed mt-0.5">
+        <div className="text-xs text-muted-foreground leading-relaxed mt-0.5">
           {t.capabilities.appFeatures[descKey]}
         </div>
       </div>
@@ -295,7 +295,7 @@ function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   const shouldReduceMotion = useReducedMotion();
   
   const renderFeatures = () => (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       {appFeaturesList.map((feature) => (
         shouldReduceMotion ? (
           <FeatureItem key={feature.id} feature={feature} t={t} />
@@ -309,9 +309,9 @@ function AppFeaturesSection({ t }: { t: ReturnType<typeof useI18n>['t'] }) {
   );
   
   return (
-    <div className="space-y-2">
-      <h4 className="text-xs font-medium flex items-center gap-2 text-muted-foreground">
-        <Sparkles className="h-3.5 w-3.5 text-primary" />
+    <div className="space-y-2.5">
+      <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+        <Sparkles className="h-4 w-4 text-primary" />
         {t.capabilities.appFeaturesTitle}
       </h4>
       
@@ -472,12 +472,12 @@ export function AppCapabilitiesDialog({ onClose }: AppCapabilitiesDialogProps) {
               <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/5 pointer-events-none" />
               
               <div className="flex items-center gap-3 p-4 border-b border-border/40">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <Bell className="h-4.5 w-4.5 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Bell className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <h2 id="capabilities-title" className="text-sm font-semibold">{t.capabilities.title}</h2>
-                  <p id="capabilities-description" className="text-[11px] text-muted-foreground">{t.capabilities.description}</p>
+                  <h2 id="capabilities-title" className="text-base font-semibold tracking-tight" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>{t.capabilities.title}</h2>
+                  <p id="capabilities-description" className="text-xs text-muted-foreground mt-0.5">{t.capabilities.description}</p>
                 </div>
               </div>
 

@@ -3,6 +3,7 @@ import { X, GripHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { ColorPicker } from "@/components/ui/color-picker";
 import { ReticleShapeRenderer } from "./ReticleShapes";
 import type { ReticleShape } from "../types";
 
@@ -147,11 +148,9 @@ export const ReticleSelector = memo(function ReticleSelector({
       <div className="border-t pt-3 space-y-3">
         <div className="flex items-center gap-3">
           <Label className="text-xs w-12">Цвет</Label>
-          <input
-            type="color"
+          <ColorPicker
             value={settings.color}
-            onChange={(e) => onSettingsChange({ color: e.target.value })}
-            className="h-8 w-12 rounded cursor-pointer border"
+            onChange={(color) => onSettingsChange({ color })}
           />
         </div>
 

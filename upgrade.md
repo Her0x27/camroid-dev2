@@ -1,3 +1,48 @@
+# Upgrade: UI улучшения v40
+
+## Описание
+Улучшения интерфейса по запросу пользователя:
+1. Окно "Добро пожаловать" — красивый шрифт и увеличенные размеры текста
+2. Окно "Редактирование водяного знака" — добавлен слайдер высоты (5-50%)
+3. Окно "Выбор прицела" — ColorPicker вместо примитивного input[type=color]
+4. [Опционально] Авто-resize для водяного знака
+
+## Чек-лист задач v40
+
+- [x] Обновить upgrade.md — добавить секцию v40
+- [x] Улучшить шрифты в окне Welcome (увеличить размеры)
+- [x] Добавить слайдер высоты в FloatingEditPanel (5-50%)
+- [x] Заменить input[type=color] на ColorPicker в ReticleSelector
+- [x] [Опционально] Добавить кнопку авто-resize
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v40
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 12.12.2025 |
+| Welcome шрифты | ✅ Готово | 12.12.2025 |
+| Height Slider | ✅ Готово | 12.12.2025 |
+| ColorPicker в ReticleSelector | ✅ Готово | 12.12.2025 |
+| Авто-resize | ✅ Готово | 12.12.2025 |
+
+## Изменения v40
+
+### client/src/components/app-capabilities-dialog.tsx
+- **Увеличенные шрифты:** заголовок text-base→text-lg, подзаголовки text-sm→text-base
+- **Улучшенная типографика:** добавлен font-семейство Inter для диалога
+
+### client/src/pages/watermark-preview/components/FloatingEditPanel.tsx
+- **Height Slider:** добавлен слайдер высоты (5-50%, step=5)
+- **Авто-resize кнопка:** переключатель автоматического размера по содержимому
+
+### client/src/pages/watermark-preview/components/ReticleSelector.tsx
+- **ColorPicker:** заменён примитивный input[type=color] на полноценный ColorPicker компонент
+
+---
+
 # Upgrade: Улучшения редактора водяного знака v39
 
 ## Описание

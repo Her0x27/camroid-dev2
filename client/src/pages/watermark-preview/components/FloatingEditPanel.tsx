@@ -2,6 +2,7 @@ import { memo, useState, useRef, useCallback, useEffect } from "react";
 import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown, GripHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ColorPicker } from "@/components/ui/color-picker";
@@ -198,6 +199,30 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
             min={10}
             max={100}
             step={5}
+            disabled={style.autoSize}
+          />
+        </div>
+
+        <div className="space-y-1">
+          <div className="flex justify-between">
+            <Label className="text-xs">Высота</Label>
+            <span className="text-xs text-muted-foreground">{style.height}%</span>
+          </div>
+          <Slider
+            value={[style.height]}
+            onValueChange={([v]) => onStyleChange({ height: v })}
+            min={5}
+            max={50}
+            step={5}
+            disabled={style.autoSize}
+          />
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <Label className="text-xs">Авто-размер</Label>
+          <Switch
+            checked={style.autoSize}
+            onCheckedChange={(checked) => onStyleChange({ autoSize: checked })}
           />
         </div>
       </div>
