@@ -104,10 +104,10 @@ export const ReticleSelector = memo(function ReticleSelector({
     <div
       ref={panelRef}
       style={panelStyle}
-      className="w-72 max-h-[70vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl p-4 space-y-4"
+      className="w-72 max-h-[70vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl"
     >
       <div 
-        className="flex items-center justify-between cursor-move select-none -mx-4 -mt-4 px-3 py-1.5 bg-muted/50 rounded-t-lg border-b"
+        className="flex items-center justify-between cursor-move select-none px-3 py-1.5 bg-muted/50 rounded-t-lg border-b sticky top-0 z-10 backdrop-blur-sm"
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
       >
@@ -119,7 +119,7 @@ export const ReticleSelector = memo(function ReticleSelector({
           <X className="h-3.5 w-3.5" />
         </Button>
       </div>
-
+      <div className="p-4 space-y-4">
       <div className="grid grid-cols-3 gap-2">
         {RETICLE_OPTIONS.map((option) => (
           <button
@@ -196,6 +196,7 @@ export const ReticleSelector = memo(function ReticleSelector({
             step={5}
           />
         </div>
+      </div>
       </div>
     </div>
   );

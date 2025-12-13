@@ -145,10 +145,10 @@ export type WatermarkSeparator = z.infer<typeof watermarkSeparatorSchema>;
 // Watermark preview configuration (for /watermark-preview page)
 export const watermarkPreviewConfigSchema = z.object({
   // Position (percentages)
-  positionX: z.number().default(5),
-  positionY: z.number().default(5),
+  positionX: z.number().default(2),
+  positionY: z.number().default(2),
   // Background
-  backgroundColor: z.string().default("#000000"),
+  backgroundColor: z.string().default("#3b82f6"),
   backgroundOpacity: z.number().min(0).max(100).default(70),
   width: z.number().min(10).max(100).default(35), // width as % of viewport
   height: z.number().min(5).max(50).default(5), // height as % of viewport
@@ -173,7 +173,7 @@ export const watermarkPreviewConfigSchema = z.object({
   logoSize: z.number().min(16).max(96).default(40),
   logoOpacity: z.number().min(0).max(100).default(100),
   // Font family
-  fontFamily: z.enum(["system", "roboto", "montserrat", "oswald", "playfair"]).default("system"),
+  fontFamily: z.enum(["system", "roboto", "montserrat", "oswald", "playfair"]).default("montserrat"),
   // Separators
   separators: z.array(watermarkSeparatorSchema).default([]),
 });
@@ -184,9 +184,9 @@ export type FontFamily = "system" | "roboto" | "montserrat" | "oswald" | "playfa
 // Reticle preview configuration (for /watermark-preview page)
 export const reticlePreviewConfigSchema = z.object({
   shape: z.enum(["crosshair", "circle", "square", "arrow", "speech-bubble", "custom"]).default("crosshair"),
-  color: z.string().default("#22c55e"),
-  size: z.number().min(1).max(30).default(10), // size as % of viewport min dimension
-  strokeWidth: z.number().min(5).max(50).default(15), // strokeWidth as % of reticle size
+  color: z.string().default("#3b82f6"),
+  size: z.number().min(1).max(30).default(5), // size as % of viewport min dimension
+  strokeWidth: z.number().min(5).max(50).default(10), // strokeWidth as % of reticle size
   opacity: z.number().min(10).max(100).default(80),
   positionX: z.number().default(0),
   positionY: z.number().default(0),
@@ -295,9 +295,9 @@ export const defaultSettings: Settings = {
     contrast: 10,
   },
   watermarkPreview: {
-    positionX: 20,
-    positionY: 20,
-    backgroundColor: "#000000",
+    positionX: 2,
+    positionY: 2,
+    backgroundColor: "#3b82f6",
     backgroundOpacity: 70,
     width: 35,
     height: 5,
@@ -316,14 +316,14 @@ export const defaultSettings: Settings = {
     logoPosition: "left",
     logoSize: 40,
     logoOpacity: 100,
-    fontFamily: "system",
+    fontFamily: "montserrat",
     separators: [],
   },
   reticlePreview: {
     shape: "crosshair",
-    color: "#22c55e",
-    size: 10,
-    strokeWidth: 15,
+    color: "#3b82f6",
+    size: 5,
+    strokeWidth: 10,
     opacity: 80,
     positionX: 0,
     positionY: 0,

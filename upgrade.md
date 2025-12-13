@@ -1,3 +1,56 @@
+# Upgrade: Исправления и улучшения UI v44
+
+## Описание
+Исправление ошибки бесконечного цикла и улучшения UI:
+1. Исправить "Maximum update depth exceeded" в settings-context.tsx
+2. Фиксированная шапка при прокрутке в окнах "Редактирование водяного знака" и "Выбор прицела"
+3. Обновить значения по умолчанию для водяного знака
+4. Обновить значения по умолчанию для прицела
+
+## Чек-лист задач v44
+
+- [x] Обновить upgrade.md — добавить секцию v44
+- [x] Исправить бесконечный цикл в settings-context.tsx
+- [x] Добавить sticky header в FloatingEditPanel и ReticleSelector
+- [x] Обновить дефолты watermark: цвет #3b82f6, X=2, Y=2, шрифт montserrat
+- [x] Обновить дефолты reticle: size=5%, strokeWidth=10%
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v44
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 13.12.2025 |
+| settings-context fix | ✅ Готово | 13.12.2025 |
+| sticky header | ✅ Готово | 13.12.2025 |
+| watermark defaults | ✅ Готово | 13.12.2025 |
+| reticle defaults | ✅ Готово | 13.12.2025 |
+
+## Изменения v44
+
+### client/src/lib/settings-context.tsx
+- **settingsRef:** добавлен ref для хранения текущих настроек
+- **Все update функции:** переписаны на функциональные обновления `setSettings(prev => ...)`
+- **Убраны зависимости от settings:** убрана зависимость от `settings` в массивах зависимостей `useCallback`
+- **Результат:** исправлена ошибка "Maximum update depth exceeded"
+
+### client/src/pages/watermark-preview/components/FloatingEditPanel.tsx
+- **Sticky header:** добавлен `sticky top-0 z-10 backdrop-blur-sm`
+- **Структура:** контент обёрнут в отдельный div с padding
+
+### client/src/pages/watermark-preview/components/ReticleSelector.tsx
+- **Sticky header:** добавлен `sticky top-0 z-10 backdrop-blur-sm`
+- **Структура:** контент обёрнут в отдельный div с padding
+
+### shared/schema.ts
+- **watermarkPreviewConfigSchema:** positionX/Y default 5→2, backgroundColor #000000→#3b82f6, fontFamily system→montserrat
+- **reticlePreviewConfigSchema:** color #22c55e→#3b82f6, size 10→5, strokeWidth 15→10
+- **defaultSettings:** обновлены дефолты для watermarkPreview и reticlePreview
+
+---
+
 # Upgrade: Описания возможностей и относительные единицы v43
 
 ## Описание

@@ -26,6 +26,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingSettingsRef = useRef<Settings | null>(null);
+  const settingsRef = useRef<Settings>(defaultSettings);
+  
+  useEffect(() => {
+    settingsRef.current = settings;
+  }, [settings]);
 
   const debouncedSave = useCallback((newSettings: Settings) => {
     pendingSettingsRef.current = newSettings;
@@ -92,25 +97,39 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateSettings = useCallback((updates: Partial<Settings>) => {
-    const newSettings = { ...settings, ...updates };
-    setSettings(newSettings);
-    debouncedSave(newSettings);
-  }, [settings, debouncedSave]);
+    setSettings(prev => {
+      const newSettings = { ...prev, ...updates };
+      debouncedSave(newSettings);
+      return newSettings;
+    });
+  }, [debouncedSave]);
 
   const updateReticle = useCallback((updates: Partial<ReticleConfig>) => {
-    const newReticle = { ...settings.reticle, ...updates };
-    updateSettings({ reticle: newReticle });
-  }, [settings.reticle, updateSettings]);
+    setSettings(prev => {
+      const newReticle = { ...prev.reticle, ...updates };
+      const newSettings = { ...prev, reticle: newReticle };
+      debouncedSave(newSettings);
+      return newSettings;
+    });
+  }, [debouncedSave]);
 
   const updateStabilization = useCallback((updates: Partial<StabilizationSettings>) => {
-    const newStabilization = { ...settings.stabilization, ...updates };
-    updateSettings({ stabilization: newStabilization });
-  }, [settings.stabilization, updateSettings]);
+    setSettings(prev => {
+      const newStabilization = { ...prev.stabilization, ...updates };
+      const newSettings = { ...prev, stabilization: newStabilization };
+      debouncedSave(newSettings);
+      return newSettings;
+    });
+  }, [debouncedSave]);
 
   const updateEnhancement = useCallback((updates: Partial<EnhancementSettings>) => {
-    const newEnhancement = { ...settings.enhancement, ...updates };
-    updateSettings({ enhancement: newEnhancement });
-  }, [settings.enhancement, updateSettings]);
+    setSettings(prev => {
+      const newEnhancement = { ...prev.enhancement, ...updates };
+      const newSettings = { ...prev, enhancement: newEnhancement };
+      debouncedSave(newSettings);
+      return newSettings;
+    });
+  }, [debouncedSave]);
 
   const updateWatermarkPreview = useCallback((updates: Partial<WatermarkPreviewConfig>) => {
     const clampedUpdates = { ...updates };
@@ -138,9 +157,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (clampedUpdates.logoOpacity !== undefined) {
       clampedUpdates.logoOpacity = Math.max(0, Math.min(100, clampedUpdates.logoOpacity));
     }
-    const newWatermarkPreview = { ...settings.watermarkPreview, ...clampedUpdates };
-    updateSettings({ watermarkPreview: newWatermarkPreview });
-  }, [settings.watermarkPreview, updateSettings]);
+    setSettings(prev => {
+      const newWatermarkPreview = { ...prev.watermarkPreview, ...clampedUpdates };
+      const newSettings = { ...prev, watermarkPreview: newWatermarkPreview };
+      debouncedSave(newSettings);
+      return newSettings;
+    });
+  }, [debouncedSave]);
 
   const updateReticlePreview = useCallback((updates: Partial<ReticlePreviewConfig>) => {
     const clampedUpdates = { ...updates };
@@ -153,9 +176,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (clampedUpdates.opacity !== undefined) {
       clampedUpdates.opacity = Math.max(10, Math.min(100, clampedUpdates.opacity));
     }
-    const newReticlePreview = { ...settings.reticlePreview, ...clampedUpdates };
-    updateSettings({ reticlePreview: newReticlePreview });
-  }, [settings.reticlePreview, updateSettings]);
+    setSettings(prev => {
+      const newReticlePreview = { ...prev.reticlePreview, ...clampedUpdates };
+      const newSettings = { ...prev, reticlePreview: newReticlePreview };
+      debouncedSave(newSettings);
+      return newSettings;
+    });
+  }, [debouncedSave]);
 
   const resetSettings = useCallback(async () => {
     setSettings(defaultSettings);
@@ -167,17 +194,21 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isSectionOpen = useCallback((sectionId: string): boolean => {
-    return settings.expandedSections?.[sectionId] ?? false;
-  }, [settings.expandedSections]);
+    return settingsRef.current.expandedSections?.[sectionId] ?? false;
+  }, []);
 
   const toggleSection = useCallback((sectionId: string) => {
-    const currentState = settings.expandedSections?.[sectionId] ?? false;
-    const newExpandedSections = {
-      ...settings.expandedSections,
-      [sectionId]: !currentState,
-    };
-    updateSettings({ expandedSections: newExpandedSections });
-  }, [settings.expandedSections, updateSettings]);
+    setSettings(prev => {
+      const currentState = prev.expandedSections?.[sectionId] ?? false;
+      const newExpandedSections = {
+        ...prev.expandedSections,
+        [sectionId]: !currentState,
+      };
+      const newSettings = { ...prev, expandedSections: newExpandedSections };
+      debouncedSave(newSettings);
+      return newSettings;
+    });
+  }, [debouncedSave]);
 
   return (
     <SettingsContext.Provider
