@@ -51,6 +51,8 @@ export default function WatermarkPreviewPage() {
     logoUrl: watermarkConfig.logoUrl,
     logoPosition: watermarkConfig.logoPosition,
     logoSize: watermarkConfig.logoSize,
+    logoOpacity: watermarkConfig.logoOpacity ?? 100,
+    fontFamily: watermarkConfig.fontFamily ?? "system",
   });
 
   const [reticleSettings, setReticleSettings] = useState<ReticleSettings>({
@@ -92,6 +94,8 @@ export default function WatermarkPreviewPage() {
         logoUrl: watermarkConfig.logoUrl,
         logoPosition: watermarkConfig.logoPosition,
         logoSize: watermarkConfig.logoSize,
+        logoOpacity: watermarkConfig.logoOpacity ?? 100,
+        fontFamily: watermarkConfig.fontFamily ?? "system",
       });
       setReticleSettings({
         shape: reticleConfig.shape as ReticleShape,
@@ -157,6 +161,7 @@ export default function WatermarkPreviewPage() {
         underline: newStyle.underline,
         width: newStyle.width,
         height: newStyle.height,
+        autoSize: newStyle.autoSize,
         rotation: newStyle.rotation,
         note: newStyle.note,
         notePlacement: newStyle.notePlacement,
@@ -165,6 +170,8 @@ export default function WatermarkPreviewPage() {
         logoUrl: newStyle.logoUrl,
         logoPosition: newStyle.logoPosition,
         logoSize: newStyle.logoSize,
+        logoOpacity: newStyle.logoOpacity,
+        fontFamily: newStyle.fontFamily,
       });
       return newStyle;
     });
@@ -231,6 +238,8 @@ export default function WatermarkPreviewPage() {
       logoUrl: watermark.logoUrl,
       logoPosition: watermark.logoPosition,
       logoSize: watermark.logoSize,
+      logoOpacity: watermark.logoOpacity ?? 100,
+      fontFamily: watermark.fontFamily ?? "system",
     });
     setReticleSettings({
       shape: reticle.shape as ReticleShape,

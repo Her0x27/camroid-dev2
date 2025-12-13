@@ -301,6 +301,7 @@ export const defaultSettings: Settings = {
     backgroundOpacity: 70,
     width: 200,
     height: 60,
+    autoSize: false,
     fontColor: "#22c55e",
     fontOpacity: 100,
     fontSize: 14,
