@@ -81,7 +81,7 @@ export const SettingItem = memo(function SettingItem({
         </div>
 
         <div className={cn(
-          "shrink-0 flex items-center",
+          "shrink-0 flex items-center justify-end",
           vertical ? "w-full" : "w-full md:w-auto",
           !vertical && "mt-3 md:mt-0"
         )}>
@@ -140,7 +140,7 @@ export const SettingItemCompact = memo(function SettingItemCompact({
           )}
         </div>
       </div>
-      <div className="shrink-0 flex items-center">
+      <div className="shrink-0 flex items-center justify-end">
         {children}
       </div>
     </div>
