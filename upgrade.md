@@ -2,10 +2,10 @@
 
 ## Описание
 Исправление размера toggle switch в настройках для соответствия стандартам iOS/Android:
-1. Увеличение размера Switch до оптимальных стандартов
-2. Track: h-7 w-12 (28px × 48px) вместо h-6 w-11 (24px × 44px)
-3. Thumb: h-6 w-6 (24px × 24px) вместо h-5 w-5 (20px × 20px)
-4. Сохранено смещение ручки (translate-x-5)
+1. Компактный размер Switch для мобильных платформ
+2. Track: h-6 w-10 (24px × 40px)
+3. Thumb: h-5 w-5 (20px × 20px)
+4. Смещение ручки translate-x-4
 5. Удаление inline size overrides в компонентах настроек
 
 ## Чек-лист задач v55
@@ -30,9 +30,9 @@
 ## Изменения v55
 
 ### client/src/components/ui/switch.tsx
-- **Track размер:** изменён с `h-6 w-11` (24×44px) на `h-7 w-12` (28×48px)
-- **Thumb размер:** изменён с `h-5 w-5` (20×20px) на `h-6 w-6` (24×24px)
-- **Translate:** оставлен `translate-x-5` для правильного позиционирования
+- **Track размер:** изменён на `h-6 w-10` (24×40px) — компактный размер
+- **Thumb размер:** `h-5 w-5` (20×20px)
+- **Translate:** `translate-x-4` для правильного позиционирования
 
 ### client/src/pages/settings/tabs/MainSettingsTab.tsx
 - **Switch sound:** убран `className="h-6 w-11 min-h-[24px]"`
