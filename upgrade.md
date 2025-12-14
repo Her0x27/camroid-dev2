@@ -26,13 +26,13 @@
 ## Чек-лист задач v52
 
 - [x] Обновить upgrade.md — добавить секцию v52
-- [ ] Создать компонент SettingsTabs — красивые табы вместо chips
-- [ ] Создать компонент SettingsCard — карточка без спойлера
-- [ ] Создать MainSettingsTab — вкладка 'Основные' с grid-layout
-- [ ] Переработать PrivacyTab — убрать спойлер
-- [ ] Создать StorageTab — вкладка 'Хранилище'
-- [ ] Обновить settings/index.tsx — новая структура с 3 табами
-- [ ] Финальное обновление upgrade.md
+- [x] Создать компонент SettingsTabs — красивые табы вместо chips
+- [x] Создать компонент SettingsCard — карточка без спойлера
+- [x] Создать MainSettingsTab — вкладка 'Основные' с grid-layout
+- [x] Переработать PrivacyTab — убрать спойлер
+- [x] Создать StorageTab — вкладка 'Хранилище'
+- [x] Обновить settings/index.tsx — новая структура с 3 табами
+- [x] Финальное обновление upgrade.md
 
 ---
 
@@ -41,12 +41,53 @@
 | Задача | Статус | Дата |
 |--------|--------|------|
 | upgrade.md | ✅ Готово | 14.12.2025 |
-| SettingsTabs | ⏳ В процессе | - |
-| SettingsCard | ⏳ В процессе | - |
-| MainSettingsTab | ⏳ Ожидание | - |
-| PrivacyTab | ⏳ Ожидание | - |
-| StorageTab | ⏳ Ожидание | - |
-| index.tsx | ⏳ Ожидание | - |
+| SettingsTabs | ✅ Готово | 14.12.2025 |
+| SettingsCard | ✅ Готово | 14.12.2025 |
+| MainSettingsTab | ✅ Готово | 14.12.2025 |
+| PrivacyTab | ✅ Готово | 14.12.2025 |
+| StorageTab | ✅ Готово | 14.12.2025 |
+| index.tsx | ✅ Готово | 14.12.2025 |
+
+## Изменения v52
+
+### client/src/pages/settings/index.tsx
+- **Импорты:** заменены section-импорты на tab-импорты (MainSettingsTab, PrivacyTab, StorageTab)
+- **State:** заменён `activeCategory: SettingsCategory` на `activeTab: SettingsTab` ("main" | "privacy" | "storage")
+- **Header:** заменён SettingsChips на SettingsTabs с современным дизайном
+- **Контент:** удалён categorySections и QuickSettings, добавлен renderActiveTab() с условным рендерингом
+- **Упрощение:** удалены неиспользуемые импорты (sections, SettingsChips, searchQuery, theme и др.)
+
+### client/src/pages/settings/components/SettingsTabs.tsx
+- **Новый компонент:** красивые табы с иконками (Settings, Shield, Database)
+- **Дизайн:** полоска с 3 колонками, иконки + текст (скрывается на мобильных)
+- **Haptic feedback:** тактильная отдача при переключении
+
+### client/src/pages/settings/components/SettingsCard.tsx
+- **Новый компонент:** карточка настроек без Collapsible
+- **Props:** icon, title, description, children
+- **Использование:** заменяет CollapsibleCard в табах
+
+### client/src/pages/settings/tabs/MainSettingsTab.tsx
+- **Вкладка "Основные":** объединяет Theme, Language, Sound, Reset, Camera, ImageQuality
+- **Grid-layout:** настройки темы и языка в 2 колонки
+- **Параметры камеры:** разрешение, качество, защита съёмки
+- **Качество изображения:** стабилизация, детализация, резкость, шум, контраст
+
+### client/src/pages/settings/tabs/PrivacyTab.tsx
+- **Вкладка "Приватность":** режим приватности без спойлера
+- **Полный функционал:** включение/выключение, выбор модуля, настройка жестов
+- **Preview:** диалог активации и предпросмотр модуля
+
+### client/src/pages/settings/tabs/StorageTab.tsx
+- **Вкладка "Хранилище":** информация о хранилище + облачный хостинг
+- **Статистика:** количество фото, использовано, доступно с progress bar
+- **Cloud:** выбор провайдера, настройки API, валидация ключа
+
+### client/src/pages/settings/components/index.ts
+- **Exports:** добавлены SettingsTabs, SettingsTab, SettingsCard
+
+### client/src/pages/settings/tabs/index.ts
+- **Exports:** MainSettingsTab, PrivacyTab, StorageTab
 
 ---
 
