@@ -326,7 +326,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         <div>±5m · 180° S</div>
       )}
       {style.showTimestamp && (
-        <div>{new Date().toLocaleTimeString()}</div>
+        <div>{new Date().toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
       )}
       {style.showNote !== false && style.notePlacement === "start" && (style.separators || []).filter(s => s.position === "after-note").map(s => (
         <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />

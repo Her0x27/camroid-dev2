@@ -239,8 +239,8 @@ export default function WatermarkPreviewPage() {
     [updateReticlePreview]
   );
 
-  const handleBackgroundClick = useCallback(() => {
-    if (activePanel) {
+  const handleBackgroundClick = useCallback((e: React.MouseEvent) => {
+    if (e.target === e.currentTarget && activePanel) {
       setActivePanel(null);
     }
   }, [activePanel]);
@@ -344,8 +344,10 @@ export default function WatermarkPreviewPage() {
               width: `${reticleSettings.size}vmin`,
               height: `${reticleSettings.size}vmin`,
             }}
-            onClick={handleReticleTap}
-            onTouchStart={handleReticleTap}
+            onPointerUp={(e) => {
+              e.stopPropagation();
+              handleReticleTap(e);
+            }}
           >
             <div
               className={`w-full h-full transition-all ${
