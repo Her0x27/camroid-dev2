@@ -1,6 +1,8 @@
 import { memo, useMemo } from "react";
 import { 
   Sun, 
+  Palette,
+  Globe,
   Volume2, 
   VolumeX, 
   RotateCcw, 
@@ -8,12 +10,13 @@ import {
   Sparkles,
   Target,
   Focus,
-  MapPin
+  MapPin,
+  Image,
+  Contrast,
+  Eraser
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { LockedSlider } from "@/components/ui/locked-slider";
 import {
   Select,
@@ -23,6 +26,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SettingsCard } from "../components/SettingsCard";
+import { 
+  SettingItem, 
+  SettingItemCompact, 
+  SettingSliderItem, 
+  SettingSelectItem 
+} from "../components/SettingItem";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme-context";
 import type { Settings, CameraResolution, StabilizationSettings, EnhancementSettings } from "@shared/schema";
@@ -71,11 +80,15 @@ export const MainSettingsTab = memo(function MainSettingsTab({
         title={t.settings.sections?.appearance || "Внешний вид"}
         testId="section-appearance"
       >
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="text-sm">{t.settings.theme.mode}</Label>
+        <div className="space-y-3">
+          <SettingSelectItem
+            icon={<Palette className="w-5 h-5" />}
+            title={t.settings.theme.mode}
+            description={t.settings.theme.modeDesc || "Выберите цветовую тему приложения"}
+            testId="setting-theme"
+          >
             <Select value={themeId} onValueChange={setThemeById}>
-              <SelectTrigger data-testid="select-theme">
+              <SelectTrigger className="h-11" data-testid="select-theme">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -86,15 +99,19 @@ export const MainSettingsTab = memo(function MainSettingsTab({
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </SettingSelectItem>
 
-          <div className="space-y-2">
-            <Label className="text-sm">{t.settings.general.language}</Label>
+          <SettingSelectItem
+            icon={<Globe className="w-5 h-5" />}
+            title={t.settings.general.language}
+            description={t.settings.general.languageDesc}
+            testId="setting-language"
+          >
             <Select
               value={language}
               onValueChange={(val) => setLanguage(val as "en" | "ru")}
             >
-              <SelectTrigger data-testid="select-language">
+              <SelectTrigger className="h-11" data-testid="select-language">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -105,7 +122,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </SettingSelectItem>
         </div>
       </SettingsCard>
 
@@ -114,38 +131,41 @@ export const MainSettingsTab = memo(function MainSettingsTab({
         title={t.settings.sections?.controls || "Управление"}
         testId="section-controls"
       >
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="sound-enabled" className="flex items-center gap-2 cursor-pointer">
-              {settings.soundEnabled ? (
-                <Volume2 className="w-4 h-4 text-primary" />
-              ) : (
-                <VolumeX className="w-4 h-4 text-muted-foreground" />
-              )}
-              <div>
-                <span className="text-sm">{t.settings.general.captureSound}</span>
-                <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.general.captureSoundDesc}</p>
-              </div>
-            </Label>
+        <div className="space-y-3">
+          <SettingItemCompact
+            icon={settings.soundEnabled ? (
+              <Volume2 className="w-4 h-4" />
+            ) : (
+              <VolumeX className="w-4 h-4" />
+            )}
+            title={t.settings.general.captureSound}
+            description={t.settings.general.captureSoundDesc}
+            testId="setting-sound"
+          >
             <Switch
-              id="sound-enabled"
               checked={settings.soundEnabled}
               onCheckedChange={(checked) => updateSettings({ soundEnabled: checked })}
+              className="h-6 w-11"
               data-testid="switch-sound"
             />
-          </div>
+          </SettingItemCompact>
 
-          <div className="flex items-center">
+          <SettingItemCompact
+            icon={<RotateCcw className="w-4 h-4" />}
+            title={t.settings.reset.resetAllSettings}
+            description={t.settings.reset.resetSettingsDesc || "Сбросить все настройки к значениям по умолчанию"}
+            testId="setting-reset"
+          >
             <Button
               variant="outline"
-              className="w-full"
+              size="sm"
+              className="h-9 px-4"
               onClick={onShowResetDialog}
               data-testid="button-reset-settings"
             >
-              <RotateCcw className="w-4 h-4 mr-2" />
-              {t.settings.reset.resetAllSettings}
+              {t.common.reset}
             </Button>
-          </div>
+          </SettingItemCompact>
         </div>
       </SettingsCard>
 
@@ -154,16 +174,24 @@ export const MainSettingsTab = memo(function MainSettingsTab({
         title={t.settings.sections?.cameraParams || "Параметры камеры"}
         testId="section-camera-params"
       >
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="text-sm">{t.settings.camera.resolution}</Label>
+        <div className="space-y-3">
+          <SettingSelectItem
+            icon={<Camera className="w-5 h-5" />}
+            title={t.settings.camera.resolution}
+            description={t.settings.camera.resolutionDesc}
+            platformTip={{
+              ios: "iOS поддерживает до 4K разрешения на большинстве устройств",
+              android: "Максимальное разрешение зависит от возможностей камеры устройства",
+            }}
+            testId="setting-resolution"
+          >
             <Select
               value={settings.cameraResolution}
               onValueChange={(value) =>
                 updateSettings({ cameraResolution: value as CameraResolution })
               }
             >
-              <SelectTrigger data-testid="select-camera-resolution">
+              <SelectTrigger className="h-11" data-testid="select-camera-resolution">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -174,49 +202,53 @@ export const MainSettingsTab = memo(function MainSettingsTab({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.camera.resolutionDesc}</p>
-          </div>
+          </SettingSelectItem>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm">{t.settings.camera.quality}</Label>
-              <span className="text-sm text-muted-foreground font-mono">
-                {settings.photoQuality}%
-              </span>
-            </div>
+          <SettingSliderItem
+            icon={<Image className="w-5 h-5" />}
+            title={t.settings.camera.quality}
+            description={t.settings.camera.qualityDesc}
+            value={settings.photoQuality}
+            unit="%"
+            platformTip={{
+              ios: "85-90% — оптимальный баланс качества и размера для iOS",
+              android: "85-90% — оптимальный баланс качества и размера для Android",
+            }}
+            testId="setting-quality"
+          >
             <LockedSlider
               value={[settings.photoQuality]}
               onValueChange={([value]) => updateSettings({ photoQuality: value })}
               min={50}
               max={100}
               step={1}
+              className="py-2"
               data-testid="slider-photo-quality"
             />
-            <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.camera.qualityDesc}</p>
-          </div>
-        </div>
+          </SettingSliderItem>
 
-        <Separator />
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label className="flex items-center gap-2 text-sm">
-              <MapPin className="w-4 h-4 text-primary" />
-              {t.settings.capture.accuracyLimit}
-            </Label>
-            <span className="text-sm text-muted-foreground font-mono">
-              {settings.accuracyLimit || 20}m
-            </span>
-          </div>
-          <LockedSlider
-            value={[settings.accuracyLimit || 20]}
-            onValueChange={([value]) => updateSettings({ accuracyLimit: value })}
-            min={5}
-            max={100}
-            step={5}
-            data-testid="slider-accuracy-limit"
-          />
-          <p className="text-xs text-muted-foreground">{t.settings.capture.accuracyLimitDesc || "Максимальная погрешность GPS при съёмке"}</p>
+          <SettingSliderItem
+            icon={<MapPin className="w-5 h-5" />}
+            title={t.settings.capture.accuracyLimit}
+            description={t.settings.capture.accuracyLimitDesc || "Максимальная погрешность GPS при съёмке"}
+            value={settings.accuracyLimit || 20}
+            unit="m"
+            platformTip={{
+              ios: "iOS обычно обеспечивает более высокую точность GPS (5-10м)",
+              android: "Точность GPS зависит от датчиков устройства и окружения",
+            }}
+            testId="setting-accuracy"
+          >
+            <LockedSlider
+              value={[settings.accuracyLimit || 20]}
+              onValueChange={([value]) => updateSettings({ accuracyLimit: value })}
+              min={5}
+              max={100}
+              step={5}
+              className="py-2"
+              data-testid="slider-accuracy-limit"
+            />
+          </SettingSliderItem>
         </div>
       </SettingsCard>
 
@@ -225,124 +257,124 @@ export const MainSettingsTab = memo(function MainSettingsTab({
         title={t.settings.sections?.imageQuality || "Качество изображения"}
         testId="section-image-quality"
       >
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="stabilization-enabled" className="flex items-center gap-2 cursor-pointer">
-              <Target className="w-4 h-4 text-primary" />
-              <div>
-                <span className="text-sm">{t.settings.imageQuality.stabilization}</span>
-                <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.imageQuality.stabilizationDesc}</p>
-              </div>
-            </Label>
+        <div className="space-y-3">
+          <SettingItem
+            icon={<Target className="w-5 h-5" />}
+            title={t.settings.imageQuality.stabilization}
+            description={t.settings.imageQuality.stabilizationDesc}
+            platformTip={{
+              ios: "iOS эффективно использует гироскоп для стабилизации",
+              android: "Android может требовать более высокий порог стабилизации",
+            }}
+            testId="setting-stabilization"
+          >
             <Switch
-              id="stabilization-enabled"
               checked={settings.stabilization.enabled}
               onCheckedChange={(checked) => updateStabilization({ enabled: checked })}
+              className="h-6 w-11"
               data-testid="switch-stabilization"
             />
-          </div>
+          </SettingItem>
 
           {settings.stabilization.enabled && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm">{t.settings.imageQuality.stabilityThreshold}</Label>
-                <span className="text-sm text-muted-foreground font-mono">
-                  {settings.stabilization.threshold}%
-                </span>
-              </div>
+            <SettingSliderItem
+              icon={<Target className="w-5 h-5" />}
+              title={t.settings.imageQuality.stabilityThreshold}
+              description={t.settings.imageQuality.stabilityThresholdDesc || "Порог срабатывания стабилизации"}
+              value={settings.stabilization.threshold}
+              unit="%"
+              platformTip={{
+                android: "Для Android рекомендуется значение 60-70%",
+              }}
+              testId="setting-stability-threshold"
+            >
               <LockedSlider
                 value={[settings.stabilization.threshold]}
                 onValueChange={([value]) => updateStabilization({ threshold: value })}
                 min={30}
                 max={90}
                 step={5}
+                className="py-2"
                 data-testid="slider-stability-threshold"
               />
-            </div>
+            </SettingSliderItem>
           )}
-        </div>
 
-        <Separator />
+          <SettingItem
+            icon={<Focus className="w-5 h-5" />}
+            title={t.settings.imageQuality.enhancement}
+            description={t.settings.imageQuality.enhancementDesc}
+            testId="setting-enhancement"
+          >
+            <Switch
+              checked={settings.enhancement.enabled}
+              onCheckedChange={(checked) => updateEnhancement({ enabled: checked })}
+              className="h-6 w-11"
+              data-testid="switch-enhancement"
+            />
+          </SettingItem>
 
-        <div className="flex items-center justify-between">
-          <Label htmlFor="enhancement-enabled" className="flex items-center gap-2 cursor-pointer">
-            <Focus className="w-4 h-4 text-primary" />
-            <div>
-              <span className="text-sm">{t.settings.imageQuality.enhancement}</span>
-              <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.imageQuality.enhancementDesc}</p>
-            </div>
-          </Label>
-          <Switch
-            id="enhancement-enabled"
-            checked={settings.enhancement.enabled}
-            onCheckedChange={(checked) => updateEnhancement({ enabled: checked })}
-            data-testid="switch-enhancement"
-          />
-        </div>
-
-        {settings.enhancement.enabled && (
-          <>
-            <Separator />
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">
-                    {t.settings.imageQuality.sharpness}
-                  </Label>
-                  <span className="text-xs text-muted-foreground font-mono">
-                    {settings.enhancement.sharpness}%
-                  </span>
-                </div>
+          {settings.enhancement.enabled && (
+            <>
+              <SettingSliderItem
+                icon={<Focus className="w-5 h-5" />}
+                title={t.settings.imageQuality.sharpness}
+                description={t.settings.imageQuality.sharpnessDesc || "Уровень повышения резкости изображения"}
+                value={settings.enhancement.sharpness}
+                unit="%"
+                testId="setting-sharpness"
+              >
                 <LockedSlider
                   value={[settings.enhancement.sharpness]}
                   onValueChange={([value]) => updateEnhancement({ sharpness: value })}
                   min={0}
                   max={100}
                   step={5}
+                  className="py-2"
                   data-testid="slider-sharpness"
                 />
-              </div>
+              </SettingSliderItem>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">
-                    {t.settings.imageQuality.denoise}
-                  </Label>
-                  <span className="text-xs text-muted-foreground font-mono">
-                    {settings.enhancement.denoise}%
-                  </span>
-                </div>
+              <SettingSliderItem
+                icon={<Eraser className="w-5 h-5" />}
+                title={t.settings.imageQuality.denoise}
+                description={t.settings.imageQuality.denoiseDesc || "Уровень подавления цифрового шума"}
+                value={settings.enhancement.denoise}
+                unit="%"
+                testId="setting-denoise"
+              >
                 <LockedSlider
                   value={[settings.enhancement.denoise]}
                   onValueChange={([value]) => updateEnhancement({ denoise: value })}
                   min={0}
                   max={100}
                   step={5}
+                  className="py-2"
                   data-testid="slider-denoise"
                 />
-              </div>
+              </SettingSliderItem>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">
-                    {t.settings.imageQuality.contrast}
-                  </Label>
-                  <span className="text-xs text-muted-foreground font-mono">
-                    {settings.enhancement.contrast}%
-                  </span>
-                </div>
+              <SettingSliderItem
+                icon={<Contrast className="w-5 h-5" />}
+                title={t.settings.imageQuality.contrast}
+                description={t.settings.imageQuality.contrastDesc || "Уровень повышения контрастности"}
+                value={settings.enhancement.contrast}
+                unit="%"
+                testId="setting-contrast"
+              >
                 <LockedSlider
                   value={[settings.enhancement.contrast]}
                   onValueChange={([value]) => updateEnhancement({ contrast: value })}
                   min={0}
                   max={100}
                   step={5}
+                  className="py-2"
                   data-testid="slider-contrast"
                 />
-              </div>
-            </div>
-          </>
-        )}
+              </SettingSliderItem>
+            </>
+          )}
+        </div>
       </SettingsCard>
     </div>
   );

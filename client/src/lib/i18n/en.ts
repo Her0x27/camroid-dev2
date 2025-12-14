@@ -404,6 +404,37 @@ export const en = {
       demoNote: "Demo note for preview",
     },
     
+    platformTips: {
+      resolution: {
+        ios: "iPhone supports up to 4K. 1080p recommended for optimal balance",
+        android: "Maximum resolution depends on device. 1080p is universal choice",
+      },
+      quality: {
+        ios: "85-90% is optimal for Photos and iCloud",
+        android: "85-90% provides good balance for gallery and cloud services",
+      },
+      gpsAccuracy: {
+        ios: "iPhone typically provides 5-15m accuracy",
+        android: "Accuracy depends on device sensors. 20m recommended",
+      },
+      stabilization: {
+        ios: "50-60% threshold works well on iPhone",
+        android: "60-70% threshold recommended on Android due to sensor differences",
+      },
+      patternUnlock: {
+        ios: "Pattern may work slower on iOS due to browser limitations",
+        android: "Pattern works fast thanks to optimized touch events",
+      },
+      multitouch: {
+        ios: "iPhone supports up to 5 simultaneous touches",
+        android: "Android supports more simultaneous touches (up to 10)",
+      },
+      cloudUpload: {
+        ios: "Photos automatically save to device gallery",
+        android: "Allow storage access to save photos to gallery",
+      },
+    },
+    
     categoryTips: {
       title: "Recommendations",
       camera: {

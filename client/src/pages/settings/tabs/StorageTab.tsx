@@ -1,9 +1,9 @@
 import { memo, useMemo } from "react";
-import { Database, Cloud, Trash2, HardDrive, Image, Server } from "lucide-react";
+import { Database, Cloud, Trash2, HardDrive, Image, Server, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
 import { SettingsCard } from "../components/SettingsCard";
+import { SettingSelectItem } from "../components/SettingItem";
 import { ProviderSelector } from "@/components/ui/provider-selector";
 import { ProviderSettingsForm } from "@/components/ui/provider-settings-form";
 import { cloudProviderRegistry, type ProviderSettings } from "@/cloud-providers";
@@ -122,32 +122,47 @@ export const StorageTab = memo(function StorageTab({
       >
         {storageInfo && (
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-4 rounded-xl bg-muted/50">
-                <Image className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-bold">{storageInfo.photos}</div>
-                <div className="text-xs text-muted-foreground">{t.settings.storage.photosStored}</div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="relative overflow-hidden text-center p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/10 hover:border-primary/20 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50" />
+                <div className="relative">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Image className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="text-2xl font-bold tracking-tight">{storageInfo.photos}</div>
+                  <div className="text-[11px] text-muted-foreground font-medium mt-0.5">{t.settings.storage.photosStored}</div>
+                </div>
               </div>
-              <div className="text-center p-4 rounded-xl bg-muted/50">
-                <HardDrive className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-bold">{formatBytes(storageInfo.used)}</div>
-                <div className="text-xs text-muted-foreground">{t.settings.storage.storageUsed}</div>
+              <div className="relative overflow-hidden text-center p-4 rounded-xl bg-gradient-to-br from-blue-500/5 to-blue-500/10 border border-blue-500/10 hover:border-blue-500/20 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-50" />
+                <div className="relative">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                    <HardDrive className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div className="text-2xl font-bold tracking-tight">{formatBytes(storageInfo.used)}</div>
+                  <div className="text-[11px] text-muted-foreground font-medium mt-0.5">{t.settings.storage.storageUsed}</div>
+                </div>
               </div>
-              <div className="text-center p-4 rounded-xl bg-muted/50">
-                <Server className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <div className="text-2xl font-bold">{formatBytes(storageInfo.quota - storageInfo.used)}</div>
-                <div className="text-xs text-muted-foreground">{t.settings.storage.available}</div>
+              <div className="relative overflow-hidden text-center p-4 rounded-xl bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/10 hover:border-emerald-500/20 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-50" />
+                <div className="relative">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                    <Server className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div className="text-2xl font-bold tracking-tight">{formatBytes(storageInfo.quota - storageInfo.used)}</div>
+                  <div className="text-[11px] text-muted-foreground font-medium mt-0.5">{t.settings.storage.available}</div>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 p-3 rounded-lg bg-muted/30 border border-border/30">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{t.settings.storage.storageUsed}</span>
-                <span className="font-mono">{usagePercent.toFixed(1)}%</span>
+                <span className="font-mono font-medium">{usagePercent.toFixed(1)}%</span>
               </div>
-              <div className="h-3 bg-muted rounded-full overflow-hidden">
+              <div className="h-2.5 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-primary via-primary to-primary/70 transition-all duration-500 rounded-full"
                   style={{ width: `${usagePercent}%` }}
                 />
               </div>
@@ -159,7 +174,7 @@ export const StorageTab = memo(function StorageTab({
 
         <Button
           variant="outline"
-          className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="w-full min-h-[44px] text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30 hover:border-destructive/50"
           onClick={onShowClearDialog}
           disabled={!storageInfo || storageInfo.photos === 0}
           data-testid="button-clear-storage"
@@ -176,13 +191,21 @@ export const StorageTab = memo(function StorageTab({
           description={t.settings.cloud.description}
           testId="section-cloud-upload"
         >
-          <div className="space-y-3">
-            <Label>{t.settings.cloud.provider || "Cloud Provider"}</Label>
+          <SettingSelectItem
+            icon={<Upload className="w-4 h-4" />}
+            title={t.settings.cloud.provider || "Облачный провайдер"}
+            description={t.settings.cloud.providerDesc || "Выберите сервис для загрузки фотографий в облако"}
+            platformTip={{
+              ios: "Фото автоматически сохраняются в галерею",
+              android: "Разрешите доступ к хранилищу для загрузки",
+            }}
+            testId="setting-cloud-provider"
+          >
             <ProviderSelector
               selectedProviderId={selectedProviderId}
               onProviderChange={handleProviderChange}
             />
-          </div>
+          </SettingSelectItem>
 
           <Separator />
 

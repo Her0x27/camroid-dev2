@@ -4,7 +4,6 @@ import { Shield, Eye, Hand, Clock3, Settings2, Fingerprint, Layers, ChevronDown,
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { LockedSlider } from "@/components/ui/locked-slider";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SettingsCard } from "../components/SettingsCard";
+import { SettingItem, SettingItemCompact, SettingSliderItem, SettingSelectItem } from "../components/SettingItem";
 import { ModulePreview } from "../components";
 import { privacyModuleRegistry } from "@/privacy_modules";
 import { validateSequence } from "@/privacy_modules/calculator/config";
@@ -172,34 +172,32 @@ export const PrivacyTab = memo(function PrivacyTab({
         description={t.settings.privacy.description}
         testId="section-privacy"
       >
-        <div className="flex items-center justify-between">
-          <Label htmlFor="privacy-enabled" className="flex items-center gap-2 cursor-pointer">
-            <Eye className="w-4 h-4" />
-            <div>
-              <span>{t.settings.privacy.enabled}</span>
-              <p className="text-xs text-muted-foreground font-normal">
-                {t.settings.privacy.enabledDesc}
-              </p>
-            </div>
-          </Label>
+        <SettingItemCompact
+          icon={<Eye className="w-4 h-4" />}
+          title={t.settings.privacy.enabled}
+          description={t.settings.privacy.enabledDesc}
+          testId="setting-privacy-enabled"
+        >
           <Switch
             id="privacy-enabled"
             checked={privacySettings.enabled}
             onCheckedChange={handleEnablePrivacy}
             data-testid="switch-privacy-enabled"
+            className="min-w-[44px] min-h-[24px]"
           />
-        </div>
+        </SettingItemCompact>
 
         {privacySettings.enabled && (
           <>
             <Separator />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <Label className="flex items-center gap-2">
-                  <Layers className="w-4 h-4" />
-                  {t.settings.privacy.module}
-                </Label>
+            <SettingSelectItem
+              icon={<Layers className="w-4 h-4" />}
+              title={t.settings.privacy.module}
+              description={t.settings.privacy.moduleDesc}
+              testId="setting-module"
+            >
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Select
                   value={privacySettings.selectedModule}
                   onValueChange={(value) => {
@@ -207,12 +205,12 @@ export const PrivacyTab = memo(function PrivacyTab({
                     updatePrivacySettings({ selectedModule: value });
                   }}
                 >
-                  <SelectTrigger data-testid="select-module">
+                  <SelectTrigger data-testid="select-module" className="min-h-[44px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {privacyModuleRegistry.getAll().map((module) => (
-                      <SelectItem key={module.id} value={module.id}>
+                      <SelectItem key={module.id} value={module.id} className="min-h-[44px]">
                         <span className="flex items-center gap-2">
                           <module.icon className="w-4 h-4" />
                           {module.title}
@@ -221,16 +219,10 @@ export const PrivacyTab = memo(function PrivacyTab({
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">
-                  {t.settings.privacy.moduleDesc}
-                </p>
-              </div>
-
-              <div className="space-y-3">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full"
+                  className="min-h-[44px] w-full sm:w-auto"
                   onClick={() => setShowPreview(!showPreview)}
                 >
                   <span className="flex items-center gap-2">
@@ -239,7 +231,7 @@ export const PrivacyTab = memo(function PrivacyTab({
                   </span>
                 </Button>
               </div>
-            </div>
+            </SettingSelectItem>
 
             {showPreview && (
               <ModulePreview 
@@ -255,127 +247,126 @@ export const PrivacyTab = memo(function PrivacyTab({
             {currentModule && currentModule.unlockMethod.type !== 'swipePattern' && (
               <>
                 <Separator />
-                <div className="space-y-3">
-                  <Label className="flex items-center gap-2">
-                    <Settings2 className="w-4 h-4" />
-                    {(t.settings.privacy.moduleUnlock as Record<string, string>)[currentModule.unlockMethod.labelKey] || currentModule.unlockMethod.labelKey}
-                  </Label>
+                <SettingItem
+                  icon={<Settings2 className="w-4 h-4" />}
+                  title={(t.settings.privacy.moduleUnlock as Record<string, string>)[currentModule.unlockMethod.labelKey] || currentModule.unlockMethod.labelKey}
+                  description={
+                    currentModule.unlockMethod.type === 'sequence'
+                      ? (t.settings.privacy.moduleUnlock as Record<string, string>).sequenceDesc || 'Enter a secret sequence to unlock'
+                      : (t.settings.privacy.moduleUnlock as Record<string, string>).phraseDesc || 'Enter a secret phrase to unlock'
+                  }
+                  testId="setting-module-unlock"
+                  vertical
+                >
                   <Input
                     type="text"
                     value={currentUnlockValue}
                     onChange={(e) => handleModuleUnlockValueChange(e.target.value)}
                     placeholder={(t.settings.privacy.moduleUnlock as Record<string, string>)[currentModule.unlockMethod.placeholderKey || ''] || currentModule.unlockMethod.defaultValue}
-                    className={sequenceValidationError && currentModule.unlockMethod.type === 'sequence' ? 'border-amber-500 focus-visible:ring-amber-500' : ''}
+                    className={`min-h-[44px] ${sequenceValidationError && currentModule.unlockMethod.type === 'sequence' ? 'border-amber-500 focus-visible:ring-amber-500' : ''}`}
                     data-testid="input-module-unlock"
                   />
                   {sequenceValidationError && currentModule.unlockMethod.type === 'sequence' && (
-                    <p className="text-xs text-amber-500">
+                    <p className="text-xs text-amber-500 mt-2">
                       {(t.settings.privacy.moduleUnlock as Record<string, string>).sequenceValidationError || 'Only digits and calculator symbols allowed'}
                     </p>
                   )}
-                </div>
+                </SettingItem>
               </>
             )}
 
             <Separator />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <Label className="flex items-center gap-2">
-                  <Hand className="w-4 h-4" />
-                  {t.settings.privacy.secretGesture}
-                </Label>
-                <Select
-                  value={privacySettings.gestureType}
-                  onValueChange={(value) => updatePrivacySettings({ gestureType: value as 'patternUnlock' | 'severalFingers' })}
+            <SettingSelectItem
+              icon={<Hand className="w-4 h-4" />}
+              title={t.settings.privacy.secretGesture}
+              description={
+                privacySettings.gestureType === 'patternUnlock'
+                  ? t.settings.privacy.patternUnlockHint
+                  : t.settings.privacy.severalFingersHint
+              }
+              platformTip={
+                privacySettings.gestureType === 'patternUnlock'
+                  ? { ios: "На iOS может работать медленнее из-за ограничений браузера" }
+                  : { android: "Android поддерживает больше пальцев одновременно" }
+              }
+              testId="setting-gesture-type"
+            >
+              <Select
+                value={privacySettings.gestureType}
+                onValueChange={(value) => updatePrivacySettings({ gestureType: value as 'patternUnlock' | 'severalFingers' })}
+              >
+                <SelectTrigger data-testid="select-gesture-type" className="min-h-[44px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="patternUnlock" className="min-h-[44px]">{t.settings.privacy.patternUnlock}</SelectItem>
+                  <SelectItem value="severalFingers" className="min-h-[44px]">{t.settings.privacy.severalFingers}</SelectItem>
+                </SelectContent>
+              </Select>
+            </SettingSelectItem>
+
+            {privacySettings.gestureType === 'patternUnlock' && (
+              <SettingItem
+                icon={<Settings2 className="w-4 h-4" />}
+                title={privacySettings.secretPattern ? t.settings.privacy.changePattern : t.settings.privacy.setPattern}
+                description={t.settings.privacy.patternUnlockHint}
+                badge={!privacySettings.secretPattern ? "!" : undefined}
+                platformTip={{ ios: "На iOS может работать медленнее из-за ограничений браузера" }}
+                testId="setting-pattern"
+              >
+                <Button
+                  variant="outline"
+                  className="min-h-[44px] w-full sm:w-auto"
+                  onClick={onShowPatternSetup}
+                  data-testid="button-set-pattern"
                 >
-                  <SelectTrigger data-testid="select-gesture-type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="patternUnlock">{t.settings.privacy.patternUnlock}</SelectItem>
-                    <SelectItem value="severalFingers">{t.settings.privacy.severalFingers}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  {privacySettings.gestureType === 'patternUnlock'
-                    ? t.settings.privacy.patternUnlockHint
-                    : t.settings.privacy.severalFingersHint}
-                </p>
-              </div>
+                  {privacySettings.secretPattern ? t.settings.privacy.changeSecretPattern : t.settings.privacy.setSecretPattern}
+                </Button>
+              </SettingItem>
+            )}
 
-              {privacySettings.gestureType === 'patternUnlock' && (
-                <div className="space-y-3">
-                  <Label className="flex items-center gap-2">
-                    <Settings2 className="w-4 h-4" />
-                    {privacySettings.secretPattern ? t.settings.privacy.changePattern : t.settings.privacy.setPattern}
-                  </Label>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={onShowPatternSetup}
-                    data-testid="button-set-pattern"
-                  >
-                    {privacySettings.secretPattern ? t.settings.privacy.changeSecretPattern : t.settings.privacy.setSecretPattern}
-                  </Button>
-                  {!privacySettings.secretPattern && (
-                    <p className="text-xs text-amber-500">
-                      {t.settings.privacy.patternNotSet}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {privacySettings.gestureType === 'severalFingers' && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="flex items-center gap-2">
-                      <Fingerprint className="w-4 h-4" />
-                      {t.settings.privacy.fingerCount}
-                    </Label>
-                    <span className="text-sm text-muted-foreground font-mono">
-                      {privacySettings.unlockFingers}
-                    </span>
-                  </div>
-                  <LockedSlider
-                    value={[privacySettings.unlockFingers]}
-                    onValueChange={([value]) => updatePrivacySettings({ unlockFingers: value })}
-                    min={3}
-                    max={9}
-                    step={1}
-                    data-testid="slider-unlock-fingers"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    {t.settings.privacy.fingerCountDesc}
-                  </p>
-                </div>
-              )}
-            </div>
+            {privacySettings.gestureType === 'severalFingers' && (
+              <SettingSliderItem
+                icon={<Fingerprint className="w-4 h-4" />}
+                title={t.settings.privacy.fingerCount}
+                description={t.settings.privacy.fingerCountDesc}
+                value={privacySettings.unlockFingers}
+                platformTip={{ android: "Android поддерживает больше пальцев одновременно" }}
+                testId="setting-finger-count"
+              >
+                <LockedSlider
+                  value={[privacySettings.unlockFingers]}
+                  onValueChange={([value]) => updatePrivacySettings({ unlockFingers: value })}
+                  min={3}
+                  max={9}
+                  step={1}
+                  className="min-h-[44px]"
+                  data-testid="slider-unlock-fingers"
+                />
+              </SettingSliderItem>
+            )}
 
             <Separator />
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2">
-                  <Clock3 className="w-4 h-4" />
-                  {t.settings.privacy.autoLock}
-                </Label>
-                <span className="text-sm text-muted-foreground font-mono">
-                  {privacySettings.autoLockMinutes} {t.settings.privacy.min}
-                </span>
-              </div>
+            <SettingSliderItem
+              icon={<Clock3 className="w-4 h-4" />}
+              title={t.settings.privacy.autoLock}
+              description={t.settings.privacy.autoLockDesc}
+              value={privacySettings.autoLockMinutes}
+              unit={` ${t.settings.privacy.min}`}
+              testId="setting-auto-lock"
+            >
               <LockedSlider
                 value={[privacySettings.autoLockMinutes]}
                 onValueChange={([value]) => updatePrivacySettings({ autoLockMinutes: value })}
                 min={1}
                 max={30}
                 step={1}
+                className="min-h-[44px]"
                 data-testid="slider-auto-lock"
               />
-              <p className="text-xs text-muted-foreground">
-                {t.settings.privacy.autoLockDesc}
-              </p>
-            </div>
+            </SettingSliderItem>
           </>
         )}
       </SettingsCard>
@@ -454,13 +445,13 @@ export const PrivacyTab = memo(function PrivacyTab({
                 <div className="p-4 border-t border-border/40 bg-muted/20 flex gap-2">
                   <Button 
                     variant="outline" 
-                    className="flex-1 h-9 text-sm"
+                    className="flex-1 min-h-[44px] text-sm"
                     onClick={() => setShowActivationDialog(false)}
                   >
                     {t.common?.cancel || 'Отмена'}
                   </Button>
                   <Button 
-                    className="flex-1 h-9 text-sm"
+                    className="flex-1 min-h-[44px] text-sm"
                     onClick={confirmActivation}
                   >
                     {t.settings.privacy.activationConfirm || 'Понятно, включить'}
