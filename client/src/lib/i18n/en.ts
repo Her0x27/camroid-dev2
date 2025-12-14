@@ -454,10 +454,6 @@ export const en = {
         ios: "iPhone supports up to 5 simultaneous touches",
         android: "Android supports more simultaneous touches (up to 10)",
       },
-      cloudUpload: {
-        ios: "Photos automatically save to device gallery",
-        android: "Allow storage access to save photos to gallery",
-      },
     },
     
     categoryTips: {
