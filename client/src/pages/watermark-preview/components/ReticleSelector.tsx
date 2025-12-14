@@ -1,5 +1,5 @@
-import { memo, useState, useRef, useCallback, useEffect } from "react";
-import { X, GripHorizontal, Palette } from "lucide-react";
+import { memo } from "react";
+import { X, Palette, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,8 @@ import { ColorPicker } from "@/components/ui/color-picker";
 import { ReticleShapeRenderer } from "./ReticleShapes";
 import type { ReticleShape } from "../types";
 import type { ColorScheme } from "@shared/schema";
+
+export type DockPosition = "top" | "bottom";
 
 export interface ReticleSettings {
   shape: ReticleShape;
@@ -21,23 +23,13 @@ export interface ReticleSettings {
   colorScheme: ColorScheme;
 }
 
-interface WatermarkBounds {
-  left: number;
-  right: number;
-  top: number;
-  bottom: number;
-  centerX: number;
-  centerY: number;
-}
-
 interface ReticleSelectorProps {
   isOpen: boolean;
   onClose: () => void;
   settings: ReticleSettings;
   onSettingsChange: (updates: Partial<ReticleSettings>) => void;
-  anchorPosition: { x: number; y: number };
-  watermarkBounds?: WatermarkBounds | null;
-  reticlePosition?: { x: number; y: number };
+  dockPosition: DockPosition;
+  onDockPositionChange: (position: DockPosition) => void;
 }
 
 const RETICLE_OPTIONS: { value: ReticleShape; label: string }[] = [
@@ -54,151 +46,42 @@ export const ReticleSelector = memo(function ReticleSelector({
   onClose,
   settings,
   onSettingsChange,
-  anchorPosition: _anchorPosition,
-  watermarkBounds,
-  reticlePosition,
+  dockPosition,
+  onDockPositionChange,
 }: ReticleSelectorProps) {
-  const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartRef = useRef({ x: 0, y: 0 });
-  const panelRef = useRef<HTMLDivElement>(null);
-  const wasOpenRef = useRef(false);
-
-  useEffect(() => {
-    if (isOpen && !wasOpenRef.current) {
-      wasOpenRef.current = true;
-      
-      const panelWidth = 288;
-      const panelHeight = Math.min(window.innerHeight * 0.5, 400);
-      const margin = 20;
-      const screenWidth = window.innerWidth;
-      const screenHeight = window.innerHeight;
-      
-      const watermarkLeft = watermarkBounds ? (watermarkBounds.left / 100) * screenWidth : 0;
-      const watermarkRight = watermarkBounds ? (watermarkBounds.right / 100) * screenWidth : 0;
-      const watermarkTop = watermarkBounds ? (watermarkBounds.top / 100) * screenHeight : 0;
-      const watermarkBottom = watermarkBounds ? (watermarkBounds.bottom / 100) * screenHeight : 0;
-      
-      const reticleX = reticlePosition ? (reticlePosition.x / 100) * screenWidth : screenWidth / 2;
-      const reticleY = reticlePosition ? (reticlePosition.y / 100) * screenHeight : screenHeight / 2;
-      const currentReticleSize = (settings.size / 100) * Math.min(screenWidth, screenHeight);
-      
-      const reticleLeft = reticleX - currentReticleSize / 2;
-      const reticleRight = reticleX + currentReticleSize / 2;
-      const reticleTop = reticleY - currentReticleSize / 2;
-      const reticleBottom = reticleY + currentReticleSize / 2;
-      
-      const positions = [
-        { x: screenWidth - panelWidth - margin, y: margin },
-        { x: margin, y: margin },
-        { x: screenWidth - panelWidth - margin, y: screenHeight - panelHeight - margin },
-        { x: margin, y: screenHeight - panelHeight - margin },
-      ];
-      
-      const doesOverlap = (pos: { x: number; y: number }) => {
-        const panelLeft = pos.x;
-        const panelRight = pos.x + panelWidth;
-        const panelTop = pos.y;
-        const panelBottom = pos.y + panelHeight;
-        
-        const overlapsWatermark = watermarkBounds && !(
-          panelRight < watermarkLeft - margin ||
-          panelLeft > watermarkRight + margin ||
-          panelBottom < watermarkTop - margin ||
-          panelTop > watermarkBottom + margin
-        );
-        
-        const overlapsReticle = !(
-          panelRight < reticleLeft - margin ||
-          panelLeft > reticleRight + margin ||
-          panelBottom < reticleTop - margin ||
-          panelTop > reticleBottom + margin
-        );
-        
-        return overlapsWatermark || overlapsReticle;
-      };
-      
-      let smartPos = positions[0];
-      for (const pos of positions) {
-        if (!doesOverlap(pos)) {
-          smartPos = pos;
-          break;
-        }
-      }
-      
-      setPanelPosition({
-        x: Math.max(0, Math.min(smartPos.x, screenWidth - panelWidth)),
-        y: Math.max(0, Math.min(smartPos.y, screenHeight - panelHeight)),
-      });
-    } else if (!isOpen) {
-      wasOpenRef.current = false;
-    }
-  }, [isOpen, watermarkBounds, reticlePosition, settings.size]);
-
-  const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    dragStartRef.current = { x: clientX - panelPosition.x, y: clientY - panelPosition.y };
-    setIsDragging(true);
-  }, [panelPosition]);
-
-  const handleDragMove = useCallback((e: MouseEvent | TouchEvent) => {
-    if (!isDragging) return;
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    setPanelPosition({
-      x: Math.max(0, Math.min(clientX - dragStartRef.current.x, window.innerWidth - 280)),
-      y: Math.max(0, Math.min(clientY - dragStartRef.current.y, window.innerHeight - 100)),
-    });
-  }, [isDragging]);
-
-  const handleDragEnd = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener("mousemove", handleDragMove);
-      window.addEventListener("mouseup", handleDragEnd);
-      window.addEventListener("touchmove", handleDragMove);
-      window.addEventListener("touchend", handleDragEnd);
-      return () => {
-        window.removeEventListener("mousemove", handleDragMove);
-        window.removeEventListener("mouseup", handleDragEnd);
-        window.removeEventListener("touchmove", handleDragMove);
-        window.removeEventListener("touchend", handleDragEnd);
-      };
-    }
-  }, [isDragging, handleDragMove, handleDragEnd]);
-
   if (!isOpen) return null;
 
-  const panelStyle: React.CSSProperties = {
-    position: "fixed",
-    left: panelPosition.x,
-    top: panelPosition.y,
-    zIndex: 100,
+  const toggleDockPosition = () => {
+    onDockPositionChange(dockPosition === "top" ? "bottom" : "top");
   };
 
   return (
     <div
-      ref={panelRef}
-      style={{ ...panelStyle, fontFamily: 'var(--font-montserrat), system-ui, sans-serif' }}
-      className="w-72 max-h-[50vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl"
+      style={{ fontFamily: 'var(--font-montserrat), system-ui, sans-serif' }}
+      className={`fixed left-0 right-0 z-[100] max-h-[45vh] overflow-y-auto bg-background/95 backdrop-blur-sm border-x shadow-xl transition-all duration-300 ease-out ${
+        dockPosition === "top" 
+          ? "top-0 border-b rounded-b-lg" 
+          : "bottom-0 border-t rounded-t-lg"
+      }`}
     >
       <div 
-        className="flex items-center justify-between cursor-move select-none px-3 py-1.5 bg-muted/50 rounded-t-lg border-b sticky top-0 z-10 backdrop-blur-sm"
-        onMouseDown={handleDragStart}
-        onTouchStart={handleDragStart}
+        className="flex items-center justify-between select-none px-4 py-2 bg-muted/50 border-b sticky top-0 z-10 backdrop-blur-sm"
       >
-        <div className="flex items-center gap-1.5">
-          <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
-          <h3 className="font-medium text-xs">Выбор прицела</h3>
+        <h3 className="font-medium text-sm">Выбор прицела</h3>
+        <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleDockPosition} 
+            className="h-7 w-7"
+            title={dockPosition === "top" ? "Переместить вниз" : "Переместить вверх"}
+          >
+            {dockPosition === "top" ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7">
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-5 w-5 -mr-1">
-          <X className="h-3.5 w-3.5" />
-        </Button>
       </div>
       <div className="p-4 space-y-4">
       <div className="grid grid-cols-3 gap-2">

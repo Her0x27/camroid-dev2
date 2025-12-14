@@ -1,5 +1,5 @@
-import { memo, useState, useRef, useCallback, useEffect } from "react";
-import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown, ChevronRight, GripHorizontal, Palette, Type, MapPin, Move, Minus } from "lucide-react";
+import { memo, useState, useRef, useCallback } from "react";
+import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown, ChevronRight, ChevronUp, Palette, Type, MapPin, Move, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +9,8 @@ import { ColorPicker } from "@/components/ui/color-picker";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat, LogoPosition, FontFamily } from "./InteractiveWatermark";
 
+export type DockPosition = "top" | "bottom";
+
 interface FloatingEditPanelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,7 +18,8 @@ interface FloatingEditPanelProps {
   position: WatermarkPosition;
   onStyleChange: (updates: Partial<WatermarkStyle>) => void;
   onPositionChange: (updates: Partial<WatermarkPosition>) => void;
-  anchorPosition: { x: number; y: number };
+  dockPosition: DockPosition;
+  onDockPositionChange: (position: DockPosition) => void;
 }
 
 const SEPARATOR_POSITIONS: { value: SeparatorPosition; label: string }[] = [
@@ -64,13 +67,10 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
   position,
   onStyleChange,
   onPositionChange,
-  anchorPosition,
+  dockPosition,
+  onDockPositionChange,
 }: FloatingEditPanelProps) {
   const [showSeparatorMenu, setShowSeparatorMenu] = useState(false);
-  const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartRef = useRef({ x: 0, y: 0 });
-  const panelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [openSections, setOpenSections] = useState({
@@ -85,52 +85,6 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
-
-  useEffect(() => {
-    if (isOpen) {
-      setPanelPosition({
-        x: Math.min(anchorPosition.x, window.innerWidth - 320),
-        y: Math.min(anchorPosition.y + 10, window.innerHeight - 500),
-      });
-    }
-  }, [isOpen, anchorPosition]);
-
-  const handleDragStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    dragStartRef.current = { x: clientX - panelPosition.x, y: clientY - panelPosition.y };
-    setIsDragging(true);
-  }, [panelPosition]);
-
-  const handleDragMove = useCallback((e: MouseEvent | TouchEvent) => {
-    if (!isDragging) return;
-    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
-    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-    setPanelPosition({
-      x: Math.max(0, Math.min(clientX - dragStartRef.current.x, window.innerWidth - 320)),
-      y: Math.max(0, Math.min(clientY - dragStartRef.current.y, window.innerHeight - 100)),
-    });
-  }, [isDragging]);
-
-  const handleDragEnd = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener("mousemove", handleDragMove);
-      window.addEventListener("mouseup", handleDragEnd);
-      window.addEventListener("touchmove", handleDragMove);
-      window.addEventListener("touchend", handleDragEnd);
-      return () => {
-        window.removeEventListener("mousemove", handleDragMove);
-        window.removeEventListener("mouseup", handleDragEnd);
-        window.removeEventListener("touchmove", handleDragMove);
-        window.removeEventListener("touchend", handleDragEnd);
-      };
-    }
-  }, [isDragging, handleDragMove, handleDragEnd]);
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -167,31 +121,39 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
     onStyleChange({ separators: style.separators.filter(s => s.id !== id) });
   };
 
-  const panelStyle: React.CSSProperties = {
-    position: "fixed",
-    left: panelPosition.x,
-    top: panelPosition.y,
-    zIndex: 100,
+  const toggleDockPosition = () => {
+    onDockPositionChange(dockPosition === "top" ? "bottom" : "top");
   };
 
   return (
     <div
-      ref={panelRef}
-      style={{ ...panelStyle, fontFamily: 'var(--font-montserrat), system-ui, sans-serif' }}
-      className="w-80 max-h-[50vh] overflow-y-auto bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl"
+      style={{ fontFamily: 'var(--font-montserrat), system-ui, sans-serif' }}
+      className={`fixed left-0 right-0 z-[100] max-h-[45vh] overflow-y-auto bg-background/95 backdrop-blur-sm border-x shadow-xl transition-all duration-300 ease-out ${
+        dockPosition === "top" 
+          ? "top-0 border-b rounded-b-lg" 
+          : "bottom-0 border-t rounded-t-lg"
+      }`}
     >
       <div 
-        className="flex items-center justify-between cursor-move select-none px-3 py-1.5 bg-muted/50 rounded-t-lg border-b sticky top-0 z-10 backdrop-blur-sm"
-        onMouseDown={handleDragStart}
-        onTouchStart={handleDragStart}
+        className={`flex items-center justify-between select-none px-4 py-2 bg-muted/50 border-b sticky z-10 backdrop-blur-sm ${
+          dockPosition === "top" ? "top-0" : "top-0"
+        }`}
       >
-        <div className="flex items-center gap-1.5">
-          <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
-          <h3 className="font-medium text-xs">Редактирование водяного знака</h3>
+        <h3 className="font-medium text-sm">Редактирование водяного знака</h3>
+        <div className="flex items-center gap-1">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleDockPosition} 
+            className="h-7 w-7"
+            title={dockPosition === "top" ? "Переместить вниз" : "Переместить вверх"}
+          >
+            {dockPosition === "top" ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7">
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-5 w-5 -mr-1">
-          <X className="h-3.5 w-3.5" />
-        </Button>
       </div>
       <div className="px-4 pt-1 pb-4 space-y-0">
       <input
@@ -604,21 +566,20 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
                 className="h-8 text-xs w-full justify-between"
               >
                 <span className="flex items-center">
-                  <Plus className="h-4 w-4 mr-1" />
-                  Вставить разделитель
+                  <Plus className="h-3 w-3 mr-1" />
+                  Добавить разделитель
                 </span>
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className={`h-3 w-3 transition-transform ${showSeparatorMenu ? "rotate-180" : ""}`} />
               </Button>
-              
               {showSeparatorMenu && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-background border rounded-md shadow-lg z-10">
-                  {SEPARATOR_POSITIONS.map((pos) => (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-popover border rounded-lg shadow-lg z-50">
+                  {SEPARATOR_POSITIONS.map((sep) => (
                     <button
-                      key={pos.value}
-                      onClick={() => handleAddSeparator(pos.value)}
-                      className="w-full px-3 py-2 text-xs text-left hover:bg-accent transition-colors"
+                      key={sep.value}
+                      onClick={() => handleAddSeparator(sep.value)}
+                      className="w-full px-3 py-2 text-xs text-left hover:bg-muted transition-colors first:rounded-t-lg last:rounded-b-lg"
                     >
-                      {pos.label}
+                      {sep.label}
                     </button>
                   ))}
                 </div>
@@ -627,22 +588,22 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
 
             {style.separators.length > 0 && (
               <div className="space-y-1">
-                {style.separators.map((sep) => {
-                  const label = SEPARATOR_POSITIONS.find(p => p.value === sep.position)?.label || sep.position;
-                  return (
-                    <div key={sep.id} className="flex items-center justify-between bg-muted/50 rounded px-2 py-1">
-                      <span className="text-xs">{label}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleRemoveSeparator(sep.id)}
-                        className="h-6 w-6"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  );
-                })}
+                {style.separators.map((sep) => (
+                  <div
+                    key={sep.id}
+                    className="flex items-center justify-between px-2 py-1.5 bg-muted rounded text-xs"
+                  >
+                    <span>{SEPARATOR_POSITIONS.find(p => p.value === sep.position)?.label}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveSeparator(sep.id)}
+                      className="h-6 w-6 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
               </div>
             )}
           </div>

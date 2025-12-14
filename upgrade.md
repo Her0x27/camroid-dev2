@@ -10,11 +10,11 @@
 ## Чек-лист задач v48
 
 - [x] Обновить upgrade.md — добавить секцию v48
-- [ ] Обновить FloatingEditPanel — dock-режим (top/bottom), удалить drag
-- [ ] Обновить ReticleSelector — dock-режим (top/bottom), удалить smart positioning и drag
-- [ ] Добавить кнопки переключения позиции (▲/▼) в шапку обеих панелей
-- [ ] Обновить watermark-preview/index.tsx — состояние dock position для панелей
-- [ ] Финальное обновление upgrade.md
+- [x] Обновить FloatingEditPanel — dock-режим (top/bottom), удалить drag
+- [x] Обновить ReticleSelector — dock-режим (top/bottom), удалить smart positioning и drag
+- [x] Добавить кнопки переключения позиции (▲/▼) в шапку обеих панелей
+- [x] Обновить watermark-preview/index.tsx — состояние dock position для панелей
+- [x] Финальное обновление upgrade.md
 
 ---
 
@@ -23,10 +23,37 @@
 | Задача | Статус | Дата |
 |--------|--------|------|
 | upgrade.md | ✅ Готово | 14.12.2025 |
-| FloatingEditPanel dock | 🔄 В процессе | 14.12.2025 |
-| ReticleSelector dock | ⏳ Ожидает | - |
-| Кнопки ▲/▼ | ⏳ Ожидает | - |
-| index.tsx state | ⏳ Ожидает | - |
+| FloatingEditPanel dock | ✅ Готово | 14.12.2025 |
+| ReticleSelector dock | ✅ Готово | 14.12.2025 |
+| Кнопки ▲/▼ | ✅ Готово | 14.12.2025 |
+| index.tsx state | ✅ Готово | 14.12.2025 |
+
+## Изменения v48
+
+### client/src/pages/watermark-preview/components/FloatingEditPanel.tsx
+- **DockPosition type:** добавлен тип "top" | "bottom"
+- **Props:** заменены anchorPosition на dockPosition и onDockPositionChange
+- **Удалено:** drag-функциональность (panelPosition, isDragging, handleDragStart/Move/End)
+- **Позиционирование:** fixed left-0 right-0, top-0 или bottom-0 в зависимости от dockPosition
+- **Кнопка переключения:** ChevronUp/ChevronDown в шапке для смены позиции
+- **Высота:** max-h-[45vh] для гарантии отсутствия перекрытия прицела
+
+### client/src/pages/watermark-preview/components/ReticleSelector.tsx
+- **DockPosition type:** добавлен тип "top" | "bottom"
+- **Props:** заменены anchorPosition, watermarkBounds, reticlePosition на dockPosition и onDockPositionChange
+- **Удалено:** умное позиционирование (wasOpenRef, smart positioning logic)
+- **Удалено:** drag-функциональность
+- **Позиционирование:** fixed left-0 right-0, dock к верху или низу
+- **Кнопка переключения:** ChevronUp/ChevronDown в шапке
+
+### client/src/pages/watermark-preview/components/index.ts
+- **Export:** добавлен DockPosition type
+
+### client/src/pages/watermark-preview/index.tsx
+- **State:** добавлены watermarkDockPosition и reticleDockPosition (useState<DockPosition>)
+- **Удалено:** panelAnchor state (больше не нужен)
+- **handleWatermarkTap/handleReticleTap:** упрощены, убрано вычисление anchorPosition
+- **Props:** обновлены для FloatingEditPanel и ReticleSelector
 
 ---
 

@@ -17,6 +17,7 @@ import {
   type WatermarkStyle,
   type ReticleSettings,
   type WatermarkBounds,
+  type DockPosition,
 } from "./components";
 
 type ActivePanel = null | "watermark" | "reticle";
@@ -76,8 +77,9 @@ export default function WatermarkPreviewPage() {
 
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [panelAnchor, setPanelAnchor] = useState({ x: 0, y: 0 });
   const [watermarkBounds, setWatermarkBounds] = useState<WatermarkBounds | null>(null);
+  const [watermarkDockPosition, setWatermarkDockPosition] = useState<DockPosition>("bottom");
+  const [reticleDockPosition, setReticleDockPosition] = useState<DockPosition>("bottom");
 
   const handleWatermarkBoundsChange = useCallback((bounds: WatermarkBounds) => {
     setWatermarkBounds(bounds);
@@ -136,22 +138,12 @@ export default function WatermarkPreviewPage() {
   }, [isLoading, watermarkConfig, reticleConfig]);
 
   const handleWatermarkTap = useCallback(() => {
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setPanelAnchor({
-        x: watermarkPosition.x + rect.left + watermarkStyle.width + 10,
-        y: watermarkPosition.y + rect.top,
-      });
-    }
     setActivePanel(activePanel === "watermark" ? null : "watermark");
-  }, [activePanel, watermarkPosition, watermarkStyle.width]);
+  }, [activePanel]);
 
   const handleReticleTap = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       e.stopPropagation();
-      const clientX = "touches" in e ? e.touches[0]?.clientX ?? 0 : e.clientX;
-      const clientY = "touches" in e ? e.touches[0]?.clientY ?? 0 : e.clientY;
-      setPanelAnchor({ x: clientX + 10, y: clientY + 10 });
       setActivePanel(activePanel === "reticle" ? null : "reticle");
     },
     [activePanel]
@@ -397,7 +389,8 @@ export default function WatermarkPreviewPage() {
         position={watermarkPosition}
         onStyleChange={handleStyleChange}
         onPositionChange={handlePositionChange}
-        anchorPosition={panelAnchor}
+        dockPosition={watermarkDockPosition}
+        onDockPositionChange={setWatermarkDockPosition}
       />
 
       <ReticleSelector
@@ -405,9 +398,8 @@ export default function WatermarkPreviewPage() {
         onClose={() => setActivePanel(null)}
         settings={reticleSettings}
         onSettingsChange={handleReticleSettingsChange}
-        anchorPosition={panelAnchor}
-        watermarkBounds={watermarkBounds}
-        reticlePosition={reticleSettings.position}
+        dockPosition={reticleDockPosition}
+        onDockPositionChange={setReticleDockPosition}
       />
 
       <TooltipProvider delayDuration={300}>
