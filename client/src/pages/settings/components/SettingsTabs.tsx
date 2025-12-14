@@ -39,55 +39,29 @@ export const SettingsTabs = memo(function SettingsTabs({
     return labels[key] || key;
   };
 
-  const activeIndex = tabs.findIndex(t => t.id === activeTab);
-
   return (
-    <Tabs value={activeTab} className="fixed left-3 top-1/2 -translate-y-1/2 z-50">
-      <div className="relative">
-        <div className="absolute -inset-2 bg-primary/30 rounded-3xl blur-xl opacity-60" />
-        
-        <div className={cn(
-          "relative overflow-hidden",
-          "bg-zinc-900/95 backdrop-blur-xl",
-          "border border-zinc-700/80",
-          "rounded-2xl",
-          "shadow-2xl shadow-black/40"
-        )}>
-          <div className="px-3 py-2 border-b border-zinc-700/50">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-              Меню
-            </span>
-          </div>
-          
-          <TabsList className="relative p-2 flex flex-col gap-0.5 bg-transparent">
-            <div 
-              className="absolute left-2 w-1 h-9 bg-primary rounded-full transition-all duration-300 ease-out"
-              style={{ top: `${8 + activeIndex * 40}px` }}
-            />
-            
-            {tabs.map((tab) => (
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id}
-                onClick={() => {
-                  triggerHapticFeedback();
-                  onTabChange(tab.id);
-                }}
-                className={cn(
-                  "flex items-center gap-3 w-full h-9 px-4 rounded-lg text-left",
-                  "transition-all duration-200",
-                  "data-[state=active]:bg-zinc-800 data-[state=active]:text-white",
-                  "data-[state=inactive]:text-zinc-400",
-                  "data-[state=inactive]:hover:text-zinc-200 data-[state=inactive]:hover:bg-zinc-800/50"
-                )}
-              >
-                {tab.icon}
-                <span className="text-xs font-medium">{getTabLabel(tab.labelKey)}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
-      </div>
+    <Tabs value={activeTab}>
+      <TabsList className="h-9 p-1 bg-muted/50 rounded-lg flex gap-0.5">
+        {tabs.map((tab) => (
+          <TabsTrigger
+            key={tab.id}
+            value={tab.id}
+            onClick={() => {
+              triggerHapticFeedback();
+              onTabChange(tab.id);
+            }}
+            className={cn(
+              "flex items-center justify-center w-9 h-7 rounded-md",
+              "transition-all duration-200",
+              "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+              "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground"
+            )}
+            title={getTabLabel(tab.labelKey)}
+          >
+            {tab.icon}
+          </TabsTrigger>
+        ))}
+      </TabsList>
     </Tabs>
   );
 });

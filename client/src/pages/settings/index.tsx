@@ -194,14 +194,13 @@ function SettingsPageContent() {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <h1 className="text-lg font-semibold flex-1">{t.settings.title}</h1>
+            <SettingsTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
           </div>
         </div>
       </header>
-
-      <SettingsTabs
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
 
       <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
         <AnimatedContainer className="space-y-4">
