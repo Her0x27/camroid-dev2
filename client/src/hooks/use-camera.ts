@@ -4,6 +4,69 @@ import { logger } from "@/lib/logger";
 import { usePageVisibility } from "@/hooks/use-page-visibility";
 import type { CameraResolution } from "@shared/schema";
 
+// Standard 16:9 resolutions
+const STANDARD_16x9_RESOLUTIONS: Array<{ label: string; value: CameraResolution; width: number; height: number }> = [
+  { label: "4K (3840×2160)", value: "4k", width: 3840, height: 2160 },
+  { label: "Full HD (1920×1080)", value: "1080p", width: 1920, height: 1080 },
+  { label: "HD (1280×720)", value: "720p", width: 1280, height: 720 },
+  { label: "SD (640×360)", value: "480p", width: 640, height: 360 },
+];
+
+export async function queryCameraResolutions(facingMode: "user" | "environment" = "environment"): Promise<SupportedResolution[]> {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode, width: { ideal: 4096 }, height: { ideal: 2160 } },
+      audio: false,
+    });
+    
+    const videoTrack = stream.getVideoTracks()[0];
+    if (!videoTrack) {
+      stream.getTracks().forEach(t => t.stop());
+      return getDefaultResolutions();
+    }
+    
+    const caps = videoTrack.getCapabilities() as MediaTrackCapabilities & {
+      width?: { min?: number; max?: number };
+      height?: { min?: number; max?: number };
+    };
+    
+    const maxWidth = caps.width?.max || 1920;
+    const maxHeight = caps.height?.max || 1080;
+    
+    // Stop the stream immediately after getting capabilities
+    stream.getTracks().forEach(t => t.stop());
+    
+    const supportedResolutions: SupportedResolution[] = STANDARD_16x9_RESOLUTIONS
+      .filter(res => res.width <= maxWidth && res.height <= maxHeight)
+      .map(res => ({
+        ...res,
+        aspectRatio: "16:9",
+      }));
+    
+    // Add "auto" option at the beginning
+    supportedResolutions.unshift({
+      label: `Auto (${maxWidth}×${maxHeight})`,
+      value: "auto" as CameraResolution,
+      width: maxWidth,
+      height: maxHeight,
+      aspectRatio: Math.abs(maxWidth / maxHeight - 16/9) < 0.1 ? "16:9" : 
+                   Math.abs(maxWidth / maxHeight - 4/3) < 0.1 ? "4:3" : "other",
+    });
+    
+    return supportedResolutions;
+  } catch (e) {
+    logger.warn("Failed to query camera resolutions", e);
+    return getDefaultResolutions();
+  }
+}
+
+function getDefaultResolutions(): SupportedResolution[] {
+  return [
+    { label: "Auto", value: "auto", width: 1920, height: 1080, aspectRatio: "16:9" },
+    ...STANDARD_16x9_RESOLUTIONS.map(res => ({ ...res, aspectRatio: "16:9" as const })),
+  ];
+}
+
 const RESOLUTION_CONSTRAINTS: Record<CameraResolution, { width: MediaTrackConstraintSet["width"]; height: MediaTrackConstraintSet["height"] }> = {
   "4k": {
     width: { ideal: 3840, max: 3840 },
@@ -39,9 +102,18 @@ export interface CameraDevice {
   groupId: string;
 }
 
+export interface SupportedResolution {
+  label: string;
+  value: CameraResolution;
+  width: number;
+  height: number;
+  aspectRatio: string;
+}
+
 export interface CameraCapabilities {
   torch: boolean;
   focusMode: string[];
+  supportedResolutions: SupportedResolution[];
 }
 
 type PhotoMetadata = WatermarkMetadata;
@@ -107,11 +179,43 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
       const caps = track.getCapabilities() as MediaTrackCapabilities & {
         torch?: boolean;
         focusMode?: string[];
+        width?: { min?: number; max?: number };
+        height?: { min?: number; max?: number };
       };
+      
+      // Define standard 16:9 resolutions to check
+      const standard16x9Resolutions: Array<{ label: string; value: CameraResolution; width: number; height: number }> = [
+        { label: "4K (3840×2160)", value: "4k", width: 3840, height: 2160 },
+        { label: "Full HD (1920×1080)", value: "1080p", width: 1920, height: 1080 },
+        { label: "HD (1280×720)", value: "720p", width: 1280, height: 720 },
+        { label: "SD (640×360)", value: "480p", width: 640, height: 360 },
+      ];
+      
+      // Check which resolutions are supported by the camera
+      const maxWidth = caps.width?.max || 1920;
+      const maxHeight = caps.height?.max || 1080;
+      
+      const supportedResolutions: SupportedResolution[] = standard16x9Resolutions
+        .filter(res => res.width <= maxWidth && res.height <= maxHeight)
+        .map(res => ({
+          ...res,
+          aspectRatio: "16:9",
+        }));
+      
+      // Always add "auto" option at the beginning
+      supportedResolutions.unshift({
+        label: `Auto (${maxWidth}×${maxHeight})`,
+        value: "auto" as CameraResolution,
+        width: maxWidth,
+        height: maxHeight,
+        aspectRatio: Math.abs(maxWidth / maxHeight - 16/9) < 0.1 ? "16:9" : 
+                     Math.abs(maxWidth / maxHeight - 4/3) < 0.1 ? "4:3" : "other",
+      });
       
       const fullCaps: CameraCapabilities = {
         torch: !!caps.torch,
         focusMode: caps.focusMode || [],
+        supportedResolutions,
       };
       setCapabilities(fullCaps);
     } catch (e) {

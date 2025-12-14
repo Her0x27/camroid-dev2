@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { 
   Sun, 
   Palette,
@@ -13,7 +13,8 @@ import {
   MapPin,
   Image,
   Contrast,
-  Eraser
+  Eraser,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -34,6 +35,7 @@ import {
 } from "../components/SettingItem";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme-context";
+import { useCameraResolutions } from "@/hooks/use-camera-resolutions";
 import type { Settings, CameraResolution, StabilizationSettings, EnhancementSettings } from "@shared/schema";
 
 interface LanguageOption {
@@ -64,14 +66,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
 }: MainSettingsTabProps) {
   const { t } = useI18n();
   const { themeId, setThemeById, availableThemes } = useTheme();
-
-  const resolutionOptions = useMemo(() => [
-    { value: "auto" as CameraResolution, label: t.settings.camera.auto },
-    { value: "4k" as CameraResolution, label: t.settings.camera.res4k },
-    { value: "1080p" as CameraResolution, label: t.settings.camera.res1080p },
-    { value: "720p" as CameraResolution, label: t.settings.camera.res720p },
-    { value: "480p" as CameraResolution, label: t.settings.camera.res480p },
-  ], [t]);
+  const { resolutions: cameraResolutions, isLoading: resolutionsLoading } = useCameraResolutions();
 
   return (
     <div className="space-y-4">
@@ -190,14 +185,22 @@ export const MainSettingsTab = memo(function MainSettingsTab({
               onValueChange={(value) =>
                 updateSettings({ cameraResolution: value as CameraResolution })
               }
+              disabled={resolutionsLoading}
             >
               <SelectTrigger className="h-11" data-testid="select-camera-resolution">
-                <SelectValue />
+                {resolutionsLoading ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Загрузка...</span>
+                  </div>
+                ) : (
+                  <SelectValue />
+                )}
               </SelectTrigger>
               <SelectContent>
-                {resolutionOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                {cameraResolutions.map((res) => (
+                  <SelectItem key={res.value} value={res.value}>
+                    {res.label} {res.aspectRatio !== "16:9" && `(${res.aspectRatio})`}
                   </SelectItem>
                 ))}
               </SelectContent>
