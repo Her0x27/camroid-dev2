@@ -153,7 +153,7 @@ export const watermarkPreviewConfigSchema = z.object({
   // Background
   backgroundColor: z.string().default("#3b82f6"),
   backgroundOpacity: z.number().min(0).max(100).default(70),
-  width: z.number().min(10).max(100).default(35), // width as % of viewport
+  width: z.number().min(10).max(100).default(40), // width as % of viewport
   height: z.number().min(5).max(50).default(5), // height as % of viewport
   autoSize: z.boolean().default(false), // auto-size based on content
   // Font
