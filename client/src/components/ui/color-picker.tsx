@@ -318,7 +318,7 @@ export function ColorPicker({
                 type="button"
                 className={cn(
                   "w-6 h-6 rounded-md border border-border transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1",
-                  value.toLowerCase() === color.toLowerCase() && "ring-2 ring-primary ring-offset-1"
+                  value?.toLowerCase() === color.toLowerCase() && "ring-2 ring-primary ring-offset-1"
                 )}
                 style={{ backgroundColor: color }}
                 onClick={() => handlePresetClick(color)}
