@@ -2,12 +2,6 @@ import { memo, useState, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { Camera, Settings2, Images, FileText, CloudUpload, Palette } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface CameraControlsProps {
   onCapture: () => void;
@@ -223,9 +217,8 @@ const RightControls = memo(function RightControls({
   onNavigateSettings,
   hasNote,
 }: RightControlsProps) {
-  const { t } = useI18n();
   const [, navigate] = useLocation();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showEditorIcon, setShowEditorIcon] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPress = useRef(false);
 
@@ -233,7 +226,7 @@ const RightControls = memo(function RightControls({
     isLongPress.current = false;
     longPressTimer.current = setTimeout(() => {
       isLongPress.current = true;
-      setDropdownOpen(true);
+      setShowEditorIcon(true);
     }, 500);
   }, []);
 
@@ -255,9 +248,13 @@ const RightControls = memo(function RightControls({
   }, []);
 
   const handleVisualEditor = useCallback(() => {
-    setDropdownOpen(false);
+    setShowEditorIcon(false);
     navigate("/ve-watermark");
   }, [navigate]);
+
+  const handleEditorIconPointerLeave = useCallback(() => {
+    setShowEditorIcon(false);
+  }, []);
 
   return (
     <div className="absolute right-4 flex items-center gap-3">
@@ -272,28 +269,30 @@ const RightControls = memo(function RightControls({
         )}
       </button>
 
-      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen} modal={false}>
-        <DropdownMenuTrigger asChild>
+      <div className="relative">
+        {showEditorIcon && (
           <button
-            className="text-primary flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
-            onPointerDown={handlePointerDown}
-            onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerLeave}
-            onPointerCancel={handlePointerLeave}
-            onClick={(e) => e.preventDefault()}
-            onContextMenu={(e) => e.preventDefault()}
-            data-testid="button-settings"
+            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 text-primary flex items-center justify-center w-14 h-14 bg-card/80 backdrop-blur-sm rounded-full shadow-lg border border-primary/30 transition-all animate-in fade-in zoom-in-90 duration-200"
+            onClick={handleVisualEditor}
+            onPointerLeave={handleEditorIconPointerLeave}
+            data-testid="button-visual-editor"
           >
-            <Settings2 className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+            <Palette className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
           </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-[200px]">
-          <DropdownMenuItem onClick={handleVisualEditor} className="gap-2">
-            <Palette className="w-4 h-4" />
-            {t.camera.visualEditor}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        )}
+        <button
+          className="text-primary flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerLeave}
+          onPointerCancel={handlePointerLeave}
+          onClick={(e) => e.preventDefault()}
+          onContextMenu={(e) => e.preventDefault()}
+          data-testid="button-settings"
+        >
+          <Settings2 className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+        </button>
+      </div>
     </div>
   );
 });
