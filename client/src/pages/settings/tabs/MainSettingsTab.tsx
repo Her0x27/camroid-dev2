@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { LockedSlider } from "@/components/ui/locked-slider";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -37,6 +37,23 @@ import { useI18n } from "@/lib/i18n";
 import { useTheme } from "@/lib/theme-context";
 import { useCameraResolutions } from "@/hooks/use-camera-resolutions";
 import type { Settings, CameraResolution, StabilizationSettings, EnhancementSettings } from "@shared/schema";
+
+type SliderType = 'sharpness' | 'denoise' | 'contrast';
+
+function getDynamicDescription(
+  type: SliderType, 
+  value: number, 
+  t: { settings: { imageQuality: { sliderDescriptions?: Record<SliderType, { off: string; low: string; medium: string; high: string; max: string }> } } }
+): string {
+  const descriptions = t.settings.imageQuality.sliderDescriptions?.[type];
+  if (!descriptions) return '';
+  
+  if (value === 0) return descriptions.off;
+  if (value <= 30) return descriptions.low;
+  if (value <= 60) return descriptions.medium;
+  if (value <= 80) return descriptions.high;
+  return descriptions.max;
+}
 
 interface LanguageOption {
   code: string;
@@ -220,7 +237,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             }}
             testId="setting-quality"
           >
-            <LockedSlider
+            <Slider
               value={[settings.photoQuality]}
               onValueChange={([value]) => updateSettings({ photoQuality: value })}
               min={50}
@@ -244,7 +261,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             }}
             testId="setting-accuracy"
           >
-            <LockedSlider
+            <Slider
               value={[settings.accuracyLimit || 20]}
               onValueChange={([value]) => updateSettings({ accuracyLimit: value })}
               min={5}
@@ -293,7 +310,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
               }}
               testId="setting-stability-threshold"
             >
-              <LockedSlider
+              <Slider
                 value={[settings.stabilization.threshold]}
                 onValueChange={([value]) => updateStabilization({ threshold: value })}
                 min={30}
@@ -323,12 +340,12 @@ export const MainSettingsTab = memo(function MainSettingsTab({
               <SettingSliderItem
                 icon={<Focus className="w-5 h-5" />}
                 title={t.settings.imageQuality.sharpness}
-                description={t.settings.imageQuality.sharpnessDesc || "Уровень повышения резкости изображения"}
+                description={getDynamicDescription('sharpness', settings.enhancement.sharpness, t)}
                 value={settings.enhancement.sharpness}
                 unit="%"
                 testId="setting-sharpness"
               >
-                <LockedSlider
+                <Slider
                   value={[settings.enhancement.sharpness]}
                   onValueChange={([value]) => updateEnhancement({ sharpness: value })}
                   min={0}
@@ -342,12 +359,12 @@ export const MainSettingsTab = memo(function MainSettingsTab({
               <SettingSliderItem
                 icon={<Eraser className="w-5 h-5" />}
                 title={t.settings.imageQuality.denoise}
-                description={t.settings.imageQuality.denoiseDesc || "Уровень подавления цифрового шума"}
+                description={getDynamicDescription('denoise', settings.enhancement.denoise, t)}
                 value={settings.enhancement.denoise}
                 unit="%"
                 testId="setting-denoise"
               >
-                <LockedSlider
+                <Slider
                   value={[settings.enhancement.denoise]}
                   onValueChange={([value]) => updateEnhancement({ denoise: value })}
                   min={0}
@@ -361,12 +378,12 @@ export const MainSettingsTab = memo(function MainSettingsTab({
               <SettingSliderItem
                 icon={<Contrast className="w-5 h-5" />}
                 title={t.settings.imageQuality.contrast}
-                description={t.settings.imageQuality.contrastDesc || "Уровень повышения контрастности"}
+                description={getDynamicDescription('contrast', settings.enhancement.contrast, t)}
                 value={settings.enhancement.contrast}
                 unit="%"
                 testId="setting-contrast"
               >
-                <LockedSlider
+                <Slider
                   value={[settings.enhancement.contrast]}
                   onValueChange={([value]) => updateEnhancement({ contrast: value })}
                   min={0}

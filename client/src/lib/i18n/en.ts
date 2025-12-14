@@ -251,6 +251,29 @@ export const en = {
       stabilityIndicator: "Stability",
       waitingForStability: "Hold steady...",
       stable: "Stable",
+      sliderDescriptions: {
+        sharpness: {
+          off: "No processing — original sharpness",
+          low: "Slight edge and contour enhancement",
+          medium: "Noticeable texture detail enhancement",
+          high: "Strong clarity, fine detail emphasis",
+          max: "Maximum sharpness, artifacts possible",
+        },
+        denoise: {
+          off: "No processing",
+          low: "Minimal smoothing, detail preservation",
+          medium: "Moderate grain reduction",
+          high: "Strong smoothing, possible fine detail loss",
+          max: "Maximum noise reduction, soft image",
+        },
+        contrast: {
+          off: "No changes",
+          low: "Slight tonal depth enhancement",
+          medium: "Pronounced shadows and highlights",
+          high: "Rich tones, deep blacks",
+          max: "Maximum contrast, possible midtone loss",
+        },
+      },
     },
     
     cloud: {
