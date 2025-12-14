@@ -152,6 +152,8 @@ export const ru: Translations = {
     },
     
     sections: {
+      appearance: "Внешний вид",
+      controls: "Управление",
       cameraParams: "Параметры камеры",
       imageQuality: "Качество изображения",
     },

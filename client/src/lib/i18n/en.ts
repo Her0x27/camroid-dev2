@@ -150,6 +150,8 @@ export const en = {
     },
     
     sections: {
+      appearance: "Appearance",
+      controls: "Controls",
       cameraParams: "Camera Parameters",
       imageQuality: "Image Quality",
     },

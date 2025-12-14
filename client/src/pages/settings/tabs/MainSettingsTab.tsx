@@ -1,7 +1,6 @@
 import { memo, useMemo } from "react";
 import { 
   Sun, 
-  Languages, 
   Volume2, 
   VolumeX, 
   RotateCcw, 
@@ -9,8 +8,6 @@ import {
   Sparkles,
   Target,
   Focus,
-  Waves,
-  SunMedium,
   MapPin
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -68,90 +65,96 @@ export const MainSettingsTab = memo(function MainSettingsTab({
   ], [t]);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-3 p-4 rounded-xl bg-card border">
-          <Label className="flex items-center gap-2 text-sm font-medium">
-            <Sun className="w-4 h-4 text-primary" />
-            {t.settings.theme.mode}
-          </Label>
-          <Select value={themeId} onValueChange={setThemeById}>
-            <SelectTrigger data-testid="select-theme">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {availableThemes.map((themeOption) => (
-                <SelectItem key={themeOption.id} value={themeOption.id}>
-                  {themeOption.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-4">
+      <SettingsCard
+        icon={<Sun className="w-5 h-5" />}
+        title={t.settings.sections?.appearance || "Внешний вид"}
+        testId="section-appearance"
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="text-sm">{t.settings.theme.mode}</Label>
+            <Select value={themeId} onValueChange={setThemeById}>
+              <SelectTrigger data-testid="select-theme">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {availableThemes.map((themeOption) => (
+                  <SelectItem key={themeOption.id} value={themeOption.id}>
+                    {themeOption.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-3 p-4 rounded-xl bg-card border">
-          <Label className="flex items-center gap-2 text-sm font-medium">
-            <Languages className="w-4 h-4 text-primary" />
-            {t.settings.general.language}
-          </Label>
-          <Select
-            value={language}
-            onValueChange={(val) => setLanguage(val as "en" | "ru")}
-          >
-            <SelectTrigger data-testid="select-language">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {availableLanguages.map((lang) => (
-                <SelectItem key={lang.code} value={lang.code}>
-                  {lang.nativeName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="space-y-2">
+            <Label className="text-sm">{t.settings.general.language}</Label>
+            <Select
+              value={language}
+              onValueChange={(val) => setLanguage(val as "en" | "ru")}
+            >
+              <SelectTrigger data-testid="select-language">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {availableLanguages.map((lang) => (
+                  <SelectItem key={lang.code} value={lang.code}>
+                    {lang.nativeName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </div>
+      </SettingsCard>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="flex items-center justify-between p-4 rounded-xl bg-card border">
-          <Label htmlFor="sound-enabled" className="flex items-center gap-3 cursor-pointer">
-            {settings.soundEnabled ? (
-              <Volume2 className="w-4 h-4 text-primary" />
-            ) : (
-              <VolumeX className="w-4 h-4 text-muted-foreground" />
-            )}
-            <div>
-              <span className="text-sm font-medium">{t.settings.general.captureSound}</span>
-              <p className="text-xs text-muted-foreground">{t.settings.general.captureSoundDesc}</p>
-            </div>
-          </Label>
-          <Switch
-            id="sound-enabled"
-            checked={settings.soundEnabled}
-            onCheckedChange={(checked) => updateSettings({ soundEnabled: checked })}
-            data-testid="switch-sound"
-          />
-        </div>
+      <SettingsCard
+        icon={<Volume2 className="w-5 h-5" />}
+        title={t.settings.sections?.controls || "Управление"}
+        testId="section-controls"
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="sound-enabled" className="flex items-center gap-2 cursor-pointer">
+              {settings.soundEnabled ? (
+                <Volume2 className="w-4 h-4 text-primary" />
+              ) : (
+                <VolumeX className="w-4 h-4 text-muted-foreground" />
+              )}
+              <div>
+                <span className="text-sm">{t.settings.general.captureSound}</span>
+                <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.general.captureSoundDesc}</p>
+              </div>
+            </Label>
+            <Switch
+              id="sound-enabled"
+              checked={settings.soundEnabled}
+              onCheckedChange={(checked) => updateSettings({ soundEnabled: checked })}
+              data-testid="switch-sound"
+            />
+          </div>
 
-        <div className="flex items-center justify-center p-4 rounded-xl bg-card border">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={onShowResetDialog}
-            data-testid="button-reset-settings"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            {t.settings.reset.resetAllSettings}
-          </Button>
+          <div className="flex items-center">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={onShowResetDialog}
+              data-testid="button-reset-settings"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              {t.settings.reset.resetAllSettings}
+            </Button>
+          </div>
         </div>
-      </div>
+      </SettingsCard>
 
       <SettingsCard
         icon={<Camera className="w-5 h-5" />}
         title={t.settings.sections?.cameraParams || "Параметры камеры"}
         testId="section-camera-params"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label className="text-sm">{t.settings.camera.resolution}</Label>
             <Select
@@ -171,7 +174,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">{t.settings.camera.resolutionDesc}</p>
+            <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.camera.resolutionDesc}</p>
           </div>
 
           <div className="space-y-2">
@@ -189,50 +192,31 @@ export const MainSettingsTab = memo(function MainSettingsTab({
               step={1}
               data-testid="slider-photo-quality"
             />
-            <p className="text-xs text-muted-foreground">{t.settings.camera.qualityDesc}</p>
+            <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.camera.qualityDesc}</p>
           </div>
         </div>
 
         <Separator />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="gps-enabled" className="flex items-center gap-2 cursor-pointer">
+            <Label className="flex items-center gap-2 text-sm">
               <MapPin className="w-4 h-4 text-primary" />
-              <div>
-                <span className="text-sm">{t.settings.capture.gpsLocation}</span>
-                <p className="text-xs text-muted-foreground">{t.settings.capture.gpsLocationDesc}</p>
-              </div>
+              {t.settings.capture.accuracyLimit}
             </Label>
-            <Switch
-              id="gps-enabled"
-              checked={settings.gpsEnabled}
-              onCheckedChange={(checked) => updateSettings({ gpsEnabled: checked })}
-              data-testid="switch-gps"
-            />
+            <span className="text-sm text-muted-foreground font-mono">
+              {settings.accuracyLimit || 20}m
+            </span>
           </div>
-
-          {settings.gpsEnabled && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="flex items-center gap-2 text-sm">
-                  <Target className="w-4 h-4" />
-                  {t.settings.capture.accuracyLimit}
-                </Label>
-                <span className="text-sm text-muted-foreground font-mono">
-                  {settings.accuracyLimit || 20}m
-                </span>
-              </div>
-              <LockedSlider
-                value={[settings.accuracyLimit || 20]}
-                onValueChange={([value]) => updateSettings({ accuracyLimit: value })}
-                min={5}
-                max={100}
-                step={5}
-                data-testid="slider-accuracy-limit"
-              />
-            </div>
-          )}
+          <LockedSlider
+            value={[settings.accuracyLimit || 20]}
+            onValueChange={([value]) => updateSettings({ accuracyLimit: value })}
+            min={5}
+            max={100}
+            step={5}
+            data-testid="slider-accuracy-limit"
+          />
+          <p className="text-xs text-muted-foreground">{t.settings.capture.accuracyLimitDesc || "Максимальная погрешность GPS при съёмке"}</p>
         </div>
       </SettingsCard>
 
@@ -241,13 +225,13 @@ export const MainSettingsTab = memo(function MainSettingsTab({
         title={t.settings.sections?.imageQuality || "Качество изображения"}
         testId="section-image-quality"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="stabilization-enabled" className="flex items-center gap-2 cursor-pointer">
               <Target className="w-4 h-4 text-primary" />
               <div>
                 <span className="text-sm">{t.settings.imageQuality.stabilization}</span>
-                <p className="text-xs text-muted-foreground">{t.settings.imageQuality.stabilizationDesc}</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.imageQuality.stabilizationDesc}</p>
               </div>
             </Label>
             <Switch
@@ -285,7 +269,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             <Focus className="w-4 h-4 text-primary" />
             <div>
               <span className="text-sm">{t.settings.imageQuality.enhancement}</span>
-              <p className="text-xs text-muted-foreground">{t.settings.imageQuality.enhancementDesc}</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">{t.settings.imageQuality.enhancementDesc}</p>
             </div>
           </Label>
           <Switch
@@ -299,14 +283,13 @@ export const MainSettingsTab = memo(function MainSettingsTab({
         {settings.enhancement.enabled && (
           <>
             <Separator />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-2 text-sm">
-                    <Focus className="w-4 h-4" />
+                  <Label className="text-sm">
                     {t.settings.imageQuality.sharpness}
                   </Label>
-                  <span className="text-sm text-muted-foreground font-mono">
+                  <span className="text-xs text-muted-foreground font-mono">
                     {settings.enhancement.sharpness}%
                   </span>
                 </div>
@@ -322,11 +305,10 @@ export const MainSettingsTab = memo(function MainSettingsTab({
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-2 text-sm">
-                    <Waves className="w-4 h-4" />
+                  <Label className="text-sm">
                     {t.settings.imageQuality.denoise}
                   </Label>
-                  <span className="text-sm text-muted-foreground font-mono">
+                  <span className="text-xs text-muted-foreground font-mono">
                     {settings.enhancement.denoise}%
                   </span>
                 </div>
@@ -342,11 +324,10 @@ export const MainSettingsTab = memo(function MainSettingsTab({
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="flex items-center gap-2 text-sm">
-                    <SunMedium className="w-4 h-4" />
+                  <Label className="text-sm">
                     {t.settings.imageQuality.contrast}
                   </Label>
-                  <span className="text-sm text-muted-foreground font-mono">
+                  <span className="text-xs text-muted-foreground font-mono">
                     {settings.enhancement.contrast}%
                   </span>
                 </div>
