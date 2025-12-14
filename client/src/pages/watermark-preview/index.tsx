@@ -186,17 +186,20 @@ export default function WatermarkPreviewPage() {
 
   const handleReticleSettingsChange = useCallback(
     (updates: Partial<ReticleSettings>) => {
-      setReticleSettings((prev) => ({ ...prev, ...updates }));
-      updateReticlePreview({
-        shape: updates.shape,
-        color: updates.color,
-        size: updates.size,
-        strokeWidth: updates.strokeWidth,
-        opacity: updates.opacity,
-        positionX: updates.position?.x,
-        positionY: updates.position?.y,
-        autoColor: updates.autoColor,
-        colorScheme: updates.colorScheme,
+      setReticleSettings((prev) => {
+        const next = { ...prev, ...updates };
+        updateReticlePreview({
+          shape: next.shape,
+          color: next.color,
+          size: next.size,
+          strokeWidth: next.strokeWidth,
+          opacity: next.opacity,
+          positionX: next.position?.x,
+          positionY: next.position?.y,
+          autoColor: next.autoColor,
+          colorScheme: next.colorScheme,
+        });
+        return next;
       });
     },
     [updateReticlePreview]
