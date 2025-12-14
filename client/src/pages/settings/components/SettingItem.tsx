@@ -48,7 +48,7 @@ export const SettingItem = memo(function SettingItem({
     >
       <div className={cn(
         "flex gap-4",
-        vertical ? "flex-col" : "flex-col md:flex-row md:items-start"
+        vertical ? "flex-col" : "flex-row items-start"
       )}>
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -81,9 +81,8 @@ export const SettingItem = memo(function SettingItem({
         </div>
 
         <div className={cn(
-          "shrink-0 flex items-center justify-end",
-          vertical ? "w-full" : "w-full md:w-auto",
-          !vertical && "mt-3 md:mt-0"
+          "shrink-0 flex items-center",
+          vertical ? "w-full justify-end" : "w-auto ml-auto"
         )}>
           {children}
         </div>
