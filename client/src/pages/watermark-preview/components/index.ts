@@ -5,3 +5,4 @@ export type { DockPosition } from "./FloatingEditPanel";
 export { ReticleSelector } from "./ReticleSelector";
 export type { ReticleSettings } from "./ReticleSelector";
 export { ConfigExportImport } from "./ConfigExportImport";
+export { VisibilityDropdown } from "./VisibilityDropdown";

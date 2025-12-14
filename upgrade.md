@@ -10,12 +10,12 @@
 ## Чек-лист задач v50
 
 - [x] Обновить upgrade.md — добавить секцию v50
-- [ ] Исправить мигание панелей (stopPropagation + убрать дубль touch/click)
-- [ ] Создать VisibilityDropdown с выпадающим меню
-- [ ] Переместить иконку меню в ряд с импорт/экспорт
-- [ ] Добавить защиту слайдеров
-- [ ] Обновить таймштамп — дата и время
-- [ ] Финальное обновление upgrade.md
+- [x] Исправить мигание панелей (stopPropagation + убрать дубль touch/click)
+- [x] Создать VisibilityDropdown с выпадающим меню
+- [x] Переместить иконку меню в ряд с импорт/экспорт
+- [x] Добавить защиту слайдеров
+- [x] Обновить таймштамп — дата и время
+- [x] Финальное обновление upgrade.md
 
 ---
 
@@ -24,10 +24,32 @@
 | Задача | Статус | Дата |
 |--------|--------|------|
 | upgrade.md | ✅ Готово | 14.12.2025 |
-| Мигание панелей | ⏳ В процессе | 14.12.2025 |
-| VisibilityDropdown | ⏳ Ожидает | - |
-| Слайдеры | ⏳ Ожидает | - |
-| Таймштамп | ⏳ Ожидает | - |
+| Мигание панелей | ✅ Готово | 14.12.2025 |
+| VisibilityDropdown | ✅ Готово | 14.12.2025 |
+| Слайдеры | ✅ Готово | 14.12.2025 |
+| Таймштамп | ✅ Готово | 14.12.2025 |
+
+## Изменения v50
+
+### client/src/pages/watermark-preview/index.tsx
+- **handleBackgroundClick:** добавлена проверка `e.target === e.currentTarget` для предотвращения закрытия панели при клике на дочерние элементы
+- **Reticle click:** заменены `onClick` + `onTouchStart` на единый `onPointerUp` с `stopPropagation`
+- **Toggle buttons:** удалены кнопки снизу экрана, добавлен VisibilityDropdown в header
+- **Импорты:** удалены Tooltip компоненты, добавлен VisibilityDropdown
+
+### client/src/pages/watermark-preview/components/InteractiveWatermark.tsx
+- **handleEnd:** добавлен `e.stopPropagation()` для предотвращения всплытия события
+- **Таймштамп:** изменён формат с `toLocaleTimeString()` на `toLocaleString()` с датой и временем
+
+### client/src/pages/watermark-preview/components/VisibilityDropdown.tsx
+- **Новый компонент:** выпадающее меню для управления видимостью элементов
+- **Иконка Eye:** показывает количество активных элементов
+- **DropdownMenu:** список с чекбоксами для каждого элемента
+
+### client/src/components/ui/slider.tsx
+- **Обёртка:** добавлена защитная обёртка с `onTouchStart/onTouchMove` stopPropagation
+- **Увеличенные размеры:** track h-3, thumb h-8 w-8 для лучшего touch-взаимодействия
+- **Padding:** увеличен padding для защиты от случайных касаний
 
 ---
 

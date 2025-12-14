@@ -260,7 +260,8 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
     [getEventPosition, clearLongPressTimer, calculateNewPosition, onDrag]
   );
 
-  const handleEnd = useCallback(() => {
+  const handleEnd = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    e.stopPropagation();
     clearLongPressTimer();
 
     if (isDraggingRef.current) {

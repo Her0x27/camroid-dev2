@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, MapPin, Compass, Crosshair, MessageSquare, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import previewBackground from "@/assets/preview-background.jpg";
 import { ReticleShapeRenderer } from "./components/ReticleShapes";
 import type { ReticleShape } from "./types";
@@ -13,6 +12,7 @@ import {
   FloatingEditPanel,
   ReticleSelector,
   ConfigExportImport,
+  VisibilityDropdown,
   type WatermarkPosition,
   type WatermarkStyle,
   type ReticleSettings,
@@ -386,6 +386,10 @@ export default function WatermarkPreviewPage() {
           reticleConfig={reticleConfig}
           onImport={handleImportConfig}
         />
+        <VisibilityDropdown
+          items={toggleButtons}
+          onToggle={handleToggle}
+        />
       </div>
 
       <FloatingEditPanel
@@ -408,34 +412,7 @@ export default function WatermarkPreviewPage() {
         onDockPositionChange={setReticleDockPosition}
       />
 
-      <TooltipProvider delayDuration={300}>
-        <div 
-          className="absolute bottom-4 z-50 flex items-center gap-1 transition-all duration-300 ease-out"
-          style={{
-            left: controlsOnLeft ? '1rem' : 'auto',
-            right: controlsOnLeft ? 'auto' : '1rem',
-          }}
-        >
-          {toggleButtons.map((btn) => (
-            <Tooltip key={btn.key}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={btn.active ? "default" : "outline"}
-                  size="icon"
-                  className={`h-10 w-10 backdrop-blur-sm ${btn.active ? "" : "bg-background/80"}`}
-                  onClick={() => handleToggle(btn.key)}
-                >
-                  <btn.icon className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>{btn.title}</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </div>
-      </TooltipProvider>
-
+      
       {isDragging && (
         <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-background/90 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium shadow-lg z-50">
           Перетаскивание...
