@@ -143,6 +143,17 @@ export const en = {
   settings: {
     title: "Settings",
     
+    tabs: {
+      main: "Main",
+      privacy: "Privacy",
+      storage: "Storage",
+    },
+    
+    sections: {
+      cameraParams: "Camera Parameters",
+      imageQuality: "Image Quality",
+    },
+    
     general: {
       title: "General",
       description: "Basic application settings",

@@ -145,6 +145,17 @@ export const ru: Translations = {
   settings: {
     title: "Настройки",
     
+    tabs: {
+      main: "Основные",
+      privacy: "Приватность",
+      storage: "Хранилище",
+    },
+    
+    sections: {
+      cameraParams: "Параметры камеры",
+      imageQuality: "Качество изображения",
+    },
+    
     general: {
       title: "Основные",
       description: "Базовые настройки приложения",
