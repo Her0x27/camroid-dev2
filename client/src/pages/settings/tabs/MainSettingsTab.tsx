@@ -83,7 +83,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             testId="setting-theme"
           >
             <Select value={themeId} onValueChange={setThemeById}>
-              <SelectTrigger className="h-11" data-testid="select-theme">
+              <SelectTrigger data-testid="select-theme">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -106,7 +106,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
               value={language}
               onValueChange={(val) => setLanguage(val as "en" | "ru")}
             >
-              <SelectTrigger className="h-11" data-testid="select-language">
+              <SelectTrigger data-testid="select-language">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -187,7 +187,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
               }
               disabled={resolutionsLoading}
             >
-              <SelectTrigger className="h-11" data-testid="select-camera-resolution">
+              <SelectTrigger data-testid="select-camera-resolution">
                 {resolutionsLoading ? (
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />

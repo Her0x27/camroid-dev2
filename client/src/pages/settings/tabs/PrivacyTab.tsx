@@ -204,12 +204,12 @@ export const PrivacyTab = memo(function PrivacyTab({
                     updatePrivacySettings({ selectedModule: value });
                   }}
                 >
-                  <SelectTrigger data-testid="select-module" className="min-h-[44px]">
+                  <SelectTrigger data-testid="select-module">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {privacyModuleRegistry.getAll().map((module) => (
-                      <SelectItem key={module.id} value={module.id} className="min-h-[44px]">
+                      <SelectItem key={module.id} value={module.id}>
                         <span className="flex items-center gap-2">
                           <module.icon className="w-4 h-4" />
                           {module.title}
@@ -301,12 +301,12 @@ export const PrivacyTab = memo(function PrivacyTab({
                 value={privacySettings.gestureType}
                 onValueChange={(value) => updatePrivacySettings({ gestureType: value as 'patternUnlock' | 'severalFingers' })}
               >
-                <SelectTrigger data-testid="select-gesture-type" className="min-h-[44px]">
+                <SelectTrigger data-testid="select-gesture-type">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patternUnlock" className="min-h-[44px]">{t.settings.privacy.patternUnlock}</SelectItem>
-                  <SelectItem value="severalFingers" className="min-h-[44px]">{t.settings.privacy.severalFingers}</SelectItem>
+                  <SelectItem value="patternUnlock">{t.settings.privacy.patternUnlock}</SelectItem>
+                  <SelectItem value="severalFingers">{t.settings.privacy.severalFingers}</SelectItem>
                 </SelectContent>
               </Select>
             </SettingSelectItem>
