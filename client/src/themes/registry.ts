@@ -1,23 +1,10 @@
+import { BaseRegistry } from "@/lib/base-registry";
 import type { ThemeConfig } from "./types";
 
-class ThemeRegistry {
-  private themes: Map<string, ThemeConfig> = new Map();
-  private defaultThemeId: string = 'tactical-dark';
-
-  register(config: ThemeConfig): void {
-    this.themes.set(config.id, config);
-  }
-
-  get(id: string): ThemeConfig | undefined {
-    return this.themes.get(id);
-  }
-
-  getDefault(): ThemeConfig | undefined {
-    return this.themes.get(this.defaultThemeId);
-  }
-
-  getAll(): ThemeConfig[] {
-    return Array.from(this.themes.values());
+class ThemeRegistry extends BaseRegistry<ThemeConfig> {
+  constructor() {
+    super();
+    this.defaultId = 'tactical-dark';
   }
 
   getByMode(mode: 'light' | 'dark'): ThemeConfig[] {
@@ -25,13 +12,7 @@ class ThemeRegistry {
   }
 
   setDefaultThemeId(id: string): void {
-    if (this.themes.has(id)) {
-      this.defaultThemeId = id;
-    }
-  }
-
-  has(id: string): boolean {
-    return this.themes.has(id);
+    this.setDefaultId(id);
   }
 }
 

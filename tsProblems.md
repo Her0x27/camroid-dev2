@@ -25,7 +25,7 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 ### Найденные проблемы
 
-#### MEDIUM-001: Дублирование Registry классов (не исправлено)
+#### MEDIUM-001: Дублирование Registry классов (ИСПРАВЛЕНО)
 
 **Местоположение:**
 - `client/src/themes/registry.ts` — `ThemeRegistry`
@@ -34,13 +34,13 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 **Проблема:** Три практически идентичных класса с методами `register()`, `get()`, `getDefault()`, `getAll()`, `has()`. Отличаются только типами.
 
-**Решение:** Создать generic базовый класс `BaseRegistry<T>` и унаследовать от него.
+**Решение:** Создан generic базовый класс `BaseRegistry<T>` в `client/src/lib/base-registry.ts`. Все три registry унаследованы от него.
 
-**Статус:** ⏸️ Оставлено — текущая реализация работает, рефакторинг опционален
+**Статус:** ✅ Исправлено 14.12.2025
 
 ---
 
-#### LOW-001: Магические числа в отдельных файлах
+#### LOW-001: Магические числа в отдельных файлах (ИСПРАВЛЕНО)
 
 **Местоположение:**
 - `client/src/components/pattern-lock.tsx:4` — `MOVE_THROTTLE_MS = 16`
@@ -48,9 +48,11 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 **Проблема:** Локальные константы вместо централизованных в `constants.ts`.
 
-**Решение:** Вынести в `client/src/lib/constants.ts` для консистентности.
+**Решение:** Вынесено в `client/src/lib/constants.ts`:
+- `THROTTLE.MOVE_MS = 16`
+- `LONG_PRESS.DURATION_MS = 500`
 
-**Статус:** ⏸️ Опционально — значения уже константы, просто локальные
+**Статус:** ✅ Исправлено 14.12.2025
 
 ---
 
@@ -66,7 +68,7 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 ---
 
-#### LOW-003: Потенциально неиспользуемые экспорты
+#### LOW-003: Потенциально неиспользуемые экспорты (ПРОВЕРЕНО)
 
 **Местоположение:**
 - `client/src/lib/canvas-icons.ts:173` — `drawRoundedRectPath()` 
@@ -74,20 +76,25 @@ This document contains the results of a comprehensive TypeScript project audit c
 
 **Проблема:** Экспортируемые функции могут быть неиспользуемыми.
 
-**Решение:** Проверить использование, удалить если не используется.
+**Результат проверки:**
+- `drawRoundedRectPath()` — используется в `watermark-renderer.ts`
+- `getAudioContext()` — используется в `use-capture-sound.ts`
 
-**Статус:** ⏸️ Требует проверки
+**Статус:** ✅ Проверено 14.12.2025 — оба экспорта используются
 
 ---
 
 ### Чек-лист задач (14.12.2025)
 
+#### Выполнено
+
+- [x] **REGISTRY-001**: Создать generic `BaseRegistry<T>` класс для унификации трёх registry ✅
+- [x] **CONST-001**: Вынести `MOVE_THROTTLE_MS` из pattern-lock.tsx в constants.ts ✅
+- [x] **CONST-002**: Вынести `LONG_PRESS_DURATION` из InteractiveWatermark.tsx в constants.ts ✅
+- [x] **CLEAN-007**: Проверить использование `drawRoundedRectPath()` и `getAudioContext()` ✅ (оба используются)
+
 #### Опционально (низкий приоритет)
 
-- [ ] **REGISTRY-001**: Создать generic `BaseRegistry<T>` класс для унификации трёх registry
-- [ ] **CONST-001**: Вынести `MOVE_THROTTLE_MS` из pattern-lock.tsx в constants.ts
-- [ ] **CONST-002**: Вынести `LONG_PRESS_DURATION` из InteractiveWatermark.tsx в constants.ts
-- [ ] **CLEAN-007**: Проверить использование `drawRoundedRectPath()` и `getAudioContext()`
 - [ ] **CLEAN-008**: Удалить `isDocumentHidden` из usePageVisibility если не нужен
 
 ### Положительные находки

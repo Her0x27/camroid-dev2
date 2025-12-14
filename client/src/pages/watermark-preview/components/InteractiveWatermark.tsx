@@ -1,5 +1,6 @@
 import { memo, useRef, useCallback, useEffect } from "react";
 import { MapPin, Target, Mountain, Smartphone, Compass, FileText, Clock } from "lucide-react";
+import { LONG_PRESS } from "@/lib/constants";
 
 export interface WatermarkPosition {
   x: number;
@@ -119,8 +120,6 @@ interface InteractiveWatermarkProps {
   onBoundsChange?: (bounds: WatermarkBounds) => void;
 }
 
-const LONG_PRESS_DURATION = 500;
-
 export const InteractiveWatermark = memo(function InteractiveWatermark({
   position,
   style,
@@ -236,7 +235,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
       longPressTimerRef.current = setTimeout(() => {
         isDraggingRef.current = true;
         onDragStart();
-      }, LONG_PRESS_DURATION);
+      }, LONG_PRESS.DURATION_MS);
     },
     [getEventPosition, position, onDragStart]
   );

@@ -1,7 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo, memo } from "react";
-import { PATTERN_LOCK, GESTURE, TIMING } from "@/lib/constants";
-
-const MOVE_THROTTLE_MS = 16;
+import { PATTERN_LOCK, GESTURE, TIMING, THROTTLE } from "@/lib/constants";
 
 interface PatternLockProps {
   onPatternComplete: (pattern: number[]) => void;
@@ -106,7 +104,7 @@ export const PatternLock = memo(function PatternLock({
     e.preventDefault();
     
     const now = Date.now();
-    if (now - lastMoveTimeRef.current < MOVE_THROTTLE_MS) {
+    if (now - lastMoveTimeRef.current < THROTTLE.MOVE_MS) {
       return;
     }
     lastMoveTimeRef.current = now;

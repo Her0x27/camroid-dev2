@@ -75,6 +75,11 @@ export const CAMERA = {
 export const LONG_PRESS = {
   DEFAULT_DELAY_MS: 500,
   DEFAULT_MOVE_THRESHOLD_PX: 10,
+  DURATION_MS: 500,
+} as const;
+
+export const THROTTLE = {
+  MOVE_MS: 16,
 } as const;
 
 export const GALLERY = {
