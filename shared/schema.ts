@@ -131,6 +131,9 @@ export type LogoPosition = "left" | "right";
 // Note placement in watermark
 export type NotePlacement = "start" | "end";
 
+// Text alignment in watermark
+export type TextAlign = "left" | "center" | "right";
+
 // Separator position in watermark
 export type SeparatorPosition = "before-coords" | "after-coords" | "before-note" | "after-note";
 
@@ -154,7 +157,7 @@ export const watermarkPreviewConfigSchema = z.object({
   height: z.number().min(5).max(50).default(5), // height as % of viewport
   autoSize: z.boolean().default(false), // auto-size based on content
   // Font
-  fontColor: z.string().default("#22c55e"),
+  fontColor: z.string().default("#ffffff"),
   fontOpacity: z.number().min(0).max(100).default(100),
   fontSize: z.number().min(1).max(10).default(3), // fontSize as % of viewport min dimension (vmin)
   bold: z.boolean().default(false),
@@ -174,6 +177,8 @@ export const watermarkPreviewConfigSchema = z.object({
   logoOpacity: z.number().min(0).max(100).default(100),
   // Font family
   fontFamily: z.enum(["system", "roboto", "montserrat", "oswald", "playfair"]).default("montserrat"),
+  // Text alignment
+  textAlign: z.enum(["left", "center", "right"]).default("left"),
   // Separators
   separators: z.array(watermarkSeparatorSchema).default([]),
   // Visibility toggles
@@ -310,7 +315,7 @@ export const defaultSettings: Settings = {
     width: 35,
     height: 5,
     autoSize: false,
-    fontColor: "#22c55e",
+    fontColor: "#ffffff",
     fontOpacity: 100,
     fontSize: 3,
     bold: false,
@@ -325,6 +330,7 @@ export const defaultSettings: Settings = {
     logoSize: 40,
     logoOpacity: 100,
     fontFamily: "montserrat",
+    textAlign: "left",
     separators: [],
     showCoordinates: true,
     showGyroscope: true,

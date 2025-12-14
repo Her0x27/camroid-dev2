@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown, ChevronRight, ChevronUp, Palette, Type, MapPin, Move, Minus } from "lucide-react";
+import { X, Bold, Italic, Underline, Plus, Trash2, Image, ChevronDown, ChevronRight, ChevronUp, Palette, Type, MapPin, Move, Minus, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat, LogoPosition, FontFamily } from "./InteractiveWatermark";
+import type { WatermarkStyle, WatermarkPosition, SeparatorPosition, CoordinateFormat, LogoPosition, FontFamily, TextAlign } from "./InteractiveWatermark";
 
 export type DockPosition = "top" | "bottom";
 
@@ -313,6 +313,31 @@ export const FloatingEditPanel = memo(function FloatingEditPanel({
                 className="h-8 w-8"
               >
                 <Underline className="h-4 w-4" />
+              </Button>
+              <div className="w-px bg-border mx-1" />
+              <Button
+                variant={style.textAlign === "left" ? "default" : "outline"}
+                size="icon"
+                onClick={() => onStyleChange({ textAlign: "left" as TextAlign })}
+                className="h-8 w-8"
+              >
+                <AlignLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={style.textAlign === "center" ? "default" : "outline"}
+                size="icon"
+                onClick={() => onStyleChange({ textAlign: "center" as TextAlign })}
+                className="h-8 w-8"
+              >
+                <AlignCenter className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={style.textAlign === "right" ? "default" : "outline"}
+                size="icon"
+                onClick={() => onStyleChange({ textAlign: "right" as TextAlign })}
+                className="h-8 w-8"
+              >
+                <AlignRight className="h-4 w-4" />
               </Button>
             </div>
 

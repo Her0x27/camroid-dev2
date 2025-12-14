@@ -56,6 +56,8 @@ function formatCoordinates(lat: number, lng: number, format: CoordinateFormat): 
   }
 }
 
+export type TextAlign = "left" | "center" | "right";
+
 export interface WatermarkStyle {
   backgroundColor: string;
   backgroundOpacity: number;
@@ -78,6 +80,7 @@ export interface WatermarkStyle {
   logoSize: number;
   logoOpacity: number;
   fontFamily: FontFamily;
+  textAlign: TextAlign;
   showCoordinates: boolean;
   showGyroscope: boolean;
   showReticle: boolean;
@@ -292,12 +295,13 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
 
   const renderTextContent = () => (
     <div
-      className="text-center whitespace-pre-wrap break-words flex-1"
+      className="whitespace-pre-wrap break-words flex-1"
       style={{
         color: style.fontColor,
         opacity: style.fontOpacity / 100,
         fontSize: `${style.fontSize}vmin`,
         fontFamily: FONT_FAMILY_MAP[style.fontFamily ?? "system"],
+        textAlign: style.textAlign ?? "left",
         ...fontStyles,
       }}
     >

@@ -1,3 +1,61 @@
+# Upgrade: Белый текст, выравнивание и перегруппировка элементов v49
+
+## Описание
+1. Сделать в водяном знаке текст белым цветом по умолчанию
+2. Добавить настройку выравнивания текста (left|center|right) в водяном знаке
+3. Перегруппировка UI элементов под позицию панели (top/bottom)
+
+## Чек-лист задач v49
+
+- [x] Обновить upgrade.md — добавить секцию v49
+- [x] Изменить fontColor по умолчанию на #ffffff в schema.ts
+- [x] Добавить textAlign в schema.ts и WatermarkStyle
+- [x] Обновить InteractiveWatermark — применить textAlign
+- [x] Обновить FloatingEditPanel — добавить настройку выравнивания
+- [x] Обновить index.tsx — textAlign в watermarkStyle
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v49
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 14.12.2025 |
+| fontColor white | ✅ Готово | 14.12.2025 |
+| textAlign | ✅ Готово | 14.12.2025 |
+| InteractiveWatermark | ✅ Готово | 14.12.2025 |
+| FloatingEditPanel | ✅ Готово | 14.12.2025 |
+| index.tsx | ✅ Готово | 14.12.2025 |
+
+## Изменения v49
+
+### shared/schema.ts
+- **fontColor default:** изменён с "#22c55e" на "#ffffff"
+- **TextAlign type:** добавлен тип "left" | "center" | "right"
+- **watermarkPreviewConfigSchema:** добавлен textAlign с default "left"
+- **defaultSettings:** добавлен textAlign: "left"
+
+### client/src/pages/watermark-preview/components/InteractiveWatermark.tsx
+- **TextAlign type:** экспортируется новый тип
+- **WatermarkStyle interface:** добавлен textAlign: TextAlign
+- **renderTextContent:** удалён hardcoded "text-center", добавлен textAlign в style
+
+### client/src/pages/watermark-preview/components/FloatingEditPanel.tsx
+- **Импорты:** добавлены AlignLeft, AlignCenter, AlignRight иконки
+- **TextAlign type:** импортируется из InteractiveWatermark
+- **Секция "Шрифт":** добавлены 3 кнопки выравнивания (left|center|right)
+
+### client/src/pages/watermark-preview/index.tsx
+- **watermarkStyle state:** добавлен textAlign
+- **handleStyleChange:** передаёт textAlign в updateWatermarkPreview
+- **handleImportConfig:** поддерживает textAlign
+
+### client/src/pages/watermark-preview/components/index.ts
+- **TextAlign:** добавлен в экспорты
+
+---
+
 # Upgrade: SideBar Panel — трансформация окон [top|bottom] v48
 
 ## Описание
