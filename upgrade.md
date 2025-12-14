@@ -39,6 +39,11 @@
 - **Удалён Separator:** убрана линия между статистикой и кнопкой
 - **Импорты:** добавлен ImageIcon; удалён Separator
 
+### client/src/themes/apply-theme.ts
+- **Исправлен dark mode:** добавлен класс `.dark` на `<html>` для тёмной темы
+- **Tailwind dark: variants:** теперь работают корректно (например `dark:text-white`)
+- **Light mode:** убирается `.dark`, добавляется `.light`
+
 ---
 
 # Upgrade: Иконка редактора над настройками v59

@@ -41,8 +41,10 @@ export function applyTheme(theme: ThemeConfig): void {
   root.style.setProperty('--elevate-2', colors.elevate2);
 
   if (theme.mode === 'light') {
+    root.classList.remove('dark');
     root.classList.add('light');
   } else {
     root.classList.remove('light');
+    root.classList.add('dark');
   }
 }
