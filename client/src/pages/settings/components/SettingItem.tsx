@@ -24,10 +24,10 @@ interface SettingItemProps {
 function getPlatformTipColors(platform: Platform) {
   if (platform === "android") {
     return {
-      bg: "bg-orange-500/10",
-      border: "border-orange-500/20",
-      text: "text-orange-600 dark:text-orange-400",
-      icon: "text-orange-600 dark:text-orange-400",
+      bg: "bg-blue-500/10",
+      border: "border-blue-500/20",
+      text: "text-blue-600 dark:text-blue-400",
+      icon: "text-blue-600 dark:text-blue-400",
     };
   }
   return {
