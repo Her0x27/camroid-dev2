@@ -40,8 +40,8 @@ export const SettingsTabs = memo(function SettingsTabs({
   };
 
   return (
-    <Tabs value={activeTab} className="w-full">
-      <TabsList className="w-full p-1 bg-muted/50 rounded-xl flex flex-col gap-1">
+    <Tabs value={activeTab} className="fixed left-3 top-1/2 -translate-y-1/2 z-50">
+      <TabsList className="p-1.5 bg-background/90 backdrop-blur-sm border border-border rounded-xl flex flex-col gap-1 shadow-lg">
         {tabs.map((tab) => (
           <TabsTrigger
             key={tab.id}
@@ -51,15 +51,14 @@ export const SettingsTabs = memo(function SettingsTabs({
               onTabChange(tab.id);
             }}
             className={cn(
-              "flex items-center justify-start gap-3 w-full h-10 px-3 rounded-lg text-sm font-medium",
+              "flex items-center justify-center w-10 h-10 rounded-lg",
               "transition-all duration-200",
-              "data-[state=active]:bg-background data-[state=active]:shadow-sm",
-              "data-[state=active]:text-foreground",
-              "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground/80"
+              "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm",
+              "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground data-[state=inactive]:hover:bg-muted/50"
             )}
+            title={getTabLabel(tab.labelKey)}
           >
             {tab.icon}
-            <span>{getTabLabel(tab.labelKey)}</span>
           </TabsTrigger>
         ))}
       </TabsList>
