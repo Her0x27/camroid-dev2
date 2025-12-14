@@ -48,6 +48,8 @@ export const ru: Translations = {
     stable: "Стабильно",
     stabilizing: "Стабилизация...",
     noteSuggestions: "Подсказки",
+    settingsMenu: "Меню настроек",
+    visualEditor: "Визуальный редактор",
   },
   
   gallery: {

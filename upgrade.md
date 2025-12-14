@@ -1,3 +1,66 @@
+# Upgrade: Dropdown настроек камеры и оранжевые Android-подсказки v57
+
+## Описание
+1. Добавить dropdown меню на иконку настроек камеры при удержании
+2. Пункт меню "Визуальный редактор" ведёт на /visualEditorWatermark
+3. Переименовать роут /watermark-preview → /visualEditorWatermark
+4. Изменить цвет platformTip для Android на оранжевый (вместо зелёного)
+
+## Чек-лист задач v57
+
+- [x] Обновить upgrade.md — добавить секцию v57
+- [x] Переименовать роут /watermark-preview → /visualEditorWatermark
+- [x] Добавить DropdownMenu на кнопку настроек в CameraControls.tsx
+- [x] Изменить цвет platformTip для Android на оранжевый
+- [x] Добавить переводы для нового пункта меню
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v57
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 14.12.2025 |
+| Переименование роута | ✅ Готово | 14.12.2025 |
+| DropdownMenu настроек | ✅ Готово | 14.12.2025 |
+| Оранжевый Android | ✅ Готово | 14.12.2025 |
+| Переводы i18n | ✅ Готово | 14.12.2025 |
+
+## Изменения v57
+
+### client/src/App.tsx
+- **Роут:** переименован `/watermark-preview` → `/visualEditorWatermark`
+- **Компонент:** переименован `WatermarkPreviewPage` → `VisualEditorWatermarkPage`
+
+### client/src/pages/camera/components/CameraControls.tsx
+- **Импорты:** добавлены `useState`, `useRef`, `useCallback`, `useLocation`, `Palette`, `DropdownMenu` компоненты
+- **RightControls:** добавлен DropdownMenu на кнопку настроек
+- **Long press:** при удержании 500мс открывается меню с пунктом "Визуальный редактор"
+- **Tap:** обычный тап переходит на страницу настроек
+- **handleVisualEditor:** навигация на `/visualEditorWatermark`
+
+### client/src/pages/settings/components/SettingItem.tsx
+- **getPlatformTipColors:** новая функция для определения цветов подсказки
+- **Android:** оранжевый цвет (`bg-orange-500/10`, `text-orange-600 dark:text-orange-400`)
+- **iOS/Desktop:** зелёный primary цвет (без изменений)
+- **SettingItem:** использует `tipColors` для стилизации
+- **SettingSliderItem:** использует `tipColors` для стилизации
+- **SettingSelectItem:** использует `tipColors` для стилизации
+
+### client/src/pages/settings/sections/WatermarkSection.tsx
+- **navigate:** изменён путь `/watermark-preview` → `/visualEditorWatermark`
+
+### client/src/lib/i18n/ru.ts
+- **camera.settingsMenu:** "Меню настроек"
+- **camera.visualEditor:** "Визуальный редактор"
+
+### client/src/lib/i18n/en.ts
+- **camera.settingsMenu:** "Settings Menu"
+- **camera.visualEditor:** "Visual Editor"
+
+---
+
 # Upgrade: Динамические описания слайдеров и исправления v56
 
 ## Описание

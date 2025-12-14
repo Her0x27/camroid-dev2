@@ -21,6 +21,23 @@ interface SettingItemProps {
   testId?: string;
 }
 
+function getPlatformTipColors(platform: Platform) {
+  if (platform === "android") {
+    return {
+      bg: "bg-orange-500/10",
+      border: "border-orange-500/20",
+      text: "text-orange-600 dark:text-orange-400",
+      icon: "text-orange-600 dark:text-orange-400",
+    };
+  }
+  return {
+    bg: "bg-primary/5",
+    border: "border-primary/10",
+    text: "text-primary/80",
+    icon: "text-primary",
+  };
+}
+
 export const SettingItem = memo(function SettingItem({
   icon,
   title,
@@ -34,6 +51,7 @@ export const SettingItem = memo(function SettingItem({
 }: SettingItemProps) {
   const platform = usePlatform();
   const currentTip = platformTip?.[platform];
+  const tipColors = getPlatformTipColors(platform);
 
   return (
     <div
@@ -70,9 +88,9 @@ export const SettingItem = memo(function SettingItem({
             </p>
             
             {currentTip && (
-              <div className="flex items-start gap-1.5 mt-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
-                <PlatformIcon platform={platform} className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
-                <span className="text-[11px] text-primary/80 leading-relaxed">
+              <div className={cn("flex items-start gap-1.5 mt-2 p-2 rounded-lg", tipColors.bg, "border", tipColors.border)}>
+                <PlatformIcon platform={platform} className={cn("w-3.5 h-3.5 shrink-0 mt-0.5", tipColors.icon)} />
+                <span className={cn("text-[11px] leading-relaxed", tipColors.text)}>
                   {currentTip}
                 </span>
               </div>
@@ -171,6 +189,7 @@ export const SettingSliderItem = memo(function SettingSliderItem({
 }: SettingSliderItemProps) {
   const platform = usePlatform();
   const currentTip = platformTip?.[platform];
+  const tipColors = getPlatformTipColors(platform);
 
   return (
     <div
@@ -207,9 +226,9 @@ export const SettingSliderItem = memo(function SettingSliderItem({
       </div>
 
       {currentTip && (
-        <div className="flex items-start gap-1.5 p-2 rounded-lg bg-primary/5 border border-primary/10">
-          <PlatformIcon platform={platform} className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
-          <span className="text-[11px] text-primary/80 leading-relaxed">
+        <div className={cn("flex items-start gap-1.5 p-2 rounded-lg", tipColors.bg, "border", tipColors.border)}>
+          <PlatformIcon platform={platform} className={cn("w-3.5 h-3.5 shrink-0 mt-0.5", tipColors.icon)} />
+          <span className={cn("text-[11px] leading-relaxed", tipColors.text)}>
             {currentTip}
           </span>
         </div>
@@ -239,6 +258,7 @@ export const SettingSelectItem = memo(function SettingSelectItem({
 }: SettingSelectItemProps) {
   const platform = usePlatform();
   const currentTip = platformTip?.[platform];
+  const tipColors = getPlatformTipColors(platform);
 
   return (
     <div
@@ -269,9 +289,9 @@ export const SettingSelectItem = memo(function SettingSelectItem({
       </div>
 
       {currentTip && (
-        <div className="flex items-start gap-1.5 p-2 rounded-lg bg-primary/5 border border-primary/10">
-          <PlatformIcon platform={platform} className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
-          <span className="text-[11px] text-primary/80 leading-relaxed">
+        <div className={cn("flex items-start gap-1.5 p-2 rounded-lg", tipColors.bg, "border", tipColors.border)}>
+          <PlatformIcon platform={platform} className={cn("w-3.5 h-3.5 shrink-0 mt-0.5", tipColors.icon)} />
+          <span className={cn("text-[11px] leading-relaxed", tipColors.text)}>
             {currentTip}
           </span>
         </div>

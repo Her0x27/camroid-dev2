@@ -46,6 +46,8 @@ export const en = {
     stable: "Stable",
     stabilizing: "Stabilizing...",
     noteSuggestions: "Suggestions",
+    settingsMenu: "Settings Menu",
+    visualEditor: "Visual Editor",
   },
   
   gallery: {

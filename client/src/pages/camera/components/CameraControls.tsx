@@ -1,6 +1,13 @@
-import { memo } from "react";
-import { Camera, Settings2, Images, FileText, CloudUpload } from "lucide-react";
+import { memo, useState, useRef, useCallback } from "react";
+import { useLocation } from "wouter";
+import { Camera, Settings2, Images, FileText, CloudUpload, Palette } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface CameraControlsProps {
   onCapture: () => void;
@@ -216,6 +223,42 @@ const RightControls = memo(function RightControls({
   onNavigateSettings,
   hasNote,
 }: RightControlsProps) {
+  const { t } = useI18n();
+  const [, navigate] = useLocation();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLongPress = useRef(false);
+
+  const handlePointerDown = useCallback(() => {
+    isLongPress.current = false;
+    longPressTimer.current = setTimeout(() => {
+      isLongPress.current = true;
+      setDropdownOpen(true);
+    }, 500);
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    if (!isLongPress.current) {
+      onNavigateSettings();
+    }
+  }, [onNavigateSettings]);
+
+  const handlePointerLeave = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const handleVisualEditor = useCallback(() => {
+    setDropdownOpen(false);
+    navigate("/visualEditorWatermark");
+  }, [navigate]);
+
   return (
     <div className="absolute right-4 flex items-center gap-3">
       <button
@@ -229,13 +272,26 @@ const RightControls = memo(function RightControls({
         )}
       </button>
 
-      <button
-        className="text-primary flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
-        onClick={onNavigateSettings}
-        data-testid="button-settings"
-      >
-        <Settings2 className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
-      </button>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+        <DropdownMenuTrigger asChild>
+          <button
+            className="text-primary flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerLeave}
+            onContextMenu={(e) => e.preventDefault()}
+            data-testid="button-settings"
+          >
+            <Settings2 className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-[200px]">
+          <DropdownMenuItem onClick={handleVisualEditor} className="gap-2">
+            <Palette className="w-4 h-4" />
+            {t.camera.visualEditor}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 });

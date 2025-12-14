@@ -34,7 +34,7 @@ export const WatermarkSection = memo(function WatermarkSection({
   }, [activatePreview, t]);
 
   const handleOpenEditor = useCallback(() => {
-    navigate("/watermark-preview");
+    navigate("/visualEditorWatermark");
   }, [navigate]);
   
   return (
