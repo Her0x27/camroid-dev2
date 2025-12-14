@@ -145,7 +145,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             <Switch
               checked={settings.soundEnabled}
               onCheckedChange={(checked) => updateSettings({ soundEnabled: checked })}
-              className="h-6 w-11"
+              className="h-6 w-11 min-h-[24px]"
               data-testid="switch-sound"
             />
           </SettingItemCompact>
@@ -159,7 +159,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             <Button
               variant="outline"
               size="sm"
-              className="h-9 px-4"
+              className="min-h-[44px] h-11 px-4"
               onClick={onShowResetDialog}
               data-testid="button-reset-settings"
             >
@@ -182,6 +182,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             platformTip={{
               ios: "iOS поддерживает до 4K разрешения на большинстве устройств",
               android: "Максимальное разрешение зависит от возможностей камеры устройства",
+              desktop: "Разрешение зависит от подключенной веб-камеры",
             }}
             testId="setting-resolution"
           >
@@ -213,6 +214,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             platformTip={{
               ios: "85-90% — оптимальный баланс качества и размера для iOS",
               android: "85-90% — оптимальный баланс качества и размера для Android",
+              desktop: "85-90% — оптимальный баланс качества и размера",
             }}
             testId="setting-quality"
           >
@@ -236,6 +238,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             platformTip={{
               ios: "iOS обычно обеспечивает более высокую точность GPS (5-10м)",
               android: "Точность GPS зависит от датчиков устройства и окружения",
+              desktop: "Точность зависит от метода геолокации браузера",
             }}
             testId="setting-accuracy"
           >
@@ -265,13 +268,14 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             platformTip={{
               ios: "iOS эффективно использует гироскоп для стабилизации",
               android: "Android может требовать более высокий порог стабилизации",
+              desktop: "Стабилизация рекомендуется для веб-камер",
             }}
             testId="setting-stabilization"
           >
             <Switch
               checked={settings.stabilization.enabled}
               onCheckedChange={(checked) => updateStabilization({ enabled: checked })}
-              className="h-6 w-11"
+              className="h-6 w-11 min-h-[24px]"
               data-testid="switch-stabilization"
             />
           </SettingItem>
@@ -309,7 +313,7 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             <Switch
               checked={settings.enhancement.enabled}
               onCheckedChange={(checked) => updateEnhancement({ enabled: checked })}
-              className="h-6 w-11"
+              className="h-6 w-11 min-h-[24px]"
               data-testid="switch-enhancement"
             />
           </SettingItem>

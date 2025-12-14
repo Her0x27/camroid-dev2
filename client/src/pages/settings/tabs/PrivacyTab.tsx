@@ -287,8 +287,14 @@ export const PrivacyTab = memo(function PrivacyTab({
               }
               platformTip={
                 privacySettings.gestureType === 'patternUnlock'
-                  ? { ios: "На iOS может работать медленнее из-за ограничений браузера" }
-                  : { android: "Android поддерживает больше пальцев одновременно" }
+                  ? { 
+                      ios: "На iOS может работать медленнее из-за ограничений браузера",
+                      desktop: "Используйте мышь для рисования паттерна",
+                    }
+                  : { 
+                      android: "Android поддерживает больше пальцев одновременно",
+                      desktop: "На desktop используйте паттерн вместо жестов",
+                    }
               }
               testId="setting-gesture-type"
             >
@@ -312,7 +318,10 @@ export const PrivacyTab = memo(function PrivacyTab({
                 title={privacySettings.secretPattern ? t.settings.privacy.changePattern : t.settings.privacy.setPattern}
                 description={t.settings.privacy.patternUnlockHint}
                 badge={!privacySettings.secretPattern ? "!" : undefined}
-                platformTip={{ ios: "На iOS может работать медленнее из-за ограничений браузера" }}
+                platformTip={{ 
+                  ios: "На iOS может работать медленнее из-за ограничений браузера",
+                  desktop: "Используйте мышь для рисования паттерна",
+                }}
                 testId="setting-pattern"
               >
                 <Button
@@ -332,7 +341,10 @@ export const PrivacyTab = memo(function PrivacyTab({
                 title={t.settings.privacy.fingerCount}
                 description={t.settings.privacy.fingerCountDesc}
                 value={privacySettings.unlockFingers}
-                platformTip={{ android: "Android поддерживает больше пальцев одновременно" }}
+                platformTip={{ 
+                  android: "Android поддерживает больше пальцев одновременно",
+                  desktop: "На desktop слайдер управляется мышью",
+                }}
                 testId="setting-finger-count"
               >
                 <LockedSlider

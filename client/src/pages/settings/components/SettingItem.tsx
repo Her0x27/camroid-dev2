@@ -48,7 +48,7 @@ export const SettingItem = memo(function SettingItem({
     >
       <div className={cn(
         "flex gap-4",
-        vertical ? "flex-col" : "flex-col sm:flex-row sm:items-start"
+        vertical ? "flex-col" : "flex-col md:flex-row md:items-start"
       )}>
         <div className="flex items-start gap-3 flex-1 min-w-0">
           <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -82,8 +82,9 @@ export const SettingItem = memo(function SettingItem({
 
         <div className={cn(
           "shrink-0",
-          vertical ? "w-full" : "w-full sm:w-auto",
-          !vertical && "mt-3 sm:mt-0"
+          vertical ? "w-full" : "w-full md:w-auto",
+          !vertical && "mt-3 md:mt-0",
+          "[&>*]:min-h-[44px]"
         )}>
           {children}
         </div>
@@ -120,7 +121,7 @@ export const SettingItemCompact = memo(function SettingItemCompact({
     <div
       data-testid={testId}
       className={cn(
-        "flex items-center justify-between gap-4 p-3 rounded-lg",
+        "flex items-center justify-between gap-4 p-3 rounded-lg min-h-[56px]",
         "bg-muted/20 hover:bg-muted/40",
         "border border-border/30",
         "transition-colors duration-150",
@@ -140,7 +141,7 @@ export const SettingItemCompact = memo(function SettingItemCompact({
           )}
         </div>
       </div>
-      <div className="shrink-0">
+      <div className="shrink-0 [&>*]:min-h-[44px]">
         {children}
       </div>
     </div>

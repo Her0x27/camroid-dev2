@@ -34,12 +34,60 @@
 | Задача | Статус | Дата |
 |--------|--------|------|
 | upgrade.md | ✅ Готово | 14.12.2025 |
-| SettingItem | ⏳ В процессе | 14.12.2025 |
-| usePlatform | ⏳ Ожидание | - |
-| MainSettingsTab | ⏳ Ожидание | - |
-| PrivacyTab | ⏳ Ожидание | - |
-| StorageTab | ⏳ Ожидание | - |
-| Переводы | ⏳ Ожидание | - |
+| SettingItem | ✅ Готово | 14.12.2025 |
+| usePlatform | ✅ Готово | 14.12.2025 |
+| MainSettingsTab | ✅ Готово | 14.12.2025 |
+| PrivacyTab | ✅ Готово | 14.12.2025 |
+| StorageTab | ✅ Готово | 14.12.2025 |
+| Переводы | ✅ Готово | 14.12.2025 |
+
+## Изменения v54
+
+### client/src/hooks/use-platform.ts (НОВЫЙ)
+- **usePlatform hook:** определение платформы (ios | android | desktop) через user agent
+- **getPlatformName:** получение читаемого имени платформы
+
+### client/src/pages/settings/components/SettingItem.tsx (НОВЫЙ)
+- **SettingItem:** полноценная карточка настройки с иконкой, описанием, platformTip
+- **SettingItemCompact:** компактная карточка для простых toggle-настроек
+- **SettingSliderItem:** карточка со слайдером, значением и описанием
+- **SettingSelectItem:** карточка с выпадающим списком
+- **platformTip:** платформо-зависимые рекомендации для Android/iOS
+
+### client/src/pages/settings/tabs/MainSettingsTab.tsx
+- **Импорты:** добавлены SettingItem, SettingItemCompact, SettingSliderItem, SettingSelectItem
+- **Новые иконки:** Palette, Globe, Image, Contrast, Eraser
+- **Внешний вид:** SettingSelectItem для Тема и Язык с описаниями
+- **Управление:** SettingItemCompact для Звук, кнопка Сброс
+- **Параметры камеры:** SettingSelectItem для Разрешение, SettingSliderItem для Качество и GPS
+- **Качество изображения:** SettingItem для Стабилизация/Улучшение, SettingSliderItem для параметров
+- **platformTip:** рекомендации для iOS/Android для разрешения, качества, GPS, стабилизации
+- **Touch-friendly:** h-11 для SelectTrigger, h-6 w-11 для Switch
+- **Описания:** всегда видимы (убраны hidden sm:block)
+
+### client/src/pages/settings/tabs/PrivacyTab.tsx
+- **Импорты:** добавлены SettingItem, SettingItemCompact, SettingSliderItem, SettingSelectItem
+- **Приватность:** SettingItemCompact для toggle включения
+- **Модуль:** SettingSelectItem с кнопкой предпросмотра
+- **Жест:** SettingSelectItem с platformTip для паттерна и мультитач
+- **Авто-блокировка:** SettingSliderItem
+- **Touch-friendly:** min-h-[44px] для всех интерактивных элементов
+
+### client/src/pages/settings/tabs/StorageTab.tsx
+- **Статистика:** улучшенные карточки с градиентами и hover-эффектами
+- **Облачный провайдер:** SettingSelectItem с platformTip для iOS/Android
+- **Кнопка очистки:** destructive стиль с min-h-[44px]
+
+### client/src/lib/i18n/ru.ts
+- **platformTips:** добавлены переводы для iOS/Android рекомендаций
+  - resolution, quality, gpsAccuracy, stabilization
+  - patternUnlock, multitouch, cloudUpload
+
+### client/src/lib/i18n/en.ts
+- **platformTips:** английские переводы для iOS/Android рекомендаций
+
+### client/src/pages/settings/components/index.ts
+- **Exports:** добавлены SettingItem, SettingItemCompact, SettingSliderItem, SettingSelectItem
 
 ---
 

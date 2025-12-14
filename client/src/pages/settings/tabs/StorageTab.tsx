@@ -122,7 +122,7 @@ export const StorageTab = memo(function StorageTab({
       >
         {storageInfo && (
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="relative overflow-hidden text-center p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/10 hover:border-primary/20 transition-colors">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50" />
                 <div className="relative">
@@ -198,6 +198,7 @@ export const StorageTab = memo(function StorageTab({
             platformTip={{
               ios: "Фото автоматически сохраняются в галерею",
               android: "Разрешите доступ к хранилищу для загрузки",
+              desktop: "Фото загружаются в облако для доступа с любого устройства",
             }}
             testId="setting-cloud-provider"
           >
