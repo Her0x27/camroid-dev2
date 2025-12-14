@@ -184,12 +184,12 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
     }
   }, []);
 
-  const getEventPosition = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if ("touches" in e && e.touches.length > 0) {
-      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }
+  const getEventPosition = useCallback((e: React.PointerEvent | React.TouchEvent | React.MouseEvent) => {
     if ("clientX" in e) {
       return { x: e.clientX, y: e.clientY };
+    }
+    if ("touches" in e && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
     return { x: 0, y: 0 };
   }, []);
@@ -226,7 +226,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
   );
 
   const handleStart = useCallback(
-    (e: React.TouchEvent | React.MouseEvent) => {
+    (e: React.PointerEvent) => {
       const eventPos = getEventPosition(e);
       startPosRef.current = eventPos;
       elementPosRef.current = position;
@@ -241,7 +241,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
   );
 
   const handleMove = useCallback(
-    (e: React.TouchEvent | React.MouseEvent) => {
+    (e: React.PointerEvent) => {
       const eventPos = getEventPosition(e);
       const deltaX = Math.abs(eventPos.x - startPosRef.current.x);
       const deltaY = Math.abs(eventPos.y - startPosRef.current.y);
@@ -260,8 +260,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
     [getEventPosition, clearLongPressTimer, calculateNewPosition, onDrag]
   );
 
-  const handleEnd = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    e.stopPropagation();
+  const handleEnd = useCallback((e: React.PointerEvent) => {
     clearLongPressTimer();
 
     if (isDraggingRef.current) {
@@ -318,13 +317,16 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
       ))}
       {style.showCoordinates !== false && (
-        <div>{formatCoordinates(55.7558, 37.6173, style.coordinateFormat)}</div>
+        <div>{formatCoordinates(55.7558, 37.6173, style.coordinateFormat)} ±5m</div>
       )}
       {style.showCoordinates !== false && (style.separators || []).filter(s => s.position === "after-coords").map(s => (
         <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
       ))}
       {style.showGyroscope !== false && (
-        <div>±5m · 180° S</div>
+        <>
+          <div>↑ 156m</div>
+          <div>⦦ 12° · ⊕ 180° S</div>
+        </>
       )}
       {style.showTimestamp && (
         <div>{new Date().toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
@@ -361,13 +363,13 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         transform: `rotate(${style.rotation}deg)`,
         borderRadius: 8,
       }}
-      onTouchStart={handleStart}
-      onTouchMove={handleMove}
-      onTouchEnd={handleEnd}
-      onMouseDown={handleStart}
-      onMouseMove={handleMove}
-      onMouseUp={handleEnd}
-      onMouseLeave={() => {
+      onPointerDown={handleStart}
+      onPointerMove={handleMove}
+      onPointerUp={(e) => {
+        e.stopPropagation();
+        handleEnd(e);
+      }}
+      onPointerLeave={() => {
         clearLongPressTimer();
         if (isDraggingRef.current) {
           isDraggingRef.current = false;
