@@ -21,8 +21,8 @@ export function SettingsCard({
 }: SettingsCardProps) {
   return (
     <Card data-testid={testId} className={cn("settings-card", className)}>
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-3 text-base">
+      <CardHeader className="p-3 pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
           {icon && <span className="text-primary shrink-0">{icon}</span>}
           <span className="leading-tight">{title}</span>
         </CardTitle>
@@ -32,7 +32,7 @@ export function SettingsCard({
           </CardDescription>
         )}
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="p-3 pt-0 space-y-4">
         {children}
       </CardContent>
     </Card>
