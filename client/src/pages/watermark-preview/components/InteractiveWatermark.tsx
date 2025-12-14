@@ -1,4 +1,5 @@
 import { memo, useRef, useCallback, useEffect } from "react";
+import { MapPin, Target, Mountain, Smartphone, Compass, FileText, Clock } from "lucide-react";
 
 export interface WatermarkPosition {
   x: number;
@@ -307,7 +308,10 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
     >
       {style.showNote !== false && style.notePlacement === "start" && style.note && (
         <>
-          <div>{style.note}</div>
+          <div className="flex items-center gap-1">
+            <FileText className="inline-block flex-shrink-0" style={{ width: `${style.fontSize * 0.8}vmin`, height: `${style.fontSize * 0.8}vmin` }} />
+            <span>{style.note}</span>
+          </div>
           {(style.separators || []).filter(s => s.position === "before-coords").map(s => (
             <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
           ))}
@@ -317,19 +321,33 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
       ))}
       {style.showCoordinates !== false && (
-        <div>{formatCoordinates(55.7558, 37.6173, style.coordinateFormat)} ±5m</div>
+        <div className="flex items-center gap-1">
+          <MapPin className="inline-block flex-shrink-0" style={{ width: `${style.fontSize * 0.8}vmin`, height: `${style.fontSize * 0.8}vmin` }} />
+          <span>{formatCoordinates(55.7558, 37.6173, style.coordinateFormat)}</span>
+          <Target className="inline-block flex-shrink-0 ml-1" style={{ width: `${style.fontSize * 0.8}vmin`, height: `${style.fontSize * 0.8}vmin` }} />
+          <span>±5m</span>
+        </div>
       )}
       {style.showCoordinates !== false && (style.separators || []).filter(s => s.position === "after-coords").map(s => (
         <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
       ))}
       {style.showGyroscope !== false && (
-        <>
-          <div>↑ 156m</div>
-          <div>⦦ 12° · ⊕ 180° S</div>
-        </>
+        <div className="flex items-center gap-1">
+          <Mountain className="inline-block flex-shrink-0" style={{ width: `${style.fontSize * 0.8}vmin`, height: `${style.fontSize * 0.8}vmin` }} />
+          <span>156m</span>
+          <span className="mx-0.5">|</span>
+          <Smartphone className="inline-block flex-shrink-0" style={{ width: `${style.fontSize * 0.8}vmin`, height: `${style.fontSize * 0.8}vmin` }} />
+          <span>12°</span>
+          <span className="mx-0.5">|</span>
+          <Compass className="inline-block flex-shrink-0" style={{ width: `${style.fontSize * 0.8}vmin`, height: `${style.fontSize * 0.8}vmin` }} />
+          <span>180° S</span>
+        </div>
       )}
       {style.showTimestamp && (
-        <div>{new Date().toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</div>
+        <div className="flex items-center gap-1">
+          <Clock className="inline-block flex-shrink-0" style={{ width: `${style.fontSize * 0.8}vmin`, height: `${style.fontSize * 0.8}vmin` }} />
+          <span>{new Date().toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+        </div>
       )}
       {style.showNote !== false && style.notePlacement === "start" && (style.separators || []).filter(s => s.position === "after-note").map(s => (
         <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
@@ -339,7 +357,10 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
           {(style.separators || []).filter(s => s.position === "before-note").map(s => (
             <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
           ))}
-          <div>{style.note}</div>
+          <div className="flex items-center gap-1">
+            <FileText className="inline-block flex-shrink-0" style={{ width: `${style.fontSize * 0.8}vmin`, height: `${style.fontSize * 0.8}vmin` }} />
+            <span>{style.note}</span>
+          </div>
           {(style.separators || []).filter(s => s.position === "after-note").map(s => (
             <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
           ))}

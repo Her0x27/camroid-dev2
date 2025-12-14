@@ -312,7 +312,7 @@ export const defaultSettings: Settings = {
     positionY: 2,
     backgroundColor: "#3b82f6",
     backgroundOpacity: 70,
-    width: 35,
+    width: 40,
     height: 5,
     autoSize: false,
     fontColor: "#ffffff",

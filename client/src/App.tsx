@@ -45,7 +45,7 @@ function Router() {
         <Route path="/gallery" component={GalleryPage} />
         <Route path="/photo/:id" component={PhotoDetailPage} />
         <Route path="/settings" component={SettingsPage} />
-        <Route path="/visualEditorWatermark" component={VisualEditorWatermarkPage} />
+        <Route path="/ve-watermark" component={VisualEditorWatermarkPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

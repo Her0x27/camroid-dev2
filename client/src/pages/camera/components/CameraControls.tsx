@@ -256,7 +256,7 @@ const RightControls = memo(function RightControls({
 
   const handleVisualEditor = useCallback(() => {
     setDropdownOpen(false);
-    navigate("/visualEditorWatermark");
+    navigate("/ve-watermark");
   }, [navigate]);
 
   return (
