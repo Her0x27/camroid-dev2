@@ -40,28 +40,39 @@ export const SettingsTabs = memo(function SettingsTabs({
   };
 
   return (
-    <Tabs value={activeTab} className="fixed left-2 top-1/2 -translate-y-1/2 z-50">
-      <TabsList className="p-1 bg-card/95 backdrop-blur-md border border-border/50 rounded-2xl flex flex-col gap-0.5 shadow-xl shadow-black/10">
-        {tabs.map((tab) => (
-          <TabsTrigger
-            key={tab.id}
-            value={tab.id}
-            onClick={() => {
-              triggerHapticFeedback();
-              onTabChange(tab.id);
-            }}
-            className={cn(
-              "flex items-center justify-center w-9 h-9 rounded-xl",
-              "transition-all duration-200",
-              "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:scale-105",
-              "data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-foreground data-[state=inactive]:hover:bg-muted/60"
-            )}
-            title={getTabLabel(tab.labelKey)}
-          >
-            {tab.icon}
-          </TabsTrigger>
-        ))}
-      </TabsList>
+    <Tabs value={activeTab} className="fixed left-3 top-1/2 -translate-y-1/2 z-50">
+      <div className="relative">
+        <div className="absolute -inset-1 bg-primary/40 rounded-3xl blur-lg" />
+        <TabsList className={cn(
+          "relative p-2 flex flex-col gap-1.5",
+          "bg-zinc-900/95 backdrop-blur-xl",
+          "border-2 border-primary/50",
+          "rounded-2xl",
+          "shadow-2xl"
+        )}>
+          {tabs.map((tab) => (
+            <TabsTrigger
+              key={tab.id}
+              value={tab.id}
+              onClick={() => {
+                triggerHapticFeedback();
+                onTabChange(tab.id);
+              }}
+              className={cn(
+                "flex items-center justify-center w-11 h-11 rounded-xl",
+                "transition-all duration-200",
+                "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
+                "data-[state=active]:shadow-lg data-[state=active]:scale-110",
+                "data-[state=inactive]:text-zinc-400",
+                "data-[state=inactive]:hover:text-white data-[state=inactive]:hover:bg-zinc-800"
+              )}
+              title={getTabLabel(tab.labelKey)}
+            >
+              {tab.icon}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
     </Tabs>
   );
 });
