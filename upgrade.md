@@ -32,6 +32,11 @@
 - **Координаты:** теперь отображаются с погрешностью на одной строке (например: `55.7558°N 37.6173°E ±5m`)
 - **Гироскоп:** реорганизован — теперь показывает высоту (`↑ 156m`), угол наклона и азимут (`⦦ 12° · ⊕ 180° S`)
 
+### client/src/pages/watermark-preview/index.tsx
+- **handleStyleChange:** исправлен бесконечный цикл — updateWatermarkPreview теперь вызывается вне callback-а setWatermarkStyle
+- **handlePositionChange:** аналогичное исправление
+- **handleReticleSettingsChange:** аналогичное исправление — updateReticlePreview вызывается после setState
+
 ---
 
 # Upgrade: Dropdown видимости, защита слайдеров, таймштамп с датой v50

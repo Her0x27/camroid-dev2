@@ -169,50 +169,16 @@ export default function WatermarkPreviewPage() {
   }, [watermarkPosition, updateWatermarkPreview]);
 
   const handleStyleChange = useCallback((updates: Partial<WatermarkStyle>) => {
-    setWatermarkStyle((prev) => {
-      const newStyle = { ...prev, ...updates };
-      updateWatermarkPreview({
-        backgroundColor: newStyle.backgroundColor,
-        backgroundOpacity: newStyle.backgroundOpacity,
-        fontColor: newStyle.fontColor,
-        fontOpacity: newStyle.fontOpacity,
-        fontSize: newStyle.fontSize,
-        bold: newStyle.bold,
-        italic: newStyle.italic,
-        underline: newStyle.underline,
-        width: newStyle.width,
-        height: newStyle.height,
-        autoSize: newStyle.autoSize,
-        rotation: newStyle.rotation,
-        note: newStyle.note,
-        notePlacement: newStyle.notePlacement,
-        separators: newStyle.separators,
-        coordinateFormat: newStyle.coordinateFormat,
-        logoUrl: newStyle.logoUrl,
-        logoPosition: newStyle.logoPosition,
-        logoSize: newStyle.logoSize,
-        logoOpacity: newStyle.logoOpacity,
-        fontFamily: newStyle.fontFamily,
-        textAlign: newStyle.textAlign,
-        showCoordinates: newStyle.showCoordinates,
-        showGyroscope: newStyle.showGyroscope,
-        showReticle: newStyle.showReticle,
-        showNote: newStyle.showNote,
-        showTimestamp: newStyle.showTimestamp,
-      });
-      return newStyle;
-    });
+    setWatermarkStyle((prev) => ({ ...prev, ...updates }));
+    updateWatermarkPreview(updates);
   }, [updateWatermarkPreview]);
 
   const handlePositionChange = useCallback(
     (updates: Partial<WatermarkPosition>) => {
-      setWatermarkPosition((prev) => {
-        const newPos = { ...prev, ...updates };
-        updateWatermarkPreview({
-          positionX: newPos.x,
-          positionY: newPos.y,
-        });
-        return newPos;
+      setWatermarkPosition((prev) => ({ ...prev, ...updates }));
+      updateWatermarkPreview({
+        positionX: updates.x,
+        positionY: updates.y,
       });
     },
     [updateWatermarkPreview]
@@ -220,20 +186,17 @@ export default function WatermarkPreviewPage() {
 
   const handleReticleSettingsChange = useCallback(
     (updates: Partial<ReticleSettings>) => {
-      setReticleSettings((prev) => {
-        const newSettings = { ...prev, ...updates };
-        updateReticlePreview({
-          shape: newSettings.shape,
-          color: newSettings.color,
-          size: newSettings.size,
-          strokeWidth: newSettings.strokeWidth,
-          opacity: newSettings.opacity,
-          positionX: newSettings.position.x,
-          positionY: newSettings.position.y,
-          autoColor: newSettings.autoColor,
-          colorScheme: newSettings.colorScheme,
-        });
-        return newSettings;
+      setReticleSettings((prev) => ({ ...prev, ...updates }));
+      updateReticlePreview({
+        shape: updates.shape,
+        color: updates.color,
+        size: updates.size,
+        strokeWidth: updates.strokeWidth,
+        opacity: updates.opacity,
+        positionX: updates.position?.x,
+        positionY: updates.position?.y,
+        autoColor: updates.autoColor,
+        colorScheme: updates.colorScheme,
       });
     },
     [updateReticlePreview]
