@@ -57,7 +57,7 @@ export const SettingRow = memo(function SettingRow({
           checked={checked}
           onCheckedChange={onCheckedChange}
           data-testid={testId}
-          className="shrink-0 scale-110"
+          className="shrink-0"
         />
       ) : (
         <div className="shrink-0">{control}</div>
