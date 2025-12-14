@@ -182,7 +182,7 @@ function SettingsPageContent() {
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <header className="sticky top-0 z-50 border-b border-border safe-top bg-background/95 backdrop-blur-sm">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-3 px-4 py-3">
             <Button
               variant="ghost"
@@ -195,21 +195,25 @@ function SettingsPageContent() {
             </Button>
             <h1 className="text-lg font-semibold flex-1">{t.settings.title}</h1>
           </div>
-          <div className="px-4 pb-3">
+        </div>
+      </header>
+
+      <main className="flex-1 p-4 max-w-4xl mx-auto w-full">
+        <div className="flex gap-4">
+          <aside className="w-48 shrink-0">
             <SettingsTabs
               activeTab={activeTab}
               onTabChange={setActiveTab}
             />
+          </aside>
+          <div className="flex-1 min-w-0">
+            <AnimatedContainer className="space-y-4">
+              <AnimatedItem>
+                {renderActiveTab()}
+              </AnimatedItem>
+            </AnimatedContainer>
           </div>
         </div>
-      </header>
-
-      <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
-        <AnimatedContainer className="space-y-4">
-          <AnimatedItem>
-            {renderActiveTab()}
-          </AnimatedItem>
-        </AnimatedContainer>
       </main>
 
       <footer className="border-t border-border py-4 safe-bottom bg-background/95 backdrop-blur-sm">
