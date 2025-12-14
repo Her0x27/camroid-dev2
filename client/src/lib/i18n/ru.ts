@@ -456,6 +456,10 @@ export const ru: Translations = {
         ios: "iPhone поддерживает до 5 касаний одновременно",
         android: "Android поддерживает больше касаний одновременно (до 10)",
       },
+      cloudUpload: {
+        ios: "Фото загружаются напрямую в облачный сервис ImgBB",
+        android: "Фото загружаются напрямую в облачный сервис ImgBB",
+      },
     },
     
     categoryTips: {

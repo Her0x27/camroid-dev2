@@ -454,6 +454,10 @@ export const en = {
         ios: "iPhone supports up to 5 simultaneous touches",
         android: "Android supports more simultaneous touches (up to 10)",
       },
+      cloudUpload: {
+        ios: "Photos upload directly to ImgBB cloud service",
+        android: "Photos upload directly to ImgBB cloud service",
+      },
     },
     
     categoryTips: {
