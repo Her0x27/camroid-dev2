@@ -27,7 +27,8 @@
 - **getPlatformTipColors:** изменён цвет для Android
   - `bg-orange-500/10` → `bg-blue-500/10`
   - `border-orange-500/20` → `border-blue-500/20`
-  - `text-orange-600 dark:text-orange-400` → `text-blue-600 dark:text-blue-400`
+  - `text-orange-600 dark:text-orange-400` → `text-blue-600 dark:text-white`
+  - Белый текст в тёмной теме для лучшей читаемости
 
 ### client/src/pages/settings/sections/StorageSection.tsx
 - **Компактный дизайн:** объединена статистика в одну строку
@@ -36,7 +37,7 @@
 - **Прогресс-бар:** уменьшен до h-1.5 (было h-2)
 - **Кнопка:** size="sm", уменьшены иконка и отступы
 - **Удалён Separator:** убрана линия между статистикой и кнопкой
-- **Импорты:** добавлены ImageIcon, HardDrive; удалён Separator
+- **Импорты:** добавлен ImageIcon; удалён Separator
 
 ---
 

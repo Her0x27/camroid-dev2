@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Database, Trash2, ImageIcon, HardDrive } from "lucide-react";
+import { Database, Trash2, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CollapsibleCard } from "@/components/ui/collapsible-card";
 import { formatBytes } from "@/lib/date-utils";

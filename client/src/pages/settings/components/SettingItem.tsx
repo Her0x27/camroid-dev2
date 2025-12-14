@@ -26,8 +26,8 @@ function getPlatformTipColors(platform: Platform) {
     return {
       bg: "bg-blue-500/10",
       border: "border-blue-500/20",
-      text: "text-blue-600 dark:text-blue-400",
-      icon: "text-blue-600 dark:text-blue-400",
+      text: "text-blue-600 dark:text-white",
+      icon: "text-blue-600 dark:text-white",
     };
   }
   return {
