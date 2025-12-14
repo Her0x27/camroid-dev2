@@ -183,7 +183,6 @@ export const PrivacyTab = memo(function PrivacyTab({
             checked={privacySettings.enabled}
             onCheckedChange={handleEnablePrivacy}
             data-testid="switch-privacy-enabled"
-            className="min-w-[44px] min-h-[24px]"
           />
         </SettingItemCompact>
 

@@ -145,7 +145,6 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             <Switch
               checked={settings.soundEnabled}
               onCheckedChange={(checked) => updateSettings({ soundEnabled: checked })}
-              className="h-6 w-11 min-h-[24px]"
               data-testid="switch-sound"
             />
           </SettingItemCompact>
@@ -275,7 +274,6 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             <Switch
               checked={settings.stabilization.enabled}
               onCheckedChange={(checked) => updateStabilization({ enabled: checked })}
-              className="h-6 w-11 min-h-[24px]"
               data-testid="switch-stabilization"
             />
           </SettingItem>
@@ -313,7 +311,6 @@ export const MainSettingsTab = memo(function MainSettingsTab({
             <Switch
               checked={settings.enhancement.enabled}
               onCheckedChange={(checked) => updateEnhancement({ enabled: checked })}
-              className="h-6 w-11 min-h-[24px]"
               data-testid="switch-enhancement"
             />
           </SettingItem>
