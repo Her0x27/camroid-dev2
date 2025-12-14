@@ -70,6 +70,7 @@ export const CAMERA = {
   STABILITY_CHECK_INTERVAL_MS: 100,
   DEFAULT_RETICLE_SIZE: 20,
   DEFAULT_RETICLE_COLOR: "#22c55e",
+  RETICLE_OUTLINE_COLOR: "#000000",
 } as const;
 
 export const LONG_PRESS = {
@@ -108,4 +109,16 @@ export const UI = {
   OVERLAY_Z_INDEX: 50,
   /** Focus ring width */
   FOCUS_RING_WIDTH: 2,
+} as const;
+
+export const RETICLE = {
+  DEFAULT_RADIUS: 40,
+  CENTER_DOT_RADIUS: 4,
+  SQUARE_PADDING: 10,
+  SQUARE_SIZE: 80,
+} as const;
+
+export const LONG_PRESS_INDICATOR = {
+  SIZE: 60,
+  STROKE_WIDTH: 4,
 } as const;

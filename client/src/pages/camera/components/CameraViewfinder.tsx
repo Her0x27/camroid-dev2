@@ -6,6 +6,7 @@ import { LevelIndicator } from "@/components/level-indicator";
 import { useI18n } from "@/lib/i18n";
 import { useLongPress, type LongPressPositionPercent } from "@/hooks/use-long-press";
 import { logger } from "@/lib/logger";
+import { CAMERA, LONG_PRESS_INDICATOR } from "@/lib/constants";
 import type { ReticleConfig, ReticlePosition } from "@shared/schema";
 
 interface LongPressIndicatorProps {
@@ -43,8 +44,8 @@ const LongPressIndicator = memo(function LongPressIndicator({
   const rect = containerRef.current?.getBoundingClientRect();
   if (!rect) return null;
 
-  const size = 60;
-  const strokeWidth = 4;
+  const size = LONG_PRESS_INDICATOR.SIZE;
+  const strokeWidth = LONG_PRESS_INDICATOR.STROKE_WIDTH;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
@@ -72,7 +73,7 @@ const LongPressIndicator = memo(function LongPressIndicator({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#22c55e"
+          stroke={CAMERA.DEFAULT_RETICLE_COLOR}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}

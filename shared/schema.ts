@@ -145,7 +145,7 @@ export const watermarkSeparatorSchema = z.object({
 
 export type WatermarkSeparator = z.infer<typeof watermarkSeparatorSchema>;
 
-// Watermark preview configuration (for /watermark-preview page)
+// Watermark preview configuration (for /ve-watermark page)
 export const watermarkPreviewConfigSchema = z.object({
   // Position (percentages)
   positionX: z.number().default(2),
@@ -192,7 +192,7 @@ export const watermarkPreviewConfigSchema = z.object({
 export type WatermarkPreviewConfig = z.infer<typeof watermarkPreviewConfigSchema>;
 export type FontFamily = "system" | "roboto" | "montserrat" | "oswald" | "playfair";
 
-// Reticle preview configuration (for /watermark-preview page)
+// Reticle preview configuration (for /ve-watermark page)
 export const reticlePreviewConfigSchema = z.object({
   shape: z.enum(["crosshair", "circle", "square", "arrow", "speech-bubble", "custom"]).default("crosshair"),
   color: z.string().default("#3b82f6"),

@@ -18,7 +18,7 @@ const GalleryPage = createTrackedLazy(MODULE_NAMES.gallery, () => import("@/page
 const PhotoDetailPage = createTrackedLazy(MODULE_NAMES.photoDetail, () => import("@/pages/photo-detail"));
 const SettingsPage = createTrackedLazy(MODULE_NAMES.settings, () => import("@/pages/settings"));
 const GamePage = createTrackedLazy(MODULE_NAMES.game, () => import("@/pages/game"));
-const VisualEditorWatermarkPage = createTrackedLazy(MODULE_NAMES.watermarkPreview, () => import("@/pages/watermark-preview"));
+const VisualEditorWatermarkPage = createTrackedLazy(MODULE_NAMES.watermarkPreview, () => import("@/pages/watermark-ve"));
 const NotFound = createTrackedLazy(MODULE_NAMES.notFound, () => import("@/pages/not-found"));
 
 function PageLoader() {
@@ -52,6 +52,26 @@ function Router() {
   );
 }
 
+function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <I18nProvider>
+          <TooltipProvider>
+            <SettingsProvider>
+              <PrivacyProvider>
+                <LazyLoaderProvider>
+                  {children}
+                </LazyLoaderProvider>
+              </PrivacyProvider>
+            </SettingsProvider>
+          </TooltipProvider>
+        </I18nProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}
+
 function App() {
   const [showSplash, setShowSplash] = useState(() => {
     const privacySettings = loadPrivacySettings();
@@ -69,26 +89,14 @@ function App() {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <I18nProvider>
-          <TooltipProvider>
-            <SettingsProvider>
-              <PrivacyProvider>
-                <LazyLoaderProvider>
-                  <ErrorBoundary>
-                    {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-                    <Router />
-                    <Toaster />
-                    <PrivacyOverlay />
-                  </ErrorBoundary>
-                </LazyLoaderProvider>
-              </PrivacyProvider>
-            </SettingsProvider>
-          </TooltipProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <Providers>
+      <ErrorBoundary>
+        {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
+        <Router />
+        <Toaster />
+        <PrivacyOverlay />
+      </ErrorBoundary>
+    </Providers>
   );
 }
 

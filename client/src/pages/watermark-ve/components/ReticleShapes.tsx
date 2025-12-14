@@ -1,5 +1,6 @@
 import { memo } from "react";
 import type { ReticleShape } from "../types";
+import { CAMERA, RETICLE } from "@/lib/constants";
 
 export interface ReticleShapeProps {
   size: number | string;
@@ -13,8 +14,8 @@ export interface ReticleShapeComponentProps extends ReticleShapeProps {
   shape: ReticleShape;
 }
 
-const DEFAULT_COLOR = "#22c55e";
-const OUTLINE_COLOR = "#000000";
+const DEFAULT_COLOR = CAMERA.DEFAULT_RETICLE_COLOR;
+const OUTLINE_COLOR = CAMERA.RETICLE_OUTLINE_COLOR;
 
 export const CrosshairReticle = memo(function CrosshairReticle({
   size,
@@ -69,8 +70,8 @@ export const CircleReticle = memo(function CircleReticle({
   className = "",
 }: ReticleShapeProps) {
   const outlineWidth = strokeWidth + 2;
-  const radius = 40;
-  const centerDotRadius = 4;
+  const radius = RETICLE.DEFAULT_RADIUS;
+  const centerDotRadius = RETICLE.CENTER_DOT_RADIUS;
   
   return (
     <svg
@@ -112,8 +113,8 @@ export const SquareReticle = memo(function SquareReticle({
   className = "",
 }: ReticleShapeProps) {
   const outlineWidth = strokeWidth + 2;
-  const padding = 10;
-  const squareSize = 80;
+  const padding = RETICLE.SQUARE_PADDING;
+  const squareSize = RETICLE.SQUARE_SIZE;
   
   return (
     <svg

@@ -1,6 +1,48 @@
 import { memo } from "react";
 import { Crosshair } from "lucide-react";
 
+const sizeClasses = {
+  sm: "w-5 h-5 border",
+  md: "w-8 h-8 border-2",
+  lg: "w-12 h-12 border-2",
+} as const;
+
+const iconSizes = {
+  sm: "w-6 h-6",
+  md: "w-10 h-10",
+  lg: "w-14 h-14",
+} as const;
+
+const ringSizes = {
+  sm: "w-10 h-10",
+  md: "w-16 h-16",
+  lg: "w-24 h-24",
+} as const;
+
+const outerRingSizes = {
+  sm: "w-14 h-14",
+  md: "w-24 h-24",
+  lg: "w-32 h-32",
+} as const;
+
+const brandedIconSizes = {
+  sm: "w-6 h-6",
+  md: "w-8 h-8",
+  lg: "w-12 h-12",
+} as const;
+
+const brandedRingSizes = {
+  sm: "w-10 h-10",
+  md: "w-14 h-14",
+  lg: "w-20 h-20",
+} as const;
+
+const brandedOuterRingSizes = {
+  sm: "w-14 h-14",
+  md: "w-20 h-20",
+  lg: "w-28 h-28",
+} as const;
+
 interface PageLoaderProps {
   variant?: "fullscreen" | "inline" | "overlay" | "branded";
   size?: "sm" | "md" | "lg";
@@ -12,30 +54,6 @@ export const PageLoader = memo(function PageLoader({
   size = "md",
   className = "",
 }: PageLoaderProps) {
-  const sizeClasses = {
-    sm: "w-5 h-5 border",
-    md: "w-8 h-8 border-2",
-    lg: "w-12 h-12 border-2",
-  };
-
-  const iconSizes = {
-    sm: "w-6 h-6",
-    md: "w-10 h-10",
-    lg: "w-14 h-14",
-  };
-
-  const ringSizes = {
-    sm: "w-10 h-10",
-    md: "w-16 h-16",
-    lg: "w-24 h-24",
-  };
-
-  const outerRingSizes = {
-    sm: "w-14 h-14",
-    md: "w-24 h-24",
-    lg: "w-32 h-32",
-  };
-
   const spinnerClasses = `${sizeClasses[size]} border-primary border-t-transparent rounded-full animate-spin`;
 
   if (variant === "branded") {
@@ -122,24 +140,6 @@ export const BrandedLoader = memo(function BrandedLoader({
   className = "",
   text,
 }: BrandedLoaderProps) {
-  const iconSizes = {
-    sm: "w-6 h-6",
-    md: "w-8 h-8",
-    lg: "w-12 h-12",
-  };
-
-  const ringSizes = {
-    sm: "w-10 h-10",
-    md: "w-14 h-14",
-    lg: "w-20 h-20",
-  };
-
-  const outerRingSizes = {
-    sm: "w-14 h-14",
-    md: "w-20 h-20",
-    lg: "w-28 h-28",
-  };
-
   return (
     <div 
       className={`flex flex-col items-center justify-center gap-4 ${className}`}
@@ -151,15 +151,15 @@ export const BrandedLoader = memo(function BrandedLoader({
       <span className="sr-only">{text || "Loading..."}</span>
       <div className="relative flex items-center justify-center">
         <div 
-          className={`absolute ${outerRingSizes[size]} rounded-full border border-primary/20 animate-pulse-ring-outer`}
+          className={`absolute ${brandedOuterRingSizes[size]} rounded-full border border-primary/20 animate-pulse-ring-outer`}
           aria-hidden="true"
         />
         <div 
-          className={`absolute ${ringSizes[size]} rounded-full border-2 border-primary/40 animate-pulse-ring`}
+          className={`absolute ${brandedRingSizes[size]} rounded-full border-2 border-primary/40 animate-pulse-ring`}
           aria-hidden="true"
         />
         <Crosshair 
-          className={`${iconSizes[size]} text-primary animate-crosshair-rotate`}
+          className={`${brandedIconSizes[size]} text-primary animate-crosshair-rotate`}
           strokeWidth={1.5}
           aria-hidden="true"
         />
