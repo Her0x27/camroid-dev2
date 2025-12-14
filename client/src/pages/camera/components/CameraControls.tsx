@@ -272,13 +272,15 @@ const RightControls = memo(function RightControls({
         )}
       </button>
 
-      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen} modal={false}>
         <DropdownMenuTrigger asChild>
           <button
             className="text-primary flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
             onPointerDown={handlePointerDown}
             onPointerUp={handlePointerUp}
             onPointerLeave={handlePointerLeave}
+            onPointerCancel={handlePointerLeave}
+            onClick={(e) => e.preventDefault()}
             onContextMenu={(e) => e.preventDefault()}
             data-testid="button-settings"
           >
