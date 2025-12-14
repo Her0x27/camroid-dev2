@@ -11,10 +11,10 @@
 ## Чек-лист задач v55
 
 - [x] Обновить upgrade.md — добавить секцию v55
-- [ ] Обновить Switch компонент — увеличить размер до стандартов iOS/Android
-- [ ] Обновить MainSettingsTab — убрать inline size overrides для Switch
-- [ ] Обновить PrivacyTab — убрать inline size overrides для Switch
-- [ ] Финальное обновление upgrade.md
+- [x] Обновить Switch компонент — увеличить размер до стандартов iOS/Android
+- [x] Обновить MainSettingsTab — убрать inline size overrides для Switch
+- [x] Обновить PrivacyTab — убрать inline size overrides для Switch
+- [x] Финальное обновление upgrade.md
 
 ---
 
@@ -23,9 +23,24 @@
 | Задача | Статус | Дата |
 |--------|--------|------|
 | upgrade.md | ✅ Готово | 14.12.2025 |
-| Switch компонент | 🔄 В процессе | 14.12.2025 |
-| MainSettingsTab | ⏳ Ожидание | — |
-| PrivacyTab | ⏳ Ожидание | — |
+| Switch компонент | ✅ Готово | 14.12.2025 |
+| MainSettingsTab | ✅ Готово | 14.12.2025 |
+| PrivacyTab | ✅ Готово | 14.12.2025 |
+
+## Изменения v55
+
+### client/src/components/ui/switch.tsx
+- **Track размер:** изменён с `h-6 w-11` (24×44px) на `h-8 w-14` (32×56px)
+- **Thumb размер:** изменён с `h-5 w-5` (20×20px) на `h-7 w-7` (28×28px)
+- **Translate:** изменён с `translate-x-5` на `translate-x-6` для правильного позиционирования
+
+### client/src/pages/settings/tabs/MainSettingsTab.tsx
+- **Switch sound:** убран `className="h-6 w-11 min-h-[24px]"`
+- **Switch stabilization:** убран `className="h-6 w-11 min-h-[24px]"`
+- **Switch enhancement:** убран `className="h-6 w-11 min-h-[24px]"`
+
+### client/src/pages/settings/tabs/PrivacyTab.tsx
+- **Switch privacy-enabled:** убран `className="min-w-[44px] min-h-[24px]"`
 
 ---
 
