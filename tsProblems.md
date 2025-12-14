@@ -4,6 +4,108 @@
 
 This document contains the results of a comprehensive TypeScript project audit covering code duplication, architecture, performance, typing, data handling, async patterns, imports, code smells, and **clean code analysis**.
 
+**Последний аудит:** 14.12.2025
+
+---
+
+## Аудит 14.12.2025 — Новый полный анализ
+
+### Общая оценка
+
+| Категория | Статус |
+|-----------|--------|
+| Дублирование | ✅ Хорошо (исправлено ранее) |
+| Архитектура | ✅ Хорошо |
+| Производительность | ✅ Хорошо |
+| Типизация | ✅ Отлично (нет `any`, нет `@ts-ignore` в коде проекта) |
+| Обработка данных | ✅ Хорошо |
+| Асинхронность | ✅ Корректно |
+| Code splitting | ✅ Настроен |
+| Код-смеллы | ⚠️ Незначительные улучшения возможны |
+
+### Найденные проблемы
+
+#### MEDIUM-001: Дублирование Registry классов (не исправлено)
+
+**Местоположение:**
+- `client/src/themes/registry.ts` — `ThemeRegistry`
+- `client/src/privacy_modules/registry.ts` — `PrivacyModuleRegistry`
+- `client/src/cloud-providers/registry.ts` — `CloudProviderRegistry`
+
+**Проблема:** Три практически идентичных класса с методами `register()`, `get()`, `getDefault()`, `getAll()`, `has()`. Отличаются только типами.
+
+**Решение:** Создать generic базовый класс `BaseRegistry<T>` и унаследовать от него.
+
+**Статус:** ⏸️ Оставлено — текущая реализация работает, рефакторинг опционален
+
+---
+
+#### LOW-001: Магические числа в отдельных файлах
+
+**Местоположение:**
+- `client/src/components/pattern-lock.tsx:4` — `MOVE_THROTTLE_MS = 16`
+- `client/src/pages/watermark-preview/components/InteractiveWatermark.tsx:122` — `LONG_PRESS_DURATION = 500`
+
+**Проблема:** Локальные константы вместо централизованных в `constants.ts`.
+
+**Решение:** Вынести в `client/src/lib/constants.ts` для консистентности.
+
+**Статус:** ⏸️ Опционально — значения уже константы, просто локальные
+
+---
+
+#### LOW-002: Неиспользуемое свойство `isDocumentHidden`
+
+**Местоположение:** `client/src/hooks/use-page-visibility.ts:25`
+
+**Проблема:** Свойство `isDocumentHidden` возвращается из хука, но не используется.
+
+**Решение:** Удалить или задокументировать назначение.
+
+**Статус:** ⏸️ Опционально — не влияет на производительность
+
+---
+
+#### LOW-003: Потенциально неиспользуемые экспорты
+
+**Местоположение:**
+- `client/src/lib/canvas-icons.ts:173` — `drawRoundedRectPath()` 
+- `client/src/lib/audio-utils.ts:1` — `getAudioContext()`
+
+**Проблема:** Экспортируемые функции могут быть неиспользуемыми.
+
+**Решение:** Проверить использование, удалить если не используется.
+
+**Статус:** ⏸️ Требует проверки
+
+---
+
+### Чек-лист задач (14.12.2025)
+
+#### Опционально (низкий приоритет)
+
+- [ ] **REGISTRY-001**: Создать generic `BaseRegistry<T>` класс для унификации трёх registry
+- [ ] **CONST-001**: Вынести `MOVE_THROTTLE_MS` из pattern-lock.tsx в constants.ts
+- [ ] **CONST-002**: Вынести `LONG_PRESS_DURATION` из InteractiveWatermark.tsx в constants.ts
+- [ ] **CLEAN-007**: Проверить использование `drawRoundedRectPath()` и `getAudioContext()`
+- [ ] **CLEAN-008**: Удалить `isDocumentHidden` из usePageVisibility если не нужен
+
+### Положительные находки
+
+1. **Типизация отличная** — нет `any` и `@ts-ignore` в коде проекта
+2. **Мемоизация применена** — 336+ использований useMemo/useCallback/React.memo
+3. **Promise.all используется** — параллельные операции реализованы корректно
+4. **Очистка подписок** — addEventListener/removeEventListener парами
+5. **Lazy loading** — страницы загружаются лениво
+6. **Виртуализация** — react-window для галереи
+7. **Code splitting** — vendor chunks настроены в vite.config.ts
+8. **Константы централизованы** — `client/src/lib/constants.ts`
+9. **Логгирование через logger** — централизованный логгер вместо console.log
+
+---
+
+## История аудитов
+
 **Последний аудит:** 11.12.2025
 
 **Статус задач разделов 1-10:** ✅ ВСЕ ЗАДАЧИ ОБРАБОТАНЫ
