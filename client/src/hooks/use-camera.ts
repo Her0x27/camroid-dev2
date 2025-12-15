@@ -6,10 +6,12 @@ import type { CameraResolution } from "@shared/schema";
 
 // Standard 16:9 resolutions
 const STANDARD_16x9_RESOLUTIONS: Array<{ label: string; value: CameraResolution; width: number; height: number }> = [
-  { label: "4K (3840×2160)", value: "4k", width: 3840, height: 2160 },
-  { label: "Full HD (1920×1080)", value: "1080p", width: 1920, height: 1080 },
-  { label: "HD (1280×720)", value: "720p", width: 1280, height: 720 },
-  { label: "SD (640×360)", value: "480p", width: 640, height: 360 },
+  { label: "4000×2250", value: "4000x2250", width: 4000, height: 2250 },
+  { label: "4K (3840×2160)", value: "3840x2160", width: 3840, height: 2160 },
+  { label: "3264×1836", value: "3264x1836", width: 3264, height: 1836 },
+  { label: "Full HD (1920×1080)", value: "1920x1080", width: 1920, height: 1080 },
+  { label: "1600×900", value: "1600x900", width: 1600, height: 900 },
+  { label: "HD (1280×720)", value: "1280x720", width: 1280, height: 720 },
 ];
 
 export async function queryCameraResolutions(facingMode: "user" | "environment" = "environment"): Promise<SupportedResolution[]> {
@@ -68,21 +70,29 @@ function getDefaultResolutions(): SupportedResolution[] {
 }
 
 const RESOLUTION_CONSTRAINTS: Record<CameraResolution, { width: MediaTrackConstraintSet["width"]; height: MediaTrackConstraintSet["height"] }> = {
-  "4k": {
+  "4000x2250": {
+    width: { ideal: 4000, max: 4000 },
+    height: { ideal: 2250, max: 2250 },
+  },
+  "3840x2160": {
     width: { ideal: 3840, max: 3840 },
     height: { ideal: 2160, max: 2160 },
   },
-  "1080p": {
+  "3264x1836": {
+    width: { ideal: 3264, max: 3264 },
+    height: { ideal: 1836, max: 1836 },
+  },
+  "1920x1080": {
     width: { ideal: 1920, max: 1920 },
     height: { ideal: 1080, max: 1080 },
   },
-  "720p": {
+  "1600x900": {
+    width: { ideal: 1600, max: 1600 },
+    height: { ideal: 900, max: 900 },
+  },
+  "1280x720": {
     width: { ideal: 1280, max: 1280 },
     height: { ideal: 720, max: 720 },
-  },
-  "480p": {
-    width: { ideal: 640, max: 640 },
-    height: { ideal: 480, max: 480 },
   },
   auto: {
     width: { ideal: 4096 },
@@ -185,10 +195,12 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
       
       // Define standard 16:9 resolutions to check
       const standard16x9Resolutions: Array<{ label: string; value: CameraResolution; width: number; height: number }> = [
-        { label: "4K (3840×2160)", value: "4k", width: 3840, height: 2160 },
-        { label: "Full HD (1920×1080)", value: "1080p", width: 1920, height: 1080 },
-        { label: "HD (1280×720)", value: "720p", width: 1280, height: 720 },
-        { label: "SD (640×360)", value: "480p", width: 640, height: 360 },
+        { label: "4000×2250", value: "4000x2250", width: 4000, height: 2250 },
+        { label: "4K (3840×2160)", value: "3840x2160", width: 3840, height: 2160 },
+        { label: "3264×1836", value: "3264x1836", width: 3264, height: 1836 },
+        { label: "Full HD (1920×1080)", value: "1920x1080", width: 1920, height: 1080 },
+        { label: "1600×900", value: "1600x900", width: 1600, height: 900 },
+        { label: "HD (1280×720)", value: "1280x720", width: 1280, height: 720 },
       ];
       
       // Check which resolutions are supported by the camera

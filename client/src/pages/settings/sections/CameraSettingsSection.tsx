@@ -31,10 +31,12 @@ export const CameraSettingsSection = memo(function CameraSettingsSection({
 
   const resolutionOptions = useMemo(() => [
     { value: "auto" as CameraResolution, label: t.settings.camera.auto },
-    { value: "4k" as CameraResolution, label: t.settings.camera.res4k },
-    { value: "1080p" as CameraResolution, label: t.settings.camera.res1080p },
-    { value: "720p" as CameraResolution, label: t.settings.camera.res720p },
-    { value: "480p" as CameraResolution, label: t.settings.camera.res480p },
+    { value: "4000x2250" as CameraResolution, label: "4000×2250" },
+    { value: "3840x2160" as CameraResolution, label: "3840×2160 (4K)" },
+    { value: "3264x1836" as CameraResolution, label: "3264×1836" },
+    { value: "1920x1080" as CameraResolution, label: "1920×1080 (FHD)" },
+    { value: "1600x900" as CameraResolution, label: "1600×900" },
+    { value: "1280x720" as CameraResolution, label: "1280×720 (HD)" },
   ], [t]);
 
   return (

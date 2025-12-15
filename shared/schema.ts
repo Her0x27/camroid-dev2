@@ -215,8 +215,8 @@ export const stabilizationSettingsSchema = z.object({
 
 export type StabilizationSettings = z.infer<typeof stabilizationSettingsSchema>;
 
-// Camera resolution preset
-export type CameraResolution = "auto" | "4k" | "1080p" | "720p" | "480p";
+// Camera resolution preset (16:9 resolutions)
+export type CameraResolution = "auto" | "4000x2250" | "3840x2160" | "3264x1836" | "1920x1080" | "1600x900" | "1280x720";
 
 // Expanded sections state (which settings cards are open)
 export const expandedSectionsSchema = z.record(z.string(), z.boolean()).default({});
@@ -233,7 +233,7 @@ export const settingsSchema = z.object({
   accuracyLimit: z.number().min(5).max(100).default(20),
   watermarkScale: z.number().min(50).max(150).default(100),
   showLevelIndicator: z.boolean().default(false),
-  cameraResolution: z.enum(["auto", "4k", "1080p", "720p", "480p"]).default("auto"),
+  cameraResolution: z.enum(["auto", "4000x2250", "3840x2160", "3264x1836", "1920x1080", "1600x900", "1280x720"]).default("auto"),
   photoQuality: z.number().min(50).max(100).default(90),
   expandedSections: expandedSectionsSchema.default({}),
   cloud: cloudSettingsSchema.default({
@@ -284,7 +284,7 @@ export const defaultSettings: Settings = {
   accuracyLimit: 20,
   watermarkScale: 100,
   showLevelIndicator: false,
-  cameraResolution: "1080p",
+  cameraResolution: "1920x1080",
   photoQuality: 90,
   expandedSections: {},
   cloud: {

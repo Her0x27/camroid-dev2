@@ -1,3 +1,50 @@
+# Upgrade: Новые разрешения фотографий v69
+
+## Описание
+Добавить выбор разрешений фотографий 16:9:
+- 4000x2250
+- 3840x2160 (4K)
+- 3264x1836
+- 1920x1080 (Full HD)
+- 1600x900
+- 1280x720 (HD)
+
+## Чек-лист задач v69
+
+- [x] Обновить upgrade.md — добавить секцию v69
+- [x] Обновить CameraResolution type в shared/schema.ts
+- [x] Обновить RESOLUTION_CONSTRAINTS в use-camera.ts
+- [x] Обновить resolutionOptions в CameraSettingsSection.tsx
+- [x] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v69
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ✅ Готово | 15.12.2025 |
+| CameraResolution type | ✅ Готово | 15.12.2025 |
+| RESOLUTION_CONSTRAINTS | ✅ Готово | 15.12.2025 |
+| resolutionOptions | ✅ Готово | 15.12.2025 |
+
+## Изменения v69
+
+### shared/schema.ts
+- **CameraResolution type:** новые значения `"auto" | "4000x2250" | "3840x2160" | "3264x1836" | "1920x1080" | "1600x900" | "1280x720"`
+- **cameraResolution enum:** обновлён в settingsSchema
+- **defaultSettings:** изменено с "1080p" на "1920x1080"
+
+### client/src/hooks/use-camera.ts
+- **STANDARD_16x9_RESOLUTIONS:** 6 разрешений 16:9 вместо 4
+- **RESOLUTION_CONSTRAINTS:** новые constraints для всех разрешений
+- **extractCapabilities:** обновлён список разрешений
+
+### client/src/pages/settings/sections/CameraSettingsSection.tsx
+- **resolutionOptions:** новые опции с точными размерами
+
+---
+
 # Upgrade: Компактный просмотр фото v68
 
 ## Описание
