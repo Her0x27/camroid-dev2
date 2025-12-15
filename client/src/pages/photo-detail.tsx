@@ -241,23 +241,29 @@ export default function PhotoDetailPage() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <img
-        src={photo.imageData}
-        alt={t.gallery.photo}
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-150"
+      <div 
+        className="absolute inset-0 flex items-center justify-center"
         style={{
-          transform: isSwipeActive 
-            ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px)`
-            : 'translate(0, 0)',
-          opacity: isSwipeActive && verticalSwipeOffset !== 0 
-            ? Math.max(0.3, 1 - Math.abs(verticalSwipeOffset) / 200)
-            : 1,
-          margin: 0,
-          padding: 0,
+          paddingTop: '56px',
+          paddingBottom: '56px',
         }}
-        data-testid="photo-image"
-        draggable={false}
-      />
+      >
+        <img
+          src={photo.imageData}
+          alt={t.gallery.photo}
+          className="w-full h-full object-contain transition-transform duration-150"
+          style={{
+            transform: isSwipeActive 
+              ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px)`
+              : 'translate(0, 0)',
+            opacity: isSwipeActive && verticalSwipeOffset !== 0 
+              ? Math.max(0.3, 1 - Math.abs(verticalSwipeOffset) / 200)
+              : 1,
+          }}
+          data-testid="photo-image"
+          draggable={false}
+        />
+      </div>
 
       {hasPrevious && (
         <Button
@@ -283,7 +289,7 @@ export default function PhotoDetailPage() {
         </Button>
       )}
 
-      <header className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/60 to-transparent safe-top">
+      <header className="absolute top-0 left-0 right-0 z-50 bg-black/80 safe-top">
         <div className="flex items-center gap-3 px-4 py-3">
           <Button
             variant="ghost"
@@ -295,11 +301,19 @@ export default function PhotoDetailPage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
 
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="text-sm text-white/70 shrink-0">
-              {currentIndex + 1}/{total}
-            </span>
-            <span className="text-sm text-white truncate">
+          <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-white/60 shrink-0">
+                {currentIndex + 1}/{total}
+              </span>
+              <span 
+                className="text-sm text-white font-medium truncate"
+                title={photo.note || undefined}
+              >
+                {photo.note || `IMG_${new Date(photo.metadata.timestamp).toISOString().slice(0, 10).replace(/-/g, "")}`}
+              </span>
+            </div>
+            <span className="text-xs text-white/50">
               {new Date(photo.metadata.timestamp).toLocaleDateString("ru-RU", {
                 day: "numeric",
                 month: "short",
@@ -312,7 +326,7 @@ export default function PhotoDetailPage() {
         </div>
       </header>
 
-      <footer className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/60 to-transparent safe-bottom">
+      <footer className="absolute bottom-0 left-0 right-0 z-50 bg-black/80 safe-bottom">
         <div className="flex items-center justify-center gap-2 px-4 py-3">
           <Button
             variant="ghost"
