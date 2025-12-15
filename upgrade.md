@@ -24,6 +24,9 @@
 ## Изменения v68
 
 ### client/src/pages/photo-detail.tsx
+- **Изображение:**
+  - `w-full h-full object-contain` → `w-full max-h-full` — фото на всю ширину, без чёрных полос по бокам
+  
 - **Контейнер изображения:**
   - `paddingBottom: '56px'` → `paddingBottom: '40px'` — уменьшен отступ снизу
   

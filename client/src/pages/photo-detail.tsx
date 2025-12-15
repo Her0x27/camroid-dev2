@@ -251,7 +251,7 @@ export default function PhotoDetailPage() {
         <img
           src={photo.imageData}
           alt={t.gallery.photo}
-          className="w-full h-full object-contain transition-transform duration-150"
+          className="w-full max-h-full transition-transform duration-150"
           style={{
             transform: isSwipeActive 
               ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px)`
