@@ -12,6 +12,7 @@ import { SplashScreen } from "@/components/splash-screen";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { PrivacyOverlay } from "@/components/privacy-overlay";
 import { LazyLoaderProvider, createTrackedLazy, MODULE_NAMES } from "@/lib/lazy-loader-context";
+import { PageLoader } from "@/components/page-loader";
 
 const CameraPage = createTrackedLazy(MODULE_NAMES.cameraChunk, () => import("@/pages/camera"));
 const GalleryPage = createTrackedLazy(MODULE_NAMES.gallery, () => import("@/pages/gallery"));
@@ -21,25 +22,19 @@ const GamePage = createTrackedLazy(MODULE_NAMES.game, () => import("@/pages/game
 const VisualEditorWatermarkPage = createTrackedLazy(MODULE_NAMES.watermarkPreview, () => import("@/pages/watermark-ve"));
 const NotFound = createTrackedLazy(MODULE_NAMES.notFound, () => import("@/pages/not-found"));
 
-function PageLoader() {
-  return (
-    <div className="min-h-screen bg-background" data-testid="page-loader" />
-  );
-}
-
 function Router() {
   const { settings, isLocked } = usePrivacy();
   
   if (settings.enabled && isLocked) {
     return (
-      <Suspense fallback={<PageLoader />}>
+      <Suspense fallback={<PageLoader variant="branded" />}>
         <GamePage />
       </Suspense>
     );
   }
   
   return (
-    <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={<PageLoader variant="branded" />}>
       <Switch>
         <Route path="/" component={CameraPage} />
         <Route path="/gallery" component={GalleryPage} />
