@@ -57,6 +57,12 @@ export const PageLoader = memo(function PageLoader({
   const spinnerClasses = `${sizeClasses[size]} border-primary border-t-transparent rounded-full animate-spin`;
 
   if (variant === "branded") {
+    const thirdRingSizes = {
+      sm: "w-18 h-18",
+      md: "w-32 h-32", 
+      lg: "w-40 h-40",
+    } as const;
+    
     return (
       <div 
         className={`min-h-screen bg-background flex flex-col items-center justify-center ${className}`}
@@ -68,10 +74,13 @@ export const PageLoader = memo(function PageLoader({
         <span className="sr-only">Loading...</span>
         <div className="relative flex items-center justify-center">
           <div 
+            className={`absolute ${thirdRingSizes[size]} rounded-full border border-primary/10 animate-pulse-ring-third`}
+          />
+          <div 
             className={`absolute ${outerRingSizes[size]} rounded-full border border-primary/20 animate-pulse-ring-outer`}
           />
           <div 
-            className={`absolute ${ringSizes[size]} rounded-full border-2 border-primary/40 animate-pulse-ring`}
+            className={`absolute ${ringSizes[size]} rounded-full border-2 border-primary/50 animate-pulse-ring`}
           />
           <Crosshair 
             className={`${iconSizes[size]} text-primary animate-crosshair-rotate`}
@@ -79,10 +88,10 @@ export const PageLoader = memo(function PageLoader({
             aria-hidden="true"
           />
         </div>
-        <div className="mt-6 flex items-center gap-1" aria-hidden="true">
-          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        <div className="mt-8 flex items-center gap-1.5" aria-hidden="true">
+          <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     );
