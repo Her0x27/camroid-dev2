@@ -1,4 +1,4 @@
-import { formatAltitude, formatAccuracy, formatCoordinatesCompact } from "@/hooks/use-geolocation";
+import { formatAltitude, formatAccuracy } from "@/hooks/use-geolocation";
 import { formatHeading, getCardinalDirection, formatTilt } from "@/hooks/use-orientation";
 import {
   drawMapPinIcon,
@@ -10,7 +10,7 @@ import {
   drawRoundedRectPath,
   type IconDrawFunction,
 } from "./canvas-icons";
-import type { ReticleConfig, ReticlePosition } from "@shared/schema";
+import type { ReticleConfig, ReticlePosition, CoordinateFormat, TextAlign, LogoPosition, FontFamily, NotePlacement, WatermarkSeparator } from "@shared/schema";
 import { colorToRgba, getContrastingOutlineColor } from "./color-utils";
 
 export interface WatermarkMetadata {
@@ -26,6 +26,33 @@ export interface WatermarkMetadata {
   reticleColor?: string;
   watermarkScale?: number;
   reticlePosition?: ReticlePosition;
+  showCoordinates?: boolean;
+  showGyroscope?: boolean;
+  showNote?: boolean;
+  showTimestamp?: boolean;
+  coordinateFormat?: CoordinateFormat;
+  fontFamily?: FontFamily;
+  textAlign?: TextAlign;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  backgroundColor?: string;
+  backgroundOpacity?: number;
+  fontColor?: string;
+  fontOpacity?: number;
+  fontSize?: number;
+  logoUrl?: string | null;
+  logoPosition?: LogoPosition;
+  logoSize?: number;
+  logoOpacity?: number;
+  width?: number;
+  height?: number;
+  autoSize?: boolean;
+  rotation?: number;
+  positionX?: number;
+  positionY?: number;
+  notePlacement?: NotePlacement;
+  separators?: WatermarkSeparator[];
 }
 
 interface ColumnItem {
@@ -42,6 +69,48 @@ interface WatermarkLayout {
   topOffset: number;
   iconSize: number;
   iconGap: number;
+}
+
+function formatCoordinatesCanvas(lat: number | null | undefined, lng: number | null | undefined, format: CoordinateFormat = "decimal"): string {
+  if (lat === null || lat === undefined || lng === null || lng === undefined) {
+    return "---";
+  }
+  
+  switch (format) {
+    case "dms": {
+      const latDir = lat >= 0 ? "N" : "S";
+      const lngDir = lng >= 0 ? "E" : "W";
+      const absLat = Math.abs(lat);
+      const absLng = Math.abs(lng);
+      const latDeg = Math.floor(absLat);
+      const latMin = Math.floor((absLat - latDeg) * 60);
+      const latSec = ((absLat - latDeg - latMin / 60) * 3600).toFixed(1);
+      const lngDeg = Math.floor(absLng);
+      const lngMin = Math.floor((absLng - lngDeg) * 60);
+      const lngSec = ((absLng - lngDeg - lngMin / 60) * 3600).toFixed(1);
+      return `${latDeg}°${latMin}'${latSec}"${latDir} ${lngDeg}°${lngMin}'${lngSec}"${lngDir}`;
+    }
+    case "ddm": {
+      const latDir = lat >= 0 ? "N" : "S";
+      const lngDir = lng >= 0 ? "E" : "W";
+      const absLat = Math.abs(lat);
+      const absLng = Math.abs(lng);
+      const latDeg = Math.floor(absLat);
+      const latMin = ((absLat - latDeg) * 60).toFixed(4);
+      const lngDeg = Math.floor(absLng);
+      const lngMin = ((absLng - lngDeg) * 60).toFixed(4);
+      return `${latDeg}°${latMin}'${latDir} ${lngDeg}°${lngMin}'${lngDir}`;
+    }
+    case "simple": {
+      return `${lat.toFixed(5)} ${lng.toFixed(5)}`;
+    }
+    case "decimal":
+    default: {
+      const latDir = lat >= 0 ? "N" : "S";
+      const lngDir = lng >= 0 ? "E" : "W";
+      return `${Math.abs(lat).toFixed(4)}°${latDir} ${Math.abs(lng).toFixed(4)}°${lngDir}`;
+    }
+  }
 }
 
 function calculateLayout(width: number, height: number, watermarkScale: number): WatermarkLayout {
@@ -70,30 +139,32 @@ function drawCrosshairReticle(
   scaledStrokeWidth: number,
   outlineStrokeWidth: number
 ): void {
+  const halfSize = reticleSize / 2;
+  
   ctx.strokeStyle = outlineColor;
   ctx.lineWidth = outlineStrokeWidth;
 
   ctx.beginPath();
-  ctx.moveTo(centerX - reticleSize, centerY);
-  ctx.lineTo(centerX + reticleSize, centerY);
+  ctx.moveTo(centerX - halfSize, centerY);
+  ctx.lineTo(centerX + halfSize, centerY);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(centerX, centerY - reticleSize);
-  ctx.lineTo(centerX, centerY + reticleSize);
+  ctx.moveTo(centerX, centerY - halfSize);
+  ctx.lineTo(centerX, centerY + halfSize);
   ctx.stroke();
 
   ctx.strokeStyle = colorValue;
   ctx.lineWidth = scaledStrokeWidth;
 
   ctx.beginPath();
-  ctx.moveTo(centerX - reticleSize, centerY);
-  ctx.lineTo(centerX + reticleSize, centerY);
+  ctx.moveTo(centerX - halfSize, centerY);
+  ctx.lineTo(centerX + halfSize, centerY);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(centerX, centerY - reticleSize);
-  ctx.lineTo(centerX, centerY + reticleSize);
+  ctx.moveTo(centerX, centerY - halfSize);
+  ctx.lineTo(centerX, centerY + halfSize);
   ctx.stroke();
 }
 
@@ -107,8 +178,8 @@ function drawCircleReticle(
   scaledStrokeWidth: number,
   outlineStrokeWidth: number
 ): void {
-  const radius = reticleSize * 0.8;
-  const centerDotRadius = reticleSize * 0.08;
+  const radius = reticleSize * 0.4;
+  const centerDotRadius = reticleSize * 0.04;
 
   ctx.strokeStyle = outlineColor;
   ctx.lineWidth = outlineStrokeWidth;
@@ -143,8 +214,8 @@ function drawSquareReticle(
   scaledStrokeWidth: number,
   outlineStrokeWidth: number
 ): void {
-  const halfSize = reticleSize * 0.8;
-  const innerCrossSize = reticleSize * 0.6;
+  const halfSize = reticleSize * 0.4;
+  const innerCrossSize = reticleSize * 0.3;
 
   ctx.strokeStyle = outlineColor;
   ctx.lineWidth = outlineStrokeWidth;
@@ -185,25 +256,23 @@ function drawArrowReticle(
   scaledStrokeWidth: number,
   outlineStrokeWidth: number
 ): void {
-  const arrowHeight = reticleSize * 1.0;
-  const arrowWidth = reticleSize * 0.6;
+  const arrowWidth = reticleSize * 0.30;
 
-  const tipY = centerY + arrowHeight * 0.35;
-  const topLeftX = centerX - arrowWidth;
-  const topLeftY = centerY - arrowHeight * 0.65;
+  const tipY = centerY + reticleSize * 0.35;
+  const topY = centerY - reticleSize * 0.15;
+  const midY = centerY;
   const midX = centerX;
-  const midY = centerY - arrowHeight * 0.15;
+  const topLeftX = centerX - arrowWidth;
   const topRightX = centerX + arrowWidth;
-  const topRightY = centerY - arrowHeight * 0.65;
 
   ctx.strokeStyle = outlineColor;
   ctx.lineWidth = outlineStrokeWidth;
   ctx.lineJoin = "round";
   ctx.beginPath();
   ctx.moveTo(midX, tipY);
-  ctx.lineTo(topLeftX, topLeftY);
+  ctx.lineTo(topLeftX, topY);
   ctx.lineTo(midX, midY);
-  ctx.lineTo(topRightX, topRightY);
+  ctx.lineTo(topRightX, topY);
   ctx.closePath();
   ctx.stroke();
 
@@ -212,9 +281,9 @@ function drawArrowReticle(
   ctx.lineWidth = scaledStrokeWidth;
   ctx.beginPath();
   ctx.moveTo(midX, tipY);
-  ctx.lineTo(topLeftX, topLeftY);
+  ctx.lineTo(topLeftX, topY);
   ctx.lineTo(midX, midY);
-  ctx.lineTo(topRightX, topRightY);
+  ctx.lineTo(topRightX, topY);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
@@ -230,10 +299,10 @@ function drawSpeechBubbleReticle(
   scaledStrokeWidth: number,
   outlineStrokeWidth: number
 ): void {
-  const bubbleWidth = reticleSize * 1.4;
-  const bubbleHeight = reticleSize;
-  const tailHeight = reticleSize * 0.3;
-  const cornerRadius = reticleSize * 0.1;
+  const bubbleWidth = reticleSize * 0.7;
+  const bubbleHeight = reticleSize * 0.5;
+  const tailHeight = reticleSize * 0.15;
+  const cornerRadius = reticleSize * 0.05;
 
   const bubbleLeft = centerX - bubbleWidth / 2;
   const bubbleTop = centerY - bubbleHeight / 2 - tailHeight / 2;
@@ -247,9 +316,9 @@ function drawSpeechBubbleReticle(
     ctx.quadraticCurveTo(bubbleRight, bubbleTop, bubbleRight, bubbleTop + cornerRadius);
     ctx.lineTo(bubbleRight, bubbleBottom - cornerRadius);
     ctx.quadraticCurveTo(bubbleRight, bubbleBottom, bubbleRight - cornerRadius, bubbleBottom);
-    ctx.lineTo(centerX + reticleSize * 0.1, bubbleBottom);
+    ctx.lineTo(centerX + reticleSize * 0.05, bubbleBottom);
     ctx.lineTo(centerX, bubbleBottom + tailHeight);
-    ctx.lineTo(centerX - reticleSize * 0.1, bubbleBottom);
+    ctx.lineTo(centerX - reticleSize * 0.05, bubbleBottom);
     ctx.lineTo(bubbleLeft + cornerRadius, bubbleBottom);
     ctx.quadraticCurveTo(bubbleLeft, bubbleBottom, bubbleLeft, bubbleBottom - cornerRadius);
     ctx.lineTo(bubbleLeft, bubbleTop + cornerRadius);
@@ -279,12 +348,12 @@ function drawCustomReticle(
   scaledStrokeWidth: number,
   outlineStrokeWidth: number
 ): void {
-  const halfSize = reticleSize * 0.6;
-  const cornerRadius = reticleSize * 0.08;
+  const halfSize = reticleSize * 0.3;
+  const cornerRadius = reticleSize * 0.04;
 
   ctx.strokeStyle = outlineColor;
   ctx.lineWidth = outlineStrokeWidth;
-  ctx.setLineDash([reticleSize * 0.16, reticleSize * 0.08]);
+  ctx.setLineDash([reticleSize * 0.08, reticleSize * 0.04]);
   ctx.beginPath();
   drawRoundedRectPath(ctx, centerX - halfSize, centerY - halfSize, halfSize * 2, halfSize * 2, cornerRadius);
   ctx.stroke();
@@ -296,7 +365,7 @@ function drawCustomReticle(
   ctx.stroke();
   ctx.setLineDash([]);
 
-  ctx.font = `bold ${reticleSize * 0.5}px sans-serif`;
+  ctx.font = `bold ${reticleSize * 0.25}px sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = outlineColor;
@@ -320,8 +389,8 @@ function drawReticle(
   const centerX = reticlePosition ? (width * reticlePosition.x / 100) : (width / 2);
   const centerY = reticlePosition ? (height * reticlePosition.y / 100) : (height / 2);
 
-  const sizePercent = reticleConfig?.size || 20;
-  const reticleSize = Math.ceil(minDimension * (sizePercent / 100) / 2);
+  const sizePercent = reticleConfig?.size || 5;
+  const reticleSize = minDimension * (sizePercent / 100);
 
   const opacity = reticleConfig?.opacity ? reticleConfig.opacity / 100 : 1;
 
@@ -330,9 +399,9 @@ function drawReticle(
   const colorValue = colorToRgba(mainColor, opacity);
   const outlineColor = getContrastingOutlineColor(mainColor, opacity);
 
-  const strokeWidthPercent = reticleConfig?.strokeWidth || 3;
-  const scaledStrokeWidth = Math.max(1, Math.ceil(reticleSize * 2 * (strokeWidthPercent / 100)));
-  const outlineStrokeWidth = Math.max(2, scaledStrokeWidth + Math.ceil(scaledStrokeWidth * 0.2));
+  const strokeWidthPercent = reticleConfig?.strokeWidth || 10;
+  const scaledStrokeWidth = Math.max(1, reticleSize * (strokeWidthPercent / 100));
+  const outlineStrokeWidth = scaledStrokeWidth + (reticleSize * 0.02);
 
   ctx.lineCap = "round";
 
@@ -368,6 +437,11 @@ function drawMetadataPanel(
 ): void {
   const { padding, fontSize, lineHeight, topOffset, iconSize, iconGap } = layout;
 
+  const showCoordinates = metadata.showCoordinates !== false;
+  const showGyroscope = metadata.showGyroscope !== false;
+  const showNote = metadata.showNote !== false;
+  const showTimestamp = metadata.showTimestamp === true;
+
   const greenColor = "rgba(34, 197, 94, 0.9)";
   const dimColor = "rgba(107, 114, 128, 0.9)";
   const bgColor = "rgba(0, 0, 0, 0.6)";
@@ -383,7 +457,8 @@ function drawMetadataPanel(
   const hasTilt = metadata.tilt !== null && metadata.tilt !== undefined;
   const hasNote = metadata.note && metadata.note.trim();
 
-  const coordText = formatCoordinatesCompact(metadata.latitude ?? null, metadata.longitude ?? null);
+  const coordFormat = metadata.coordinateFormat || "decimal";
+  const coordText = formatCoordinatesCanvas(metadata.latitude, metadata.longitude, coordFormat);
   const altText = hasAltitude ? formatAltitude(metadata.altitude ?? null) : "--- m";
   const gpsText = hasAccuracy ? formatAccuracy(metadata.accuracy ?? null) : "---";
   const headingText = hasHeading ? formatHeading(metadata.heading ?? null) : "---°";
@@ -393,18 +468,29 @@ function drawMetadataPanel(
   ctx.font = `${fontSize}px monospace`;
   ctx.textBaseline = "top";
 
-  const noteText = hasNote ? metadata.note!.trim() : "";
+  const noteText = (showNote && hasNote) ? metadata.note!.trim() : "";
   const noteFontSize = Math.ceil(fontSize * 0.85);
 
-  const leftCol: ColumnItem[] = [
+  const timestampText = showTimestamp && metadata.timestamp 
+    ? new Date(metadata.timestamp).toLocaleString('ru-RU', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      })
+    : "";
+
+  const leftCol: ColumnItem[] = showGyroscope ? [
     { icon: drawMountainIcon, text: altText, hasData: hasAltitude },
     { icon: drawSignalIcon, text: gpsText, hasData: hasAccuracy || hasLocation },
-  ];
+  ] : [];
 
-  const rightCol: ColumnItem[] = [
+  const rightCol: ColumnItem[] = showGyroscope ? [
     { icon: drawCompassIcon, text: headingText, hasData: hasHeading, cardinal },
     { icon: drawTargetIcon, text: tiltText, hasData: hasTilt },
-  ];
+  ] : [];
 
   let leftColWidth = 0;
   for (const item of leftCol) {
@@ -421,22 +507,34 @@ function drawMetadataPanel(
     rightColWidth = Math.max(rightColWidth, iconSize + iconGap + w);
   }
 
-  const coordWidth = iconSize + iconGap + ctx.measureText(coordText).width;
+  const coordWidth = showCoordinates ? iconSize + iconGap + ctx.measureText(coordText).width : 0;
 
   ctx.font = `${noteFontSize}px monospace`;
-  const noteWidth = hasNote ? iconSize + iconGap + ctx.measureText(noteText).width : 0;
+  const noteWidth = noteText ? iconSize + iconGap + ctx.measureText(noteText).width : 0;
+
+  const timestampWidth = timestampText ? iconSize + iconGap + ctx.measureText(timestampText).width : 0;
 
   const columnsWidth = leftColWidth + columnGap + rightColWidth;
-  const contentWidth = Math.max(coordWidth, columnsWidth, noteWidth);
+  const contentWidth = Math.max(coordWidth, columnsWidth, noteWidth, timestampWidth);
+  
+  if (contentWidth === 0) return;
+  
   const panelWidth = contentWidth + boxPadding * 2;
 
   let panelHeight = boxPadding * 2;
-  if (hasNote) {
+  if (noteText) {
     panelHeight += noteFontSize + fontSize * 0.4;
   }
-  panelHeight += lineHeight;
-  panelHeight += fontSize * 0.6;
-  panelHeight += lineHeight * 2;
+  if (showCoordinates) {
+    panelHeight += lineHeight;
+  }
+  if (showGyroscope && leftCol.length > 0) {
+    panelHeight += fontSize * 0.6;
+    panelHeight += lineHeight * 2;
+  }
+  if (timestampText) {
+    panelHeight += lineHeight;
+  }
 
   ctx.fillStyle = bgColor;
   ctx.beginPath();
@@ -446,7 +544,7 @@ function drawMetadataPanel(
   let currentY = topOffset + boxPadding;
   const contentX = padding + boxPadding;
 
-  if (hasNote) {
+  if (noteText) {
     ctx.font = `${noteFontSize}px monospace`;
     drawFileTextIcon(ctx, contentX, currentY, iconSize, greenColor);
     ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
@@ -454,45 +552,60 @@ function drawMetadataPanel(
     currentY += noteFontSize + fontSize * 0.4;
   }
 
-  ctx.font = `${fontSize}px monospace`;
-  const coordColor = hasLocation ? greenColor : dimColor;
-  drawMapPinIcon(ctx, contentX, currentY, iconSize, coordColor);
-  ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-  ctx.fillText(coordText, contentX + iconSize + iconGap, currentY);
-  currentY += lineHeight;
-
-  const separatorY = currentY + fontSize * 0.15;
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(contentX, separatorY);
-  ctx.lineTo(contentX + contentWidth, separatorY);
-  ctx.stroke();
-  currentY += fontSize * 0.6;
-
-  const rightColX = contentX + leftColWidth + columnGap;
-
-  for (let row = 0; row < 2; row++) {
-    const leftItem = leftCol[row];
-    const rightItem = rightCol[row];
-
-    const leftIconColor = leftItem.hasData ? greenColor : dimColor;
-    leftItem.icon(ctx, contentX, currentY, iconSize, leftIconColor);
+  if (showCoordinates) {
+    ctx.font = `${fontSize}px monospace`;
+    const coordColor = hasLocation ? greenColor : dimColor;
+    drawMapPinIcon(ctx, contentX, currentY, iconSize, coordColor);
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.fillText(leftItem.text, contentX + iconSize + iconGap, currentY);
-
-    const rightIconColor = rightItem.hasData ? greenColor : dimColor;
-    rightItem.icon(ctx, rightColX, currentY, iconSize, rightIconColor);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.fillText(rightItem.text, rightColX + iconSize + iconGap, currentY);
-
-    if (rightItem.cardinal) {
-      const mainWidth = ctx.measureText(rightItem.text + " ").width;
-      ctx.fillStyle = greenColor;
-      ctx.fillText(rightItem.cardinal, rightColX + iconSize + iconGap + mainWidth, currentY);
-    }
-
+    ctx.fillText(coordText, contentX + iconSize + iconGap, currentY);
     currentY += lineHeight;
+  }
+
+  if (showGyroscope && leftCol.length > 0) {
+    const separatorY = currentY + fontSize * 0.15;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(contentX, separatorY);
+    ctx.lineTo(contentX + contentWidth, separatorY);
+    ctx.stroke();
+    currentY += fontSize * 0.6;
+
+    ctx.font = `${fontSize}px monospace`;
+    const rightColX = contentX + leftColWidth + columnGap;
+
+    for (let row = 0; row < 2; row++) {
+      const leftItem = leftCol[row];
+      const rightItem = rightCol[row];
+
+      if (leftItem) {
+        const leftIconColor = leftItem.hasData ? greenColor : dimColor;
+        leftItem.icon(ctx, contentX, currentY, iconSize, leftIconColor);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillText(leftItem.text, contentX + iconSize + iconGap, currentY);
+      }
+
+      if (rightItem) {
+        const rightIconColor = rightItem.hasData ? greenColor : dimColor;
+        rightItem.icon(ctx, rightColX, currentY, iconSize, rightIconColor);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillText(rightItem.text, rightColX + iconSize + iconGap, currentY);
+
+        if (rightItem.cardinal) {
+          const mainWidth = ctx.measureText(rightItem.text + " ").width;
+          ctx.fillStyle = greenColor;
+          ctx.fillText(rightItem.cardinal, rightColX + iconSize + iconGap + mainWidth, currentY);
+        }
+      }
+
+      currentY += lineHeight;
+    }
+  }
+
+  if (timestampText) {
+    ctx.font = `${fontSize}px monospace`;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.fillText(timestampText, contentX + iconSize + iconGap, currentY);
   }
 }
 

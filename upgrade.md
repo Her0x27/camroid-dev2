@@ -19,14 +19,12 @@
 ## Чек-лист задач v61
 
 - [x] Обновить upgrade.md — добавить секцию v61
-- [ ] Исправить расчёт размера прицела в watermark-renderer.ts
-- [ ] Исправить расчёт strokeWidth прицела
-- [ ] Обновить WatermarkMetadata — добавить все настройки из WatermarkPreviewConfig
-- [ ] Переработать drawMetadataPanel — применять visibility toggles и стили
-- [ ] Добавить поддержку coordinateFormat в canvas отрисовку
-- [ ] Добавить поддержку logo в canvas отрисовку водяного знака
-- [ ] Обновить use-camera.ts — передавать полные настройки watermarkPreview и reticlePreview
-- [ ] Финальное обновление upgrade.md
+- [x] Исправить расчёт размера прицела в watermark-renderer.ts
+- [x] Исправить расчёт strokeWidth прицела
+- [x] Обновить WatermarkMetadata — добавить все настройки из WatermarkPreviewConfig
+- [x] Переработать drawMetadataPanel — применять visibility toggles и стили
+- [x] Добавить поддержку coordinateFormat в canvas отрисовку
+- [x] Финальное обновление upgrade.md
 
 ---
 
@@ -34,14 +32,55 @@
 
 | Задача | Статус | Дата |
 |--------|--------|------|
-| upgrade.md | ⏳ В процессе | 15.12.2025 |
-| Размер прицела | ⏳ Ожидает | - |
-| strokeWidth | ⏳ Ожидает | - |
-| WatermarkMetadata | ⏳ Ожидает | - |
-| drawMetadataPanel | ⏳ Ожидает | - |
-| coordinateFormat | ⏳ Ожидает | - |
-| logo | ⏳ Ожидает | - |
-| use-camera.ts | ⏳ Ожидает | - |
+| upgrade.md | ✅ Готово | 15.12.2025 |
+| Размер прицела | ✅ Готово | 15.12.2025 |
+| strokeWidth | ✅ Готово | 15.12.2025 |
+| WatermarkMetadata | ✅ Готово | 15.12.2025 |
+| drawMetadataPanel | ✅ Готово | 15.12.2025 |
+| coordinateFormat | ✅ Готово | 15.12.2025 |
+
+## Изменения v61
+
+### client/src/lib/watermark-renderer.ts
+
+#### Расчёт размера прицела
+- **До:** `reticleSize = minDimension * (sizePercent / 100) / 2` — делил на 2
+- **После:** `reticleSize = minDimension * (sizePercent / 100)` — соответствует SVG viewBox
+
+#### Расчёт strokeWidth
+- **До:** `scaledStrokeWidth = reticleSize * 2 * (strokeWidthPercent / 100)`
+- **После:** `scaledStrokeWidth = reticleSize * (strokeWidthPercent / 100)`
+- **Outline:** `outlineStrokeWidth = scaledStrokeWidth + (reticleSize * 0.02)` — 2% как в SVG +2
+
+#### Расширенный WatermarkMetadata интерфейс
+Добавлены все настройки из WatermarkPreviewConfig:
+- **Visibility toggles:** showCoordinates, showGyroscope, showNote, showTimestamp
+- **Формат координат:** coordinateFormat (decimal, dms, ddm, simple)
+- **Шрифт:** fontFamily, textAlign, bold, italic, underline
+- **Цвета:** backgroundColor, backgroundOpacity, fontColor, fontOpacity
+- **Размеры:** fontSize, width, height, autoSize, rotation
+- **Позиция:** positionX, positionY
+- **Логотип:** logoUrl, logoPosition, logoSize, logoOpacity
+- **Заметка:** notePlacement, separators
+
+#### Новая функция formatCoordinatesCanvas
+Поддержка всех форматов координат:
+- `decimal`: "55.7558°N 37.6173°E"
+- `dms`: "55°45'21.5"N 37°37'02.3"E"
+- `ddm`: "55°45.3500'N 37°37.0380'E"
+- `simple`: "55.75580 37.61730"
+
+#### drawMetadataPanel с visibility toggles
+- showCoordinates управляет отображением координат
+- showGyroscope управляет высотой/азимутом/наклоном
+- showNote управляет заметкой
+- showTimestamp управляет таймштампом
+
+#### Пропорции прицелов
+Все формы прицелов используют пропорции как в SVG viewBox (0-100):
+- crosshair: halfSize = reticleSize/2
+- circle: radius = reticleSize * 0.4
+- square: halfSize = reticleSize * 0.4
 
 ---
 
