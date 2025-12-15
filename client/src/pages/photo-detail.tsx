@@ -283,73 +283,86 @@ export default function PhotoDetailPage() {
         </Button>
       )}
 
-      <header className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/60 to-transparent safe-bottom">
-        <div className="flex items-center justify-between gap-4 px-4 py-3">
+      <header className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/60 to-transparent safe-top">
+        <div className="flex items-center gap-3 px-4 py-3">
           <Button
             variant="ghost"
             size="icon"
             onClick={handleBack}
-            className="text-white hover:bg-white/20"
+            className="text-white hover:bg-white/20 shrink-0"
             data-testid="button-back-gallery"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
 
-          <div className="text-sm text-white/80">
-            {currentIndex + 1} / {total}
-          </div>
-
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowInfoPanel(true)}
-              className="text-white hover:bg-white/20"
-              data-testid="button-info"
-            >
-              <Info className="w-5 h-5" />
-            </Button>
-            {typeof navigator.share === "function" && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleShare}
-                className="text-white hover:bg-white/20"
-                data-testid="button-share"
-              >
-                <Share2 className="w-5 h-5" />
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleExport}
-              className="text-white hover:bg-white/20"
-              data-testid="button-export"
-            >
-              <Download className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowDeleteDialog(true)}
-              className="text-red-400 hover:bg-white/20 hover:text-red-400"
-              data-testid="button-delete"
-            >
-              <Trash2 className="w-5 h-5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleCloseGallery}
-              className="text-white hover:bg-white/20"
-              data-testid="button-close-gallery"
-            >
-              <X className="w-5 h-5" />
-            </Button>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <span className="text-sm text-white/70 shrink-0">
+              {currentIndex + 1}/{total}
+            </span>
+            <span className="text-sm text-white truncate">
+              {new Date(photo.metadata.timestamp).toLocaleDateString("ru-RU", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+              })}
+            </span>
           </div>
         </div>
       </header>
+
+      <footer className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/60 to-transparent safe-bottom">
+        <div className="flex items-center justify-center gap-2 px-4 py-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowInfoPanel(true)}
+            className="text-white hover:bg-white/20"
+            data-testid="button-info"
+          >
+            <Info className="w-5 h-5" />
+          </Button>
+          {typeof navigator.share === "function" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleShare}
+              className="text-white hover:bg-white/20"
+              data-testid="button-share"
+            >
+              <Share2 className="w-5 h-5" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleExport}
+            className="text-white hover:bg-white/20"
+            data-testid="button-export"
+          >
+            <Download className="w-5 h-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowDeleteDialog(true)}
+            className="text-red-400 hover:bg-white/20 hover:text-red-400"
+            data-testid="button-delete"
+          >
+            <Trash2 className="w-5 h-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleCloseGallery}
+            className="text-white hover:bg-white/20"
+            data-testid="button-close-gallery"
+          >
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
+      </footer>
 
       <ConfirmDialog
         open={showDeleteDialog}
