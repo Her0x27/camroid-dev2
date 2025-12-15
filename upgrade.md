@@ -1,3 +1,65 @@
+# Upgrade: Полная синхронизация canvas с InteractiveWatermark v62
+
+## Описание
+Исправление расхождений между визуальным редактором (/ve-watermark) и сохранённым фото:
+1. Добавлена поддержка separators (разделительных линий)
+2. Гироскоп переделан на одну строку с "|" разделителями
+3. Добавлена accuracy после координат с иконкой Target
+4. Добавлена иконка Clock к timestamp
+
+## Чек-лист задач v62
+
+- [x] Добавить поддержку separators в watermark-renderer.ts
+- [x] Переделать гироскоп на одну строку с "|" разделителями
+- [x] Добавить accuracy после координат с Target иконкой
+- [x] Добавить Clock иконку к timestamp
+- [x] Добавить drawSmartphoneIcon и drawClockIcon в canvas-icons.ts
+- [x] Обновить upgrade.md
+
+---
+
+## Прогресс v62
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| Separators | ✅ Готово | 15.12.2025 |
+| Гироскоп в строку | ✅ Готово | 15.12.2025 |
+| Accuracy | ✅ Готово | 15.12.2025 |
+| Clock иконка | ✅ Готово | 15.12.2025 |
+| Новые иконки | ✅ Готово | 15.12.2025 |
+| upgrade.md | ✅ Готово | 15.12.2025 |
+
+## Изменения v62
+
+### client/src/lib/canvas-icons.ts
+- **drawSmartphoneIcon:** новая иконка для отображения наклона устройства
+- **drawClockIcon:** новая иконка для отображения времени
+
+### client/src/lib/watermark-renderer.ts
+- **Импорты:** заменён drawSignalIcon на drawSmartphoneIcon, добавлен drawClockIcon
+- **drawSeparatorLine:** новая функция для отрисовки разделительных линий
+- **drawMetadataPanel:** полностью переработана:
+  - Удалены leftCol/rightCol/ColumnItem — больше не используем двухколоночный layout
+  - Separators отрисовываются в 4 позициях: before-coords, after-coords, before-note, after-note
+  - Координаты теперь включают accuracy: `[MapPin] координаты [Target] ±5m`
+  - Гироскоп в одну строку: `[Mountain] 156m | [Smartphone] 12° | [Compass] 180° S`
+  - Timestamp с иконкой Clock
+
+### Структура водяного знака теперь соответствует InteractiveWatermark.tsx:
+```
+[Note - если notePlacement === "start"]
+[Separator before-coords]
+[MapPin] координаты [Target] ±accuracy
+[Separator after-coords]
+[Mountain] altitude | [Smartphone] tilt° | [Compass] heading° cardinal
+[Clock] timestamp
+[Separator before-note - если notePlacement === "end"]
+[Note - если notePlacement === "end"]
+[Separator after-note]
+```
+
+---
+
 # Upgrade: Синхронизация отрисовки водяного знака и прицела v61
 
 ## Описание
