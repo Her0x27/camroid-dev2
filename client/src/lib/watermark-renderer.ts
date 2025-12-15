@@ -13,6 +13,29 @@ import {
 import type { ReticleConfig, ReticlePosition, CoordinateFormat, TextAlign, LogoPosition, FontFamily, NotePlacement, WatermarkSeparator } from "@shared/schema";
 import { colorToRgba, getContrastingOutlineColor } from "./color-utils";
 
+const FONT_FAMILY_MAP: Record<FontFamily, string> = {
+  system: "system-ui, sans-serif",
+  roboto: "'Roboto', sans-serif",
+  montserrat: "'Montserrat', sans-serif",
+  oswald: "'Oswald', sans-serif",
+  playfair: "'Playfair Display', serif",
+};
+
+function buildFontString(fontSize: number, fontFamily: FontFamily, bold?: boolean, italic?: boolean): string {
+  const fontWeight = bold ? "bold" : "normal";
+  const fontStyle = italic ? "italic" : "normal";
+  const family = FONT_FAMILY_MAP[fontFamily] || FONT_FAMILY_MAP.system;
+  return `${fontStyle} ${fontWeight} ${fontSize}px ${family}`;
+}
+
+function hexToRgba(hex: string, opacity: number): string {
+  const cleanHex = hex.replace('#', '');
+  const r = parseInt(cleanHex.substring(0, 2), 16);
+  const g = parseInt(cleanHex.substring(2, 4), 16);
+  const b = parseInt(cleanHex.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
+
 export interface WatermarkMetadata {
   latitude?: number | null;
   longitude?: number | null;
@@ -433,18 +456,44 @@ function drawReticle(
 function drawMetadataPanel(
   ctx: CanvasRenderingContext2D,
   metadata: WatermarkMetadata,
-  layout: WatermarkLayout
+  layout: WatermarkLayout,
+  canvasWidth: number,
+  canvasHeight: number
 ): void {
-  const { padding, fontSize, lineHeight, topOffset, iconSize, iconGap } = layout;
+  const { fontSize: baseFontSize } = layout;
 
   const showCoordinates = metadata.showCoordinates !== false;
   const showGyroscope = metadata.showGyroscope !== false;
   const showNote = metadata.showNote !== false;
   const showTimestamp = metadata.showTimestamp === true;
+  const notePlacement = metadata.notePlacement || "end";
+  const textAlign = metadata.textAlign || "left";
+  const fontFamily: FontFamily = metadata.fontFamily || "system";
+  const bold = metadata.bold || false;
+  const italic = metadata.italic || false;
 
-  const greenColor = "rgba(34, 197, 94, 0.9)";
+  const fontSizeMultiplier = metadata.fontSize ? metadata.fontSize / 3 : 1;
+  const fontSize = Math.ceil(baseFontSize * fontSizeMultiplier);
+  const lineHeight = fontSize * 1.5;
+  const iconSize = Math.ceil(fontSize * 1.1);
+  const iconGap = Math.ceil(fontSize * 0.5);
+
+  const bgOpacity = metadata.backgroundOpacity !== undefined ? metadata.backgroundOpacity / 100 : 0.6;
+  const bgColor = metadata.backgroundColor 
+    ? hexToRgba(metadata.backgroundColor, bgOpacity)
+    : `rgba(0, 0, 0, ${bgOpacity})`;
+
+  const fontOpacity = metadata.fontOpacity !== undefined ? metadata.fontOpacity / 100 : 0.9;
+  const textColor = metadata.fontColor
+    ? hexToRgba(metadata.fontColor, fontOpacity)
+    : `rgba(255, 255, 255, ${fontOpacity})`;
+  
+  const dimTextColor = metadata.fontColor
+    ? hexToRgba(metadata.fontColor, fontOpacity * 0.6)
+    : `rgba(255, 255, 255, ${fontOpacity * 0.6})`;
+
+  const accentColor = "rgba(34, 197, 94, 0.9)";
   const dimColor = "rgba(107, 114, 128, 0.9)";
-  const bgColor = "rgba(0, 0, 0, 0.6)";
   const boxPadding = Math.ceil(fontSize * 0.6);
   const boxRadius = Math.ceil(fontSize * 0.35);
   const columnGap = Math.ceil(fontSize * 2);
@@ -465,7 +514,7 @@ function drawMetadataPanel(
   const cardinal = hasHeading ? getCardinalDirection(metadata.heading ?? null) : "";
   const tiltText = hasTilt ? formatTilt(metadata.tilt ?? null) : "---°";
 
-  ctx.font = `${fontSize}px monospace`;
+  ctx.font = buildFontString(fontSize, fontFamily, bold, italic);
   ctx.textBaseline = "top";
 
   const noteText = (showNote && hasNote) ? metadata.note!.trim() : "";
@@ -509,17 +558,21 @@ function drawMetadataPanel(
 
   const coordWidth = showCoordinates ? iconSize + iconGap + ctx.measureText(coordText).width : 0;
 
-  ctx.font = `${noteFontSize}px monospace`;
+  ctx.font = buildFontString(noteFontSize, fontFamily, bold, italic);
   const noteWidth = noteText ? iconSize + iconGap + ctx.measureText(noteText).width : 0;
 
   const timestampWidth = timestampText ? iconSize + iconGap + ctx.measureText(timestampText).width : 0;
 
   const columnsWidth = leftColWidth + columnGap + rightColWidth;
-  const contentWidth = Math.max(coordWidth, columnsWidth, noteWidth, timestampWidth);
+  const autoContentWidth = Math.max(coordWidth, columnsWidth, noteWidth, timestampWidth);
   
-  if (contentWidth === 0) return;
+  if (autoContentWidth === 0) return;
   
-  const panelWidth = contentWidth + boxPadding * 2;
+  const autoSize = metadata.autoSize !== false;
+  const fixedPanelWidth = metadata.width !== undefined ? (canvasWidth * metadata.width / 100) : 0;
+  
+  const panelWidth = autoSize ? (autoContentWidth + boxPadding * 2) : Math.max(fixedPanelWidth, boxPadding * 2);
+  const contentWidth = panelWidth - boxPadding * 2;
 
   let panelHeight = boxPadding * 2;
   if (noteText) {
@@ -536,34 +589,85 @@ function drawMetadataPanel(
     panelHeight += lineHeight;
   }
 
+  const positionX = metadata.positionX !== undefined ? metadata.positionX : 0;
+  const positionY = metadata.positionY !== undefined ? metadata.positionY : 0;
+  const panelX = (canvasWidth * positionX / 100);
+  const panelY = (canvasHeight * positionY / 100);
+
+  const rotation = metadata.rotation || 0;
+  const panelCenterX = panelX + panelWidth / 2;
+  const panelCenterY = panelY + panelHeight / 2;
+
+  ctx.save();
+
+  if (rotation !== 0) {
+    ctx.translate(panelCenterX, panelCenterY);
+    ctx.rotate(rotation * Math.PI / 180);
+    ctx.translate(-panelCenterX, -panelCenterY);
+  }
+
   ctx.fillStyle = bgColor;
   ctx.beginPath();
-  drawRoundedRectPath(ctx, padding, topOffset, panelWidth, panelHeight, boxRadius);
+  drawRoundedRectPath(ctx, panelX, panelY, panelWidth, panelHeight, boxRadius);
   ctx.fill();
 
-  let currentY = topOffset + boxPadding;
-  const contentX = padding + boxPadding;
+  let currentY = panelY + boxPadding;
+  const contentX = panelX + boxPadding;
 
-  if (noteText) {
-    ctx.font = `${noteFontSize}px monospace`;
-    drawFileTextIcon(ctx, contentX, currentY, iconSize, greenColor);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-    ctx.fillText(noteText, contentX + iconSize + iconGap, currentY + (iconSize - noteFontSize) / 2);
+  const drawNote = () => {
+    if (!noteText) return;
+    ctx.font = buildFontString(noteFontSize, fontFamily, bold, italic);
+    const noteTextWidth = ctx.measureText(noteText).width;
+    const noteContentWidth = iconSize + iconGap + noteTextWidth;
+    
+    if (textAlign === "left") {
+      drawFileTextIcon(ctx, contentX, currentY, iconSize, accentColor);
+      ctx.fillStyle = textColor;
+      ctx.fillText(noteText, contentX + iconSize + iconGap, currentY + (iconSize - noteFontSize) / 2);
+    } else if (textAlign === "center") {
+      const startX = contentX + (contentWidth - noteContentWidth) / 2;
+      drawFileTextIcon(ctx, startX, currentY, iconSize, accentColor);
+      ctx.fillStyle = textColor;
+      ctx.fillText(noteText, startX + iconSize + iconGap, currentY + (iconSize - noteFontSize) / 2);
+    } else {
+      const startX = contentX + contentWidth - noteContentWidth;
+      drawFileTextIcon(ctx, startX, currentY, iconSize, accentColor);
+      ctx.fillStyle = textColor;
+      ctx.fillText(noteText, startX + iconSize + iconGap, currentY + (iconSize - noteFontSize) / 2);
+    }
     currentY += noteFontSize + fontSize * 0.4;
-  }
+  };
 
-  if (showCoordinates) {
-    ctx.font = `${fontSize}px monospace`;
-    const coordColor = hasLocation ? greenColor : dimColor;
-    drawMapPinIcon(ctx, contentX, currentY, iconSize, coordColor);
-    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
-    ctx.fillText(coordText, contentX + iconSize + iconGap, currentY);
+  const drawCoordinates = () => {
+    if (!showCoordinates) return;
+    ctx.font = buildFontString(fontSize, fontFamily, bold, italic);
+    const coordColor = hasLocation ? accentColor : dimColor;
+    const coordTextWidth = ctx.measureText(coordText).width;
+    const coordContentWidth = iconSize + iconGap + coordTextWidth;
+    
+    if (textAlign === "left") {
+      drawMapPinIcon(ctx, contentX, currentY, iconSize, coordColor);
+      ctx.fillStyle = textColor;
+      ctx.fillText(coordText, contentX + iconSize + iconGap, currentY);
+    } else if (textAlign === "center") {
+      const startX = contentX + (contentWidth - coordContentWidth) / 2;
+      drawMapPinIcon(ctx, startX, currentY, iconSize, coordColor);
+      ctx.fillStyle = textColor;
+      ctx.fillText(coordText, startX + iconSize + iconGap, currentY);
+    } else {
+      const startX = contentX + contentWidth - coordContentWidth;
+      drawMapPinIcon(ctx, startX, currentY, iconSize, coordColor);
+      ctx.fillStyle = textColor;
+      ctx.fillText(coordText, startX + iconSize + iconGap, currentY);
+    }
     currentY += lineHeight;
-  }
+  };
 
-  if (showGyroscope && leftCol.length > 0) {
+  const drawGyroscope = () => {
+    if (!showGyroscope || leftCol.length === 0) return;
+    
     const separatorY = currentY + fontSize * 0.15;
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+    ctx.strokeStyle = dimTextColor;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(contentX, separatorY);
@@ -571,7 +675,7 @@ function drawMetadataPanel(
     ctx.stroke();
     currentY += fontSize * 0.6;
 
-    ctx.font = `${fontSize}px monospace`;
+    ctx.font = buildFontString(fontSize, fontFamily, bold, italic);
     const rightColX = contentX + leftColWidth + columnGap;
 
     for (let row = 0; row < 2; row++) {
@@ -579,34 +683,61 @@ function drawMetadataPanel(
       const rightItem = rightCol[row];
 
       if (leftItem) {
-        const leftIconColor = leftItem.hasData ? greenColor : dimColor;
+        const leftIconColor = leftItem.hasData ? accentColor : dimColor;
         leftItem.icon(ctx, contentX, currentY, iconSize, leftIconColor);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillStyle = textColor;
         ctx.fillText(leftItem.text, contentX + iconSize + iconGap, currentY);
       }
 
       if (rightItem) {
-        const rightIconColor = rightItem.hasData ? greenColor : dimColor;
+        const rightIconColor = rightItem.hasData ? accentColor : dimColor;
         rightItem.icon(ctx, rightColX, currentY, iconSize, rightIconColor);
-        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fillStyle = textColor;
         ctx.fillText(rightItem.text, rightColX + iconSize + iconGap, currentY);
 
         if (rightItem.cardinal) {
           const mainWidth = ctx.measureText(rightItem.text + " ").width;
-          ctx.fillStyle = greenColor;
+          ctx.fillStyle = accentColor;
           ctx.fillText(rightItem.cardinal, rightColX + iconSize + iconGap + mainWidth, currentY);
         }
       }
 
       currentY += lineHeight;
     }
+  };
+
+  const drawTimestamp = () => {
+    if (!timestampText) return;
+    ctx.font = buildFontString(fontSize, fontFamily, bold, italic);
+    const timestampTextWidth = ctx.measureText(timestampText).width;
+    
+    if (textAlign === "left") {
+      ctx.fillStyle = dimTextColor;
+      ctx.fillText(timestampText, contentX + iconSize + iconGap, currentY);
+    } else if (textAlign === "center") {
+      const startX = contentX + (contentWidth - timestampTextWidth) / 2;
+      ctx.fillStyle = dimTextColor;
+      ctx.fillText(timestampText, startX, currentY);
+    } else {
+      const startX = contentX + contentWidth - timestampTextWidth;
+      ctx.fillStyle = dimTextColor;
+      ctx.fillText(timestampText, startX, currentY);
+    }
+  };
+
+  if (notePlacement === "start") {
+    drawNote();
+    drawCoordinates();
+    drawGyroscope();
+    drawTimestamp();
+  } else {
+    drawCoordinates();
+    drawGyroscope();
+    drawNote();
+    drawTimestamp();
   }
 
-  if (timestampText) {
-    ctx.font = `${fontSize}px monospace`;
-    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-    ctx.fillText(timestampText, contentX + iconSize + iconGap, currentY);
-  }
+  ctx.restore();
 }
 
 export function drawWatermark(
@@ -623,6 +754,6 @@ export function drawWatermark(
   drawReticle(ctx, width, height, metadata.reticleConfig, metadata.reticleColor, metadata.reticlePosition);
 
   if (metadata.reticleConfig?.showMetadata !== false) {
-    drawMetadataPanel(ctx, metadata, layout);
+    drawMetadataPanel(ctx, metadata, layout, width, height);
   }
 }

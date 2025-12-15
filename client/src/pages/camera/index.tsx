@@ -257,12 +257,14 @@ export default function CameraPage() {
       denoise: settings.enhancement?.denoise ?? 0,
       contrast: settings.enhancement?.contrast ?? 0,
     },
+    watermarkPreview: settings.watermarkPreview,
   }), [
     settings.reticle,
     settings.watermarkScale,
     settings.soundEnabled,
     settings.stabilization,
     settings.enhancement,
+    settings.watermarkPreview,
   ]);
 
   const handlePhotoSaved = useCallback((result: SavedPhotoResult) => {
@@ -312,6 +314,7 @@ export default function CameraPage() {
         playCapture();
       }
 
+      const wp = captureConfig.watermarkPreview;
       const result = await capturePhoto({
         latitude: geoData.latitude,
         longitude: geoData.longitude,
@@ -319,12 +322,40 @@ export default function CameraPage() {
         accuracy: geoData.accuracy,
         heading: orientationData.heading,
         tilt: orientationData.tilt,
-        note: noteText || undefined,
+        note: noteText || wp?.note || undefined,
         timestamp,
         reticleConfig: captureConfig.reticle,
         reticleColor: customReticleColor || reticleColor,
         watermarkScale: captureConfig.watermarkScale,
         reticlePosition: position,
+        // Watermark preview settings
+        showCoordinates: wp?.showCoordinates,
+        showGyroscope: wp?.showGyroscope,
+        showNote: wp?.showNote,
+        showTimestamp: wp?.showTimestamp,
+        coordinateFormat: wp?.coordinateFormat,
+        fontFamily: wp?.fontFamily,
+        textAlign: wp?.textAlign,
+        bold: wp?.bold,
+        italic: wp?.italic,
+        underline: wp?.underline,
+        backgroundColor: wp?.backgroundColor,
+        backgroundOpacity: wp?.backgroundOpacity,
+        fontColor: wp?.fontColor,
+        fontOpacity: wp?.fontOpacity,
+        fontSize: wp?.fontSize,
+        width: wp?.width,
+        height: wp?.height,
+        autoSize: wp?.autoSize,
+        rotation: wp?.rotation,
+        positionX: wp?.positionX,
+        positionY: wp?.positionY,
+        logoUrl: wp?.logoUrl,
+        logoPosition: wp?.logoPosition,
+        logoSize: wp?.logoSize,
+        logoOpacity: wp?.logoOpacity,
+        notePlacement: wp?.notePlacement,
+        separators: wp?.separators,
       });
 
       if (!result) {
