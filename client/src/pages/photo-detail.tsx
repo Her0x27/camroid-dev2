@@ -244,7 +244,7 @@ export default function PhotoDetailPage() {
       <img
         src={photo.imageData}
         alt={t.gallery.photo}
-        className="absolute inset-0 w-full h-full object-contain transition-transform duration-150"
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-150"
         style={{
           transform: isSwipeActive 
             ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px)`
@@ -252,8 +252,6 @@ export default function PhotoDetailPage() {
           opacity: isSwipeActive && verticalSwipeOffset !== 0 
             ? Math.max(0.3, 1 - Math.abs(verticalSwipeOffset) / 200)
             : 1,
-          maxWidth: '100vw',
-          maxHeight: '100dvh',
           margin: 0,
           padding: 0,
         }}
