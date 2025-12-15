@@ -3,12 +3,12 @@ import { formatHeading, getCardinalDirection, formatTilt } from "@/hooks/use-ori
 import {
   drawMapPinIcon,
   drawMountainIcon,
-  drawSignalIcon,
+  drawSmartphoneIcon,
   drawCompassIcon,
   drawTargetIcon,
   drawFileTextIcon,
+  drawClockIcon,
   drawRoundedRectPath,
-  type IconDrawFunction,
 } from "./canvas-icons";
 import type { ReticleConfig, ReticlePosition, CoordinateFormat, TextAlign, LogoPosition, FontFamily, NotePlacement, WatermarkSeparator } from "@shared/schema";
 import { colorToRgba, getContrastingOutlineColor } from "./color-utils";
@@ -76,13 +76,6 @@ export interface WatermarkMetadata {
   positionY?: number;
   notePlacement?: NotePlacement;
   separators?: WatermarkSeparator[];
-}
-
-interface ColumnItem {
-  icon: IconDrawFunction;
-  text: string;
-  hasData: boolean;
-  cardinal?: string;
 }
 
 interface WatermarkLayout {
@@ -471,12 +464,14 @@ function drawMetadataPanel(
   const fontFamily: FontFamily = metadata.fontFamily || "system";
   const bold = metadata.bold || false;
   const italic = metadata.italic || false;
+  const separators = metadata.separators || [];
 
   const fontSizeMultiplier = metadata.fontSize ? metadata.fontSize / 3 : 1;
   const fontSize = Math.ceil(baseFontSize * fontSizeMultiplier);
   const lineHeight = fontSize * 1.5;
   const iconSize = Math.ceil(fontSize * 1.1);
   const iconGap = Math.ceil(fontSize * 0.5);
+  const separatorHeight = Math.ceil(fontSize * 0.3);
 
   const bgOpacity = metadata.backgroundOpacity !== undefined ? metadata.backgroundOpacity / 100 : 0.6;
   const bgColor = metadata.backgroundColor 
@@ -489,14 +484,13 @@ function drawMetadataPanel(
     : `rgba(255, 255, 255, ${fontOpacity})`;
   
   const dimTextColor = metadata.fontColor
-    ? hexToRgba(metadata.fontColor, fontOpacity * 0.6)
-    : `rgba(255, 255, 255, ${fontOpacity * 0.6})`;
+    ? hexToRgba(metadata.fontColor, fontOpacity * 0.5)
+    : `rgba(255, 255, 255, ${fontOpacity * 0.5})`;
 
   const accentColor = "rgba(34, 197, 94, 0.9)";
   const dimColor = "rgba(107, 114, 128, 0.9)";
   const boxPadding = Math.ceil(fontSize * 0.6);
   const boxRadius = Math.ceil(fontSize * 0.35);
-  const columnGap = Math.ceil(fontSize * 2);
 
   const hasLocation = metadata.latitude !== null && metadata.latitude !== undefined &&
     metadata.longitude !== null && metadata.longitude !== undefined;
@@ -508,8 +502,8 @@ function drawMetadataPanel(
 
   const coordFormat = metadata.coordinateFormat || "decimal";
   const coordText = formatCoordinatesCanvas(metadata.latitude, metadata.longitude, coordFormat);
+  const accuracyText = hasAccuracy ? formatAccuracy(metadata.accuracy ?? null) : "±5m";
   const altText = hasAltitude ? formatAltitude(metadata.altitude ?? null) : "--- m";
-  const gpsText = hasAccuracy ? formatAccuracy(metadata.accuracy ?? null) : "---";
   const headingText = hasHeading ? formatHeading(metadata.heading ?? null) : "---°";
   const cardinal = hasHeading ? getCardinalDirection(metadata.heading ?? null) : "";
   const tiltText = hasTilt ? formatTilt(metadata.tilt ?? null) : "---°";
@@ -531,40 +525,34 @@ function drawMetadataPanel(
       })
     : "";
 
-  const leftCol: ColumnItem[] = showGyroscope ? [
-    { icon: drawMountainIcon, text: altText, hasData: hasAltitude },
-    { icon: drawSignalIcon, text: gpsText, hasData: hasAccuracy || hasLocation },
-  ] : [];
+  const hasSeparator = (position: string) => separators.some(s => s.position === position);
+  const separatorLineHeight = separatorHeight + fontSize * 0.2;
 
-  const rightCol: ColumnItem[] = showGyroscope ? [
-    { icon: drawCompassIcon, text: headingText, hasData: hasHeading, cardinal },
-    { icon: drawTargetIcon, text: tiltText, hasData: hasTilt },
-  ] : [];
-
-  let leftColWidth = 0;
-  for (const item of leftCol) {
-    const w = ctx.measureText(item.text).width;
-    leftColWidth = Math.max(leftColWidth, iconSize + iconGap + w);
-  }
-
-  let rightColWidth = 0;
-  for (const item of rightCol) {
-    let w = ctx.measureText(item.text).width;
-    if (item.cardinal) {
-      w += ctx.measureText(" " + item.cardinal).width;
+  const pipeText = " | ";
+  const pipeWidth = ctx.measureText(pipeText).width;
+  
+  let gyroRowWidth = 0;
+  if (showGyroscope) {
+    const altWidth = iconSize + iconGap + ctx.measureText(altText).width;
+    const tiltWidth = iconSize + iconGap + ctx.measureText(tiltText).width;
+    let headingWidth = iconSize + iconGap + ctx.measureText(headingText).width;
+    if (cardinal) {
+      headingWidth += ctx.measureText(" " + cardinal).width;
     }
-    rightColWidth = Math.max(rightColWidth, iconSize + iconGap + w);
+    gyroRowWidth = altWidth + pipeWidth + tiltWidth + pipeWidth + headingWidth;
   }
 
-  const coordWidth = showCoordinates ? iconSize + iconGap + ctx.measureText(coordText).width : 0;
+  const coordWidth = showCoordinates 
+    ? iconSize + iconGap + ctx.measureText(coordText).width + iconGap + iconSize + iconGap + ctx.measureText(accuracyText).width
+    : 0;
 
   ctx.font = buildFontString(noteFontSize, fontFamily, bold, italic);
   const noteWidth = noteText ? iconSize + iconGap + ctx.measureText(noteText).width : 0;
 
+  ctx.font = buildFontString(fontSize, fontFamily, bold, italic);
   const timestampWidth = timestampText ? iconSize + iconGap + ctx.measureText(timestampText).width : 0;
 
-  const columnsWidth = leftColWidth + columnGap + rightColWidth;
-  const autoContentWidth = Math.max(coordWidth, columnsWidth, noteWidth, timestampWidth);
+  const autoContentWidth = Math.max(coordWidth, gyroRowWidth, noteWidth, timestampWidth);
   
   if (autoContentWidth === 0) return;
   
@@ -575,18 +563,46 @@ function drawMetadataPanel(
   const contentWidth = panelWidth - boxPadding * 2;
 
   let panelHeight = boxPadding * 2;
-  if (noteText) {
+  
+  if (notePlacement === "start" && noteText) {
     panelHeight += noteFontSize + fontSize * 0.4;
+    if (hasSeparator("before-coords")) {
+      panelHeight += separatorLineHeight;
+    }
   }
+  
+  if (notePlacement === "end" && hasSeparator("before-coords")) {
+    panelHeight += separatorLineHeight;
+  }
+  
   if (showCoordinates) {
     panelHeight += lineHeight;
   }
-  if (showGyroscope && leftCol.length > 0) {
-    panelHeight += fontSize * 0.6;
-    panelHeight += lineHeight * 2;
+  
+  if (hasSeparator("after-coords")) {
+    panelHeight += separatorLineHeight;
   }
-  if (timestampText) {
+  
+  if (showGyroscope) {
     panelHeight += lineHeight;
+  }
+  
+  if (showTimestamp && timestampText) {
+    panelHeight += lineHeight;
+  }
+  
+  if (notePlacement === "end" && noteText) {
+    if (hasSeparator("before-note")) {
+      panelHeight += separatorLineHeight;
+    }
+    panelHeight += noteFontSize + fontSize * 0.4;
+    if (hasSeparator("after-note")) {
+      panelHeight += separatorLineHeight;
+    }
+  }
+  
+  if (notePlacement === "start" && hasSeparator("after-note")) {
+    panelHeight += separatorLineHeight;
   }
 
   const positionX = metadata.positionX !== undefined ? metadata.positionX : 0;
@@ -613,6 +629,17 @@ function drawMetadataPanel(
 
   let currentY = panelY + boxPadding;
   const contentX = panelX + boxPadding;
+
+  const drawSeparatorLine = () => {
+    const separatorY = currentY + separatorHeight / 2;
+    ctx.strokeStyle = dimTextColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(contentX, separatorY);
+    ctx.lineTo(contentX + contentWidth, separatorY);
+    ctx.stroke();
+    currentY += separatorLineHeight;
+  };
 
   const drawNote = () => {
     if (!noteText) return;
@@ -643,98 +670,132 @@ function drawMetadataPanel(
     ctx.font = buildFontString(fontSize, fontFamily, bold, italic);
     const coordColor = hasLocation ? accentColor : dimColor;
     const coordTextWidth = ctx.measureText(coordText).width;
-    const coordContentWidth = iconSize + iconGap + coordTextWidth;
+    const accuracyTextWidth = ctx.measureText(accuracyText).width;
+    const totalCoordWidth = iconSize + iconGap + coordTextWidth + iconGap + iconSize + iconGap + accuracyTextWidth;
     
-    if (textAlign === "left") {
-      drawMapPinIcon(ctx, contentX, currentY, iconSize, coordColor);
-      ctx.fillStyle = textColor;
-      ctx.fillText(coordText, contentX + iconSize + iconGap, currentY);
-    } else if (textAlign === "center") {
-      const startX = contentX + (contentWidth - coordContentWidth) / 2;
-      drawMapPinIcon(ctx, startX, currentY, iconSize, coordColor);
-      ctx.fillStyle = textColor;
-      ctx.fillText(coordText, startX + iconSize + iconGap, currentY);
-    } else {
-      const startX = contentX + contentWidth - coordContentWidth;
-      drawMapPinIcon(ctx, startX, currentY, iconSize, coordColor);
-      ctx.fillStyle = textColor;
-      ctx.fillText(coordText, startX + iconSize + iconGap, currentY);
+    let startX = contentX;
+    if (textAlign === "center") {
+      startX = contentX + (contentWidth - totalCoordWidth) / 2;
+    } else if (textAlign === "right") {
+      startX = contentX + contentWidth - totalCoordWidth;
     }
+    
+    drawMapPinIcon(ctx, startX, currentY, iconSize, coordColor);
+    ctx.fillStyle = textColor;
+    ctx.fillText(coordText, startX + iconSize + iconGap, currentY);
+    
+    const targetX = startX + iconSize + iconGap + coordTextWidth + iconGap;
+    const accuracyColor = hasAccuracy ? accentColor : dimColor;
+    drawTargetIcon(ctx, targetX, currentY, iconSize, accuracyColor);
+    ctx.fillStyle = textColor;
+    ctx.fillText(accuracyText, targetX + iconSize + iconGap, currentY);
+    
     currentY += lineHeight;
   };
 
   const drawGyroscope = () => {
-    if (!showGyroscope || leftCol.length === 0) return;
+    if (!showGyroscope) return;
     
-    const separatorY = currentY + fontSize * 0.15;
-    ctx.strokeStyle = dimTextColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(contentX, separatorY);
-    ctx.lineTo(contentX + contentWidth, separatorY);
-    ctx.stroke();
-    currentY += fontSize * 0.6;
-
     ctx.font = buildFontString(fontSize, fontFamily, bold, italic);
-    const rightColX = contentX + leftColWidth + columnGap;
-
-    for (let row = 0; row < 2; row++) {
-      const leftItem = leftCol[row];
-      const rightItem = rightCol[row];
-
-      if (leftItem) {
-        const leftIconColor = leftItem.hasData ? accentColor : dimColor;
-        leftItem.icon(ctx, contentX, currentY, iconSize, leftIconColor);
-        ctx.fillStyle = textColor;
-        ctx.fillText(leftItem.text, contentX + iconSize + iconGap, currentY);
-      }
-
-      if (rightItem) {
-        const rightIconColor = rightItem.hasData ? accentColor : dimColor;
-        rightItem.icon(ctx, rightColX, currentY, iconSize, rightIconColor);
-        ctx.fillStyle = textColor;
-        ctx.fillText(rightItem.text, rightColX + iconSize + iconGap, currentY);
-
-        if (rightItem.cardinal) {
-          const mainWidth = ctx.measureText(rightItem.text + " ").width;
-          ctx.fillStyle = accentColor;
-          ctx.fillText(rightItem.cardinal, rightColX + iconSize + iconGap + mainWidth, currentY);
-        }
-      }
-
-      currentY += lineHeight;
+    
+    const altWidth = iconSize + iconGap + ctx.measureText(altText).width;
+    const tiltWidth = iconSize + iconGap + ctx.measureText(tiltText).width;
+    let headingWidth = iconSize + iconGap + ctx.measureText(headingText).width;
+    if (cardinal) {
+      headingWidth += ctx.measureText(" " + cardinal).width;
     }
+    const totalGyroWidth = altWidth + pipeWidth + tiltWidth + pipeWidth + headingWidth;
+    
+    let startX = contentX;
+    if (textAlign === "center") {
+      startX = contentX + (contentWidth - totalGyroWidth) / 2;
+    } else if (textAlign === "right") {
+      startX = contentX + contentWidth - totalGyroWidth;
+    }
+    
+    const altColor = hasAltitude ? accentColor : dimColor;
+    drawMountainIcon(ctx, startX, currentY, iconSize, altColor);
+    ctx.fillStyle = textColor;
+    ctx.fillText(altText, startX + iconSize + iconGap, currentY);
+    startX += altWidth;
+    
+    ctx.fillStyle = dimTextColor;
+    ctx.fillText(pipeText, startX, currentY);
+    startX += pipeWidth;
+    
+    const tiltColor = hasTilt ? accentColor : dimColor;
+    drawSmartphoneIcon(ctx, startX, currentY, iconSize, tiltColor);
+    ctx.fillStyle = textColor;
+    ctx.fillText(tiltText, startX + iconSize + iconGap, currentY);
+    startX += tiltWidth;
+    
+    ctx.fillStyle = dimTextColor;
+    ctx.fillText(pipeText, startX, currentY);
+    startX += pipeWidth;
+    
+    const headingColor = hasHeading ? accentColor : dimColor;
+    drawCompassIcon(ctx, startX, currentY, iconSize, headingColor);
+    ctx.fillStyle = textColor;
+    ctx.fillText(headingText, startX + iconSize + iconGap, currentY);
+    if (cardinal) {
+      const headingTextWidth = ctx.measureText(headingText + " ").width;
+      ctx.fillStyle = accentColor;
+      ctx.fillText(cardinal, startX + iconSize + iconGap + headingTextWidth, currentY);
+    }
+    
+    currentY += lineHeight;
   };
 
   const drawTimestamp = () => {
     if (!timestampText) return;
     ctx.font = buildFontString(fontSize, fontFamily, bold, italic);
     const timestampTextWidth = ctx.measureText(timestampText).width;
+    const totalTimestampWidth = iconSize + iconGap + timestampTextWidth;
     
-    if (textAlign === "left") {
-      ctx.fillStyle = dimTextColor;
-      ctx.fillText(timestampText, contentX + iconSize + iconGap, currentY);
-    } else if (textAlign === "center") {
-      const startX = contentX + (contentWidth - timestampTextWidth) / 2;
-      ctx.fillStyle = dimTextColor;
-      ctx.fillText(timestampText, startX, currentY);
-    } else {
-      const startX = contentX + contentWidth - timestampTextWidth;
-      ctx.fillStyle = dimTextColor;
-      ctx.fillText(timestampText, startX, currentY);
+    let startX = contentX;
+    if (textAlign === "center") {
+      startX = contentX + (contentWidth - totalTimestampWidth) / 2;
+    } else if (textAlign === "right") {
+      startX = contentX + contentWidth - totalTimestampWidth;
     }
+    
+    drawClockIcon(ctx, startX, currentY, iconSize, accentColor);
+    ctx.fillStyle = textColor;
+    ctx.fillText(timestampText, startX + iconSize + iconGap, currentY);
+    currentY += lineHeight;
   };
 
   if (notePlacement === "start") {
     drawNote();
+    if (hasSeparator("before-coords")) {
+      drawSeparatorLine();
+    }
     drawCoordinates();
+    if (hasSeparator("after-coords")) {
+      drawSeparatorLine();
+    }
     drawGyroscope();
     drawTimestamp();
+    if (hasSeparator("after-note")) {
+      drawSeparatorLine();
+    }
   } else {
+    if (hasSeparator("before-coords")) {
+      drawSeparatorLine();
+    }
     drawCoordinates();
+    if (hasSeparator("after-coords")) {
+      drawSeparatorLine();
+    }
     drawGyroscope();
-    drawNote();
     drawTimestamp();
+    if (hasSeparator("before-note")) {
+      drawSeparatorLine();
+    }
+    drawNote();
+    if (hasSeparator("after-note")) {
+      drawSeparatorLine();
+    }
   }
 
   ctx.restore();

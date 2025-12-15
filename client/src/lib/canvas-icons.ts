@@ -170,6 +170,77 @@ export function drawFileTextIcon(
   ctx.restore();
 }
 
+export function drawSmartphoneIcon(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  color: string
+): void {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = size * 0.1;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  const w = size * 0.5;
+  const h = size * 0.8;
+  const rx = x + (size - w) / 2;
+  const ry = y + (size - h) / 2;
+  const r = size * 0.08;
+
+  ctx.beginPath();
+  ctx.moveTo(rx + r, ry);
+  ctx.lineTo(rx + w - r, ry);
+  ctx.quadraticCurveTo(rx + w, ry, rx + w, ry + r);
+  ctx.lineTo(rx + w, ry + h - r);
+  ctx.quadraticCurveTo(rx + w, ry + h, rx + w - r, ry + h);
+  ctx.lineTo(rx + r, ry + h);
+  ctx.quadraticCurveTo(rx, ry + h, rx, ry + h - r);
+  ctx.lineTo(rx, ry + r);
+  ctx.quadraticCurveTo(rx, ry, rx + r, ry);
+  ctx.closePath();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(rx + w * 0.35, ry + h * 0.9);
+  ctx.lineTo(rx + w * 0.65, ry + h * 0.9);
+  ctx.stroke();
+  ctx.restore();
+}
+
+export function drawClockIcon(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  color: string
+): void {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = size * 0.1;
+  ctx.lineCap = "round";
+
+  const cx = x + size / 2;
+  const cy = y + size / 2;
+  const r = size * 0.4;
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx, cy - r * 0.6);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + r * 0.45, cy + r * 0.2);
+  ctx.stroke();
+  ctx.restore();
+}
+
 export function drawRoundedRectPath(
   ctx: CanvasRenderingContext2D,
   x: number,
