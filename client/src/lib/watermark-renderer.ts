@@ -486,7 +486,6 @@ function drawMetadataPanel(
     ? hexToRgba(metadata.fontColor, fontOpacity * 0.5)
     : `rgba(255, 255, 255, ${fontOpacity * 0.5})`;
 
-  const accentColor = "rgba(34, 197, 94, 0.9)";
   const dimColor = "rgba(107, 114, 128, 0.9)";
   const boxPadding = Math.ceil(fontSize * 0.6);
   const boxRadius = Math.ceil(fontSize * 0.35);
@@ -647,17 +646,17 @@ function drawMetadataPanel(
     const noteContentWidth = iconSize + iconGap + noteTextWidth;
     
     if (textAlign === "left") {
-      drawFileTextIcon(ctx, contentX, currentY, iconSize, accentColor);
+      drawFileTextIcon(ctx, contentX, currentY, iconSize, textColor);
       ctx.fillStyle = textColor;
       ctx.fillText(noteText, contentX + iconSize + iconGap, currentY + (iconSize - noteFontSize) / 2);
     } else if (textAlign === "center") {
       const startX = contentX + (contentWidth - noteContentWidth) / 2;
-      drawFileTextIcon(ctx, startX, currentY, iconSize, accentColor);
+      drawFileTextIcon(ctx, startX, currentY, iconSize, textColor);
       ctx.fillStyle = textColor;
       ctx.fillText(noteText, startX + iconSize + iconGap, currentY + (iconSize - noteFontSize) / 2);
     } else {
       const startX = contentX + contentWidth - noteContentWidth;
-      drawFileTextIcon(ctx, startX, currentY, iconSize, accentColor);
+      drawFileTextIcon(ctx, startX, currentY, iconSize, textColor);
       ctx.fillStyle = textColor;
       ctx.fillText(noteText, startX + iconSize + iconGap, currentY + (iconSize - noteFontSize) / 2);
     }
@@ -667,7 +666,7 @@ function drawMetadataPanel(
   const drawCoordinates = () => {
     if (!showCoordinates) return;
     ctx.font = buildFontString(fontSize, fontFamily, bold, italic);
-    const coordColor = hasLocation ? accentColor : dimColor;
+    const coordColor = hasLocation ? textColor : dimColor;
     const coordTextWidth = ctx.measureText(coordText).width;
     const accuracyTextWidth = ctx.measureText(accuracyText).width;
     const totalCoordWidth = iconSize + iconGap + coordTextWidth + iconGap + iconSize + iconGap + accuracyTextWidth;
@@ -684,7 +683,7 @@ function drawMetadataPanel(
     ctx.fillText(coordText, startX + iconSize + iconGap, currentY);
     
     const targetX = startX + iconSize + iconGap + coordTextWidth + iconGap;
-    const accuracyColor = hasAccuracy ? accentColor : dimColor;
+    const accuracyColor = hasAccuracy ? textColor : dimColor;
     drawTargetIcon(ctx, targetX, currentY, iconSize, accuracyColor);
     ctx.fillStyle = textColor;
     ctx.fillText(accuracyText, targetX + iconSize + iconGap, currentY);
@@ -712,7 +711,7 @@ function drawMetadataPanel(
       startX = contentX + contentWidth - totalGyroWidth;
     }
     
-    const altColor = hasAltitude ? accentColor : dimColor;
+    const altColor = hasAltitude ? textColor : dimColor;
     drawMountainIcon(ctx, startX, currentY, iconSize, altColor);
     ctx.fillStyle = textColor;
     ctx.fillText(altText, startX + iconSize + iconGap, currentY);
@@ -722,7 +721,7 @@ function drawMetadataPanel(
     ctx.fillText(pipeText, startX, currentY);
     startX += pipeWidth;
     
-    const tiltColor = hasTilt ? accentColor : dimColor;
+    const tiltColor = hasTilt ? textColor : dimColor;
     drawSmartphoneIcon(ctx, startX, currentY, iconSize, tiltColor);
     ctx.fillStyle = textColor;
     ctx.fillText(tiltText, startX + iconSize + iconGap, currentY);
@@ -732,13 +731,13 @@ function drawMetadataPanel(
     ctx.fillText(pipeText, startX, currentY);
     startX += pipeWidth;
     
-    const headingColor = hasHeading ? accentColor : dimColor;
+    const headingColor = hasHeading ? textColor : dimColor;
     drawCompassIcon(ctx, startX, currentY, iconSize, headingColor);
     ctx.fillStyle = textColor;
     ctx.fillText(headingText, startX + iconSize + iconGap, currentY);
     if (cardinal) {
       const headingTextWidth = ctx.measureText(headingText + " ").width;
-      ctx.fillStyle = accentColor;
+      ctx.fillStyle = textColor;
       ctx.fillText(cardinal, startX + iconSize + iconGap + headingTextWidth, currentY);
     }
     
@@ -758,7 +757,7 @@ function drawMetadataPanel(
       startX = contentX + contentWidth - totalTimestampWidth;
     }
     
-    drawClockIcon(ctx, startX, currentY, iconSize, accentColor);
+    drawClockIcon(ctx, startX, currentY, iconSize, textColor);
     ctx.fillStyle = textColor;
     ctx.fillText(timestampText, startX + iconSize + iconGap, currentY);
     currentY += lineHeight;
@@ -800,6 +799,41 @@ function drawMetadataPanel(
   ctx.restore();
 }
 
+const FONT_URLS: Record<string, string> = {
+  roboto: '/fonts/roboto.woff2',
+  montserrat: '/fonts/montserrat.woff2',
+  oswald: '/fonts/oswald.woff2',
+  playfair: '/fonts/playfair-display.woff2',
+};
+
+async function ensureFontLoaded(fontFamily: FontFamily): Promise<void> {
+  if (fontFamily === 'system') return;
+  
+  const fontName = FONT_FAMILY_MAP[fontFamily];
+  if (!fontName) return;
+
+  try {
+    await document.fonts.ready;
+    
+    const fontUrl = FONT_URLS[fontFamily];
+    if (!fontUrl) return;
+    
+    const testString = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const loaded = document.fonts.check(`16px ${fontName}`, testString);
+    
+    if (!loaded) {
+      const fontFace = new FontFace(
+        fontName.split(',')[0].replace(/['"]/g, '').trim(),
+        `url(${fontUrl})`
+      );
+      await fontFace.load();
+      document.fonts.add(fontFace);
+    }
+  } catch (e) {
+    console.warn(`Failed to load font ${fontFamily}:`, e);
+  }
+}
+
 export function drawWatermark(
   ctx: CanvasRenderingContext2D,
   width: number,
@@ -816,4 +850,18 @@ export function drawWatermark(
   if (metadata.reticleConfig?.showMetadata !== false) {
     drawMetadataPanel(ctx, metadata, layout, width, height);
   }
+}
+
+export async function drawWatermarkAsync(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  metadata?: WatermarkMetadata
+): Promise<void> {
+  if (!metadata) return;
+
+  const fontFamily = metadata.fontFamily || 'system';
+  await ensureFontLoaded(fontFamily);
+
+  drawWatermark(ctx, width, height, metadata);
 }

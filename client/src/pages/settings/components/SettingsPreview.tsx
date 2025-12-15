@@ -2,7 +2,7 @@ import { memo, useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSettings } from "@/lib/settings-context";
 import { usePreview } from "../contexts/PreviewContext";
-import { drawWatermark, type WatermarkMetadata } from "@/lib/watermark-renderer";
+import { drawWatermarkAsync, type WatermarkMetadata } from "@/lib/watermark-renderer";
 import { useI18n } from "@/lib/i18n";
 import { getDefaultColorForScheme } from "@/components/reticles";
 import { Slider } from "@/components/ui/slider";
@@ -45,7 +45,7 @@ export const SettingsPreview = memo(function SettingsPreview() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const drawPreview = () => {
+    const drawPreview = async () => {
       if (!imageRef.current) return;
 
       const img = imageRef.current;
@@ -98,7 +98,7 @@ export const SettingsPreview = memo(function SettingsPreview() {
         reticlePosition: { x: 50, y: 50 },
       };
 
-      drawWatermark(ctx, containerWidth, containerHeight, metadata);
+      await drawWatermarkAsync(ctx, containerWidth, containerHeight, metadata);
     };
 
     drawPreview();

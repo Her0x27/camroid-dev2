@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { drawWatermark, type WatermarkMetadata } from "@/lib/watermark-renderer";
+import { drawWatermarkAsync, type WatermarkMetadata } from "@/lib/watermark-renderer";
 import { logger } from "@/lib/logger";
 import { usePageVisibility } from "@/hooks/use-page-visibility";
 import type { CameraResolution } from "@shared/schema";
@@ -357,7 +357,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
     canvas.height = videoHeight;
     
     ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
-    drawWatermark(ctx, canvas.width, canvas.height, metadata);
+    await drawWatermarkAsync(ctx, canvas.width, canvas.height, metadata);
 
     const imageData = canvas.toDataURL("image/jpeg", photoQuality / 100);
 
@@ -376,7 +376,7 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
 
     if (thumbCtx) {
       thumbCtx.drawImage(video, 0, 0, videoWidth, videoHeight, 0, 0, thumbCanvas.width, thumbCanvas.height);
-      drawWatermark(thumbCtx, thumbCanvas.width, thumbCanvas.height, metadata);
+      await drawWatermarkAsync(thumbCtx, thumbCanvas.width, thumbCanvas.height, metadata);
     }
 
     const thumbnailData = thumbCanvas.toDataURL("image/jpeg", 0.7);
@@ -389,47 +389,51 @@ export function useCamera(options: UseCameraOptions = {}): UseCameraReturn {
     metadata?: PhotoMetadata,
     quality?: number
   ): Promise<CaptureResult | null> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        
-        if (!ctx) {
-          resolve(null);
-          return;
+      img.onload = async () => {
+        try {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          
+          if (!ctx) {
+            resolve(null);
+            return;
+          }
+
+          canvas.width = img.width;
+          canvas.height = img.height;
+          
+          ctx.drawImage(img, 0, 0, img.width, img.height);
+          await drawWatermarkAsync(ctx, canvas.width, canvas.height, metadata);
+
+          const finalQuality = quality ?? photoQuality;
+          const imageData = canvas.toDataURL("image/jpeg", finalQuality / 100);
+
+          const thumbCanvas = document.createElement("canvas");
+          const thumbCtx = thumbCanvas.getContext("2d");
+          const thumbSize = 300;
+          const aspectRatio = img.width / img.height;
+          
+          if (aspectRatio > 1) {
+            thumbCanvas.width = thumbSize;
+            thumbCanvas.height = thumbSize / aspectRatio;
+          } else {
+            thumbCanvas.height = thumbSize;
+            thumbCanvas.width = thumbSize * aspectRatio;
+          }
+
+          if (thumbCtx) {
+            thumbCtx.drawImage(img, 0, 0, img.width, img.height, 0, 0, thumbCanvas.width, thumbCanvas.height);
+            await drawWatermarkAsync(thumbCtx, thumbCanvas.width, thumbCanvas.height, metadata);
+          }
+
+          const thumbnailData = thumbCanvas.toDataURL("image/jpeg", 0.7);
+
+          resolve({ imageData, thumbnailData });
+        } catch (err) {
+          reject(err);
         }
-
-        canvas.width = img.width;
-        canvas.height = img.height;
-        
-        ctx.drawImage(img, 0, 0, img.width, img.height);
-        drawWatermark(ctx, canvas.width, canvas.height, metadata);
-
-        const finalQuality = quality ?? photoQuality;
-        const imageData = canvas.toDataURL("image/jpeg", finalQuality / 100);
-
-        const thumbCanvas = document.createElement("canvas");
-        const thumbCtx = thumbCanvas.getContext("2d");
-        const thumbSize = 300;
-        const aspectRatio = img.width / img.height;
-        
-        if (aspectRatio > 1) {
-          thumbCanvas.width = thumbSize;
-          thumbCanvas.height = thumbSize / aspectRatio;
-        } else {
-          thumbCanvas.height = thumbSize;
-          thumbCanvas.width = thumbSize * aspectRatio;
-        }
-
-        if (thumbCtx) {
-          thumbCtx.drawImage(img, 0, 0, img.width, img.height, 0, 0, thumbCanvas.width, thumbCanvas.height);
-          drawWatermark(thumbCtx, thumbCanvas.width, thumbCanvas.height, metadata);
-        }
-
-        const thumbnailData = thumbCanvas.toDataURL("image/jpeg", 0.7);
-
-        resolve({ imageData, thumbnailData });
       };
       
       img.onerror = () => {

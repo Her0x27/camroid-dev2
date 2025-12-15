@@ -7,9 +7,11 @@
 
 ## Чек-лист задач v64
 
-- [ ] Заменить accentColor на textColor для всех иконок в watermark-renderer.ts
-- [ ] Добавить ожидание загрузки шрифтов (document.fonts.ready) перед рендерингом
-- [ ] Обновить upgrade.md
+- [x] Заменить accentColor на textColor для всех иконок в watermark-renderer.ts
+- [x] Добавить ожидание загрузки шрифтов (document.fonts.ready) перед рендерингом
+- [x] Обновить use-camera.ts — использовать drawWatermarkAsync
+- [x] Обновить SettingsPreview.tsx — использовать drawWatermarkAsync
+- [x] Обновить upgrade.md
 
 ---
 
@@ -17,9 +19,28 @@
 
 | Задача | Статус | Дата |
 |--------|--------|------|
-| Цвет иконок | ⏳ В процессе | 15.12.2025 |
-| Загрузка шрифтов | ⏳ В процессе | 15.12.2025 |
-| upgrade.md | ⏳ В процессе | 15.12.2025 |
+| Цвет иконок | ✅ Готово | 15.12.2025 |
+| Загрузка шрифтов | ✅ Готово | 15.12.2025 |
+| use-camera.ts | ✅ Готово | 15.12.2025 |
+| SettingsPreview.tsx | ✅ Готово | 15.12.2025 |
+| upgrade.md | ✅ Готово | 15.12.2025 |
+
+## Изменения v64
+
+### client/src/lib/watermark-renderer.ts
+- **Удалён accentColor:** все иконки теперь используют textColor (цвет текста)
+- **Добавлен FONT_URLS:** маппинг шрифтов на локальные файлы
+- **ensureFontLoaded():** загрузка шрифтов через FontFace API
+- **drawWatermarkAsync():** новая async функция с ожиданием загрузки шрифтов
+
+### client/src/hooks/use-camera.ts
+- **Импорт:** заменён drawWatermark на drawWatermarkAsync
+- **capturePhoto:** await drawWatermarkAsync для основного и thumbnail
+- **captureFromImage:** img.onload стал async, await drawWatermarkAsync
+
+### client/src/pages/settings/components/SettingsPreview.tsx
+- **Импорт:** заменён drawWatermark на drawWatermarkAsync
+- **drawPreview:** стал async, await drawWatermarkAsync
 
 ---
 
