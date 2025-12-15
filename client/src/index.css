@@ -494,6 +494,35 @@
     animation: crosshair-rotate 3s ease-in-out infinite, crosshair-glow 1.5s ease-in-out infinite;
   }
   
+  /* Letter assembly/disassembly animation for "Camroid M" */
+  @keyframes letter-assemble {
+    0% {
+      opacity: 0;
+      transform: var(--letter-start-transform);
+      filter: blur(8px);
+    }
+    40% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0deg) scale(1);
+      filter: blur(0);
+    }
+    60% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0deg) scale(1);
+      filter: blur(0);
+    }
+    100% {
+      opacity: 0;
+      transform: var(--letter-end-transform);
+      filter: blur(8px);
+    }
+  }
+  
+  .animate-letter-assemble {
+    animation: letter-assemble 3s ease-in-out infinite;
+    display: inline-block;
+  }
+  
   /* Fade in up animation */
   @keyframes fade-in-up {
     0% {
@@ -522,6 +551,13 @@
     .animate-pulse-ring-outer,
     .animate-pulse-ring-third {
       animation: none;
+    }
+    
+    .animate-letter-assemble {
+      animation: none;
+      opacity: 1;
+      transform: none;
+      filter: none;
     }
     
     .animate-crosshair-rotate {

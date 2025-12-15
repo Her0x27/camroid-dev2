@@ -1,5 +1,64 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { Crosshair } from "lucide-react";
+
+const BRAND_TEXT = "Camroid M";
+
+const letterTransforms = [
+  { start: "translate(-80px, -60px) rotate(-25deg) scale(0.5)", end: "translate(-100px, -80px) rotate(30deg) scale(0.3)" },
+  { start: "translate(60px, -80px) rotate(20deg) scale(0.6)", end: "translate(80px, -100px) rotate(-35deg) scale(0.4)" },
+  { start: "translate(-70px, 50px) rotate(-15deg) scale(0.7)", end: "translate(-90px, 70px) rotate(25deg) scale(0.2)" },
+  { start: "translate(50px, 70px) rotate(30deg) scale(0.4)", end: "translate(70px, 90px) rotate(-20deg) scale(0.5)" },
+  { start: "translate(-60px, -40px) rotate(25deg) scale(0.5)", end: "translate(-85px, -60px) rotate(-30deg) scale(0.3)" },
+  { start: "translate(70px, -50px) rotate(-20deg) scale(0.6)", end: "translate(95px, -70px) rotate(15deg) scale(0.4)" },
+  { start: "translate(-50px, 60px) rotate(15deg) scale(0.4)", end: "translate(-75px, 85px) rotate(-25deg) scale(0.3)" },
+  { start: "translate(80px, 40px) rotate(-30deg) scale(0.5)", end: "translate(105px, 60px) rotate(20deg) scale(0.2)" },
+  { start: "translate(0px, -90px) rotate(0deg) scale(0.3)", end: "translate(0px, -120px) rotate(180deg) scale(0.4)" },
+];
+
+interface AnimatedLetterProps {
+  letter: string;
+  index: number;
+}
+
+function AnimatedLetter({ letter, index }: AnimatedLetterProps) {
+  const transform = letterTransforms[index % letterTransforms.length];
+  const delay = index * 0.08;
+  
+  if (letter === " ") {
+    return <span className="inline-block w-2" />;
+  }
+  
+  return (
+    <span
+      className="animate-letter-assemble text-primary font-bold"
+      style={{
+        "--letter-start-transform": transform.start,
+        "--letter-end-transform": transform.end,
+        animationDelay: `${delay}s`,
+      } as React.CSSProperties}
+    >
+      {letter}
+    </span>
+  );
+}
+
+function BrandTextAnimation({ size }: { size: "sm" | "md" | "lg" }) {
+  const textSizes = {
+    sm: "text-lg",
+    md: "text-2xl",
+    lg: "text-3xl",
+  };
+  
+  const letters = useMemo(() => BRAND_TEXT.split(""), []);
+  
+  return (
+    <div className={`${textSizes[size]} tracking-wider flex items-center justify-center`}>
+      {letters.map((letter, i) => (
+        <AnimatedLetter key={i} letter={letter} index={i} />
+      ))}
+    </div>
+  );
+}
 
 const sizeClasses = {
   sm: "w-5 h-5 border",
@@ -65,13 +124,16 @@ export const PageLoader = memo(function PageLoader({
     
     return (
       <div 
-        className={`min-h-screen bg-background flex flex-col items-center justify-center ${className}`}
+        className={`min-h-screen bg-background flex flex-col items-center justify-center gap-8 ${className}`}
         role="status"
         aria-busy="true"
         aria-label="Loading application"
         data-testid="loader-branded"
       >
         <span className="sr-only">Loading...</span>
+        
+        <BrandTextAnimation size={size} />
+        
         <div className="relative flex items-center justify-center">
           <div 
             className={`absolute ${thirdRingSizes[size]} rounded-full border border-primary/10 animate-pulse-ring-third`}
@@ -87,11 +149,6 @@ export const PageLoader = memo(function PageLoader({
             strokeWidth={1.5}
             aria-hidden="true"
           />
-        </div>
-        <div className="mt-8 flex items-center gap-1.5" aria-hidden="true">
-          <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <span className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
         </div>
       </div>
     );
