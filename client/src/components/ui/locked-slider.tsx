@@ -150,16 +150,18 @@ export function LockedSlider({
           </span>
         </div>
       )}
-      <Slider
-        value={value}
-        onValueChange={handleValueChange}
-        min={min}
-        max={max}
-        step={step}
-        data-testid={testId}
-        disabled={isLocked}
-        colorByValue={colorByValue}
-      />
+      <div className={cn(isLocked && "pointer-events-none")}>
+        <Slider
+          value={value}
+          onValueChange={handleValueChange}
+          min={min}
+          max={max}
+          step={step}
+          data-testid={testId}
+          disabled={isLocked}
+          colorByValue={colorByValue}
+        />
+      </div>
     </div>
   );
 }
