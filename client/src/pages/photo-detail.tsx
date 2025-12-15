@@ -327,7 +327,7 @@ export default function PhotoDetailPage() {
       </header>
 
       <footer className="absolute bottom-0 left-0 right-0 z-50 bg-black/80 safe-bottom">
-        <div className="flex items-center justify-center gap-2 px-4 py-1.5">
+        <div className="flex items-center justify-center gap-2 py-1.5">
           <Button
             variant="ghost"
             size="icon"
