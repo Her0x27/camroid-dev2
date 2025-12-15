@@ -7,24 +7,24 @@ export function drawMapPinIcon(
 ): void {
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = size * 0.12;
+  ctx.lineWidth = size * 0.08;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
   const cx = x + size / 2;
-  const cy = y + size / 2;
-  const r = size * 0.35;
+  const cy = y + size * 0.4;
+  const r = size * 0.25;
 
   ctx.beginPath();
-  ctx.arc(cx, cy - size * 0.1, r, Math.PI * 0.2, Math.PI * 0.8, true);
-  ctx.lineTo(cx, cy + size * 0.4);
-  ctx.closePath();
+  ctx.arc(cx, cy, r, Math.PI, 0, false);
+  ctx.lineTo(cx, y + size * 0.85);
+  ctx.arc(cx, cy, r, 0, Math.PI, false);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.arc(cx, cy - size * 0.1, r * 0.35, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.arc(cx, cy, r * 0.4, 0, Math.PI * 2);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -37,17 +37,22 @@ export function drawMountainIcon(
 ): void {
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.12;
+  ctx.lineWidth = size * 0.08;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
   ctx.beginPath();
-  ctx.moveTo(x + size * 0.1, y + size * 0.8);
-  ctx.lineTo(x + size * 0.4, y + size * 0.2);
-  ctx.lineTo(x + size * 0.55, y + size * 0.45);
-  ctx.lineTo(x + size * 0.7, y + size * 0.25);
-  ctx.lineTo(x + size * 0.9, y + size * 0.8);
+  ctx.moveTo(x + size * 0.08, y + size * 0.85);
+  ctx.lineTo(x + size * 0.5, y + size * 0.15);
+  ctx.lineTo(x + size * 0.92, y + size * 0.85);
   ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x + size * 0.33, y + size * 0.85);
+  ctx.lineTo(x + size * 0.5, y + size * 0.6);
+  ctx.lineTo(x + size * 0.67, y + size * 0.85);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -84,23 +89,26 @@ export function drawCompassIcon(
   ctx.save();
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
-  ctx.lineWidth = size * 0.1;
+  ctx.lineWidth = size * 0.08;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
 
   const cx = x + size / 2;
   const cy = y + size / 2;
-  const r = size * 0.4;
+  const r = size * 0.42;
 
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(cx, cy - r * 0.7);
-  ctx.lineTo(cx - r * 0.25, cy + r * 0.3);
+  ctx.moveTo(cx, cy - r * 0.65);
+  ctx.lineTo(cx + r * 0.2, cy + r * 0.25);
   ctx.lineTo(cx, cy);
-  ctx.lineTo(cx + r * 0.25, cy + r * 0.3);
+  ctx.lineTo(cx - r * 0.2, cy + r * 0.25);
   ctx.closePath();
   ctx.fill();
+
   ctx.restore();
 }
 
@@ -113,23 +121,25 @@ export function drawTargetIcon(
 ): void {
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.1;
+  ctx.lineWidth = size * 0.08;
   ctx.lineCap = "round";
 
   const cx = x + size / 2;
   const cy = y + size / 2;
-  const r = size * 0.35;
+  const r = size * 0.4;
 
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(cx - r * 1.3, cy);
-  ctx.lineTo(cx + r * 1.3, cy);
-  ctx.moveTo(cx, cy - r * 1.3);
-  ctx.lineTo(cx, cy + r * 1.3);
+  ctx.arc(cx, cy, r * 0.6, 0, Math.PI * 2);
   ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.25, 0, Math.PI * 2);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -142,31 +152,46 @@ export function drawFileTextIcon(
 ): void {
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.1;
+  ctx.lineWidth = size * 0.08;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
+  const left = x + size * 0.2;
+  const right = x + size * 0.8;
+  const top = y + size * 0.08;
+  const bottom = y + size * 0.92;
+  const foldSize = size * 0.2;
+
   ctx.beginPath();
-  ctx.moveTo(x + size * 0.2, y + size * 0.1);
-  ctx.lineTo(x + size * 0.6, y + size * 0.1);
-  ctx.lineTo(x + size * 0.8, y + size * 0.3);
-  ctx.lineTo(x + size * 0.8, y + size * 0.9);
-  ctx.lineTo(x + size * 0.2, y + size * 0.9);
+  ctx.moveTo(left, top);
+  ctx.lineTo(right - foldSize, top);
+  ctx.lineTo(right, top + foldSize);
+  ctx.lineTo(right, bottom);
+  ctx.lineTo(left, bottom);
   ctx.closePath();
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(x + size * 0.6, y + size * 0.1);
-  ctx.lineTo(x + size * 0.6, y + size * 0.3);
-  ctx.lineTo(x + size * 0.8, y + size * 0.3);
+  ctx.moveTo(right - foldSize, top);
+  ctx.lineTo(right - foldSize, top + foldSize);
+  ctx.lineTo(right, top + foldSize);
   ctx.stroke();
 
   ctx.beginPath();
   ctx.moveTo(x + size * 0.3, y + size * 0.5);
   ctx.lineTo(x + size * 0.7, y + size * 0.5);
-  ctx.moveTo(x + size * 0.3, y + size * 0.7);
-  ctx.lineTo(x + size * 0.7, y + size * 0.7);
   ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x + size * 0.3, y + size * 0.65);
+  ctx.lineTo(x + size * 0.7, y + size * 0.65);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x + size * 0.3, y + size * 0.8);
+  ctx.lineTo(x + size * 0.55, y + size * 0.8);
+  ctx.stroke();
+
   ctx.restore();
 }
 
@@ -179,7 +204,7 @@ export function drawSmartphoneIcon(
 ): void {
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.1;
+  ctx.lineWidth = size * 0.08;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
 
@@ -187,7 +212,7 @@ export function drawSmartphoneIcon(
   const h = size * 0.8;
   const rx = x + (size - w) / 2;
   const ry = y + (size - h) / 2;
-  const r = size * 0.08;
+  const r = size * 0.06;
 
   ctx.beginPath();
   ctx.moveTo(rx + r, ry);
@@ -203,9 +228,10 @@ export function drawSmartphoneIcon(
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.moveTo(rx + w * 0.35, ry + h * 0.9);
-  ctx.lineTo(rx + w * 0.65, ry + h * 0.9);
+  ctx.moveTo(rx + w * 0.35, ry + h * 0.88);
+  ctx.lineTo(rx + w * 0.65, ry + h * 0.88);
   ctx.stroke();
+
   ctx.restore();
 }
 
@@ -218,12 +244,12 @@ export function drawClockIcon(
 ): void {
   ctx.save();
   ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.1;
+  ctx.lineWidth = size * 0.08;
   ctx.lineCap = "round";
 
   const cx = x + size / 2;
   const cy = y + size / 2;
-  const r = size * 0.4;
+  const r = size * 0.42;
 
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
@@ -231,13 +257,14 @@ export function drawClockIcon(
 
   ctx.beginPath();
   ctx.moveTo(cx, cy);
-  ctx.lineTo(cx, cy - r * 0.6);
+  ctx.lineTo(cx, cy - r * 0.55);
   ctx.stroke();
 
   ctx.beginPath();
   ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + r * 0.45, cy + r * 0.2);
+  ctx.lineTo(cx + r * 0.4, cy + r * 0.15);
   ctx.stroke();
+
   ctx.restore();
 }
 

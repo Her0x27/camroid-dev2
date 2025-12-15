@@ -1,3 +1,51 @@
+# Upgrade: Визуальное соответствие иконок и шрифтов v63
+
+## Описание
+Исправление визуальных расхождений между редактором водяного знака (/ve-watermark) и сохранённым фото:
+1. Иконки переделаны в стиле Lucide (stroke-based)
+2. Размер шрифта синхронизирован с vmin расчётом
+3. Размер иконок соответствует React компоненту
+
+## Чек-лист задач v63
+
+- [x] Переделать canvas иконки в стиле Lucide
+- [x] Исправить расчёт fontSize (vmin)
+- [x] Синхронизировать iconSize и iconGap
+- [x] Обновить upgrade.md
+
+---
+
+## Прогресс v63
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| Canvas иконки | ✅ Готово | 15.12.2025 |
+| fontSize vmin | ✅ Готово | 15.12.2025 |
+| iconSize/iconGap | ✅ Готово | 15.12.2025 |
+| upgrade.md | ✅ Готово | 15.12.2025 |
+
+## Изменения v63
+
+### client/src/lib/canvas-icons.ts
+- **Все иконки переписаны** в стиле Lucide:
+  - lineWidth = size * 0.08 (stroke-based как в Lucide)
+  - lineCap = "round", lineJoin = "round"
+- **drawMapPinIcon:** улучшена форма пина
+- **drawMountainIcon:** упрощённая гора с вершиной
+- **drawTargetIcon:** три концентрических круга (как Lucide Target)
+- **drawFileTextIcon:** документ с линиями текста
+- **drawSmartphoneIcon:** прямоугольник телефона со скруглёнными углами
+- **drawClockIcon:** круг с двумя стрелками
+- **drawCompassIcon:** круг с указателем на север
+
+### client/src/lib/watermark-renderer.ts
+- **fontSize:** теперь рассчитывается как vmin: `minDimension * (vminFontSize / 100)`
+- **iconSize:** изменён с `fontSize * 1.1` на `fontSize * 0.85` (соответствует React: `fontSize * 0.8`)
+- **iconGap:** изменён с `fontSize * 0.5` на `fontSize * 0.3`
+- **lineHeight:** изменён с `fontSize * 1.5` на `fontSize * 1.4`
+
+---
+
 # Upgrade: Полная синхронизация canvas с InteractiveWatermark v62
 
 ## Описание

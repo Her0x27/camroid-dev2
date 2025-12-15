@@ -453,8 +453,6 @@ function drawMetadataPanel(
   canvasWidth: number,
   canvasHeight: number
 ): void {
-  const { fontSize: baseFontSize } = layout;
-
   const showCoordinates = metadata.showCoordinates !== false;
   const showGyroscope = metadata.showGyroscope !== false;
   const showNote = metadata.showNote !== false;
@@ -466,11 +464,12 @@ function drawMetadataPanel(
   const italic = metadata.italic || false;
   const separators = metadata.separators || [];
 
-  const fontSizeMultiplier = metadata.fontSize ? metadata.fontSize / 3 : 1;
-  const fontSize = Math.ceil(baseFontSize * fontSizeMultiplier);
-  const lineHeight = fontSize * 1.5;
-  const iconSize = Math.ceil(fontSize * 1.1);
-  const iconGap = Math.ceil(fontSize * 0.5);
+  const minDimension = Math.min(canvasWidth, canvasHeight);
+  const vminFontSize = metadata.fontSize || 3;
+  const fontSize = Math.ceil(minDimension * (vminFontSize / 100));
+  const lineHeight = fontSize * 1.4;
+  const iconSize = Math.ceil(fontSize * 0.85);
+  const iconGap = Math.ceil(fontSize * 0.3);
   const separatorHeight = Math.ceil(fontSize * 0.3);
 
   const bgOpacity = metadata.backgroundOpacity !== undefined ? metadata.backgroundOpacity / 100 : 0.6;
@@ -512,7 +511,7 @@ function drawMetadataPanel(
   ctx.textBaseline = "top";
 
   const noteText = (showNote && hasNote) ? metadata.note!.trim() : "";
-  const noteFontSize = Math.ceil(fontSize * 0.85);
+  const noteFontSize = fontSize;
 
   const timestampText = showTimestamp && metadata.timestamp 
     ? new Date(metadata.timestamp).toLocaleString('ru-RU', { 
