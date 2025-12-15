@@ -1,3 +1,50 @@
+# Upgrade: Синхронизация отрисовки водяного знака и прицела v61
+
+## Описание
+Полная синхронизация отрисовки водяного знака и прицела между страницей /ve-watermark и сохранением фото.
+Настройки из визуального редактора должны точно применяться при сохранении изображения.
+
+## Проблемы для исправления
+1. **Прицел — неправильный расчёт размера:** canvas делит размер на 2, SVG нет
+2. **Прицел — неправильный strokeWidth:** разные формулы расчёта
+3. **Водяной знак — отсутствующие настройки:**
+   - showCoordinates, showGyroscope, showNote, showTimestamp — фильтрация контента
+   - coordinateFormat (decimal, dms, ddm, simple)
+   - fontFamily, textAlign, bold, italic, underline
+   - separators (разделительные линии)
+   - logo (логотип с позицией и прозрачностью)
+   - autoSize (автоматический размер)
+4. **Разные конфиги:** /ve-watermark использует watermarkPreview/reticlePreview, съёмка — старый reticleConfig
+
+## Чек-лист задач v61
+
+- [x] Обновить upgrade.md — добавить секцию v61
+- [ ] Исправить расчёт размера прицела в watermark-renderer.ts
+- [ ] Исправить расчёт strokeWidth прицела
+- [ ] Обновить WatermarkMetadata — добавить все настройки из WatermarkPreviewConfig
+- [ ] Переработать drawMetadataPanel — применять visibility toggles и стили
+- [ ] Добавить поддержку coordinateFormat в canvas отрисовку
+- [ ] Добавить поддержку logo в canvas отрисовку водяного знака
+- [ ] Обновить use-camera.ts — передавать полные настройки watermarkPreview и reticlePreview
+- [ ] Финальное обновление upgrade.md
+
+---
+
+## Прогресс v61
+
+| Задача | Статус | Дата |
+|--------|--------|------|
+| upgrade.md | ⏳ В процессе | 15.12.2025 |
+| Размер прицела | ⏳ Ожидает | - |
+| strokeWidth | ⏳ Ожидает | - |
+| WatermarkMetadata | ⏳ Ожидает | - |
+| drawMetadataPanel | ⏳ Ожидает | - |
+| coordinateFormat | ⏳ Ожидает | - |
+| logo | ⏳ Ожидает | - |
+| use-camera.ts | ⏳ Ожидает | - |
+
+---
+
 # Upgrade: Компактное хранилище и голубые Android-подсказки v60
 
 ## Описание
