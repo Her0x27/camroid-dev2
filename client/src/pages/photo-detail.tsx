@@ -229,7 +229,13 @@ export default function PhotoDetailPage() {
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 bg-black select-none touch-pan-y"
+      className="fixed inset-0 bg-black select-none touch-pan-y overflow-hidden"
+      style={{
+        width: '100vw',
+        height: '100dvh',
+        maxWidth: '100vw',
+        maxHeight: '100dvh',
+      }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -238,7 +244,7 @@ export default function PhotoDetailPage() {
       <img
         src={photo.imageData}
         alt={t.gallery.photo}
-        className="w-full h-full object-contain transition-transform duration-150"
+        className="absolute inset-0 w-full h-full object-contain transition-transform duration-150"
         style={{
           transform: isSwipeActive 
             ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px)`
@@ -246,6 +252,10 @@ export default function PhotoDetailPage() {
           opacity: isSwipeActive && verticalSwipeOffset !== 0 
             ? Math.max(0.3, 1 - Math.abs(verticalSwipeOffset) / 200)
             : 1,
+          maxWidth: '100vw',
+          maxHeight: '100dvh',
+          margin: 0,
+          padding: 0,
         }}
         data-testid="photo-image"
         draggable={false}

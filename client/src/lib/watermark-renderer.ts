@@ -449,7 +449,7 @@ function drawReticle(
 function drawMetadataPanel(
   ctx: CanvasRenderingContext2D,
   metadata: WatermarkMetadata,
-  layout: WatermarkLayout,
+  _layout: WatermarkLayout,
   canvasWidth: number,
   canvasHeight: number
 ): void {
@@ -562,15 +562,17 @@ function drawMetadataPanel(
 
   let panelHeight = boxPadding * 2;
   
+  const separatorBottomPadding = fontSize * 0.3;
+  
   if (notePlacement === "start" && noteText) {
     panelHeight += noteFontSize + fontSize * 0.4;
     if (hasSeparator("before-coords")) {
-      panelHeight += separatorLineHeight;
+      panelHeight += separatorLineHeight + separatorBottomPadding;
     }
   }
   
   if (notePlacement === "end" && hasSeparator("before-coords")) {
-    panelHeight += separatorLineHeight;
+    panelHeight += separatorLineHeight + separatorBottomPadding;
   }
   
   if (showCoordinates) {
@@ -578,7 +580,7 @@ function drawMetadataPanel(
   }
   
   if (hasSeparator("after-coords")) {
-    panelHeight += separatorLineHeight;
+    panelHeight += separatorLineHeight + separatorBottomPadding;
   }
   
   if (showGyroscope) {
@@ -591,16 +593,16 @@ function drawMetadataPanel(
   
   if (notePlacement === "end" && noteText) {
     if (hasSeparator("before-note")) {
-      panelHeight += separatorLineHeight;
+      panelHeight += separatorLineHeight + separatorBottomPadding;
     }
     panelHeight += noteFontSize + fontSize * 0.4;
     if (hasSeparator("after-note")) {
-      panelHeight += separatorLineHeight;
+      panelHeight += separatorLineHeight + separatorBottomPadding;
     }
   }
   
   if (notePlacement === "start" && hasSeparator("after-note")) {
-    panelHeight += separatorLineHeight;
+    panelHeight += separatorLineHeight + separatorBottomPadding;
   }
 
   const positionX = metadata.positionX !== undefined ? metadata.positionX : 0;
@@ -636,7 +638,7 @@ function drawMetadataPanel(
     ctx.moveTo(contentX, separatorY);
     ctx.lineTo(contentX + contentWidth, separatorY);
     ctx.stroke();
-    currentY += separatorLineHeight;
+    currentY += separatorLineHeight + fontSize * 0.3;
   };
 
   const drawNote = () => {

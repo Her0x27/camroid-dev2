@@ -6,19 +6,24 @@ interface UsePageVisibilityReturn {
 }
 
 export function usePageVisibility(): UsePageVisibilityReturn {
-  const [isVisible, setIsVisible] = useState(() => !document.hidden);
+  const [isVisible, setIsVisible] = useState(() => !document.hidden && document.hasFocus());
   
-  const handleVisibilityChange = useCallback(() => {
-    setIsVisible(!document.hidden);
+  const updateVisibility = useCallback(() => {
+    const visible = !document.hidden && document.hasFocus();
+    setIsVisible(visible);
   }, []);
 
   useEffect(() => {
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("visibilitychange", updateVisibility);
+    window.addEventListener("blur", updateVisibility);
+    window.addEventListener("focus", updateVisibility);
     
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("visibilitychange", updateVisibility);
+      window.removeEventListener("blur", updateVisibility);
+      window.removeEventListener("focus", updateVisibility);
     };
-  }, [handleVisibilityChange]);
+  }, [updateVisibility]);
 
   return {
     isVisible,

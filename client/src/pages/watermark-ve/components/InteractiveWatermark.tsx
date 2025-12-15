@@ -312,12 +312,12 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
             <span>{style.note}</span>
           </div>
           {(style.separators || []).filter(s => s.position === "before-coords").map(s => (
-            <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+            <div key={s.id} className="w-full h-px bg-current opacity-50 mb-2" />
           ))}
         </>
       )}
       {style.showNote !== false && style.notePlacement === "end" && (style.separators || []).filter(s => s.position === "before-coords").map(s => (
-        <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+        <div key={s.id} className="w-full h-px bg-current opacity-50 mb-2" />
       ))}
       {style.showCoordinates !== false && (
         <div className="flex items-center gap-1">
@@ -328,7 +328,7 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         </div>
       )}
       {style.showCoordinates !== false && (style.separators || []).filter(s => s.position === "after-coords").map(s => (
-        <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+        <div key={s.id} className="w-full h-px bg-current opacity-50 mb-2" />
       ))}
       {style.showGyroscope !== false && (
         <div className="flex items-center gap-1">
@@ -349,19 +349,19 @@ export const InteractiveWatermark = memo(function InteractiveWatermark({
         </div>
       )}
       {style.showNote !== false && style.notePlacement === "start" && (style.separators || []).filter(s => s.position === "after-note").map(s => (
-        <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+        <div key={s.id} className="w-full h-px bg-current opacity-50 mb-2" />
       ))}
       {style.showNote !== false && style.notePlacement === "end" && style.note && (
         <>
           {(style.separators || []).filter(s => s.position === "before-note").map(s => (
-            <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+            <div key={s.id} className="w-full h-px bg-current opacity-50 mb-2" />
           ))}
           <div className="flex items-center gap-1">
             <FileText className="inline-block flex-shrink-0" style={{ width: `${style.fontSize * 0.8}vmin`, height: `${style.fontSize * 0.8}vmin` }} />
             <span>{style.note}</span>
           </div>
           {(style.separators || []).filter(s => s.position === "after-note").map(s => (
-            <div key={s.id} className="w-full h-px bg-current opacity-50 my-1" />
+            <div key={s.id} className="w-full h-px bg-current opacity-50 mb-2" />
           ))}
         </>
       )}
