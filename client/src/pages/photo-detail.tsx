@@ -14,9 +14,7 @@ import {
   Loader2,
   ChevronUp,
   ChevronDown,
-  Camera,
-  Images,
-  Folder
+  Camera
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -71,39 +69,6 @@ function SwipeIndicator({ direction, opacity, label, icon }: SwipeIndicatorProps
   );
 }
 
-interface BreadcrumbsProps {
-  folderName: string | null | undefined;
-  photoName: string;
-  onGalleryClick: () => void;
-}
-
-function Breadcrumbs({ folderName, photoName, onGalleryClick }: BreadcrumbsProps) {
-  return (
-    <nav className="flex items-center gap-1 text-xs text-white/70 overflow-hidden">
-      <button 
-        onClick={onGalleryClick}
-        className="flex items-center gap-1 hover:text-white transition-colors shrink-0 touch-manipulation active:opacity-70"
-      >
-        <Images className="w-3 h-3" />
-        <span>Галерея</span>
-      </button>
-      
-      {folderName && (
-        <>
-          <ChevronRight className="w-3 h-3 shrink-0 text-white/40" />
-          <span className="flex items-center gap-1 shrink-0 text-white/60">
-            <Folder className="w-3 h-3" />
-            <span className="max-w-[80px] truncate">{folderName}</span>
-          </span>
-        </>
-      )}
-      
-      <ChevronRight className="w-3 h-3 shrink-0 text-white/40" />
-      <span className="text-white/50 truncate max-w-[100px]">{photoName}</span>
-    </nav>
-  );
-}
-
 export default function PhotoDetailPage() {
   const [, params] = useRoute("/photo/:id");
   const [, navigate] = useLocation();
@@ -117,7 +82,6 @@ export default function PhotoDetailPage() {
   const {
     photo,
     isLoading,
-    currentIndex,
     total,
     hasPrevious,
     hasNext,
@@ -387,11 +351,6 @@ export default function PhotoDetailPage() {
     return Math.min(1, verticalSwipeOffset / 80);
   }, [verticalSwipeOffset]);
 
-  const photoDisplayName = useMemo(() => {
-    if (!photo) return "";
-    return `IMG_${new Date(photo.metadata.timestamp).toISOString().slice(0, 10).replace(/-/g, "")}`;
-  }, [photo]);
-
   if (isLoading) {
     return <PageLoader variant="fullscreen" />;
   }
@@ -481,8 +440,8 @@ export default function PhotoDetailPage() {
         </Button>
       )}
 
-      <header className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 via-black/60 to-transparent safe-top">
-        <div className="flex items-center gap-3 px-3 py-3">
+      <header className="absolute top-0 left-0 right-0 z-50 safe-top">
+        <div className="flex items-center gap-3 px-2 py-2">
           <Button
             variant="ghost"
             size="icon"
@@ -493,26 +452,20 @@ export default function PhotoDetailPage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
 
-          <div className="flex flex-col min-w-0 flex-1 gap-0.5">
-            <Breadcrumbs
-              folderName={photo.note}
-              photoName={photoDisplayName}
-              onGalleryClick={handleBackToGallery}
-            />
-            
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-white/50 shrink-0">
-                {currentIndex + 1}/{total}
-              </span>
-              <span className="text-xs text-white/60">
-                {new Date(photo.metadata.timestamp).toLocaleDateString("ru-RU", {
-                  day: "numeric",
-                  month: "short",
-                  hour: "2-digit",
-                  minute: "2-digit"
-                })}
-              </span>
-            </div>
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-sm text-white font-medium">
+              {new Date(photo.metadata.timestamp).toLocaleDateString("ru-RU", {
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+              })}
+            </span>
+            <span className="text-xs text-white/60">
+              {new Date(photo.metadata.timestamp).toLocaleTimeString("ru-RU", {
+                hour: "2-digit",
+                minute: "2-digit"
+              })}
+            </span>
           </div>
 
           <Button
@@ -527,8 +480,8 @@ export default function PhotoDetailPage() {
         </div>
       </header>
 
-      <footer className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/80 via-black/60 to-transparent safe-bottom">
-        <div className="flex items-center justify-center gap-1 py-2 px-2">
+      <footer className="absolute bottom-0 left-0 right-0 z-50 safe-bottom">
+        <div className="flex items-center justify-around py-3 px-4">
           <Button
             variant="ghost"
             size="icon"
