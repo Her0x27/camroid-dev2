@@ -425,21 +425,23 @@ export default function PhotoDetailPage() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <img
-        src={photo.imageData}
-        alt={t.gallery.photo}
-        className="absolute inset-0 w-full h-full object-contain transition-all duration-200 ease-out"
-        style={{
-          transform: isSwipeActive 
-            ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
-            : 'translate(0, 0) scale(1)',
-          opacity: isSwipeActive && verticalSwipeOffset !== 0 
-            ? Math.max(0.4, 1 - Math.abs(verticalSwipeOffset) / 150)
-            : 1,
-        }}
-        data-testid="photo-image"
-        draggable={false}
-      />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <img
+          src={photo.imageData}
+          alt={t.gallery.photo}
+          className="max-w-full max-h-full object-contain transition-all duration-200 ease-out"
+          style={{
+            transform: isSwipeActive 
+              ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
+              : 'translate(0, 0) scale(1)',
+            opacity: isSwipeActive && verticalSwipeOffset !== 0 
+              ? Math.max(0.4, 1 - Math.abs(verticalSwipeOffset) / 150)
+              : 1,
+          }}
+          data-testid="photo-image"
+          draggable={false}
+        />
+      </div>
 
       <SwipeIndicator
         direction="up"

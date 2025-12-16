@@ -28,10 +28,10 @@
 ### client/src/pages/photo-detail.tsx
 
 #### Изображение:
-- **Убран wrapper div** — изображение теперь напрямую в контейнере
-- **Абсолютное позиционирование:** `absolute inset-0` — фото занимает весь экран
-- **Класс `w-full h-full object-contain`** — 100% ширина и высота с сохранением пропорций
-- **Нет padding/margin** — edge-to-edge отображение
+- **Flex-контейнер:** `absolute inset-0 flex items-center justify-center` для центрирования
+- **Класс `max-w-full max-h-full object-contain`** — фото показывается полностью без обрезки
+- **Нет padding** — header/footer отображаются поверх фото
+- **Сохранение пропорций** — чёрные полосы по бокам/сверху при необходимости
 
 #### Header (хлебные крошки):
 - **Позиция поверх фото** — absolute top-0, z-50
