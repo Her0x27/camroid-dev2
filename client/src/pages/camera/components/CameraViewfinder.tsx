@@ -347,8 +347,8 @@ export const CameraViewfinder = memo(function CameraViewfinder({
           onClick={onMask}
           data-testid="button-mask"
         >
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary/20 border border-primary/40">
-            <EyeOff className="w-4 h-4 text-primary drop-shadow-[0_0_4px_hsl(var(--primary)/0.5)]" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-emerald-500/20 border border-emerald-500/40">
+            <EyeOff className="w-4 h-4 text-emerald-500 drop-shadow-[0_0_4px_rgb(16,185,129)]" />
           </div>
         </button>
       )}
@@ -467,8 +467,8 @@ const NoteOverlay = memo(function NoteOverlay({ note }: NoteOverlayProps) {
     <div className="absolute top-4 left-4 z-20 safe-top max-w-[60%]">
       <div className="bg-card/80 backdrop-blur-md rounded-xl px-3 py-2.5 border border-border/50 shadow-lg">
         <div className="flex items-start gap-2.5">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-primary/20 border border-primary/40">
-            <FileText className="w-4 h-4 text-primary drop-shadow-[0_0_4px_hsl(var(--primary)/0.5)]" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-emerald-500/20 border border-emerald-500/40">
+            <FileText className="w-4 h-4 text-emerald-500 drop-shadow-[0_0_4px_rgb(16,185,129)]" />
           </div>
           <p className="font-sans text-sm text-foreground/90 leading-tight line-clamp-3 pt-1.5" data-testid="text-note-overlay">
             {note}
