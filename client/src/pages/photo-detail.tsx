@@ -363,8 +363,8 @@ export default function PhotoDetailPage() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <header className="absolute top-0 left-0 right-0 z-50 safe-top">
-        <div className="flex items-center gap-3 px-2 py-2 pointer-events-auto">
+      <header className="flex-shrink-0 z-50 safe-top bg-black">
+        <div className="flex items-center gap-3 px-2 py-2">
           <Button
             variant="ghost"
             size="icon"
@@ -424,12 +424,16 @@ export default function PhotoDetailPage() {
         </div>
       </header>
 
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+      <div className="flex-1 flex items-center justify-center overflow-hidden bg-black p-0 m-0">
         <img
           src={photo.imageData}
           alt={t.gallery.photo}
-          className="min-w-full min-h-full object-contain transition-all duration-200 ease-out"
+          className="block transition-all duration-200 ease-out"
           style={{
+            width: '100%',
+            height: 'auto',
+            objectFit: 'cover',
+            objectPosition: 'center',
             transform: isSwipeActive 
               ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
               : 'translate(0, 0) scale(1)',
@@ -480,8 +484,8 @@ export default function PhotoDetailPage() {
         )}
       </div>
 
-      <footer className="absolute bottom-0 left-0 right-0 z-50 safe-bottom">
-        <div className="flex items-center justify-around py-3 px-6 pointer-events-auto">
+      <footer className="flex-shrink-0 z-50 safe-bottom bg-black">
+        <div className="flex items-center justify-around py-3 px-6">
           <Button
             variant="ghost"
             size="icon"
