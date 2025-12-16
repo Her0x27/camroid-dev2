@@ -363,8 +363,8 @@ export default function PhotoDetailPage() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <header className="absolute top-0 left-0 right-0 z-50 safe-top bg-gradient-to-b from-black/80 to-transparent">
-        <div className="flex items-center gap-3 px-2 py-2 pointer-events-auto">
+      <header className="flex-shrink-0 z-50 safe-top bg-black">
+        <div className="flex items-center gap-3 px-2 py-2">
           <Button
             variant="ghost"
             size="icon"
@@ -428,7 +428,7 @@ export default function PhotoDetailPage() {
         <img
           src={photo.imageData}
           alt={t.gallery.photo}
-          className="w-full h-full object-contain transition-all duration-200 ease-out"
+          className="w-full h-auto max-h-full object-contain transition-all duration-200 ease-out"
           style={{
             transform: isSwipeActive 
               ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
