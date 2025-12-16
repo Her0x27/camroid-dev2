@@ -351,7 +351,7 @@ export default function PhotoDetailPage() {
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 bg-black select-none touch-pan-y overflow-hidden flex flex-col"
+      className="fixed inset-0 bg-black select-none touch-pan-y overflow-hidden"
       style={{
         width: '100vw',
         height: '100dvh',
@@ -363,7 +363,7 @@ export default function PhotoDetailPage() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <header className="flex-shrink-0 z-50 safe-top bg-black">
+      <header className="absolute top-0 left-0 right-0 z-50 safe-top bg-gradient-to-b from-black/70 via-black/40 to-transparent pb-8">
         <div className="flex items-center gap-3 px-2 py-2">
           <Button
             variant="ghost"
@@ -424,11 +424,11 @@ export default function PhotoDetailPage() {
         </div>
       </header>
 
-      <div className="flex-1 relative overflow-hidden bg-black">
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-black">
         <img
           src={photo.imageData}
           alt={t.gallery.photo}
-          className="absolute inset-0 w-full h-full object-contain transition-all duration-200 ease-out"
+          className="w-full h-full object-contain transition-all duration-200 ease-out"
           style={{
             transform: isSwipeActive 
               ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
@@ -480,7 +480,7 @@ export default function PhotoDetailPage() {
         )}
       </div>
 
-      <footer className="flex-shrink-0 z-50 safe-bottom bg-black">
+      <footer className="absolute bottom-0 left-0 right-0 z-50 safe-bottom bg-gradient-to-t from-black/70 via-black/40 to-transparent pt-8">
         <div className="flex items-center justify-around py-3 px-6">
           <Button
             variant="ghost"
