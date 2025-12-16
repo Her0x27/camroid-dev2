@@ -6,15 +6,14 @@ import {
   Trash2, 
   ChevronLeft, 
   ChevronRight, 
-  Share2,
   Info,
-  X,
   Cloud,
   Link,
   Loader2,
   ChevronUp,
   ChevronDown,
-  Camera
+  MapPin,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -254,24 +253,6 @@ export default function PhotoDetailPage() {
     }
   }, [photo]);
 
-  const handleShare = useCallback(async () => {
-    if (!photo || !navigator.share) return;
-    
-    try {
-      const blob = await createCleanImageBlob(photo.imageData);
-      const file = new File([blob], `zeroday-photo.jpg`, { type: "image/jpeg" });
-      
-      await navigator.share({
-        files: [file],
-        title: t.photoDetail.shareTitle,
-      });
-    } catch (error) {
-      if ((error as Error).name !== "AbortError") {
-        logger.error("Failed to share photo", error);
-      }
-    }
-  }, [photo, t.photoDetail.shareTitle]);
-
   const handleUploadToCloud = useCallback(async () => {
     if (!photo || isUploading || !settings.imgbb?.isValidated) return;
 
@@ -452,7 +433,7 @@ export default function PhotoDetailPage() {
             <ArrowLeft className="w-5 h-5" />
           </Button>
 
-          <div className="flex flex-col min-w-0 flex-1">
+          <div className="flex flex-col min-w-0 flex-1 items-center">
             <span className="text-sm text-white font-medium">
               {new Date(photo.metadata.timestamp).toLocaleDateString("ru-RU", {
                 day: "numeric",
@@ -468,57 +449,14 @@ export default function PhotoDetailPage() {
             </span>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleExitToCamera}
-            className="text-white hover:bg-white/20 shrink-0 w-10 h-10 rounded-full touch-manipulation active:scale-95 transition-transform"
-            data-testid="button-exit-camera"
-          >
-            <Camera className="w-5 h-5" />
-          </Button>
-        </div>
-      </header>
-
-      <footer className="absolute bottom-0 left-0 right-0 z-50 safe-bottom">
-        <div className="flex items-center justify-around py-3 px-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowInfoPanel(true)}
-            className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
-            data-testid="button-info"
-          >
-            <Info className="w-5 h-5" />
-          </Button>
-          {typeof navigator.share === "function" && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleShare}
-              className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
-              data-testid="button-share"
-            >
-              <Share2 className="w-5 h-5" />
-            </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleExport}
-            className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
-            data-testid="button-export"
-          >
-            <Download className="w-5 h-5" />
-          </Button>
           {isImgbbValidated && !isPhotoUploaded && (
             <Button
               variant="ghost"
               size="icon"
               onClick={handleUploadToCloud}
               disabled={isUploading}
-              className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
-              data-testid="button-upload-cloud"
+              className="text-white hover:bg-white/20 shrink-0 w-10 h-10 rounded-full touch-manipulation active:scale-95 transition-transform"
+              data-testid="button-upload-cloud-header"
             >
               {isUploading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -532,29 +470,92 @@ export default function PhotoDetailPage() {
               variant="ghost"
               size="icon"
               onClick={handleCopyLink}
-              className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
-              data-testid="button-copy-link"
+              className="text-white hover:bg-white/20 shrink-0 w-10 h-10 rounded-full touch-manipulation active:scale-95 transition-transform"
+              data-testid="button-copy-link-header"
             >
               <Link className="w-5 h-5" />
+            </Button>
+          )}
+          {!isImgbbValidated && !isPhotoUploaded && (
+            <div className="w-10 h-10 shrink-0" />
+          )}
+        </div>
+
+        {(photo.note || (photo.metadata.latitude !== null && photo.metadata.longitude !== null)) && (
+          <div className="px-3 pb-2 flex flex-wrap gap-2">
+            {photo.note && (
+              <div className="inline-flex items-center gap-1.5 bg-emerald-500/80 backdrop-blur-sm px-2 py-1 rounded text-white text-xs">
+                <FileText className="w-3 h-3" />
+                <span className="font-medium truncate max-w-[200px]">{photo.note}</span>
+              </div>
+            )}
+            {photo.metadata.latitude !== null && photo.metadata.longitude !== null && (
+              <div className="inline-flex items-center gap-1.5 bg-red-500/80 backdrop-blur-sm px-2 py-1 rounded text-white text-xs">
+                <MapPin className="w-3 h-3" />
+                <span className="font-mono">
+                  {photo.metadata.latitude.toFixed(5)} {photo.metadata.longitude.toFixed(5)}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </header>
+
+      <footer className="absolute bottom-0 left-0 right-0 z-50 safe-bottom">
+        <div className="flex items-center justify-around py-4 px-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowInfoPanel(true)}
+            className="text-white hover:bg-white/20 w-12 h-12 rounded-full touch-manipulation active:scale-95 transition-transform"
+            data-testid="button-info"
+          >
+            <Info className="w-6 h-6" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleExport}
+            className="text-white hover:bg-white/20 w-12 h-12 rounded-full touch-manipulation active:scale-95 transition-transform"
+            data-testid="button-export"
+          >
+            <Download className="w-6 h-6" />
+          </Button>
+          {isImgbbValidated && !isPhotoUploaded && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleUploadToCloud}
+              disabled={isUploading}
+              className="text-white hover:bg-white/20 w-12 h-12 rounded-full touch-manipulation active:scale-95 transition-transform"
+              data-testid="button-upload-cloud"
+            >
+              {isUploading ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : (
+                <Cloud className="w-6 h-6" />
+              )}
+            </Button>
+          )}
+          {isPhotoUploaded && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCopyLink}
+              className="text-white hover:bg-white/20 w-12 h-12 rounded-full touch-manipulation active:scale-95 transition-transform"
+              data-testid="button-copy-link"
+            >
+              <Link className="w-6 h-6" />
             </Button>
           )}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShowDeleteDialog(true)}
-            className="text-red-400 hover:bg-white/20 hover:text-red-400 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
+            className="text-white hover:bg-white/20 w-12 h-12 rounded-full touch-manipulation active:scale-95 transition-transform"
             data-testid="button-delete"
           >
-            <Trash2 className="w-5 h-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleExitToCamera}
-            className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
-            data-testid="button-close-gallery"
-          >
-            <X className="w-5 h-5" />
+            <Trash2 className="w-6 h-6" />
           </Button>
         </div>
       </footer>
