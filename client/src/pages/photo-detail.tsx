@@ -445,11 +445,11 @@ export default function PhotoDetailPage() {
         )}
       </header>
 
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 overflow-auto flex items-center">
         <img
           src={photo.imageData}
           alt={t.gallery.photo}
-          className="h-full w-full object-contain transition-all duration-200 ease-out"
+          className="w-full h-auto transition-all duration-200 ease-out"
           style={{
             transform: isSwipeActive 
               ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
