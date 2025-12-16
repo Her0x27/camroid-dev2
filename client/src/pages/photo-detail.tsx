@@ -421,7 +421,7 @@ export default function PhotoDetailPage() {
         </Button>
       )}
 
-      <header className="absolute top-0 left-0 right-0 z-50 safe-top">
+      <header className="absolute top-0 left-0 right-0 z-50 safe-top bg-gradient-to-b from-black/70 to-transparent">
         <div className="flex items-center gap-3 px-2 py-2">
           <Button
             variant="ghost"
@@ -501,7 +501,7 @@ export default function PhotoDetailPage() {
         )}
       </header>
 
-      <footer className="absolute bottom-0 left-0 right-0 z-50 safe-bottom">
+      <footer className="absolute bottom-0 left-0 right-0 z-50 safe-bottom bg-gradient-to-t from-black/70 to-transparent">
         <div className="flex items-center justify-around py-4 px-6">
           <Button
             variant="ghost"
