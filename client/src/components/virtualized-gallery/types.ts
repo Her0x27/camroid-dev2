@@ -25,6 +25,7 @@ export interface VirtualizedGridProps {
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
+  cellSizeMultiplier?: number;
 }
 
 export interface PhotoListItemData {

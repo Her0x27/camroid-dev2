@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
-export type ViewMode = "folders" | "photos";
-export type DisplayType = "list" | "grid";
+export type ViewMode = "mixed" | "folders" | "photos";
+export type DisplayType = "list" | "grid" | "large";
 
 interface UseGalleryViewParams {
   onViewChange?: () => void;
@@ -14,13 +14,15 @@ interface UseGalleryViewReturn {
   handleFolderSelect: (folderName: string | null) => void;
   handleBackToFolders: () => void;
   handleToggleViewMode: () => void;
+  cycleViewMode: () => void;
   toggleDisplayType: () => void;
+  cycleDisplayType: () => void;
   setSelectedFolder: (folder: string | null | undefined) => void;
   setViewMode: (mode: ViewMode) => void;
 }
 
 export function useGalleryView({ onViewChange }: UseGalleryViewParams = {}): UseGalleryViewReturn {
-  const [viewMode, setViewMode] = useState<ViewMode>("photos");
+  const [viewMode, setViewMode] = useState<ViewMode>("mixed");
   const [selectedFolder, setSelectedFolder] = useState<string | null | undefined>(undefined);
   const [displayType, setDisplayType] = useState<DisplayType>("grid");
 
@@ -31,13 +33,13 @@ export function useGalleryView({ onViewChange }: UseGalleryViewParams = {}): Use
 
   const handleBackToFolders = useCallback(() => {
     setSelectedFolder(undefined);
-    setViewMode("folders");
+    setViewMode("mixed");
     onViewChange?.();
   }, [onViewChange]);
 
   const handleToggleViewMode = useCallback(() => {
     if (viewMode === "photos") {
-      setViewMode("folders");
+      setViewMode("mixed");
       setSelectedFolder(undefined);
     } else {
       setViewMode("photos");
@@ -46,8 +48,26 @@ export function useGalleryView({ onViewChange }: UseGalleryViewParams = {}): Use
     onViewChange?.();
   }, [viewMode, onViewChange]);
 
+  const cycleViewMode = useCallback(() => {
+    setViewMode(prev => {
+      if (prev === "mixed") return "folders";
+      if (prev === "folders") return "photos";
+      return "mixed";
+    });
+    setSelectedFolder(undefined);
+    onViewChange?.();
+  }, [onViewChange]);
+
   const toggleDisplayType = useCallback(() => {
     setDisplayType(prev => prev === "list" ? "grid" : "list");
+  }, []);
+
+  const cycleDisplayType = useCallback(() => {
+    setDisplayType(prev => {
+      if (prev === "list") return "grid";
+      if (prev === "grid") return "large";
+      return "list";
+    });
   }, []);
 
   return {
@@ -57,7 +77,9 @@ export function useGalleryView({ onViewChange }: UseGalleryViewParams = {}): Use
     handleFolderSelect,
     handleBackToFolders,
     handleToggleViewMode,
+    cycleViewMode,
     toggleDisplayType,
+    cycleDisplayType,
     setSelectedFolder,
     setViewMode,
   };

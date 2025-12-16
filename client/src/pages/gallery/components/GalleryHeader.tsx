@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { ArrowLeft, ChevronLeft, List, Grid, SortAsc, SortDesc, Filter, MapPin, FileText, X, Cloud, Upload, Link, Trash2, Loader2, Image, Folder, Download, CheckSquare, Square } from "lucide-react";
+import { ChevronRight, List, Grid, LayoutGrid, SortAsc, SortDesc, Filter, MapPin, FileText, X, Cloud, Upload, Link, Trash2, Loader2, Image, Folder, Download, CheckSquare, Square, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -11,14 +11,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { GalleryFilter } from "@shared/schema";
 
-type ViewMode = "folders" | "photos";
-type DisplayType = "list" | "grid";
+type ViewMode = "mixed" | "folders" | "photos";
+type DisplayType = "list" | "grid" | "large";
 
 interface GalleryHeaderProps {
   viewMode: ViewMode;
   displayType: DisplayType;
   headerTitle: string;
   headerSubtitle: string;
+  selectedFolder: string | null | undefined;
   filter: GalleryFilter;
   isUploading: boolean;
   hasPhotos: boolean;
@@ -28,8 +29,9 @@ interface GalleryHeaderProps {
   selectedCount: number;
   totalPhotos: number;
   onBack: () => void;
-  onBackToCamera: () => void;
-  onToggleDisplayType: () => void;
+  onCloseGallery: () => void;
+  onCycleViewMode: () => void;
+  onCycleDisplayType: () => void;
   onToggleSortOrder: () => void;
   onToggleLocationFilter: () => void;
   onToggleNoteFilter: () => void;
@@ -37,7 +39,6 @@ interface GalleryHeaderProps {
   onUploadCurrentView: () => void;
   onGetLinks: () => void;
   onClearAll: () => void;
-  onToggleViewMode: () => void;
   onCancelSelection: () => void;
   onSelectAll: () => void;
   onDeleteSelected: () => void;
@@ -46,6 +47,7 @@ interface GalleryHeaderProps {
   onGetSelectedLinks: () => void;
   t: {
     gallery: {
+      title: string;
       filterPhotos: string;
       hasLocation: string;
       hasNote: string;
@@ -64,6 +66,8 @@ interface GalleryHeaderProps {
       uploadSelected: string;
       getSelectedLinks: string;
       cancelSelection: string;
+      allPhotos: string;
+      uncategorized: string;
     };
     settings: {
       cloud: {
@@ -78,6 +82,7 @@ export const GalleryHeader = memo(function GalleryHeader({
   displayType,
   headerTitle,
   headerSubtitle,
+  selectedFolder,
   filter,
   isUploading,
   hasPhotos,
@@ -87,8 +92,9 @@ export const GalleryHeader = memo(function GalleryHeader({
   selectedCount,
   totalPhotos,
   onBack,
-  onBackToCamera,
-  onToggleDisplayType,
+  onCloseGallery,
+  onCycleViewMode,
+  onCycleDisplayType,
   onToggleSortOrder,
   onToggleLocationFilter,
   onToggleNoteFilter,
@@ -96,7 +102,6 @@ export const GalleryHeader = memo(function GalleryHeader({
   onUploadCurrentView,
   onGetLinks,
   onClearAll,
-  onToggleViewMode,
   onCancelSelection,
   onSelectAll,
   onDeleteSelected,
@@ -105,6 +110,36 @@ export const GalleryHeader = memo(function GalleryHeader({
   onGetSelectedLinks,
   t,
 }: GalleryHeaderProps) {
+  void headerTitle;
+  void onClearAll;
+  
+  const getViewModeIcon = () => {
+    switch (viewMode) {
+      case "mixed": return <FolderOpen className="w-5 h-5" />;
+      case "folders": return <Folder className="w-5 h-5" />;
+      case "photos": return <Image className="w-5 h-5" />;
+    }
+  };
+
+  const getDisplayTypeIcon = () => {
+    switch (displayType) {
+      case "list": return <List className="w-5 h-5" />;
+      case "grid": return <Grid className="w-5 h-5" />;
+      case "large": return <LayoutGrid className="w-5 h-5" />;
+    }
+  };
+
+  const getBreadcrumbs = () => {
+    const crumbs: { label: string; onClick?: () => void }[] = [];
+    crumbs.push({ label: t.gallery.title, onClick: selectedFolder !== undefined ? onBack : undefined });
+    
+    if (selectedFolder !== undefined) {
+      const folderLabel = selectedFolder === null ? t.gallery.uncategorized : selectedFolder;
+      crumbs.push({ label: folderLabel });
+    }
+    
+    return crumbs;
+  };
   if (selectionMode) {
     return (
       <header className="sticky top-0 z-50 bg-primary/10 backdrop-blur-sm border-b border-primary/20 safe-top">
@@ -189,71 +224,60 @@ export const GalleryHeader = memo(function GalleryHeader({
     );
   }
 
+  const breadcrumbs = getBreadcrumbs();
+
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border safe-top">
-      <div className="flex items-center justify-between gap-4 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={viewMode === "folders" ? onBackToCamera : onBack}
-            data-testid="button-back"
-          >
-            {viewMode === "folders" ? (
-              <ArrowLeft className="w-5 h-5" />
-            ) : (
-              <ChevronLeft className="w-5 h-5" />
-            )}
-          </Button>
-          <div>
-            <h1 className="text-lg font-semibold flex items-center gap-2">
-              {viewMode === "folders" && (
-                <Folder className="w-4 h-4 text-primary" />
+      <div className="flex items-center justify-between gap-2 px-3 py-2">
+        <div className="flex items-center gap-1 min-w-0 flex-1">
+          {breadcrumbs.map((crumb, index) => (
+            <div key={index} className="flex items-center min-w-0">
+              {index > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mx-1" />}
+              {crumb.onClick ? (
+                <button
+                  onClick={crumb.onClick}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors truncate"
+                >
+                  {crumb.label}
+                </button>
+              ) : (
+                <span className="text-sm font-medium truncate">{crumb.label}</span>
               )}
-              {viewMode === "photos" && (
-                <Image className="w-4 h-4 text-primary" />
-              )}
-              {headerTitle}
-            </h1>
-            <p className="text-xs text-muted-foreground">
-              {headerSubtitle}
-            </p>
-          </div>
+            </div>
+          ))}
+          <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">
+            {headerSubtitle}
+          </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
-            onClick={onToggleViewMode}
+            onClick={onCycleViewMode}
+            className="w-9 h-9"
             data-testid="button-view-mode-toggle"
           >
-            {viewMode === "photos" ? (
-              <Folder className="w-5 h-5" />
-            ) : (
-              <Image className="w-5 h-5" />
-            )}
+            {getViewModeIcon()}
           </Button>
 
           <Button
             variant="ghost"
             size="icon"
-            onClick={onToggleDisplayType}
+            onClick={onCycleDisplayType}
+            className="w-9 h-9"
             data-testid="button-display-toggle"
           >
-            {displayType === "list" ? (
-              <Grid className="w-5 h-5" />
-            ) : (
-              <List className="w-5 h-5" />
-            )}
+            {getDisplayTypeIcon()}
           </Button>
 
-          {viewMode === "photos" && (
+          {(viewMode === "photos" || viewMode === "mixed") && (
             <>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onToggleSortOrder}
+                className="w-9 h-9"
                 data-testid="button-sort-toggle"
               >
                 {filter.sortBy === "newest" ? (
@@ -265,7 +289,7 @@ export const GalleryHeader = memo(function GalleryHeader({
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" data-testid="button-filter">
+                  <Button variant="ghost" size="icon" className="w-9 h-9" data-testid="button-filter">
                     <Filter className="w-5 h-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -306,12 +330,13 @@ export const GalleryHeader = memo(function GalleryHeader({
             </>
           )}
 
-          {hasPhotos && (
+          {hasPhotos && isImgbbValidated && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="ghost" 
-                  size="icon" 
+                  size="icon"
+                  className="w-9 h-9"
                   disabled={isUploading}
                   data-testid="button-cloud-menu"
                 >
@@ -345,17 +370,15 @@ export const GalleryHeader = memo(function GalleryHeader({
             </DropdownMenu>
           )}
 
-          {hasPhotos && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClearAll}
-              className="text-destructive hover:text-destructive"
-              data-testid="button-clear-all"
-            >
-              <Trash2 className="w-5 h-5" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onCloseGallery}
+            className="w-9 h-9"
+            data-testid="button-close-gallery"
+          >
+            <X className="w-5 h-5" />
+          </Button>
         </div>
       </div>
     </header>

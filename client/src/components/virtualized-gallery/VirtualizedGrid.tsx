@@ -132,16 +132,18 @@ export function VirtualizedPhotoGrid({
   onLoadMore,
   hasMore = false,
   isLoadingMore = false,
+  cellSizeMultiplier = 1,
 }: VirtualizedGridProps) {
   const loadMoreTriggeredRef = useRef(false);
   const availableWidth = containerWidth - SCROLLBAR_WIDTH;
+  const effectiveMinCellSize = MIN_CELL_SIZE * cellSizeMultiplier;
   
   const { columnCount, cellSize, rowCount } = useMemo(() => {
-    const cols = Math.max(2, Math.floor(availableWidth / MIN_CELL_SIZE));
+    const cols = Math.max(2, Math.floor(availableWidth / effectiveMinCellSize));
     const size = Math.floor((availableWidth - GRID_GAP) / cols);
     const rows = Math.ceil(photos.length / cols);
     return { columnCount: cols, cellSize: size, rowCount: Math.max(1, rows) };
-  }, [availableWidth, photos.length]);
+  }, [availableWidth, photos.length, effectiveMinCellSize]);
 
   const cellProps: PhotoGridItemData = useMemo(
     () => ({

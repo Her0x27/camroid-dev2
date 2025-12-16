@@ -116,8 +116,8 @@ export default function PhotoDetailPage() {
     navigate("/gallery");
   }, [navigate]);
 
-  const handleExitToCamera = useCallback(() => {
-    navigate("/");
+  const handleExitFromGallery = useCallback(() => {
+    navigate("/gallery");
   }, [navigate]);
 
   useEffect(() => {
@@ -190,7 +190,7 @@ export default function PhotoDetailPage() {
       if (verticalDelta < 0) {
         handleBackToGallery();
       } else {
-        handleExitToCamera();
+        handleExitFromGallery();
       }
     } else if (swipeDirection === "horizontal") {
       const deltaX = swipeOffset / 0.3;
@@ -211,7 +211,7 @@ export default function PhotoDetailPage() {
     setVerticalSwipeOffset(0);
     setIsSwipeActive(false);
     setSwipeDirection(null);
-  }, [swipeOffset, verticalSwipeOffset, hasPrevious, hasNext, goToPrevious, goToNext, handleBackToGallery, handleExitToCamera, swipeDirection]);
+  }, [swipeOffset, verticalSwipeOffset, hasPrevious, hasNext, goToPrevious, goToNext, handleBackToGallery, handleExitFromGallery, swipeDirection]);
 
   const handleDelete = useCallback(async () => {
     if (!photoId) return;
@@ -353,7 +353,7 @@ export default function PhotoDetailPage() {
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 bg-black select-none touch-pan-y overflow-hidden"
+      className="fixed inset-0 bg-black select-none touch-pan-y overflow-hidden flex flex-col"
       style={{
         width: '100vw',
         height: '100dvh',
@@ -365,63 +365,7 @@ export default function PhotoDetailPage() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <img
-          src={photo.imageData}
-          alt={t.gallery.photo}
-          className="max-w-full max-h-full object-contain transition-all duration-200 ease-out"
-          style={{
-            transform: isSwipeActive 
-              ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
-              : 'translate(0, 0) scale(1)',
-            opacity: isSwipeActive && verticalSwipeOffset !== 0 
-              ? Math.max(0.4, 1 - Math.abs(verticalSwipeOffset) / 150)
-              : 1,
-          }}
-          data-testid="photo-image"
-          draggable={false}
-        />
-      </div>
-
-      <SwipeIndicator
-        direction="up"
-        opacity={swipeUpProgress}
-        label="Назад в галерею"
-        icon={<ChevronUp className="w-4 h-4" />}
-      />
-
-      <SwipeIndicator
-        direction="down"
-        opacity={swipeDownProgress}
-        label="Выход на камеру"
-        icon={<ChevronDown className="w-4 h-4" />}
-      />
-
-      {hasPrevious && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 text-white hover:bg-black/60 z-40 rounded-full touch-manipulation active:scale-95 transition-transform"
-          onClick={goToPrevious}
-          data-testid="button-previous"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </Button>
-      )}
-
-      {hasNext && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 text-white hover:bg-black/60 z-40 rounded-full touch-manipulation active:scale-95 transition-transform"
-          onClick={goToNext}
-          data-testid="button-next"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </Button>
-      )}
-
-      <header className="absolute top-0 left-0 right-0 z-50 safe-top bg-gradient-to-b from-black/70 to-transparent">
+      <header className="flex-shrink-0 z-50 safe-top bg-black">
         <div className="flex items-center gap-3 px-2 py-2">
           <Button
             variant="ghost"
@@ -501,8 +445,64 @@ export default function PhotoDetailPage() {
         )}
       </header>
 
-      <footer className="absolute bottom-0 left-0 right-0 z-50 safe-bottom bg-gradient-to-t from-black/70 to-transparent">
-        <div className="flex items-center justify-around py-4 px-6">
+      <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+        <img
+          src={photo.imageData}
+          alt={t.gallery.photo}
+          className="w-full h-full object-contain transition-all duration-200 ease-out"
+          style={{
+            transform: isSwipeActive 
+              ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
+              : 'translate(0, 0) scale(1)',
+            opacity: isSwipeActive && verticalSwipeOffset !== 0 
+              ? Math.max(0.4, 1 - Math.abs(verticalSwipeOffset) / 150)
+              : 1,
+          }}
+          data-testid="photo-image"
+          draggable={false}
+        />
+
+        <SwipeIndicator
+          direction="up"
+          opacity={swipeUpProgress}
+          label="Назад в галерею"
+          icon={<ChevronUp className="w-4 h-4" />}
+        />
+
+        <SwipeIndicator
+          direction="down"
+          opacity={swipeDownProgress}
+          label="Закрыть просмотр"
+          icon={<ChevronDown className="w-4 h-4" />}
+        />
+
+        {hasPrevious && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 text-white hover:bg-black/60 z-40 rounded-full touch-manipulation active:scale-95 transition-transform"
+            onClick={goToPrevious}
+            data-testid="button-previous"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </Button>
+        )}
+
+        {hasNext && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 text-white hover:bg-black/60 z-40 rounded-full touch-manipulation active:scale-95 transition-transform"
+            onClick={goToNext}
+            data-testid="button-next"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </Button>
+        )}
+      </div>
+
+      <footer className="flex-shrink-0 z-50 safe-bottom bg-black">
+        <div className="flex items-center justify-around py-3 px-6">
           <Button
             variant="ghost"
             size="icon"

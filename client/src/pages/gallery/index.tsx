@@ -73,8 +73,8 @@ export default function GalleryPage() {
     displayType,
     handleFolderSelect,
     handleBackToFolders: baseHandleBackToFolders,
-    handleToggleViewMode: baseHandleToggleViewMode,
-    toggleDisplayType,
+    cycleViewMode: baseCycleViewMode,
+    cycleDisplayType,
     setSelectedFolder,
     setViewMode,
   } = useGalleryView();
@@ -101,10 +101,10 @@ export default function GalleryPage() {
     clearPhotos,
   } = useGalleryPhotos({
     sortOrder: filter.sortBy,
-    folder: viewMode === "photos" ? selectedFolder : undefined,
+    folder: (viewMode === "photos" || viewMode === "mixed") ? selectedFolder : undefined,
     hasLocation: filter.hasLocation,
     hasNote: filter.hasNote,
-    viewMode,
+    viewMode: viewMode === "mixed" ? "photos" : viewMode,
   });
 
   const filteredPhotos = paginatedPhotos;
@@ -125,10 +125,10 @@ export default function GalleryPage() {
     resetSelection();
   }, [baseHandleBackToFolders, resetSelection]);
 
-  const handleToggleViewMode = useCallback(() => {
-    baseHandleToggleViewMode();
+  const handleCycleViewMode = useCallback(() => {
+    baseCycleViewMode();
     resetSelection();
-  }, [baseHandleToggleViewMode, resetSelection]);
+  }, [baseCycleViewMode, resetSelection]);
 
   useEffect(() => {
     const preventContextMenu = (e: Event) => {
@@ -515,15 +515,19 @@ export default function GalleryPage() {
   
   const headerTitle = viewMode === "folders" 
     ? t.gallery.title 
-    : selectedFolder === undefined
-      ? t.gallery.allPhotos
-      : selectedFolder === null 
-        ? t.gallery.uncategorized 
-        : selectedFolder;
+    : viewMode === "mixed"
+      ? t.gallery.title
+      : selectedFolder === undefined
+        ? t.gallery.allPhotos
+        : selectedFolder === null 
+          ? t.gallery.uncategorized 
+          : selectedFolder;
 
   const headerSubtitle = viewMode === "folders"
     ? `${folders.length} ${folders.length === 1 ? t.gallery.folder : t.gallery.folders}, ${totalPhotoCountFromFolderStats} ${totalPhotoCountFromFolderStats === 1 ? t.gallery.photo : t.gallery.photos}`
-    : `${filteredPhotos.length}${hasMore ? "+" : ""} ${filteredPhotos.length === 1 ? t.gallery.photo : t.gallery.photos}`;
+    : viewMode === "mixed"
+      ? `${folders.length} ${t.gallery.folders}, ${totalPhotoCountFromFolderStats} ${t.gallery.photos}`
+      : `${filteredPhotos.length}${hasMore ? "+" : ""} ${filteredPhotos.length === 1 ? t.gallery.photo : t.gallery.photos}`;
 
   return (
     <div 
@@ -536,6 +540,7 @@ export default function GalleryPage() {
         displayType={displayType}
         headerTitle={headerTitle}
         headerSubtitle={headerSubtitle}
+        selectedFolder={selectedFolder}
         filter={filter}
         isUploading={isUploading}
         hasPhotos={allPhotosCount > 0}
@@ -545,8 +550,9 @@ export default function GalleryPage() {
         selectedCount={selectedIds.size}
         totalPhotos={filteredPhotos.length}
         onBack={handleBackToFolders}
-        onBackToCamera={navigateToCamera}
-        onToggleDisplayType={toggleDisplayType}
+        onCloseGallery={navigateToCamera}
+        onCycleViewMode={handleCycleViewMode}
+        onCycleDisplayType={cycleDisplayType}
         onToggleSortOrder={toggleSortOrder}
         onToggleLocationFilter={toggleLocationFilter}
         onToggleNoteFilter={toggleNoteFilter}
@@ -554,7 +560,6 @@ export default function GalleryPage() {
         onUploadCurrentView={handleUploadCurrentView}
         onGetLinks={handleGetLinks}
         onClearAll={() => setShowClearDialog(true)}
-        onToggleViewMode={handleToggleViewMode}
         onCancelSelection={handleCancelSelection}
         onSelectAll={handleSelectAll}
         onDeleteSelected={() => setShowDeleteSelectedDialog(true)}
@@ -594,6 +599,62 @@ export default function GalleryPage() {
             isUploading={isUploading}
             t={t}
           />
+        ) : viewMode === "mixed" ? (
+          <div className="space-y-6">
+            {folders.length > 0 && (
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground mb-3">{t.gallery.folders}</h2>
+                <GalleryFolderList
+                  folders={folders}
+                  displayType={displayType === "large" ? "grid" : displayType}
+                  onFolderSelect={handleFolderSelect}
+                  onFolderUpload={handleFolderUpload}
+                  onFolderGetLinks={handleFolderGetLinks}
+                  isImgbbValidated={settings.imgbb?.isValidated ?? false}
+                  isUploading={isUploading}
+                  t={t}
+                />
+              </div>
+            )}
+            {filteredPhotos.length > 0 && (
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground mb-3">{t.gallery.photos}</h2>
+                <AutoSizerContainer className="flex-1" style={{ height: "calc(100vh - 280px)" }}>
+                  {({ width, height }) =>
+                    displayType === "list" ? (
+                      <VirtualizedPhotoList
+                        photos={filteredPhotos}
+                        onPhotoClick={handlePhotoClick}
+                        onDeleteClick={handleDeleteClick}
+                        onLongPress={handleLongPress}
+                        containerHeight={height}
+                        selectionMode={selectionMode}
+                        selectedIds={selectedIds}
+                        onLoadMore={loadMore}
+                        hasMore={hasMore}
+                        isLoadingMore={isLoadingMore}
+                      />
+                    ) : (
+                      <VirtualizedPhotoGrid
+                        photos={filteredPhotos}
+                        onPhotoClick={handlePhotoClick}
+                        onDeleteClick={handleDeleteClick}
+                        onLongPress={handleLongPress}
+                        containerHeight={height}
+                        containerWidth={width}
+                        selectionMode={selectionMode}
+                        selectedIds={selectedIds}
+                        onLoadMore={loadMore}
+                        hasMore={hasMore}
+                        isLoadingMore={isLoadingMore}
+                        cellSizeMultiplier={displayType === "large" ? 1.5 : 1}
+                      />
+                    )
+                  }
+                </AutoSizerContainer>
+              </div>
+            )}
+          </div>
         ) : filteredPhotos.length === 0 ? (
           <GalleryEmptyState
             type="empty-folder"
@@ -631,6 +692,7 @@ export default function GalleryPage() {
                   onLoadMore={loadMore}
                   hasMore={hasMore}
                   isLoadingMore={isLoadingMore}
+                  cellSizeMultiplier={displayType === "large" ? 1.5 : 1}
                 />
               )
             }
