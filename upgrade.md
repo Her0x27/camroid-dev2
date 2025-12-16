@@ -7,10 +7,10 @@
 ## Чек-лист задач v70
 
 - [x] Обновить upgrade.md — добавить секцию v70
-- [ ] Исправить photoData.note — добавить fallback на wp?.note для папки
-- [ ] Синхронизация: инициализировать currentNote из watermarkPreview.note
-- [ ] Синхронизация: обновлять watermarkPreview.note при закрытии диалога
-- [ ] Финальное обновление upgrade.md
+- [x] Исправить photoData.note — добавить fallback на wp?.note для папки
+- [x] Синхронизация: инициализировать currentNote из watermarkPreview.note
+- [x] Синхронизация: обновлять watermarkPreview.note при закрытии диалога
+- [x] Финальное обновление upgrade.md
 
 ---
 
@@ -19,9 +19,21 @@
 | Задача | Статус | Дата |
 |--------|--------|------|
 | upgrade.md | ✅ Готово | 16.12.2025 |
-| photoData.note fallback | ⏳ В процессе | 16.12.2025 |
-| Инициализация currentNote | ⏳ В процессе | 16.12.2025 |
-| Синхронизация при закрытии | ⏳ В процессе | 16.12.2025 |
+| photoData.note fallback | ✅ Готово | 16.12.2025 |
+| Инициализация currentNote | ✅ Готово | 16.12.2025 |
+| Синхронизация при закрытии | ✅ Готово | 16.12.2025 |
+
+## Изменения v70
+
+### client/src/pages/camera/index.tsx
+- **updateWatermarkPreview:** добавлен импорт из useSettings()
+- **lastSyncedNoteRef:** новый ref для отслеживания последней синхронизированной заметки
+- **useEffect инициализации:** обновляет currentNote из watermarkPreview.note когда диалог закрыт и значение изменилось извне
+- **handleCaptureWithPosition (строка 382):** `note: noteText || wp?.note || undefined` — fallback на заметку из водяного знака
+- **handleCaptureFromFrozenFrame:** добавлен `const wp = captureConfig.watermarkPreview` и fallback для note
+- **handleOpenNote:** подставляет заметку из watermarkPreview если локальная заметка пуста
+- **handleNoteDialogChange:** синхронизирует заметку с watermarkPreview при закрытии диалога, обновляет lastSyncedNoteRef
+- **PhotoNoteDialog:** использует handleNoteDialogChange вместо setShowNoteDialog
 
 ---
 

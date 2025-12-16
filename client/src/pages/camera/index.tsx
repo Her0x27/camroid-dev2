@@ -49,15 +49,23 @@ export default function CameraPage() {
   const [lastPhotoId, setLastPhotoId] = useState<string | null>(null);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
-  const noteInitializedRef = useRef(false);
+  const pendingSyncRef = useRef<string | null>(null);
   const { showDialog: showCapabilitiesDialog, closeDialog: closeCapabilitiesDialog } = useAppCapabilitiesDialog();
   
   useEffect(() => {
-    if (!noteInitializedRef.current && settings.watermarkPreview?.note) {
-      setCurrentNote(settings.watermarkPreview.note);
-      noteInitializedRef.current = true;
+    const wpNote = settings.watermarkPreview?.note || "";
+    
+    if (pendingSyncRef.current !== null) {
+      if (wpNote === pendingSyncRef.current) {
+        pendingSyncRef.current = null;
+      }
+      return;
     }
-  }, [settings.watermarkPreview?.note]);
+    
+    if (!showNoteDialog && wpNote !== currentNote) {
+      setCurrentNote(wpNote);
+    }
+  }, [settings.watermarkPreview?.note, showNoteDialog, currentNote]);
   
   const {
     isCapturing,
@@ -552,6 +560,7 @@ export default function CameraPage() {
   const handleNoteDialogChange = useCallback((open: boolean) => {
     setShowNoteDialog(open);
     if (!open) {
+      pendingSyncRef.current = currentNote;
       updateWatermarkPreview({ note: currentNote });
     }
   }, [currentNote, updateWatermarkPreview]);
