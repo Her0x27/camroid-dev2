@@ -19,7 +19,6 @@ import { VirtualizedPhotoList, VirtualizedPhotoGrid, AutoSizerContainer } from "
 import { GalleryLoadingSkeleton, FolderLoadingSkeleton } from "@/components/gallery-loading-skeleton";
 import {
   GalleryHeader,
-  GalleryFilters,
   GalleryEmptyState,
   GalleryFolderList,
   GalleryLinksDialog,
@@ -82,11 +81,7 @@ export default function GalleryPage() {
 
   const {
     filter,
-    hasActiveFilters,
     toggleSortOrder,
-    toggleLocationFilter,
-    toggleNoteFilter,
-    clearFilters,
   } = useGalleryFilters();
 
   const {
@@ -555,9 +550,6 @@ export default function GalleryPage() {
         onCycleViewMode={handleCycleViewMode}
         onCycleDisplayType={cycleDisplayType}
         onToggleSortOrder={toggleSortOrder}
-        onToggleLocationFilter={toggleLocationFilter}
-        onToggleNoteFilter={toggleNoteFilter}
-        onClearFilters={clearFilters}
         onUploadCurrentView={handleUploadCurrentView}
         onGetLinks={handleGetLinks}
         onClearAll={() => setShowClearDialog(true)}
@@ -566,9 +558,6 @@ export default function GalleryPage() {
         t={t}
       />
 
-      {viewMode === "photos" && !selectionMode && (
-        <GalleryFilters filter={filter} t={t} />
-      )}
 
       <main className="p-4 safe-bottom">
         {isLoading ? (
@@ -655,7 +644,7 @@ export default function GalleryPage() {
         ) : filteredPhotos.length === 0 ? (
           <GalleryEmptyState
             type="empty-folder"
-            hasFilters={hasActiveFilters}
+            hasFilters={false}
             onNavigateToCamera={navigateToCamera}
             onBackToFolders={handleBackToFolders}
             t={t}

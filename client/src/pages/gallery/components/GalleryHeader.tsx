@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { ChevronRight, List, Grid, LayoutGrid, SortAsc, SortDesc, Filter, MapPin, FileText, X, Cloud, Upload, Link, Loader2, Image, Folder, CheckSquare, Square, FolderOpen } from "lucide-react";
+import { ChevronRight, List, Grid, LayoutGrid, SortAsc, SortDesc, X, Cloud, Upload, Link, Loader2, Image, Folder, CheckSquare, Square, FolderOpen, Images } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -33,9 +33,6 @@ interface GalleryHeaderProps {
   onCycleViewMode: () => void;
   onCycleDisplayType: () => void;
   onToggleSortOrder: () => void;
-  onToggleLocationFilter: () => void;
-  onToggleNoteFilter: () => void;
-  onClearFilters: () => void;
   onUploadCurrentView: () => void;
   onGetLinks: () => void;
   onClearAll: () => void;
@@ -92,9 +89,6 @@ export const GalleryHeader = memo(function GalleryHeader({
   onCycleViewMode,
   onCycleDisplayType,
   onToggleSortOrder,
-  onToggleLocationFilter,
-  onToggleNoteFilter,
-  onClearFilters,
   onUploadCurrentView,
   onGetLinks,
   onClearAll,
@@ -122,8 +116,8 @@ export const GalleryHeader = memo(function GalleryHeader({
   };
 
   const getBreadcrumbs = () => {
-    const crumbs: { label: string; onClick?: () => void }[] = [];
-    crumbs.push({ label: t.gallery.title, onClick: selectedFolder !== undefined ? onBack : undefined });
+    const crumbs: { label: string; onClick?: () => void; icon?: boolean }[] = [];
+    crumbs.push({ label: t.gallery.title, onClick: selectedFolder !== undefined ? onBack : undefined, icon: true });
     
     if (selectedFolder !== undefined) {
       const folderLabel = selectedFolder === null ? t.gallery.uncategorized : selectedFolder;
@@ -134,20 +128,20 @@ export const GalleryHeader = memo(function GalleryHeader({
   };
   if (selectionMode) {
     return (
-      <header className="sticky top-0 z-50 bg-primary/10 backdrop-blur-sm border-b border-primary/20 safe-top">
+      <header className="sticky top-0 z-50 bg-emerald-500/10 backdrop-blur-sm border-b border-emerald-500/20 safe-top">
         <div className="flex items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={onCancelSelection}
-              className="w-9 h-9"
+              className="w-9 h-9 hover:bg-emerald-500/20"
               data-testid="button-cancel-selection"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5 text-emerald-500" />
             </Button>
             <div>
-              <h1 className="text-lg font-semibold">
+              <h1 className="text-lg font-semibold text-emerald-500">
                 {selectedCount} {t.gallery.selected}
               </h1>
             </div>
@@ -157,13 +151,13 @@ export const GalleryHeader = memo(function GalleryHeader({
             variant="ghost"
             size="icon"
             onClick={onSelectAll}
-            className="w-9 h-9"
+            className="w-9 h-9 hover:bg-emerald-500/20"
             data-testid="button-select-all"
           >
             {selectedCount === totalPhotos ? (
-              <Square className="w-5 h-5" />
+              <Square className="w-5 h-5 text-emerald-500" />
             ) : (
-              <CheckSquare className="w-5 h-5" />
+              <CheckSquare className="w-5 h-5 text-emerald-500" />
             )}
           </Button>
         </div>
@@ -180,6 +174,11 @@ export const GalleryHeader = memo(function GalleryHeader({
           {breadcrumbs.map((crumb, index) => (
             <div key={index} className="flex items-center min-w-0">
               {index > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mx-1" />}
+              {crumb.icon && (
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mr-2 flex-shrink-0">
+                  <Images className="w-4 h-4 text-emerald-500 drop-shadow-[0_0_4px_rgb(16,185,129)]" />
+                </div>
+              )}
               {crumb.onClick ? (
                 <button
                   onClick={crumb.onClick}
@@ -233,47 +232,6 @@ export const GalleryHeader = memo(function GalleryHeader({
                   <SortAsc className="w-5 h-5" />
                 )}
               </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="w-9 h-9" data-testid="button-filter">
-                    <Filter className="w-5 h-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{t.gallery.filterPhotos}</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={onToggleLocationFilter}
-                    data-testid="filter-has-location"
-                  >
-                    <MapPin className="w-4 h-4 mr-2" />
-                    {t.gallery.hasLocation}
-                    {filter.hasLocation && <span className="ml-auto text-primary">{t.gallery.active}</span>}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={onToggleNoteFilter}
-                    data-testid="filter-has-note"
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    {t.gallery.hasNote}
-                    {filter.hasNote && <span className="ml-auto text-primary">{t.gallery.active}</span>}
-                  </DropdownMenuItem>
-                  {(filter.hasLocation || filter.hasNote) && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={onClearFilters}
-                        className="text-destructive"
-                        data-testid="filter-clear"
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        {t.gallery.clearFilters}
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </>
           )}
 
