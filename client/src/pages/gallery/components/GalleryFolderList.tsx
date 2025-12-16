@@ -65,8 +65,8 @@ const FolderListItem = memo(function FolderListItem({
             loading="lazy"
           />
         ) : null}
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-          <Folder className="w-6 h-6 text-primary" />
+        <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/20">
+          <Folder className="w-6 h-6 text-emerald-500 drop-shadow-[0_0_3px_rgb(16,185,129)]" />
         </div>
       </div>
 
@@ -84,7 +84,7 @@ const FolderListItem = memo(function FolderListItem({
           {hasUploaded && (
             <Badge 
               variant="outline" 
-              className="text-[10px] px-1.5 py-0.5 text-primary border-primary/50"
+              className="text-[10px] px-1.5 py-0.5 text-emerald-500 border-emerald-500/50"
             >
               {folder.uploadedCount}
             </Badge>
@@ -172,7 +172,7 @@ const FolderGridItem = memo(function FolderGridItem({
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
       
       <div className="absolute inset-0 flex flex-col items-center justify-center p-3">
-        <Folder className="w-10 h-10 text-primary mb-2" />
+        <Folder className="w-10 h-10 text-emerald-500 drop-shadow-[0_0_4px_rgb(16,185,129)] mb-2" />
         <span className="font-semibold text-white text-center text-sm line-clamp-2">
           {folder.name ?? t.gallery.uncategorized}
         </span>
@@ -186,7 +186,7 @@ const FolderGridItem = memo(function FolderGridItem({
           {hasUploaded && (
             <Badge 
               variant="outline" 
-              className="text-xs text-primary border-primary/50 bg-black/60"
+              className="text-xs text-emerald-500 border-emerald-500/50 bg-black/60"
             >
               {folder.uploadedCount}
             </Badge>

@@ -107,10 +107,10 @@ const CaptureButton = memo(function CaptureButton({
   
   const getBoxShadow = () => {
     if (accuracyBlocked) {
-      return "0 0 15px hsl(var(--destructive)/0.4)";
+      return "0 0 10px hsl(var(--destructive)/0.3)";
     }
     if (isReady && !isCapturing) {
-      return `0 0 20px ${baseColor}80`;
+      return `0 0 12px ${baseColor}50`;
     }
     return undefined;
   };
@@ -132,8 +132,8 @@ const CaptureButton = memo(function CaptureButton({
         <span 
           className="absolute inset-0 rounded-full animate-ping" 
           style={{ 
-            animationDuration: '2s',
-            backgroundColor: `${baseColor}30`
+            animationDuration: '2.5s',
+            backgroundColor: `${baseColor}15`
           }} 
         />
       )}
@@ -155,18 +155,18 @@ const CaptureButton = memo(function CaptureButton({
       }`} />
       
       <div 
-        className={`relative z-10 w-[65%] h-[65%] rounded-full transition-all flex items-center justify-center shadow-lg ${
+        className={`relative z-10 w-[65%] h-[65%] rounded-full transition-all flex items-center justify-center shadow-md ${
           accuracyBlocked
             ? "bg-destructive/40 border-2 border-destructive/60"
             : isCapturing 
-              ? "scale-75 border-2 border-white/30" 
+              ? "scale-75 border-2 border-white/20" 
               : isReady 
-                ? "border-2 border-white/30" 
+                ? "border-2 border-white/20" 
                 : "bg-muted border-2 border-muted-foreground/30"
         }`}
         style={!accuracyBlocked && (isReady || isCapturing) ? {
           backgroundColor: baseColor,
-          boxShadow: `0 0 12px ${baseColor}99`,
+          boxShadow: `0 0 8px ${baseColor}60`,
         } : undefined}
       >
         <span 
@@ -174,11 +174,11 @@ const CaptureButton = memo(function CaptureButton({
             accuracyBlocked 
               ? "text-destructive-foreground" 
               : isReady || isCapturing
-                ? "text-white" 
+                ? "text-white/90" 
                 : "text-muted-foreground"
           }`}
           style={!accuracyBlocked && (isReady || isCapturing) ? {
-            textShadow: `0 0 4px ${baseColor}`,
+            textShadow: `0 0 2px ${baseColor}80`,
           } : undefined}
           data-testid="text-accuracy"
         >

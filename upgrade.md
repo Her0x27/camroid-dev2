@@ -10,10 +10,31 @@
 ### План реализации
 | Этап | Описание | Статус |
 |------|----------|--------|
-| 1 | Уменьшить яркость glow эффектов на кнопке затвора | ⏳ В процессе |
-| 2 | Унифицировать стили галереи под emerald-500 | ⏳ Ожидает |
-| 3 | Обновить GalleryEmptyState под новый стиль | ⏳ Ожидает |
-| 4 | Обновить GalleryFolderList под новый стиль | ⏳ Ожидает |
+| 1 | Уменьшить яркость glow эффектов на кнопке затвора | ✅ Готово |
+| 2 | Унифицировать стили галереи под emerald-500 | ✅ Готово |
+| 3 | Обновить GalleryEmptyState под новый стиль | ✅ Готово |
+| 4 | Обновить GalleryFolderList под новый стиль | ✅ Готово |
+
+### Выполненные изменения
+
+#### CaptureButton (кнопка затвора)
+- Уменьшена яркость внешнего glow с `0 0 20px` до `0 0 12px`
+- Уменьшена прозрачность ping анимации с 30% до 15%
+- Замедлена анимация ping с 2s до 2.5s
+- Уменьшена яркость внутреннего glow с `0 0 12px` до `0 0 8px`
+- Уменьшена яркость текстовой тени с `0 0 4px` до `0 0 2px`
+- Обновлены прозрачности border на 20% вместо 30%
+
+#### GalleryFolderList
+- Иконка Folder в FolderListItem: emerald-500 с glow эффектом
+- Бейдж uploadedCount: text-emerald-500 border-emerald-500/50
+- Иконка Folder в FolderGridItem: emerald-500 с drop-shadow
+
+#### GalleryEmptyState
+- Контейнер иконки: rounded-xl bg-emerald-500/20 border border-emerald-500/40
+- Иконки Camera и FolderOpen: text-emerald-500 с drop-shadow
+- Кнопка "Начать съёмку": bg-emerald-500 hover:bg-emerald-600
+- Кнопка "Назад к папкам": border-emerald-500/50 text-emerald-500
 
 ---
 
