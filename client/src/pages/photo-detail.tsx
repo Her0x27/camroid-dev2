@@ -363,8 +363,8 @@ export default function PhotoDetailPage() {
       onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <header className="flex-shrink-0 z-50 safe-top bg-black">
-        <div className="flex items-center gap-3 px-2 py-2">
+      <header className="absolute top-0 left-0 right-0 z-50 safe-top bg-gradient-to-b from-black/80 to-transparent">
+        <div className="flex items-center gap-3 px-2 py-2 pointer-events-auto">
           <Button
             variant="ghost"
             size="icon"
