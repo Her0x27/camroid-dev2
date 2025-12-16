@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useLocation, useRoute } from "wouter";
 import { 
   ArrowLeft, 
@@ -11,7 +11,12 @@ import {
   X,
   Cloud,
   Link,
-  Loader2
+  Loader2,
+  ChevronUp,
+  ChevronDown,
+  Camera,
+  Images,
+  Folder
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -25,9 +30,79 @@ import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { logger } from "@/lib/logger";
 import { cloudProviderRegistry } from "@/cloud-providers";
+import { cn } from "@/lib/utils";
 
 const SWIPE_THRESHOLD = 50;
 const SWIPE_VELOCITY_THRESHOLD = 0.3;
+const VERTICAL_SWIPE_THRESHOLD = 80;
+const VERTICAL_VELOCITY_THRESHOLD = 0.5;
+
+interface SwipeIndicatorProps {
+  direction: "up" | "down";
+  opacity: number;
+  label: string;
+  icon: React.ReactNode;
+}
+
+function SwipeIndicator({ direction, opacity, label, icon }: SwipeIndicatorProps) {
+  if (opacity <= 0.1) return null;
+  
+  const smoothOpacity = Math.min(1, opacity * 1.5);
+  const smoothScale = 0.9 + opacity * 0.1;
+  
+  return (
+    <div 
+      className={cn(
+        "absolute left-1/2 z-60 pointer-events-none",
+        "flex flex-col items-center gap-1 px-4 py-2 rounded-full",
+        "bg-black/70 backdrop-blur-sm text-white",
+        direction === "up" ? "top-20" : "bottom-20"
+      )}
+      style={{ 
+        opacity: smoothOpacity,
+        transform: `translateX(-50%) scale(${smoothScale})`,
+        transition: 'opacity 100ms ease-out, transform 100ms ease-out',
+      }}
+    >
+      {direction === "up" && icon}
+      <span className="text-xs font-medium whitespace-nowrap">{label}</span>
+      {direction === "down" && icon}
+    </div>
+  );
+}
+
+interface BreadcrumbsProps {
+  folderName: string | null | undefined;
+  photoName: string;
+  onGalleryClick: () => void;
+}
+
+function Breadcrumbs({ folderName, photoName, onGalleryClick }: BreadcrumbsProps) {
+  return (
+    <nav className="flex items-center gap-1 text-xs text-white/70 overflow-hidden">
+      <button 
+        onClick={onGalleryClick}
+        className="flex items-center gap-1 hover:text-white transition-colors shrink-0 touch-manipulation active:opacity-70"
+      >
+        <Images className="w-3 h-3" />
+        <span>Галерея</span>
+      </button>
+      
+      {folderName && (
+        <>
+          <ChevronRight className="w-3 h-3 shrink-0 text-white/40" />
+          <span className="flex items-center gap-1 shrink-0 text-white/60">
+            <Folder className="w-3 h-3" />
+            <span className="max-w-[80px] truncate">{folderName}</span>
+          </span>
+        </>
+      )}
+      
+      <ChevronRight className="w-3 h-3 shrink-0 text-white/40" />
+      <span className="text-white/50 truncate max-w-[100px]">{photoName}</span>
+    </nav>
+  );
+}
 
 export default function PhotoDetailPage() {
   const [, params] = useRoute("/photo/:id");
@@ -58,6 +133,7 @@ export default function PhotoDetailPage() {
   const [verticalSwipeOffset, setVerticalSwipeOffset] = useState(0);
   const [isSwipeActive, setIsSwipeActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState<"horizontal" | "vertical" | null>(null);
 
   const isImgbbValidated = settings.imgbb?.isValidated ?? false;
   const isPhotoUploaded = !!photo?.cloud?.url;
@@ -70,13 +146,14 @@ export default function PhotoDetailPage() {
     setSwipeOffset(0);
     setVerticalSwipeOffset(0);
     setIsSwipeActive(false);
+    setSwipeDirection(null);
   }, [photoId]);
   
-  const handleBack = useCallback(() => {
+  const handleBackToGallery = useCallback(() => {
     navigate("/gallery");
   }, [navigate]);
 
-  const handleCloseGallery = useCallback(() => {
+  const handleExitToCamera = useCallback(() => {
     navigate("/");
   }, [navigate]);
 
@@ -87,13 +164,13 @@ export default function PhotoDetailPage() {
       } else if (e.key === "ArrowRight") {
         goToNext();
       } else if (e.key === "Escape") {
-        handleBack();
+        handleBackToGallery();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToPrevious, goToNext, handleBack]);
+  }, [goToPrevious, goToNext, handleBackToGallery]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0];
@@ -103,6 +180,7 @@ export default function PhotoDetailPage() {
       time: Date.now(),
     };
     setIsSwipeActive(true);
+    setSwipeDirection(null);
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
@@ -114,36 +192,44 @@ export default function PhotoDetailPage() {
     const absDeltaX = Math.abs(deltaX);
     const absDeltaY = Math.abs(deltaY);
     
-    // Vertical swipe detection: if deltaY is significant and larger than deltaX
-    if (absDeltaY > absDeltaX && absDeltaY > 30) {
-      setVerticalSwipeOffset(deltaY * 0.3);
+    if (swipeDirection === null && (absDeltaX > 10 || absDeltaY > 10)) {
+      setSwipeDirection(absDeltaY > absDeltaX ? "vertical" : "horizontal");
+    }
+    
+    if (swipeDirection === "vertical" || (swipeDirection === null && absDeltaY > absDeltaX)) {
+      setVerticalSwipeOffset(deltaY * 0.4);
+      setSwipeOffset(0);
       return;
     }
     
-    // Horizontal swipe detection
-    if (absDeltaX > absDeltaY * 0.5) {
+    if (swipeDirection === "horizontal" || (swipeDirection === null && absDeltaX > absDeltaY)) {
       const canSwipeLeft = hasNext && deltaX < 0;
       const canSwipeRight = hasPrevious && deltaX > 0;
       
       if (canSwipeLeft || canSwipeRight) {
         setSwipeOffset(deltaX * 0.3);
       }
+      setVerticalSwipeOffset(0);
     }
-  }, [hasNext, hasPrevious]);
+  }, [hasNext, hasPrevious, swipeDirection]);
 
   const handleTouchEnd = useCallback(() => {
     if (!touchStartRef.current) return;
     
     const deltaTime = Date.now() - touchStartRef.current.time;
-    const verticalDelta = verticalSwipeOffset / 0.3;
+    const verticalDelta = verticalSwipeOffset / 0.4;
     const verticalVelocity = Math.abs(verticalDelta) / deltaTime;
-    const verticalSwipeShouldTrigger = Math.abs(verticalDelta) > SWIPE_THRESHOLD || verticalVelocity > SWIPE_VELOCITY_THRESHOLD;
+    const hasEnoughDistance = Math.abs(verticalDelta) >= VERTICAL_SWIPE_THRESHOLD;
+    const hasEnoughVelocity = verticalVelocity >= VERTICAL_VELOCITY_THRESHOLD;
+    const verticalSwipeShouldTrigger = hasEnoughDistance && hasEnoughVelocity;
     
-    // Check vertical swipe first (close photo)
-    if (verticalSwipeShouldTrigger && Math.abs(verticalDelta) > Math.abs(swipeOffset / 0.3)) {
-      handleBack();
-    } else {
-      // Then check horizontal swipe (next/previous)
+    if (swipeDirection === "vertical" && verticalSwipeShouldTrigger) {
+      if (verticalDelta < 0) {
+        handleBackToGallery();
+      } else {
+        handleExitToCamera();
+      }
+    } else if (swipeDirection === "horizontal") {
       const deltaX = swipeOffset / 0.3;
       const velocity = Math.abs(deltaX) / deltaTime;
       const shouldSwipe = Math.abs(deltaX) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD;
@@ -161,7 +247,8 @@ export default function PhotoDetailPage() {
     setSwipeOffset(0);
     setVerticalSwipeOffset(0);
     setIsSwipeActive(false);
-  }, [swipeOffset, verticalSwipeOffset, hasPrevious, hasNext, goToPrevious, goToNext, handleBack]);
+    setSwipeDirection(null);
+  }, [swipeOffset, verticalSwipeOffset, hasPrevious, hasNext, goToPrevious, goToNext, handleBackToGallery, handleExitToCamera, swipeDirection]);
 
   const handleDelete = useCallback(async () => {
     if (!photoId) return;
@@ -178,12 +265,12 @@ export default function PhotoDetailPage() {
       } else if (hasPrevious) {
         goToPrevious();
       } else {
-        setTimeout(() => handleBack(), 100);
+        setTimeout(() => handleBackToGallery(), 100);
       }
     } else {
       logger.error("Failed to delete photo", result.error);
     }
-  }, [photoId, deletePhotoById, hasNext, hasPrevious, total, goToNext, goToPrevious, handleBack, refreshIds]);
+  }, [photoId, deletePhotoById, hasNext, hasPrevious, total, goToNext, goToPrevious, handleBackToGallery, refreshIds]);
 
   const handleExport = useCallback(async () => {
     if (!photo) return;
@@ -290,6 +377,21 @@ export default function PhotoDetailPage() {
     }
   }, [photo?.cloud?.url, toast, t]);
 
+  const swipeUpProgress = useMemo(() => {
+    if (verticalSwipeOffset >= 0) return 0;
+    return Math.min(1, Math.abs(verticalSwipeOffset) / 80);
+  }, [verticalSwipeOffset]);
+
+  const swipeDownProgress = useMemo(() => {
+    if (verticalSwipeOffset <= 0) return 0;
+    return Math.min(1, verticalSwipeOffset / 80);
+  }, [verticalSwipeOffset]);
+
+  const photoDisplayName = useMemo(() => {
+    if (!photo) return "";
+    return `IMG_${new Date(photo.metadata.timestamp).toISOString().slice(0, 10).replace(/-/g, "")}`;
+  }, [photo]);
+
   if (isLoading) {
     return <PageLoader variant="fullscreen" />;
   }
@@ -301,7 +403,7 @@ export default function PhotoDetailPage() {
         <p className="text-sm text-muted-foreground mb-4">
           {t.photoDetail.mayHaveBeenDeleted}
         </p>
-        <Button onClick={handleBack} data-testid="button-back-to-gallery">
+        <Button onClick={handleBackToGallery} data-testid="button-back-to-gallery">
           {t.common.backToGallery}
         </Button>
       </div>
@@ -326,20 +428,20 @@ export default function PhotoDetailPage() {
       <div 
         className="absolute inset-0 flex items-center justify-center"
         style={{
-          paddingTop: '56px',
-          paddingBottom: '40px',
+          paddingTop: '72px',
+          paddingBottom: '52px',
         }}
       >
         <img
           src={photo.imageData}
           alt={t.gallery.photo}
-          className="w-full max-h-full transition-transform duration-150"
+          className="w-full max-h-full object-contain transition-all duration-200 ease-out"
           style={{
             transform: isSwipeActive 
-              ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px)`
-              : 'translate(0, 0)',
+              ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
+              : 'translate(0, 0) scale(1)',
             opacity: isSwipeActive && verticalSwipeOffset !== 0 
-              ? Math.max(0.3, 1 - Math.abs(verticalSwipeOffset) / 200)
+              ? Math.max(0.4, 1 - Math.abs(verticalSwipeOffset) / 150)
               : 1,
           }}
           data-testid="photo-image"
@@ -347,11 +449,25 @@ export default function PhotoDetailPage() {
         />
       </div>
 
+      <SwipeIndicator
+        direction="up"
+        opacity={swipeUpProgress}
+        label="Назад в галерею"
+        icon={<ChevronUp className="w-4 h-4" />}
+      />
+
+      <SwipeIndicator
+        direction="down"
+        opacity={swipeDownProgress}
+        label="Выход на камеру"
+        icon={<ChevronDown className="w-4 h-4" />}
+      />
+
       {hasPrevious && (
         <Button
           variant="ghost"
           size="icon"
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 text-white hover:bg-black/60 z-40"
+          className="absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 text-white hover:bg-black/60 z-40 rounded-full touch-manipulation active:scale-95 transition-transform"
           onClick={goToPrevious}
           data-testid="button-previous"
         >
@@ -363,7 +479,7 @@ export default function PhotoDetailPage() {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 text-white hover:bg-black/60 z-40"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/40 text-white hover:bg-black/60 z-40 rounded-full touch-manipulation active:scale-95 transition-transform"
           onClick={goToNext}
           data-testid="button-next"
         >
@@ -371,50 +487,59 @@ export default function PhotoDetailPage() {
         </Button>
       )}
 
-      <header className="absolute top-0 left-0 right-0 z-50 bg-black/80 safe-top">
-        <div className="flex items-center gap-3 px-4 py-3">
+      <header className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 via-black/60 to-transparent safe-top">
+        <div className="flex items-center gap-3 px-3 py-3">
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleBack}
-            className="text-white hover:bg-white/20 shrink-0"
+            onClick={handleBackToGallery}
+            className="text-white hover:bg-white/20 shrink-0 w-10 h-10 rounded-full touch-manipulation active:scale-95 transition-transform"
             data-testid="button-back-gallery"
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
 
-          <div className="flex flex-col min-w-0 flex-1">
+          <div className="flex flex-col min-w-0 flex-1 gap-0.5">
+            <Breadcrumbs
+              folderName={photo.note}
+              photoName={photoDisplayName}
+              onGalleryClick={handleBackToGallery}
+            />
+            
             <div className="flex items-center gap-2">
-              <span className="text-xs text-white/60 shrink-0">
+              <span className="text-xs text-white/50 shrink-0">
                 {currentIndex + 1}/{total}
               </span>
-              <span 
-                className="text-sm text-white font-medium truncate"
-                title={photo.note || undefined}
-              >
-                {photo.note || `IMG_${new Date(photo.metadata.timestamp).toISOString().slice(0, 10).replace(/-/g, "")}`}
+              <span className="text-xs text-white/60">
+                {new Date(photo.metadata.timestamp).toLocaleDateString("ru-RU", {
+                  day: "numeric",
+                  month: "short",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                })}
               </span>
             </div>
-            <span className="text-xs text-white/50">
-              {new Date(photo.metadata.timestamp).toLocaleDateString("ru-RU", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit"
-              })}
-            </span>
           </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleExitToCamera}
+            className="text-white hover:bg-white/20 shrink-0 w-10 h-10 rounded-full touch-manipulation active:scale-95 transition-transform"
+            data-testid="button-exit-camera"
+          >
+            <Camera className="w-5 h-5" />
+          </Button>
         </div>
       </header>
 
-      <footer className="absolute bottom-0 left-0 right-0 z-50 bg-black/80 safe-bottom">
-        <div className="flex items-center justify-center gap-2 py-1.5">
+      <footer className="absolute bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/80 via-black/60 to-transparent safe-bottom">
+        <div className="flex items-center justify-center gap-1 py-2 px-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShowInfoPanel(true)}
-            className="text-white hover:bg-white/20"
+            className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
             data-testid="button-info"
           >
             <Info className="w-5 h-5" />
@@ -424,7 +549,7 @@ export default function PhotoDetailPage() {
               variant="ghost"
               size="icon"
               onClick={handleShare}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
               data-testid="button-share"
             >
               <Share2 className="w-5 h-5" />
@@ -434,7 +559,7 @@ export default function PhotoDetailPage() {
             variant="ghost"
             size="icon"
             onClick={handleExport}
-            className="text-white hover:bg-white/20"
+            className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
             data-testid="button-export"
           >
             <Download className="w-5 h-5" />
@@ -445,7 +570,7 @@ export default function PhotoDetailPage() {
               size="icon"
               onClick={handleUploadToCloud}
               disabled={isUploading}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
               data-testid="button-upload-cloud"
             >
               {isUploading ? (
@@ -460,7 +585,7 @@ export default function PhotoDetailPage() {
               variant="ghost"
               size="icon"
               onClick={handleCopyLink}
-              className="text-white hover:bg-white/20"
+              className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
               data-testid="button-copy-link"
             >
               <Link className="w-5 h-5" />
@@ -470,7 +595,7 @@ export default function PhotoDetailPage() {
             variant="ghost"
             size="icon"
             onClick={() => setShowDeleteDialog(true)}
-            className="text-red-400 hover:bg-white/20 hover:text-red-400"
+            className="text-red-400 hover:bg-white/20 hover:text-red-400 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
             data-testid="button-delete"
           >
             <Trash2 className="w-5 h-5" />
@@ -478,8 +603,8 @@ export default function PhotoDetailPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleCloseGallery}
-            className="text-white hover:bg-white/20"
+            onClick={handleExitToCamera}
+            className="text-white hover:bg-white/20 w-11 h-11 rounded-full touch-manipulation active:scale-95 transition-transform"
             data-testid="button-close-gallery"
           >
             <X className="w-5 h-5" />
