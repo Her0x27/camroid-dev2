@@ -449,7 +449,7 @@ export default function PhotoDetailPage() {
         <img
           src={photo.imageData}
           alt={t.gallery.photo}
-          className="w-full h-full object-contain transition-all duration-200 ease-out"
+          className="w-full h-auto object-contain transition-all duration-200 ease-out"
           style={{
             transform: isSwipeActive 
               ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
