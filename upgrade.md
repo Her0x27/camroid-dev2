@@ -27,12 +27,16 @@
 
 ### client/src/pages/camera/index.tsx
 - **updateWatermarkPreview:** добавлен импорт из useSettings()
-- **lastSyncedNoteRef:** новый ref для отслеживания последней синхронизированной заметки
-- **useEffect инициализации:** обновляет currentNote из watermarkPreview.note когда диалог закрыт и значение изменилось извне
-- **handleCaptureWithPosition (строка 382):** `note: noteText || wp?.note || undefined` — fallback на заметку из водяного знака
+- **pendingSyncRef:** новый ref для предотвращения race condition при синхронизации заметки
+- **useEffect инициализации:** 
+  - Если pendingSyncRef !== null — ждёт пока wpNote сравняется с ожидаемым значением
+  - Иначе обновляет currentNote из watermarkPreview.note когда диалог закрыт
+- **handleCaptureWithPosition:** `note: noteText || wp?.note || undefined` — fallback на заметку из водяного знака для папки
 - **handleCaptureFromFrozenFrame:** добавлен `const wp = captureConfig.watermarkPreview` и fallback для note
 - **handleOpenNote:** подставляет заметку из watermarkPreview если локальная заметка пуста
-- **handleNoteDialogChange:** синхронизирует заметку с watermarkPreview при закрытии диалога, обновляет lastSyncedNoteRef
+- **handleNoteDialogChange:** 
+  - Устанавливает pendingSyncRef = currentNote перед обновлением
+  - Синхронизирует заметку с watermarkPreview при закрытии диалога
 - **PhotoNoteDialog:** использует handleNoteDialogChange вместо setShowNoteDialog
 
 ---
