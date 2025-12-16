@@ -424,16 +424,12 @@ export default function PhotoDetailPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex items-center justify-center overflow-hidden bg-black p-0 m-0">
+      <div className="flex-1 relative overflow-hidden bg-black">
         <img
           src={photo.imageData}
           alt={t.gallery.photo}
-          className="block transition-all duration-200 ease-out"
+          className="absolute inset-0 w-full h-full object-contain transition-all duration-200 ease-out"
           style={{
-            width: '100%',
-            height: 'auto',
-            objectFit: 'cover',
-            objectPosition: 'center',
             transform: isSwipeActive 
               ? `translate(${swipeOffset}px, ${verticalSwipeOffset}px) scale(${1 - Math.abs(verticalSwipeOffset) / 500})`
               : 'translate(0, 0) scale(1)',
