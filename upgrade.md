@@ -28,6 +28,10 @@
 |---------|------|--------|
 | NoteOverlay (FileText) | CameraViewfinder.tsx | ✅ Готово |
 | MaskButton (EyeOff) | CameraViewfinder.tsx | ✅ Готово |
+| GalleryButton (Images) | CameraControls.tsx | ✅ Готово |
+| Кнопка заметок (FileText) | CameraControls.tsx | ✅ Готово |
+| Кнопка настроек (Settings2) | CameraControls.tsx | ✅ Готово |
+| Кнопка визуального редактора (Palette) | CameraControls.tsx | ✅ Готово |
 
 ### Выполненные изменения
 
@@ -55,6 +59,13 @@
 - ✅ NoteOverlay - изменён цвет с primary на emerald-500
 - ✅ MaskButton - изменён цвет с primary на emerald-500
 - Все элементы теперь имеют одинаковый изумрудный оттенок как индикатор стабильности
+
+### 2024-12-16 - Унификация стиля иконок (CameraControls)
+- ✅ GalleryButton (Images) - добавлен контейнер bg-card/80 backdrop-blur-md rounded-xl + иконка в emerald-500/20 фоне
+- ✅ Кнопка заметок (FileText) - добавлен контейнер + иконка в emerald-500/20 фоне с свечением
+- ✅ Кнопка настроек (Settings2) - добавлен контейнер + иконка в emerald-500/20 фоне с свечением
+- ✅ Кнопка визуального редактора (Palette) - обновлён стиль под единый дизайн
+- Все бейджи (photoCount, cloudCount, hasNote) теперь используют emerald-500
 
 ### 2024-12-16 - Унификация стиля иконок
 - ✅ Обновлён NoteOverlay - иконка FileText в круглом контейнере

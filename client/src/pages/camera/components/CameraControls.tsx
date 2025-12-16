@@ -164,28 +164,32 @@ const GalleryButton = memo(function GalleryButton({
   return (
     <div className="absolute left-4 flex items-center">
       <button
-        className="text-primary relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+        className="bg-card/80 backdrop-blur-md rounded-xl p-2 border border-border/50 shadow-lg relative transition-opacity active:opacity-70"
         onClick={onNavigate}
         data-testid="button-gallery"
       >
         {lastPhotoThumb ? (
-          <img 
-            src={lastPhotoThumb} 
-            alt={t.camera.lastPhoto} 
-            className="w-12 h-12 object-cover rounded-lg shadow-lg"
-          />
+          <div className="w-10 h-10 rounded-lg overflow-hidden border border-emerald-500/40">
+            <img 
+              src={lastPhotoThumb} 
+              alt={t.camera.lastPhoto} 
+              className="w-full h-full object-cover"
+            />
+          </div>
         ) : (
-          <Images className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-emerald-500/20 border border-emerald-500/40">
+            <Images className="w-5 h-5 text-emerald-500 drop-shadow-[0_0_4px_rgb(16,185,129)]" />
+          </div>
         )}
         {isProcessing && (
           <span 
-            className="absolute inset-0 rounded-lg border-2 border-white/60 animate-pulse"
+            className="absolute inset-0 rounded-xl border-2 border-emerald-500/60 animate-pulse"
             data-testid="indicator-processing"
           />
         )}
         {photoCount > 0 && (
           <span 
-            className="absolute -top-1 -right-1 min-w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md"
+            className="absolute -top-1.5 -right-1.5 min-w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md"
             data-testid="badge-photo-count"
           >
             <Camera className="w-2.5 h-2.5" />
@@ -194,7 +198,7 @@ const GalleryButton = memo(function GalleryButton({
         )}
         {cloudCount > 0 && (
           <span 
-            className="absolute -bottom-1 -right-1 min-w-5 h-5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md"
+            className="absolute -bottom-1.5 -right-1.5 min-w-5 h-5 bg-emerald-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center gap-0.5 px-1 shadow-md"
             data-testid="badge-cloud-count"
           >
             <CloudUpload className="w-2.5 h-2.5" />
@@ -257,31 +261,35 @@ const RightControls = memo(function RightControls({
   }, []);
 
   return (
-    <div className="absolute right-4 flex items-center gap-3">
+    <div className="absolute right-4 flex items-center gap-2">
       <button
-        className="text-primary relative flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+        className="bg-card/80 backdrop-blur-md rounded-xl p-2 border border-border/50 shadow-lg relative transition-opacity active:opacity-70"
         onClick={onOpenNote}
         data-testid="button-note"
       >
-        <FileText className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-emerald-500/20 border border-emerald-500/40">
+          <FileText className="w-5 h-5 text-emerald-500 drop-shadow-[0_0_4px_rgb(16,185,129)]" />
+        </div>
         {hasNote && (
-          <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-primary rounded-full shadow-[0_0_6px_hsl(var(--primary))]" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_6px_rgb(16,185,129)]" />
         )}
       </button>
 
       <div className="relative">
         {showEditorIcon && (
           <button
-            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 text-primary flex items-center justify-center w-14 h-14 bg-card/80 backdrop-blur-sm rounded-full shadow-lg border border-primary/30 transition-all animate-in fade-in zoom-in-90 duration-200"
+            className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-card/80 backdrop-blur-md rounded-xl p-2 border border-border/50 shadow-lg transition-all animate-in fade-in zoom-in-90 duration-200"
             onClick={handleVisualEditor}
             onPointerLeave={handleEditorIconPointerLeave}
             data-testid="button-visual-editor"
           >
-            <Palette className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-emerald-500/20 border border-emerald-500/40">
+              <Palette className="w-5 h-5 text-emerald-500 drop-shadow-[0_0_4px_rgb(16,185,129)]" />
+            </div>
           </button>
         )}
         <button
-          className="text-primary flex items-center justify-center w-14 h-14 transition-opacity active:opacity-70"
+          className="bg-card/80 backdrop-blur-md rounded-xl p-2 border border-border/50 shadow-lg transition-opacity active:opacity-70"
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
           onPointerLeave={handlePointerLeave}
@@ -290,7 +298,9 @@ const RightControls = memo(function RightControls({
           onContextMenu={(e) => e.preventDefault()}
           data-testid="button-settings"
         >
-          <Settings2 className="w-7 h-7 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" />
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-emerald-500/20 border border-emerald-500/40">
+            <Settings2 className="w-5 h-5 text-emerald-500 drop-shadow-[0_0_4px_rgb(16,185,129)]" />
+          </div>
         </button>
       </div>
     </div>
