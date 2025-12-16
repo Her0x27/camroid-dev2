@@ -117,7 +117,7 @@ export default function PhotoDetailPage() {
   }, [navigate]);
 
   const handleExitFromGallery = useCallback(() => {
-    navigate("/gallery");
+    navigate("/");
   }, [navigate]);
 
   useEffect(() => {
@@ -472,7 +472,7 @@ export default function PhotoDetailPage() {
         <SwipeIndicator
           direction="down"
           opacity={swipeDownProgress}
-          label="Закрыть просмотр"
+          label="Выход на камеру"
           icon={<ChevronDown className="w-4 h-4" />}
         />
 

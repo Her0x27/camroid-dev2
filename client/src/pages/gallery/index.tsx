@@ -23,6 +23,7 @@ import {
   GalleryEmptyState,
   GalleryFolderList,
   GalleryLinksDialog,
+  GallerySelectionFooter,
   type FolderInfo,
 } from "./components";
 import { useGallerySelection, useGalleryView, useGalleryFilters, useGalleryPhotos } from "./hooks";
@@ -562,10 +563,6 @@ export default function GalleryPage() {
         onClearAll={() => setShowClearDialog(true)}
         onCancelSelection={handleCancelSelection}
         onSelectAll={handleSelectAll}
-        onDeleteSelected={() => setShowDeleteSelectedDialog(true)}
-        onDownloadSelected={handleDownloadSelected}
-        onUploadSelected={handleUploadSelected}
-        onGetSelectedLinks={handleGetSelectedLinks}
         t={t}
       />
 
@@ -699,6 +696,19 @@ export default function GalleryPage() {
           </AutoSizerContainer>
         )}
       </main>
+
+      {selectionMode && (
+        <GallerySelectionFooter
+          selectedCount={selectedIds.size}
+          isUploading={isUploading}
+          isImgbbValidated={settings.imgbb?.isValidated ?? false}
+          hasUploadedPhotos={filteredPhotos.filter(p => selectedIds.has(p.id) && p.cloud?.url).length > 0}
+          onDownload={handleDownloadSelected}
+          onDelete={() => setShowDeleteSelectedDialog(true)}
+          onUpload={handleUploadSelected}
+          onGetLinks={handleGetSelectedLinks}
+        />
+      )}
 
       <ConfirmDialog
         open={!!deleteTarget}

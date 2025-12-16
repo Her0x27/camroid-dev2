@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { ChevronRight, List, Grid, LayoutGrid, SortAsc, SortDesc, Filter, MapPin, FileText, X, Cloud, Upload, Link, Trash2, Loader2, Image, Folder, Download, CheckSquare, Square, FolderOpen } from "lucide-react";
+import { ChevronRight, List, Grid, LayoutGrid, SortAsc, SortDesc, Filter, MapPin, FileText, X, Cloud, Upload, Link, Loader2, Image, Folder, CheckSquare, Square, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu, 
@@ -41,10 +41,6 @@ interface GalleryHeaderProps {
   onClearAll: () => void;
   onCancelSelection: () => void;
   onSelectAll: () => void;
-  onDeleteSelected: () => void;
-  onDownloadSelected: () => void;
-  onUploadSelected: () => void;
-  onGetSelectedLinks: () => void;
   t: {
     gallery: {
       title: string;
@@ -104,10 +100,6 @@ export const GalleryHeader = memo(function GalleryHeader({
   onClearAll,
   onCancelSelection,
   onSelectAll,
-  onDeleteSelected,
-  onDownloadSelected,
-  onUploadSelected,
-  onGetSelectedLinks,
   t,
 }: GalleryHeaderProps) {
   void headerTitle;
@@ -149,6 +141,7 @@ export const GalleryHeader = memo(function GalleryHeader({
               variant="ghost"
               size="icon"
               onClick={onCancelSelection}
+              className="w-9 h-9"
               data-testid="button-cancel-selection"
             >
               <X className="w-5 h-5" />
@@ -160,65 +153,19 @@ export const GalleryHeader = memo(function GalleryHeader({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onSelectAll}
-              data-testid="button-select-all"
-            >
-              {selectedCount === totalPhotos ? (
-                <Square className="w-5 h-5" />
-              ) : (
-                <CheckSquare className="w-5 h-5" />
-              )}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onDownloadSelected}
-              disabled={selectedCount === 0}
-              data-testid="button-download-selected"
-            >
-              <Download className="w-5 h-5" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onUploadSelected}
-              disabled={selectedCount === 0 || isUploading || !isImgbbValidated}
-              data-testid="button-upload-selected"
-            >
-              {isUploading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Upload className="w-5 h-5" />
-              )}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onGetSelectedLinks}
-              disabled={selectedCount === 0}
-              data-testid="button-get-selected-links"
-            >
-              <Link className="w-5 h-5" />
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onDeleteSelected}
-              disabled={selectedCount === 0}
-              className="text-destructive hover:text-destructive"
-              data-testid="button-delete-selected"
-            >
-              <Trash2 className="w-5 h-5" />
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onSelectAll}
+            className="w-9 h-9"
+            data-testid="button-select-all"
+          >
+            {selectedCount === totalPhotos ? (
+              <Square className="w-5 h-5" />
+            ) : (
+              <CheckSquare className="w-5 h-5" />
+            )}
+          </Button>
         </div>
       </header>
     );

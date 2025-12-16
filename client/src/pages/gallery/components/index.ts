@@ -3,3 +3,4 @@ export { GalleryFilters } from "./GalleryFilters";
 export { GalleryEmptyState } from "./GalleryEmptyState";
 export { GalleryFolderList, type FolderInfo } from "./GalleryFolderList";
 export { GalleryLinksDialog } from "./GalleryLinksDialog";
+export { GallerySelectionFooter } from "./GallerySelectionFooter";
