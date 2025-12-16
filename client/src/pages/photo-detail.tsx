@@ -427,10 +427,6 @@ export default function PhotoDetailPage() {
     >
       <div 
         className="absolute inset-0 flex items-center justify-center"
-        style={{
-          paddingTop: '72px',
-          paddingBottom: '52px',
-        }}
       >
         <img
           src={photo.imageData}
