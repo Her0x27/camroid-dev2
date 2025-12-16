@@ -36,6 +36,7 @@ interface CameraViewfinderProps {
   onAdjustmentConfirm?: () => void;
   onAdjustmentCancel?: () => void;
   showPlaceholder?: boolean;
+  showFlash?: boolean;
 }
 
 const DRAG_OFFSET_PX = 60;
@@ -66,6 +67,7 @@ export const CameraViewfinder = memo(function CameraViewfinder({
   onAdjustmentConfirm,
   onAdjustmentCancel,
   showPlaceholder,
+  showFlash,
 }: CameraViewfinderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -277,6 +279,22 @@ export const CameraViewfinder = memo(function CameraViewfinder({
           onCancel={onAdjustmentCancel}
         />
       )}
+
+      {showFlash && (
+        <div 
+          className="absolute inset-0 bg-white z-50 pointer-events-none animate-flash"
+          style={{
+            animation: 'flash 150ms ease-out forwards',
+          }}
+        />
+      )}
+
+      <style>{`
+        @keyframes flash {
+          0% { opacity: 0.9; }
+          100% { opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 });

@@ -10,6 +10,7 @@ import { useCaptureController } from "@/hooks/use-capture-controller";
 import { useAdjustmentMode } from "@/hooks/use-adjustment-mode";
 import { useSettings } from "@/lib/settings-context";
 import { usePrivacy } from "@/lib/privacy-context";
+import { triggerHapticFeedback } from "@/lib/haptic-utils";
 import { getPhotoCounts, getLatestPhoto } from "@/lib/db";
 import {
   processCaptureDeferred,
@@ -49,7 +50,17 @@ export default function CameraPage() {
   const [lastPhotoId, setLastPhotoId] = useState<string | null>(null);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
+  const [showFlash, setShowFlash] = useState(false);
+  const flashTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingSyncRef = useRef<string | null>(null);
+  
+  useEffect(() => {
+    return () => {
+      if (flashTimeoutRef.current) {
+        clearTimeout(flashTimeoutRef.current);
+      }
+    };
+  }, []);
   const { showDialog: showCapabilitiesDialog, closeDialog: closeCapabilitiesDialog } = useAppCapabilitiesDialog();
   
   useEffect(() => {
@@ -380,6 +391,13 @@ export default function CameraPage() {
 
       setLastPhotoThumb(result.thumbnailData);
       captureSuccess();
+      
+      triggerHapticFeedback(50);
+      if (flashTimeoutRef.current) {
+        clearTimeout(flashTimeoutRef.current);
+      }
+      setShowFlash(true);
+      flashTimeoutRef.current = setTimeout(() => setShowFlash(false), 150);
 
       const photoData: PhotoData = {
         geoData: {
@@ -481,6 +499,13 @@ export default function CameraPage() {
 
       setLastPhotoThumb(result.thumbnailData);
       captureSuccess();
+      
+      triggerHapticFeedback(50);
+      if (flashTimeoutRef.current) {
+        clearTimeout(flashTimeoutRef.current);
+      }
+      setShowFlash(true);
+      flashTimeoutRef.current = setTimeout(() => setShowFlash(false), 150);
 
       const photoData: PhotoData = {
         geoData: {
@@ -595,6 +620,7 @@ export default function CameraPage() {
         onAdjustmentConfirm={handleAdjustmentConfirm}
         onAdjustmentCancel={cancelAdjustment}
         showPlaceholder={showCapabilitiesDialog}
+        showFlash={showFlash}
       />
 
       <CameraControls
