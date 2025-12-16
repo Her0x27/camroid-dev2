@@ -19,6 +19,7 @@ interface UsePhotoNavigatorReturn {
   goToPrevious: () => void;
   goToNext: () => void;
   refreshIds: () => Promise<void>;
+  updateCurrentPhoto: (updates: Partial<Photo>) => void;
 }
 
 export function usePhotoNavigator(
@@ -127,6 +128,10 @@ export function usePhotoNavigator(
     }
   }, [hasNext, photoIds, currentIndex, navigate]);
 
+  const updateCurrentPhoto = useCallback((updates: Partial<Photo>) => {
+    setPhoto(prev => prev ? { ...prev, ...updates } : null);
+  }, []);
+
   return {
     photo,
     isLoading,
@@ -138,5 +143,6 @@ export function usePhotoNavigator(
     goToPrevious,
     goToNext,
     refreshIds,
+    updateCurrentPhoto,
   };
 }

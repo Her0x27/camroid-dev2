@@ -158,6 +158,7 @@ export default function GalleryPage() {
       name: stat.folder,
       count: stat.count,
       latestThumb: stat.latestThumb,
+      uploadedCount: stat.uploadedCount,
     }));
   }, [folderStats]);
 
@@ -453,6 +454,34 @@ export default function GalleryPage() {
     }
   }, [linksToShow, toast, t]);
 
+  const handleFolderUpload = useCallback(async (folderName: string | null) => {
+    const allPhotos = await ensureAllPhotosLoaded();
+    const folderPhotos = allPhotos.filter(p => (p.note || null) === folderName);
+    await handleUploadPhotos(folderPhotos);
+  }, [ensureAllPhotosLoaded, handleUploadPhotos]);
+
+  const handleFolderGetLinks = useCallback(async (folderName: string | null) => {
+    const allPhotos = await ensureAllPhotosLoaded();
+    const folderPhotos = allPhotos.filter(p => (p.note || null) === folderName && p.cloud?.url);
+    
+    if (folderPhotos.length === 0) {
+      toast({
+        title: t.gallery.noLinks,
+        description: t.gallery.uploadFirst,
+      });
+      return;
+    }
+
+    setLinksToShow(
+      folderPhotos.map(p => ({
+        id: p.id,
+        url: p.cloud!.url,
+        deleteUrl: p.cloud!.deleteUrl,
+      }))
+    );
+    setShowLinksDialog(true);
+  }, [ensureAllPhotosLoaded, toast, t]);
+
   const totalPhotoCountFromFolderStats = useMemo(() => {
     return folderStats.reduce((acc, stat) => acc + stat.count, 0);
   }, [folderStats]);
@@ -559,6 +588,10 @@ export default function GalleryPage() {
             folders={folders}
             displayType={displayType}
             onFolderSelect={handleFolderSelect}
+            onFolderUpload={handleFolderUpload}
+            onFolderGetLinks={handleFolderGetLinks}
+            isImgbbValidated={settings.imgbb?.isValidated ?? false}
+            isUploading={isUploading}
             t={t}
           />
         ) : filteredPhotos.length === 0 ? (

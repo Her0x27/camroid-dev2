@@ -8,17 +8,23 @@ import {
   ChevronRight, 
   Share2,
   Info,
-  X
+  X,
+  Cloud,
+  Link,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { PageLoader } from "@/components/page-loader";
 import { PhotoMetadataPanel } from "@/components/photo-metadata-panel";
-import { createCleanImageBlob } from "@/lib/db";
+import { createCleanImageBlob, updatePhoto } from "@/lib/db";
 import { usePhotoMutations } from "@/hooks/use-photo-mutations";
 import { usePhotoNavigator } from "@/hooks/use-photo-navigator";
+import { useSettings } from "@/lib/settings-context";
+import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { logger } from "@/lib/logger";
+import { cloudProviderRegistry } from "@/cloud-providers";
 
 const SWIPE_THRESHOLD = 50;
 const SWIPE_VELOCITY_THRESHOLD = 0.3;
@@ -27,6 +33,8 @@ export default function PhotoDetailPage() {
   const [, params] = useRoute("/photo/:id");
   const [, navigate] = useLocation();
   const { deletePhotoById } = usePhotoMutations();
+  const { settings } = useSettings();
+  const { toast } = useToast();
   const { t } = useI18n();
   
   const photoId = params?.id;
@@ -41,6 +49,7 @@ export default function PhotoDetailPage() {
     goToPrevious,
     goToNext,
     refreshIds,
+    updateCurrentPhoto,
   } = usePhotoNavigator(photoId);
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -48,6 +57,10 @@ export default function PhotoDetailPage() {
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [verticalSwipeOffset, setVerticalSwipeOffset] = useState(0);
   const [isSwipeActive, setIsSwipeActive] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const isImgbbValidated = settings.imgbb?.isValidated ?? false;
+  const isPhotoUploaded = !!photo?.cloud?.url;
   
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -208,6 +221,75 @@ export default function PhotoDetailPage() {
     }
   }, [photo, t.photoDetail.shareTitle]);
 
+  const handleUploadToCloud = useCallback(async () => {
+    if (!photo || isUploading || !settings.imgbb?.isValidated) return;
+
+    setIsUploading(true);
+    
+    try {
+      const providerId = settings.cloud?.selectedProvider || "imgbb";
+      const provider = cloudProviderRegistry.get(providerId);
+      
+      if (!provider) {
+        throw new Error("Cloud provider not found");
+      }
+
+      const providerSettings = providerId === "imgbb" 
+        ? {
+            isValidated: settings.imgbb.isValidated,
+            apiKey: settings.imgbb.apiKey || "",
+            expiration: settings.imgbb.expiration ?? 0,
+          }
+        : settings.cloud?.providers?.[providerId];
+      
+      if (!providerSettings?.isValidated) {
+        throw new Error("Provider not configured");
+      }
+
+      const result = await provider.upload(photo.imageData, providerSettings);
+      
+      if (result.success && result.cloudData) {
+        await updatePhoto(photo.id, { cloud: result.cloudData });
+        updateCurrentPhoto({ cloud: result.cloudData });
+        
+        toast({
+          title: t.gallery.uploadComplete,
+          description: t.photoDetail.uploadToCloud,
+        });
+      } else {
+        throw new Error(result.error || "Upload failed");
+      }
+    } catch (error) {
+      logger.error("Failed to upload to cloud", error);
+      toast({
+        title: t.common.error,
+        description: error instanceof Error ? error.message : t.common.unknownError,
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  }, [photo, isUploading, settings, updateCurrentPhoto, toast, t]);
+
+  const handleCopyLink = useCallback(async () => {
+    if (!photo?.cloud?.url) return;
+    
+    try {
+      await navigator.clipboard.writeText(photo.cloud.url);
+      toast({
+        title: t.gallery.copied,
+        description: t.photoDetail.copyLink,
+      });
+    } catch (error) {
+      logger.error("Failed to copy link", error);
+      toast({
+        title: t.common.error,
+        description: t.gallery.copyFailed,
+        variant: "destructive",
+      });
+    }
+  }, [photo?.cloud?.url, toast, t]);
+
   if (isLoading) {
     return <PageLoader variant="fullscreen" />;
   }
@@ -357,6 +439,33 @@ export default function PhotoDetailPage() {
           >
             <Download className="w-5 h-5" />
           </Button>
+          {isImgbbValidated && !isPhotoUploaded && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleUploadToCloud}
+              disabled={isUploading}
+              className="text-white hover:bg-white/20"
+              data-testid="button-upload-cloud"
+            >
+              {isUploading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Cloud className="w-5 h-5" />
+              )}
+            </Button>
+          )}
+          {isPhotoUploaded && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCopyLink}
+              className="text-white hover:bg-white/20"
+              data-testid="button-copy-link"
+            >
+              <Link className="w-5 h-5" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
