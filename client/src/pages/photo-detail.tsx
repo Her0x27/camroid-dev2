@@ -11,9 +11,7 @@ import {
   Link,
   Loader2,
   ChevronUp,
-  ChevronDown,
-  MapPin,
-  FileText
+  ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -424,25 +422,6 @@ export default function PhotoDetailPage() {
             <div className="w-10 h-10 shrink-0" />
           )}
         </div>
-
-        {(photo.note || (photo.metadata.latitude !== null && photo.metadata.longitude !== null)) && (
-          <div className="px-3 pb-2 flex flex-wrap gap-2">
-            {photo.note && (
-              <div className="inline-flex items-center gap-1.5 bg-emerald-500/80 backdrop-blur-sm px-2 py-1 rounded text-white text-xs">
-                <FileText className="w-3 h-3" />
-                <span className="font-medium truncate max-w-[200px]">{photo.note}</span>
-              </div>
-            )}
-            {photo.metadata.latitude !== null && photo.metadata.longitude !== null && (
-              <div className="inline-flex items-center gap-1.5 bg-red-500/80 backdrop-blur-sm px-2 py-1 rounded text-white text-xs">
-                <MapPin className="w-3 h-3" />
-                <span className="font-mono">
-                  {photo.metadata.latitude.toFixed(5)} {photo.metadata.longitude.toFixed(5)}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
       </header>
 
       <div className="flex-1 relative flex items-center justify-center overflow-hidden">
