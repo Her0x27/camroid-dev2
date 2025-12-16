@@ -31,7 +31,7 @@ import type { ReticlePosition } from "@shared/schema";
 export default function CameraPage() {
   const [, navigate] = useLocation();
   const { t } = useI18n();
-  const { settings } = useSettings();
+  const { settings, updateWatermarkPreview } = useSettings();
   const { settings: privacySettings, hideCamera, resetInactivityTimer } = usePrivacy();
   const { toast } = useToast();
   const loaderContext = useLazyLoaderOptional();
@@ -49,7 +49,15 @@ export default function CameraPage() {
   const [lastPhotoId, setLastPhotoId] = useState<string | null>(null);
   const [showNoteDialog, setShowNoteDialog] = useState(false);
   const [currentNote, setCurrentNote] = useState("");
+  const noteInitializedRef = useRef(false);
   const { showDialog: showCapabilitiesDialog, closeDialog: closeCapabilitiesDialog } = useAppCapabilitiesDialog();
+  
+  useEffect(() => {
+    if (!noteInitializedRef.current && settings.watermarkPreview?.note) {
+      setCurrentNote(settings.watermarkPreview.note);
+      noteInitializedRef.current = true;
+    }
+  }, [settings.watermarkPreview?.note]);
   
   const {
     isCapturing,
@@ -376,7 +384,7 @@ export default function CameraPage() {
           heading: orientationData.heading,
           tilt: orientationData.tilt,
         },
-        note: noteText || undefined,
+        note: noteText || wp?.note || undefined,
         timestamp,
       };
 
@@ -437,6 +445,8 @@ export default function CameraPage() {
     const timestamp = Date.now();
     const noteText = currentNote.trim();
 
+    const wp = captureConfig.watermarkPreview;
+    
     try {
       if (captureConfig.soundEnabled) {
         playCapture();
@@ -449,7 +459,7 @@ export default function CameraPage() {
         accuracy: geoData.accuracy,
         heading: orientationData.heading,
         tilt: orientationData.tilt,
-        note: noteText || undefined,
+        note: noteText || wp?.note || undefined,
         timestamp,
         reticleConfig: captureConfig.reticle,
         reticleColor: customReticleColor,
@@ -475,7 +485,7 @@ export default function CameraPage() {
           heading: orientationData.heading,
           tilt: orientationData.tilt,
         },
-        note: noteText || undefined,
+        note: noteText || wp?.note || undefined,
         timestamp,
       };
 
@@ -530,7 +540,21 @@ export default function CameraPage() {
     }
   }, [navigate, lastPhotoId]);
   const handleNavigateSettings = useCallback(() => navigate("/settings"), [navigate]);
-  const handleOpenNote = useCallback(() => setShowNoteDialog(true), []);
+  
+  const handleOpenNote = useCallback(() => {
+    const wpNote = settings.watermarkPreview?.note || "";
+    if (!currentNote && wpNote) {
+      setCurrentNote(wpNote);
+    }
+    setShowNoteDialog(true);
+  }, [currentNote, settings.watermarkPreview?.note]);
+
+  const handleNoteDialogChange = useCallback((open: boolean) => {
+    setShowNoteDialog(open);
+    if (!open) {
+      updateWatermarkPreview({ note: currentNote });
+    }
+  }, [currentNote, updateWatermarkPreview]);
 
   return (
     <div 
@@ -582,7 +606,7 @@ export default function CameraPage() {
 
       <PhotoNoteDialog
         open={showNoteDialog}
-        onOpenChange={setShowNoteDialog}
+        onOpenChange={handleNoteDialogChange}
         note={currentNote}
         onNoteChange={setCurrentNote}
       />
