@@ -50,6 +50,8 @@ export const Reticle = memo(function Reticle({ config, dynamicColor, className =
         pointerEvents: "none" as const,
       }, [hasCustomPosition, position?.x, position?.y]);
 
+  const glowFilter = `drop-shadow(0 0 6px ${color}99) drop-shadow(0 0 12px ${color}66)`;
+
   return (
     <div 
       className={className}
@@ -57,8 +59,10 @@ export const Reticle = memo(function Reticle({ config, dynamicColor, className =
     >
       <svg
         viewBox="0 0 100 100"
-        style={svgStyle}
-        className="drop-shadow-lg"
+        style={{
+          ...svgStyle,
+          filter: glowFilter,
+        }}
       >
         <line 
           x1="0" y1="50" x2="100" y2="50" 

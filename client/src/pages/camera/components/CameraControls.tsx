@@ -17,6 +17,7 @@ interface CameraControlsProps {
   lastPhotoThumb: string | null;
   photoCount: number;
   cloudCount: number;
+  dynamicColor?: string;
 }
 
 export const CameraControls = memo(function CameraControls({
@@ -33,6 +34,7 @@ export const CameraControls = memo(function CameraControls({
   lastPhotoThumb,
   photoCount,
   cloudCount,
+  dynamicColor,
 }: CameraControlsProps) {
   return (
     <div className="safe-bottom absolute inset-x-0 bottom-0 z-20">
@@ -43,6 +45,7 @@ export const CameraControls = memo(function CameraControls({
           isCapturing={isCapturing}
           accuracyBlocked={accuracyBlocked}
           accuracy={accuracy}
+          dynamicColor={dynamicColor}
         />
 
         <GalleryButton
@@ -69,6 +72,7 @@ interface CaptureButtonProps {
   isCapturing: boolean;
   accuracyBlocked: boolean;
   accuracy: number | null;
+  dynamicColor?: string;
 }
 
 const CaptureButton = memo(function CaptureButton({
@@ -77,10 +81,38 @@ const CaptureButton = memo(function CaptureButton({
   isCapturing,
   accuracyBlocked,
   accuracy,
+  dynamicColor,
 }: CaptureButtonProps) {
   const formatAccuracy = (acc: number | null): string => {
     if (acc === null) return "---";
     return `±${Math.round(acc)}m`;
+  };
+
+  const baseColor = dynamicColor || "#22c55e";
+  
+  const getBorderStyle = () => {
+    if (accuracyBlocked) {
+      return "border-destructive/60";
+    }
+    if (isReady && !isCapturing) {
+      return "";
+    }
+    return "border-muted-foreground/40";
+  };
+  
+  const getBorderColor = () => {
+    if (accuracyBlocked || !(isReady && !isCapturing)) return undefined;
+    return baseColor;
+  };
+  
+  const getBoxShadow = () => {
+    if (accuracyBlocked) {
+      return "0 0 15px hsl(var(--destructive)/0.4)";
+    }
+    if (isReady && !isCapturing) {
+      return `0 0 20px ${baseColor}80`;
+    }
+    return undefined;
   };
 
   return (
@@ -97,16 +129,22 @@ const CaptureButton = memo(function CaptureButton({
       data-testid="button-capture"
     >
       {isReady && !isCapturing && !accuracyBlocked && (
-        <span className="absolute inset-0 rounded-full animate-ping bg-primary/30" style={{ animationDuration: '2s' }} />
+        <span 
+          className="absolute inset-0 rounded-full animate-ping" 
+          style={{ 
+            animationDuration: '2s',
+            backgroundColor: `${baseColor}30`
+          }} 
+        />
       )}
       
-      <span className={`absolute inset-0 rounded-full border-4 transition-all ${
-        accuracyBlocked
-          ? "border-destructive/60 shadow-[0_0_15px_hsl(var(--destructive)/0.4)]"
-          : isReady && !isCapturing
-            ? "border-primary shadow-[0_0_20px_hsl(var(--primary)/0.5)]"
-            : "border-muted-foreground/40"
-      }`} />
+      <span 
+        className={`absolute inset-0 rounded-full border-4 transition-all ${getBorderStyle()}`}
+        style={{
+          borderColor: getBorderColor(),
+          boxShadow: getBoxShadow(),
+        }}
+      />
       
       <span className={`absolute inset-1 rounded-full transition-all ${
         accuracyBlocked
@@ -121,20 +159,27 @@ const CaptureButton = memo(function CaptureButton({
           accuracyBlocked
             ? "bg-destructive/40 border-2 border-destructive/60"
             : isCapturing 
-              ? "bg-primary scale-75 border-2 border-primary-foreground/30" 
+              ? "scale-75 border-2 border-white/30" 
               : isReady 
-                ? "bg-primary border-2 border-primary-foreground/30 shadow-[0_0_12px_hsl(var(--primary)/0.6)]" 
+                ? "border-2 border-white/30" 
                 : "bg-muted border-2 border-muted-foreground/30"
         }`}
+        style={!accuracyBlocked && (isReady || isCapturing) ? {
+          backgroundColor: baseColor,
+          boxShadow: `0 0 12px ${baseColor}99`,
+        } : undefined}
       >
         <span 
           className={`text-[11px] font-bold font-mono ${
             accuracyBlocked 
               ? "text-destructive-foreground" 
               : isReady || isCapturing
-                ? "text-primary-foreground" 
+                ? "text-white" 
                 : "text-muted-foreground"
           }`}
+          style={!accuracyBlocked && (isReady || isCapturing) ? {
+            textShadow: `0 0 4px ${baseColor}`,
+          } : undefined}
           data-testid="text-accuracy"
         >
           {formatAccuracy(accuracy)}

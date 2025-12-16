@@ -611,6 +611,7 @@ export default function CameraPage() {
         lastPhotoThumb={lastPhotoThumb}
         photoCount={photoCount}
         cloudCount={cloudCount}
+        dynamicColor={adjustmentMode.active ? adjustmentReticleColor : reticleColor}
       />
 
       <PhotoNoteDialog
